@@ -66,6 +66,12 @@ int server_listen_connections(int listen_socket,ConnectionHandler f,ConnectionAr
 			log_error(server_logger,"Error al crear hilo de escucha!");
 			return -1;
 		}
+
+		if(pthread_detach(client_thread) != 0)
+		{
+			log_error(server_logger,"El thread no se pudo detachar");
+			return -1;
+		}
 	}
 	free(args);
 	close(listen_socket);
