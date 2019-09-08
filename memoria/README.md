@@ -1,0 +1,1 @@
+MUSE: memoria dinamica
