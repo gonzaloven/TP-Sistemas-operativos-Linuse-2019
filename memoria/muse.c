@@ -1,11 +1,27 @@
 #include "muse.h"
-#include "message.h"
+#include "network.h"
+#include <commons/log.h>
+#include <commons/config.h>
 
+t_log *muse_logger = NULL;
+muse_configuration *muse_config = NULL;
+
+/* helpers */
+muse_configuration *load_configuration(char *config_path);
 void* handler(void *args);
 
-int muse_start_service(int port,ConnectionHandler handler)
+int muse_start_service(ConnectionHandler handler)
 {
-	server_start(port,handler);
+	muse_config = load_configuration(MUSE_CONFIG_PATH);
+	muse_logger = log_create("../logs/muse.log","MUSE",true,LOG_LEVEL_TRACE);
+	server_start(muse_config->listen_port,handler);
+}
+
+void muse_stop_service()
+{
+	free(muse_config);
+	free(muse_logger);
+	server_stop();
 }
 
 void* handler(void *args)
@@ -25,27 +41,43 @@ void* handler(void *args)
 			switch(msg.header.message_type)
 			{
 				case MESSAGE_STRING:
-					//use logs!
-					printf("received -> %s\n",msg.data);
-					fflush(stdout);
+					log_debug(muse_logger,"Received -> %s",msg.data);	
 					break;
 				default:
-					//use logs!!
-					printf("Error\n");
-					fflush(stdout);
+					log_error(muse_logger,"Undefined message");
 					break;
 			}
 		}
 	}	
-	//use logs!!
-	printf("The client was disconnected!\n");
+	log_debug(muse_logger,"The client was disconnected!");
 	close(sock);
 	return (void*)NULL;
 }
 
+muse_configuration *load_configuration(char *path)
+{
+	t_config *config = config_create(path);
+	muse_configuration *mc = (muse_configuration *)malloc(sizeof(muse_configuration)); 
+
+	if(config == NULL)
+	{
+		log_error(muse_logger,"Configuration couldn't be loaded.Quitting program!");
+		muse_stop_service();
+		exit(-1);
+	}
+	
+	mc->listen_port = config_get_int_value(config,"LISTEN_PORT");
+	mc->memory_size = config_get_int_value(config,"MEMORY_SIZE");
+	mc->page_size = config_get_int_value(config,"PAGE_SIZE");
+	mc->swap_size = config_get_int_value(config,"SWAP_SIZE");
+	return mc;
+
+}
 
 int main(int argc,char *argv[])
 {
-	muse_start_service(8000,handler);
+	
+	muse_start_service(handler);
 	return 0;
 }
+

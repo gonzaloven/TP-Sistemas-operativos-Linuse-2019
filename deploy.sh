@@ -22,6 +22,21 @@ echo Done..
 
 cd ..
 
+#compilar libreria hilolay
+echo Compiling libHilolay
+cd libs
+cd Hilolay
+make clean
+make libhilolay
+cd .. 
+
+mv -f Hilolay/libhilolay.so bin
+echo Done..
+
+cd ..
+
+
+
 #compilar muse
 echo Compiling MUSE module
 cd memoria
@@ -30,11 +45,19 @@ make muse
 echo Done
 cd ..
 
+echo Compiling SUSE module
+cd planificador
+make clean
+make suse
+echo Done
+cd ..
+
 #compilar el programa test
 echo Compiling Program Test
 cd tests
 make clean
 make test-libmuse
+make test-libhilolay
 echo Done
 
 #echo Creating Environment Variables
