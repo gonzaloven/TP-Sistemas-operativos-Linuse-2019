@@ -1,0 +1,144 @@
+[DEBUG] 17:38:13:982 MUSE/(3642:3767): Received -> hola libmuse!
+[DEBUG] 17:38:21:78 MUSE/(3642:3767): The client was disconnected!
+[DEBUG] 19:57:29:994 MUSE/(7813:7816): The client was disconnected!
+[DEBUG] 19:59:52:660 MUSE/(7906:7910): The client was disconnected!
+[DEBUG] 20:06:32:347 MUSE/(7906:7944): The client was disconnected!
+[DEBUG] 20:06:51:159 MUSE/(7906:8140): The client was disconnected!
+[DEBUG] 20:07:28:29 MUSE/(7906:8169): The client was disconnected!
+[DEBUG] 20:08:32:410 MUSE/(7906:8251): The client was disconnected!
+[DEBUG] 20:09:25:551 MUSE/(7906:8353): The client was disconnected!
+[DEBUG] 20:09:47:35 MUSE/(7906:8365): The client was disconnected!
+[DEBUG] 20:09:58:712 MUSE/(7906:8369): The client was disconnected!
+[DEBUG] 20:11:29:65 MUSE/(8462:8466): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:11:29:117 MUSE/(8462:8466): The client was disconnected!
+[DEBUG] 20:12:08:991 MUSE/(8462:8470): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}1,
+
+[DEBUG] 20:12:45:287 MUSE/(8490:8493): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:12:45:289 MUSE/(8490:8493): The client was disconnected!
+[DEBUG] 20:13:49:267 MUSE/(8490:8554): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}1,
+
+[DEBUG] 20:13:49:875 MUSE/(8490:8554): The client was disconnected!
+[DEBUG] 20:14:16:218 MUSE/(8490:8591): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:14:18:556 MUSE/(8490:8591): The client was disconnected!
+[DEBUG] 20:14:28:46 MUSE/(8490:8595): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:15:50:174 MUSE/(8490:8595): The client was disconnected!
+[DEBUG] 20:21:24:997 MUSE/(8721:8789): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:22:00:427 MUSE/(8721:8789): The client was disconnected!
+[DEBUG] 20:22:21:350 MUSE/(8721:8826): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}1,
+
+[DEBUG] 20:22:22:794 MUSE/(8721:8826): The client was disconnected!
+[DEBUG] 20:22:28:190 MUSE/(8721:8833): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:22:32:620 MUSE/(8721:8833): The client was disconnected!
+[DEBUG] 20:23:18:600 MUSE/(8721:8838): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:25:17:394 MUSE/(8721:8838): The client was disconnected!
+[DEBUG] 20:26:37:849 MUSE/(8721:8905): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:27:25:205 MUSE/(8721:8905): The client was disconnected!
+[DEBUG] 20:27:31:770 MUSE/(8721:8951): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:27:32:316 MUSE/(8721:8951): The client was disconnected!
+[DEBUG] 20:27:49:41 MUSE/(8721:8964): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:27:49:165 MUSE/(8721:8964): The client was disconnected!
+[DEBUG] 20:28:40:748 MUSE/(8721:9002): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:28:40:750 MUSE/(8721:9002): The client was disconnected!
+[DEBUG] 20:28:56:672 MUSE/(9012:9014): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 20:28:56:678 MUSE/(9012:9014): The client was disconnected!
+[DEBUG] 07:07:52:286 MUSE/(5353:5558): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 07:07:52:301 MUSE/(5353:5558): The client was disconnected!
+[DEBUG] 07:21:31:931 MUSE/(6177:6200): {
+	"fname":	"alloc",
+	"nparams":	1,
+	"param":	1
+}
+[DEBUG] 07:21:31:937 MUSE/(6177:6200): The client was disconnected!
+[DEBUG] 07:28:29:549 MUSE/(6369:6372): The client was disconnected!
+[DEBUG] 07:29:21:120 MUSE/(6405:6407): The client was disconnected!
+[DEBUG] 07:37:40:194 MUSE/(6737:6740): The client was disconnected!
+[DEBUG] 07:39:02:513 MUSE/(6805:6807): The client was disconnected!
+[DEBUG] 07:40:49:360 MUSE/(6876:6879): The client was disconnected!
+[DEBUG] 07:42:48:994 MUSE/(6960:6964): The client was disconnected!
+[DEBUG] 07:44:10:669 MUSE/(6960:7007): The client was disconnected!
+[DEBUG] 07:44:41:309 MUSE/(7010:7022): The client was disconnected!
+[DEBUG] 07:46:42:71 MUSE/(7124:7129): The client was disconnected!
+[DEBUG] 07:50:18:139 MUSE/(7389:7392): The client was disconnected!
+[DEBUG] 07:53:14:504 MUSE/(7556:7562): The client was disconnected!
+[DEBUG] 07:56:51:495 MUSE/(7693:7717): The client was disconnected!
+[DEBUG] 07:58:24:188 MUSE/(7746:7755): The client was disconnected!
+[DEBUG] 08:02:45:293 MUSE/(7970:7973): The client was disconnected!
+[DEBUG] 08:03:18:319 MUSE/(7983:7986): The client was disconnected!
+[DEBUG] 08:03:31:379 MUSE/(7989:7992): The client was disconnected!
+[DEBUG] 08:05:39:652 MUSE/(8068:8071): The client was disconnected!
+[DEBUG] 08:37:37:378 MUSE/(9424:9433): The client was disconnected!
+[DEBUG] 08:40:02:461 MUSE/(9707:9710): The client was disconnected!
+[DEBUG] 08:40:33:191 MUSE/(9733:9739): The client was disconnected!
+[DEBUG] 08:40:58:83 MUSE/(9733:9747): The client was disconnected!
+[DEBUG] 08:41:43:828 MUSE/(9778:9781): The client was disconnected!
+[DEBUG] 08:42:26:540 MUSE/(9778:9808): The client was disconnected!
+[DEBUG] 08:42:48:77 MUSE/(9778:9835): The client was disconnected!
+[DEBUG] 08:44:10:762 MUSE/(9778:9934): The client was disconnected!
+[DEBUG] 08:45:15:363 MUSE/(9778:10013): The client was disconnected!
+[DEBUG] 08:45:27:524 MUSE/(9778:10017): The client was disconnected!
+[DEBUG] 08:46:38:225 MUSE/(9778:10092): The client was disconnected!
+[DEBUG] 08:46:47:228 MUSE/(10094:10097): The client was disconnected!

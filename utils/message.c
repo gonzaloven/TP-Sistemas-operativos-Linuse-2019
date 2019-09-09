@@ -37,6 +37,7 @@ int message_encode(Message *msg,void *buffer,size_t buffer_size)
 	switch(msg->header.message_type)
 	{
 		case MESSAGE_STRING:
+		case MESSAGE_CALL:
 			result += message_string_encode(msg,cursor,buffer_size);
 			break;
 		default:
@@ -58,6 +59,7 @@ int message_decode(void *buffer,size_t buffer_size,Message *result)
 	switch(result->header.message_type)
 	{
 		case MESSAGE_STRING:
+		case MESSAGE_CALL:
 			res += message_string_decode(cursor,buffer_size,result);
 			break;
 		default:
@@ -126,3 +128,4 @@ int message_free_data(Message *msg)
 	}
 	return -1;
 }
+

@@ -1,20 +1,17 @@
 #include "muse.h"
 #include "network.h"
+#include "rpc.h"
 #include <commons/log.h>
 #include <commons/config.h>
 
 t_log *muse_logger = NULL;
 muse_configuration *muse_config = NULL;
 
-/* helpers */
-muse_configuration *load_configuration(char *config_path);
-void* handler(void *args);
-
-int muse_start_service(ConnectionHandler handler)
+int muse_start_service(ConnectionHandler ch)
 {
 	muse_config = load_configuration(MUSE_CONFIG_PATH);
 	muse_logger = log_create("../logs/muse.log","MUSE",true,LOG_LEVEL_TRACE);
-	server_start(muse_config->listen_port,handler);
+	server_start(muse_config->listen_port,ch);
 }
 
 void muse_stop_service()
@@ -38,15 +35,7 @@ void* handler(void *args)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
-			switch(msg.header.message_type)
-			{
-				case MESSAGE_STRING:
-					log_debug(muse_logger,"Received -> %s",msg.data);	
-					break;
-				default:
-					log_error(muse_logger,"Undefined message");
-					break;
-			}
+			message_handler(&msg);
 		}
 	}	
 	log_debug(muse_logger,"The client was disconnected!");
@@ -71,13 +60,30 @@ muse_configuration *load_configuration(char *path)
 	mc->page_size = config_get_int_value(config,"PAGE_SIZE");
 	mc->swap_size = config_get_int_value(config,"SWAP_SIZE");
 	return mc;
+}
+
+void message_handler(Message *m)
+{
+	switch(m->header.message_type)
+	{
+		case MESSAGE_STRING:
+			log_debug(muse_logger,"Received -> %s",m->data);	
+			break;
+		case MESSAGE_CALL:
+			rpc_server_invoke(m->data);
+			message_free_data(m);
+			break;
+		default:
+			log_error(muse_logger,"Undefined message");
+			break;
+	}
+	return;
 
 }
 
 int main(int argc,char *argv[])
 {
-	
-	muse_start_service(handler);
+	muse_start_service(handler); 
 	return 0;
 }
 

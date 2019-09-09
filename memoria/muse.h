@@ -18,4 +18,17 @@ int muse_start_service(ConnectionHandler ch);
 /* Stops the server and frees resources */
 void muse_stop_service();
 
+/* helpers */
+muse_configuration *load_configuration(char *config_path);
+
+/* Connection handler. */
+void* handler(void *args);
+
+/* Decides wich message has arrived
+ * and depending on the message 
+ * does an action */
+void message_handler(Message *m);
+
+
+
 #endif 

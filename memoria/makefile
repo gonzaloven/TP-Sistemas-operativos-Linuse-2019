@@ -1,8 +1,9 @@
 TARGET:=muse
 CC:=gcc
 UTILS:= ../utils/
+CFLAGS:= -g
 INCDIR:= -I$(UTILS)
-SRCS := muse.c $(UTILS)network.c $(UTILS)message.c
+SRCS := muse.c $(UTILS)network.c $(UTILS)message.c $(UTILS)rpc.c $(UTILS)cJSON.c
 LFLAGS := -lpthread -lcommons
 
 muse:

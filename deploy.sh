@@ -35,8 +35,6 @@ echo Done..
 
 cd ..
 
-
-
 #compilar muse
 echo Compiling MUSE module
 cd memoria

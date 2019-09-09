@@ -18,7 +18,8 @@ typedef struct Message_s
 }Message;
 
 typedef enum{
-	MESSAGE_STRING = 1
+	MESSAGE_STRING = 1,
+	MESSAGE_CALL
 }MESSAGE_TYPE;
 
 /* Creates a header for a message.Returns -1 if fails to 
@@ -48,6 +49,6 @@ int message_string_encode(Message *msg,void *buffer,size_t buffer_size);
 /* Allocate memory in a message for data*/
 int message_alloc_data(Message *msg,unsigned int size);
 /* Frees data in a message*/
-int message_frre_data(Message *msg);
+int message_free_data(Message *msg);
 
 #endif

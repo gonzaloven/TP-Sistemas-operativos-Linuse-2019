@@ -6,7 +6,7 @@ int main(int argc,char *argv[])
 	printf("Libmuse initialized!\n");
 	printf("Comencing test!\n");
 	sleep(2);
-	say("hola libmuse!");
+	say("hola muse\n");
 	printf("Message sent!\n");
 	printf("Press a button to continue\n");
 	getchar();

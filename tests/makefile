@@ -2,7 +2,7 @@ TARGET:=libm
 CC:=gcc
 UTILS:= ../utils/
 INCDIR:= -I$(UTILS) -I../libs/libMuse -I../libs/Hilolay
-CFLAGS:=-g
+CFLAGS:= -g
 LIB-SRCS:= libmuse-test.c $(UTILS)network.c $(UTILS)message.c 
 LIBS:= -L../libs/bin/ 
 LFLAGS:= -lcommons -lpthread -lmuse
@@ -13,6 +13,10 @@ test-libmuse:
 
 test-libhilolay:
 	$(CC) $(INCDIR) $(CFLAGS) libhilolay-test.c ../utils/network.c ../utils/message.c -o libh $(LIBS) -lpthread -lcommons -lhilolay -Wl,-rpath=$(LIBPATH)
+
+test-muse-alloc:
+	$(CC) $(INCDIR) $(CFLAGS) muse_test_alloc.c $(UTILS)network.c $(UTILS)message.c $(UTILS)rpc.c $(UTILS)cJSON.c -o muse_test_alloc $(LIBS) -lpthread -lcommons -lmuse -Wl,-rpath=$(LIBPATH)
+
 all:
 	$(CC) $(INCDIR) $(INCDIR) -g main.c message-test.c $(UTILS)message.c -o main -lcunit
 
