@@ -128,7 +128,7 @@ ssize_t send_message(int socket_fd,Message *msg)
 
 ssize_t receive_message(int socket_fd,Message *msg)
 {
-	size_t buffer_size = 100;
+	size_t buffer_size = 999;
 	char buffer[buffer_size];
 
 	receive_packet(socket_fd,buffer,buffer_size);

@@ -27,13 +27,13 @@ void *handler(void *args)
 {
 	ConnectionArgs *conna = (ConnectionArgs *)args;
 	Message msg;
-	char buffer[100];
+	char buffer[1024];
 	int n=0;
 	int sock = conna->client_fd;
 	struct sockaddr_in client_address = conna->client_addr;
 	
 	printf("A client has connected!\n");
-	while((n=receive_packet(sock,buffer,100)) > 0)
+	while((n=receive_packet(sock,buffer,1024)) > 0)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{

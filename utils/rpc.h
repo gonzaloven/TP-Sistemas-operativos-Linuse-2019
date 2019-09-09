@@ -1,21 +1,18 @@
 #ifndef RPC_H
 #define RPC_H
 
-#include <commons/collections/list.h>
-
 typedef struct rpc_function_params_s
 {
-	int type;
+	char type[10]; //change for an integer enum VAR_TYPE
 	char name[20];
 	void *value;
-
 }rpc_function_params;
 
 typedef struct rpc_function_s
 {
 	char fname[20]; //function number
 	int nparams;	//number of params
-	t_list *params;
+	rpc_function_params params[20];
 }rpc_function;
 
 /* This function let's a rpc server
@@ -30,9 +27,8 @@ int rpc_server_invoke(char *json_msg);
  * @param socket:the socket of the server to send
  * @param name of the functio to call example(alloc,cpy etc..).
  * @param nparams: the number of parameters of the function
- * @param param: the parameters od the function TODO change this make it variable!
+ * @param param: the parameters od the function 
  */
-int rpc_client_call(int socket,char* name,int nparams,int param);
-//int rpc_client_call(int socket,char *name,int params,...) TODO: use va_list
+int rpc_client_call(int socket,char* name,int nparams,rpc_function_params params[],...);
 
 #endif

@@ -1,5 +1,6 @@
 #include "libmuse.h"
 #include "network.h"
+#include "rpc.h"
 
 int master_socket = 0;
 
@@ -31,7 +32,13 @@ void muse_close()
 
 uint32_t muse_alloc(uint32_t tam)
 {
-	int result = rpc_client_call(master_socket,"alloc",1,tam);
+	char value[16];
+	sprintf(value,"%lu",tam);	
+
+	rpc_function_params params[] = {
+									{"uint32_t","tam",value}
+								  };
+	int result = rpc_client_call(master_socket,"alloc",1,params);
 	return 0;
 }
 
