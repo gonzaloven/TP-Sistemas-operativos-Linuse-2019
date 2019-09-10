@@ -35,7 +35,7 @@ void* handler(void *args)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
-			message_handler(&msg);
+			message_handler(&msg,sock);
 		}
 	}	
 	log_debug(muse_logger,"The client was disconnected!");
@@ -62,7 +62,7 @@ muse_configuration *load_configuration(char *path)
 	return mc;
 }
 
-void message_handler(Message *m)
+void message_handler(Message *m,int sock)
 {
 	switch(m->header.message_type)
 	{
@@ -70,8 +70,16 @@ void message_handler(Message *m)
 			log_debug(muse_logger,"Received -> %s",m->data);	
 			break;
 		case MESSAGE_CALL:
-			rpc_server_invoke(m->data);
+			uint32_t *res = rpc_server_invoke(m->data);
 			message_free_data(m);
+
+			Message msg;
+			MessageHeader header;
+			create_message_header(&header,MESSAGE_FUNCTION_RET); //MESSAGE_FUNCTION_RET
+			msg.data_size=sizeof(uint32_t);
+			msg.data = res;
+			send_message(sock,&msg);
+
 			break;
 		default:
 			log_error(muse_logger,"Undefined message");

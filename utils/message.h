@@ -19,7 +19,8 @@ typedef struct Message_s
 
 typedef enum{
 	MESSAGE_STRING = 1,
-	MESSAGE_CALL
+	MESSAGE_CALL,
+	MESSAGE_FUNCTION_RET
 }MESSAGE_TYPE;
 
 /* Creates a header for a message.Returns -1 if fails to 

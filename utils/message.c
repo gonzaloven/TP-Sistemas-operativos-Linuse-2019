@@ -108,7 +108,8 @@ int create_string_message(Message *msg,MessageHeader *header,char *data)
 {
 	msg->header = *header;
 	msg->data_size = strlen(data);
-	strcpy(msg->data,data);
+	//strcpy(msg->data,data);
+	msg->data = data;
 	return 0;
 }
 

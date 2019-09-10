@@ -1,5 +1,6 @@
 #include "suse.h"
 #include "network.h"
+#include "rpc.h"
 #include <commons/log.h>
 #include <commons/config.h>
 
@@ -37,15 +38,7 @@ void *handler(void *args)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
-			switch(msg.header.message_type)
-			{
-				case MESSAGE_STRING:
-					log_debug(suse_logger,"Received -> %s",msg.data);
-					break;
-				default:
-					log_error(suse_logger,"Undefined message");
-					break;
-			}
+			message_handler(&msg,sock);
 		}
 	}	
 	log_debug(suse_logger,"The client was disconnected!");
@@ -75,6 +68,24 @@ suse_configuration *load_configuration(char *path)
 	return sc;
 }
 
+void message_handler(Message *m)
+{
+	switch(m->header.message_type)
+	{
+		case MESSAGE_STRING:
+			log_debug(suse_logger,"Received -> %s",m->data);	
+			break;
+		case MESSAGE_CALL:
+			rpc_server_invoke(m->data);
+			message_free_data(m);
+			break;
+		default:
+			log_error(suse_logger,"Undefined message");
+			break;
+	}
+	return;
+
+}
 
 int main(int argc,char *argv[])
 {
