@@ -80,5 +80,7 @@ int rpc_server_invoke(char *json_msg)
 	cJSON_Delete(rpc_call);
 	free(json_data);
 	//cJSON_Delete(fname);
+	
+	return 0;
 }
 

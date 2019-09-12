@@ -22,7 +22,8 @@ typedef void* (ConnectionHandler)(void*);
  * Once a connection has been established creates
  * a thread for servicing requests.
  * @param port: port to listen to.
- * @param handler: function to listen requests */
+ * @param handler: function to listen requests 
+ * @return: 0 if successful, -1 on failure */
 int server_start(int port,ConnectionHandler handler);
 
 /* Stops the server from listening */
@@ -30,14 +31,16 @@ void server_stop();
 
 /* Lets a client connect to a server
  * @param port: port to connect to.
- * @param ip: string containig the direction of the server. */
+ * @param ip: string contaning the direction of the server. 
+ * @return: socket file descriptor, -1 on failure */
 int connect_to(char *ip,int port);
 
 /* Wrapper of the function recv
  * @param socket_fd: file descriptor of the socket from whom we're going
  * to receive.
  * @param buffer: pointer to the buffer receiving data.
- * @param buffer_size: size of buffer */
+ * @param buffer_size: size of buffer 
+ * @return: number of bytes received, -1 on failure */
 ssize_t receive_packet(int socket_fd,void *buffer,size_t buffer_size);
 
 /* Same as above but for sending */
@@ -45,14 +48,14 @@ ssize_t send_packet(int socket_fd,void *buffer,size_t buffer_size);
 
 /* Sends a specified message to the socket 
  * @param socket_fd: socket to send the message
- * @param msg: message to be sended
- * */
+ * @param msg: message to be sended 
+ * @return: number of bytes sent, -1 on failure */
 ssize_t send_message(int socket_fd,Message *msg);
 
 /* Receives a message from the specified socket
  * @param socket_fd: the socket to receive from
- * @param msg: the received message
- * */
+ * @param msg: the received message 
+ * @return: size of message received, -1 on failure */
 ssize_t receive_message(int socket_fd,Message *msg);
 
 
