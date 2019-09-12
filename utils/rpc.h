@@ -1,9 +1,20 @@
 #ifndef RPC_H
 #define RPC_H
 
+/*
+typedef enum 
+{
+	UINT32,
+	INT,
+	CHAR_PTR,
+	VOID_PTR,
+	SIZE_T
+} VAR_TYPE;
+*/
+
 typedef struct rpc_function_params_s
 {
-	char type[10]; //change for an integer enum VAR_TYPE
+	char type[20]; 
 	char name[20];
 	void *value;
 }rpc_function_params;
@@ -29,6 +40,15 @@ int rpc_server_invoke(char *json_msg);
  * @param nparams: the number of parameters of the function
  * @param param: the parameters od the function 
  */
-int rpc_client_call(int socket,char* name,int nparams,rpc_function_params params[],...);
+int rpc_client_call(int socket,char* name,int nparams,rpc_function_params params[]);
 
+/* This function creates a json message to be sended to a server,the
+ * message contains the function name ,it's parameters and the paremters value
+ * and type.
+ * @param name: name of the function to be called in the server
+ * @param nparams: the quantity of parameters the function needs
+ * @param: params: list containig the variable type,variable name and value.
+ * @return: a json string
+ */
+char* rpc_form_function_msg(char *name,int nparams,rpc_function_params params[]);
 #endif

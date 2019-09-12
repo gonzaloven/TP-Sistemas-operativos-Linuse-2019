@@ -27,7 +27,7 @@ void* handler(void *args);
 /* Decides wich message has arrived
  * and depending on the message 
  * does an action */
-void message_handler(Message *m);
+void message_handler(Message *m,int sock);
 
 
 

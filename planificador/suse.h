@@ -21,6 +21,11 @@ int suse_start_service(ConnectionHandler ch);
 /* Stops server,frees resources */
 void suse_stop_service();
 
+/* Decides wich message has arrived
+ * and depending on the message 
+ * does an action */
+void message_handler(Message *m,int sock);
+
 
 #endif 
 
