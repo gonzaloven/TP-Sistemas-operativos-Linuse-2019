@@ -89,7 +89,7 @@ int muse_cpy(uint32_t dst, void* src, int n)
 									{"void*","src",arg2},
 									{"int","n",arg3}
 								};
-	int result = rpc_client_call(master_socket,"get",3,params);
+	int result = rpc_client_call(master_socket,"cpy",3,params);
 	
 	return 0;
 }
