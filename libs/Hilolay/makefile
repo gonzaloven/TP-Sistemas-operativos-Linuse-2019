@@ -2,7 +2,7 @@ CC:=gcc
 TARGET:= libhilolay.so
 UTILS:= ../../utils/
 INCDIR:= -I$(UTILS)
-CFLAGS:= -c -fpic
+CFLAGS:= -g -c -fpic
 SRCS:= hilolay.c $(UTILS)network.c $(UTILS)message.c
 LIBFLAGS:= -shared -o 
 

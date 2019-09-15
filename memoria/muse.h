@@ -29,6 +29,4 @@ void* handler(void *args);
  * does an action */
 void message_handler(Message *m,int sock);
 
-
-
 #endif 

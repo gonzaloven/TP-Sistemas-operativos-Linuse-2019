@@ -3,6 +3,7 @@
 #include "rpc.h"
 #include <commons/log.h>
 #include <commons/config.h>
+#include <signal.h>
 
 t_log *suse_logger = NULL;
 suse_configuration *suse_config = NULL;
@@ -19,8 +20,27 @@ int suse_start_service(ConnectionHandler ch)
 
 void suse_stop_service()
 {
-	free(suse_logger);
+	int i;
+	log_info(suse_logger,"Received SIGINT signal shuting down!");
+
+	log_destroy(suse_logger);
+	
+	free(suse_config->sem_id[0]);
+	free(suse_config->sem_id[1]);
+	free(suse_config->sem_id);
+
+	free(suse_config->sem_init[0]);
+	free(suse_config->sem_init[1]);
+	free(suse_config->sem_init);
+
+	free(suse_config->sem_max[0]);
+	free(suse_config->sem_max[1]);
+	free(suse_config->sem_max);
 	free(suse_config);
+
+	suse_config = NULL;
+	suse_logger = NULL;
+	
 	server_stop();
 }
 
@@ -54,7 +74,7 @@ suse_configuration *load_configuration(char *path)
 	if(config == NULL)
 	{	
 		log_error(suse_logger,"Configuration couldn't be loaded.Quitting program!");
-		suse_stop_service();
+		free(sc);
 		exit(-1);
 	}
 	
@@ -65,10 +85,12 @@ suse_configuration *load_configuration(char *path)
 	sc->sem_init = config_get_array_value(config,"SEM_INIT");
 	sc->sem_max = config_get_array_value(config,"SEM_MAX");
 	sc->alpha_sjf = config_get_int_value(config,"ALPHA_SJF"); 
+
+	config_destroy(config);
 	return sc;
 }
 
-void message_handler(Message *m)
+void message_handler(Message *m,int sock)
 {
 	switch(m->header.message_type)
 	{
@@ -76,8 +98,13 @@ void message_handler(Message *m)
 			log_debug(suse_logger,"Received -> %s",m->data);	
 			break;
 		case MESSAGE_CALL:
-			rpc_server_invoke(m->data);
+			log_debug(suse_logger,"Remote call received!");
+			rpc_server_invoke(m->data,sock);
 			message_free_data(m);
+			break;
+		case MESSAGE_NEW_ULT:
+			log_debug(suse_logger,"New ult arrived in the ready queue!\n");
+			//do_somth
 			break;
 		default:
 			log_error(suse_logger,"Undefined message");
@@ -89,6 +116,9 @@ void message_handler(Message *m)
 
 int main(int argc,char *argv[])
 {
+	//When Ctrl-C is pressed stops SUSE and frees resources
+	signal(SIGINT,suse_stop_service);
+
 	suse_start_service(handler);
 	return 0;
 }

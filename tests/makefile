@@ -15,8 +15,13 @@ test-libhilolay:
 	$(CC) $(INCDIR) $(CFLAGS) libhilolay-test.c ../utils/network.c ../utils/message.c -o libh $(LIBS) -lpthread -lcommons -lhilolay -Wl,-rpath=$(LIBPATH)
 
 test-muse-alloc:
-	$(CC) $(INCDIR) $(CFLAGS) muse_test_alloc.c $(UTILS)network.c $(UTILS)message.c $(UTILS)rpc.c $(UTILS)cJSON.c -o muse_test_alloc $(LIBS) -lpthread -lcommons -lmuse -Wl,-rpath=$(LIBPATH)
+	$(CC) $(INCDIR) $(CFLAGS) muse_test_alloc.c $(UTILS)network.c $(UTILS)message.c -o muse_test_alloc $(LIBS) -lpthread -lcommons -lmuse -Wl,-rpath=$(LIBPATH)
 
+test-hilolay-create:
+	$(CC) $(INCDIR) $(CFLAGS) test_hilolay_create.c $(UTILS)network.c $(UTILS)message.c -o hilolay_test_create $(LIBS) -lpthread -lcommons -lhilolay -Wl,-rpath=$(LIBPATH)
+
+test-filesystem:
+	gcc -g filesystem_test.c -o fs_test
 all:
 	$(CC) $(INCDIR) $(INCDIR) -g main.c message-test.c $(UTILS)message.c -o main -lcunit
 
