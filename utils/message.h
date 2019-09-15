@@ -100,7 +100,7 @@ int header_encode(MessageHeader *header,void *buffer,size_t buffer_size);
 int message_function_encode(Message *msg,void *buffer,size_t buffer_size);
 int function_arg_encode(Arg arg,void *buffer,size_t buffer_size);
 
-* Allocate memory in a message for data
+/* Allocate memory in a message for data
  * @param msg: message to allocate memory for
  * @param size: size in bytes to allocate 
  * @return: 0 if successful, -1 on failure */
