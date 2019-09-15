@@ -1,20 +1,23 @@
 #include <stdio.h>
 #include "hilolay.h"
+#include "network.h"
 
+//This is SUSE's main connection socket
 int master_socket = 0;
 
-int libhilolay_init(char *ip,int port)
+void suse_init(char *ip,int port)
 {
+	//Should the configuration be loaded here?
 	master_socket = connect_to(ip,port);
-	return master_socket; 
 }
 
 /* Initializes the ULT library
  * The first thread will be... your main function! */
 void lib_init(void) {
+	
+	//hardcoded change!!
+	suse_init("127.0.0.1",5003);
 
- 	//hardcoded change!!
-    libhilolay_init("127.0.0.1",5003);
     current_ult = &ults[0];
     current_ult->context = malloc(sizeof(ucontext_t));
     lib_write_TCB(current_ult, MAIN_THREAD_ID, RUNNING);
@@ -99,6 +102,7 @@ void th_wrapper(void (*ult_function)(void)) {
 /* Starts an ult */
 int th_create(void (*f)(void)) {
     struct TCB *new_ult;
+	lib_init();//only test delete after
 
     for (new_ult = &ults[0];; new_ult++) {
         if (new_ult == &ults[MAX_ULTS]) {
@@ -112,6 +116,8 @@ int th_create(void (*f)(void)) {
     th_create_context(new_ult, f);
     lib_write_TCB(new_ult, NEXT_ID++, READY);
     lib_enqueue(new_ult);
+	
+	suse_create(new_ult);
 
     lib_log("New thread was created");
     if(SCHEDULE_IMMEDIATELY) {
@@ -215,4 +221,16 @@ void lib_summarize_burst() {
     int last_burst = lib_get_time() - current_ult->burst_start;
     current_ult->execution_time += last_burst;
     current_ult->last_burst = last_burst;
+}
+
+void suse_create(struct TCB* tcb)
+{
+	MessageHeader header;
+	Message msg;
+	char *process_data = rpc_form_new_ult_msg(tcb);
+	
+	create_message_header(&header,MESSAGE_NEW_ULT);
+	create_string_message(&msg,&header,process_data);
+	send_message(master_socket,&msg);
+	message_free_data(&msg);
 }

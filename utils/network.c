@@ -1,6 +1,8 @@
 #include "network.h"
 #include <pthread.h>
 #include <commons/log.h>
+#include <stdlib.h>
+#include <string.h>
 
 int running = 1;
 int connected_clients = 0;
@@ -55,7 +57,11 @@ int server_listen_connections(int listen_socket,ConnectionHandler f,ConnectionAr
 	{
 		if((sock = accept(listen_socket,(struct sockaddr *)&args->client_addr,&client_address_len)) < 0)
 		{
-			log_error(server_logger,"No se pudo abrir un socket para aceptar datos!");
+			if(running)
+			{
+				log_error(server_logger,"No se pudo abrir un socket para aceptar datos!");
+			}
+
 			free(args);
 			return -1;
 		}
@@ -78,10 +84,11 @@ int server_listen_connections(int listen_socket,ConnectionHandler f,ConnectionAr
 	return 0;
 }
 
-//TODO: Use signals!
 void server_stop()
 {
 	running = 0;
+	close(listen_socket);
+	log_destroy(server_logger);
 }
 
 int connect_to(char *ip,int port)
@@ -107,7 +114,22 @@ int connect_to(char *ip,int port)
 	return sock;
 }
 
-ssize_t receive_packet(int socket_fd,void *buffer,size_t buffer_size)
+ssize_t receive_packet(int socket,void *buffer,size_t buffer_size)
+{
+	memset(buffer,0,buffer_size);
+	MessageHeader header;
+	void *cursor = buffer;
+	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t);
+	unsigned int recv_bytes = recv(socket,cursor,header_size,MSG_WAITALL);
+
+	header_decode(cursor,buffer_size,&header);
+	cursor += recv_bytes;	
+	recv_bytes += recv(socket,cursor,header.data_size,MSG_WAITALL);
+	return recv_bytes;
+}
+
+//Deprecated dont use!!
+ssize_t receive_packet_no_wait(int socket_fd,void *buffer,size_t buffer_size)
 {
 	return recv(socket_fd,buffer,buffer_size,0);
 }
@@ -119,7 +141,7 @@ ssize_t send_packet(int socket_fd,void *buffer,size_t buffer_size)
 
 ssize_t send_message(int socket_fd,Message *msg)
 {
-	size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t) + msg->data_size;
+	size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t) + msg->header.data_size;
 	char buffer[buffer_size];
 	message_encode(msg,buffer,buffer_size);
 	return send_packet(socket_fd,buffer,buffer_size);

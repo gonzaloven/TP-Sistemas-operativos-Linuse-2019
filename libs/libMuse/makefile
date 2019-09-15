@@ -2,7 +2,7 @@ CC:=gcc
 TARGET:=libmuse.so
 UTILS:= ../../utils/
 INCDIR:= -I$(UTILS)
-CFLAGS:= -c -fpic
+CFLAGS:= -c -g -fpic
 SRCS:= libmuse.c $(UTILS)network.c $(UTILS)message.c
 LIBFLAGS:= -shared -o 
 

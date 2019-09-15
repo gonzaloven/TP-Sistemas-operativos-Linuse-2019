@@ -13,7 +13,7 @@ typedef struct suse_configuration_s
 	char **sem_id;
 	char **sem_init;
 	char **sem_max;
-	int alpha_sjf;
+	double alpha_sjf;
 }suse_configuration;
 
 /* Starts server,creates a logger and loads configuration */
