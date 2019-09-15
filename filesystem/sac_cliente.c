@@ -57,7 +57,7 @@ struct t_runtime_options {
  * 	@RETURN
  * 		O archivo/directorio fue encontrado. -ENOENT archivo/directorio no encontrado
  */
-static int hello_getattr(const char *path, struct stat *stbuf) {
+static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 	int res = 0;
 
 	memset(stbuf, 0, sizeof(struct stat));
@@ -94,7 +94,7 @@ static int hello_getattr(const char *path, struct stat *stbuf) {
  * 	@RETURN
  * 		O directorio fue encontrado. -ENOENT directorio no encontrado
  */
-static int hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
+static int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
 	(void) offset;
 	(void) fi;
 
@@ -123,7 +123,7 @@ static int hello_readdir(const char *path, void *buf, fuse_fill_dir_t filler, of
  * 	@RETURN
  * 		O archivo fue encontrado. -EACCES archivo no es accesible
  */
-static int hello_open(const char *path, struct fuse_file_info *fi) {
+static int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
 	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
 		return -ENOENT;
 
@@ -151,7 +151,7 @@ static int hello_open(const char *path, struct fuse_file_info *fi) {
  * 		la cantidad de bytes leidos o -ENOENT si ocurrio un error. ( Este comportamiento es igual
  * 		para la funcion write )
  */
-static int hello_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+static int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
 	size_t len;
 	(void) fi;
 	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
@@ -168,6 +168,25 @@ static int hello_read(const char *path, char *buf, size_t size, off_t offset, st
   return size;
 }
 
+static int sac_cliente_mknod(const char* path, mode_t mode, dev_t rdev){
+	return 0;
+}
+
+static int sac_cliente_write(const char* path, char *buf, size_t size, off_t offset, struct fuse_file_info* fi){
+	return 0;
+}
+
+static int sac_cliente_unlink(const char* path){
+	return 0;
+}
+
+static int sac_cliente_mkdir(const char* path, mode_t mode){
+	return 0;
+}
+
+static int sac_cliente_rmdir(const char* path){
+	return 0;
+}
 
 /*
  * Esta es la estructura principal de FUSE con la cual nosotros le decimos a
@@ -175,11 +194,16 @@ static int hello_read(const char *path, char *buf, size_t size, off_t offset, st
  * Como se observa la estructura contiene punteros a funciones.
  */
 
-static struct fuse_operations hello_oper = {
-		.getattr = hello_getattr,
-		.readdir = hello_readdir,
-		.open = hello_open,
-		.read = hello_read,
+static struct fuse_operations sac_cliente_oper = {
+		.getattr = sac_cliente_getattr,
+		.readdir = sac_cliente_readdir,
+		.open = sac_cliente_open,
+		.read = sac_cliente_read,
+		.mknod = sac_cliente_mknod,
+		.write = sac_cliente_write,
+		.unlink = sac_cliente_unlink,
+		.mkdir = sac_cliente_mkdir,
+		.rmdir = sac_cliente_rmdir,
 };
 
 
@@ -231,5 +255,5 @@ int main(int argc, char *argv[]) {
 	// Esta es la funcion principal de FUSE, es la que se encarga
 	// de realizar el montaje, comuniscarse con el kernel, delegar todo
 	// en varios threads
-	return fuse_main(args.argc, args.argv, &hello_oper, NULL);
+	return fuse_main(args.argc, args.argv, &sac_cliente_oper, NULL);
 }
