@@ -4,9 +4,10 @@
 #include "network.h"
 
 #define BLOQUE_SIZE 4096
-#define CANTIDAD_MAXIMA_ARCHIVOS 1024
+#define MAX_FILE_SIZE 1024
 #define HEADER_BLOCK_SIZE 1
-#define MAXIMO_SIZE_NOMBRE_ARCHIVO 71
+#define MAX_NAME_SIZE 71
+#define BLKINDIRECT 1000
 
 #define TIPOGETATTR 1
 #define TIPOREADDIR 2
@@ -21,35 +22,28 @@
 
 #define SAC_CONFIG_PATH "../configs/filesystem.config"
 
-typedef struct sac_configuration_s
-{
+typedef struct sac_configuration_s{
 	int listen_port;
 }sac_configuration;
 
-typedef struct sac_server_header
-{
-	unsigned char magic_number[3] //SAC
-	uint32_t version;
-	//uint32_t deberia ir el bloque de inicio del bitmap
-	uint32_t bloques_bitmap;
+typedef uint32_t ptrGBloque;
+
+typedef struct sac_server_header{
+	unsigned char identificador[] = "SAC";
+	uint32_t version = 1;
+	uint32_t bitmap_start;
+	uint32_t bitmap_size;
 	unsigned char padding[4081];
 }Header;
 
-typedef struct sac_server_gbloque
-{
-	uint32_t *ptrGbloque;
-}GBloque;
-
-typedef struct sac_server_gfile
-{
-	//0: BORRADO, 1: ARCHIVO, 2: DIRECTORIO
-	uint8_t estado;
-	unsigned char nombre_archivo[MAXIMO_SIZE_NOMBRE_ARCHIVO];
-	//uint32_t bloque_padre
-	uint32_t archivo_size;
-	//fecha de creacion
-	//fecha de modificacion
-	//unsigned char *bloques_indirectos[1000 * sizeof(uint32_t)];
+typedef struct sac_server_gfile{
+	uint8_t state;
+	unsigned char fname[MAX_NAME_SIZE];
+	uint32_t parent_dir_block;
+	uint32_t file_size;
+	uint64_t create_date;
+	uint64_t modify_date;
+	ptrGBloque blk_indirect[BLKINDIRECT];
 }GFile;
 
 /* Starts server,creates a logger and loads configuration */
