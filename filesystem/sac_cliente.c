@@ -1,4 +1,46 @@
-#include <stddef.h>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*#include <stddef.h>
 #include <stdlib.h>
 #include <fuse.h>
 #include <stdio.h>
@@ -6,44 +48,43 @@
 #include <errno.h>
 #include <fcntl.h>
 
-
-/* Este es el contenido por defecto que va a contener
+ Este es el contenido por defecto que va a contener
  * el unico archivo que se encuentre presente en el FS.
  * Si se modifica la cadena se podra ver reflejado cuando
  * se lea el contenido del archivo
- */
+
 #define DEFAULT_FILE_CONTENT "Hello World!\n"
 
-/*
- * Este es el nombre del archivo que se va a encontrar dentro de nuestro FS
- */
+
+// Este es el nombre del archivo que se va a encontrar dentro de nuestro FS
+
 #define DEFAULT_FILE_NAME "hello"
 
-/*
- * Este es el path de nuestro, relativo al punto de montaje, archivo dentro del FS
- */
+
+// Este es el path de nuestro, relativo al punto de montaje, archivo dentro del FS
+
 #define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
 
 
 
-/*
+
  * Esta es una estructura auxiliar utilizada para almacenar parametros
  * que nosotros le pasemos por linea de comando a la funcion principal
  * de FUSE
- */
+
 struct t_runtime_options {
 	char* welcome_msg;
 } runtime_options;
 
-/*
+
  * Esta Macro sirve para definir nuestros propios parametros que queremos que
  * FUSE interprete. Esta va a ser utilizada mas abajo para completar el campos
  * welcome_msg de la variable runtime_options
- */
+
 #define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
 
 
-/*
+
  * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
  * para obtener la metadata de un archivo/directorio. Esto puede ser tamaño, tipo,
@@ -56,7 +97,7 @@ struct t_runtime_options {
  *
  * 	@RETURN
  * 		O archivo/directorio fue encontrado. -ENOENT archivo/directorio no encontrado
- */
+
 static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 	int res = 0;
 
@@ -78,7 +119,7 @@ static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 }
 
 
-/*
+
  * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
  * para obtener la lista de archivos o directorios que se encuentra dentro de un directorio
@@ -93,7 +134,7 @@ static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
  *
  * 	@RETURN
  * 		O directorio fue encontrado. -ENOENT directorio no encontrado
- */
+
 static int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
 	(void) offset;
 	(void) fi;
@@ -110,7 +151,7 @@ static int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t fill
   return 0;
 }
 
-/*
+
  * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
  * para tratar de abrir un archivo
@@ -122,7 +163,7 @@ static int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t fill
  *
  * 	@RETURN
  * 		O archivo fue encontrado. -EACCES archivo no es accesible
- */
+
 static int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
 	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
 		return -ENOENT;
@@ -133,7 +174,7 @@ static int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
 	return 0;
 }
 
-/*
+
  * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
  * para obtener el contenido de un archivo
@@ -150,7 +191,7 @@ static int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
  * 		o -ENOENT si ocurrio un error. Si el parametro direct_io no esta presente se retorna
  * 		la cantidad de bytes leidos o -ENOENT si ocurrio un error. ( Este comportamiento es igual
  * 		para la funcion write )
- */
+
 static int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
 	size_t len;
 	(void) fi;
@@ -188,11 +229,11 @@ static int sac_cliente_rmdir(const char* path){
 	return 0;
 }
 
-/*
+
  * Esta es la estructura principal de FUSE con la cual nosotros le decimos a
  * biblioteca que funciones tiene que invocar segun que se le pida a FUSE.
  * Como se observa la estructura contiene punteros a funciones.
- */
+
 
 static struct fuse_operations sac_cliente_oper = {
 		.getattr = sac_cliente_getattr,
@@ -207,17 +248,17 @@ static struct fuse_operations sac_cliente_oper = {
 };
 
 
-/** keys for FUSE_OPT_ options */
+* keys for FUSE_OPT_ options
 enum {
 	KEY_VERSION,
 	KEY_HELP,
 };
 
 
-/*
+
  * Esta estructura es utilizada para decirle a la biblioteca de FUSE que
  * parametro puede recibir y donde tiene que guardar el valor de estos
- */
+
 static struct fuse_opt fuse_options[] = {
 		// Este es un parametro definido por nosotros
 		CUSTOM_FUSE_OPT_KEY("--welcome-msg %s", welcome_msg, 0),
@@ -240,7 +281,7 @@ int main(int argc, char *argv[]) {
 
 	// Esta funcion de FUSE lee los parametros recibidos y los intepreta
 	if (fuse_opt_parse(&args, &runtime_options, fuse_options, NULL) == -1){
-		/** error parsing options */
+		* error parsing options
 		perror("Invalid arguments!");
 		return EXIT_FAILURE;
 	}
@@ -257,3 +298,4 @@ int main(int argc, char *argv[]) {
 	// en varios threads
 	return fuse_main(args.argc, args.argv, &sac_cliente_oper, NULL);
 }
+*/*/

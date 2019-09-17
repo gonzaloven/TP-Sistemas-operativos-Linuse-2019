@@ -9,6 +9,7 @@
 #define MAX_NAME_SIZE 71
 #define BLKINDIRECT 1000
 
+/*
 #define TIPOGETATTR 1
 #define TIPOREADDIR 2
 #define TIPOOPEN 3
@@ -19,6 +20,7 @@
 #define TIPOTRUNCATE 8
 #define TIPORMDIR 9
 #define TIPOMKDIR 10
+*/
 
 #define SAC_CONFIG_PATH "../configs/filesystem.config"
 
@@ -28,33 +30,45 @@ typedef struct sac_configuration_s{
 
 typedef uint32_t ptrGBloque;
 
+
+// sac server header struct
 typedef struct sac_server_header{
 	unsigned char identificador[] = "SAC";
 	uint32_t version = 1;
-	uint32_t bitmap_start;
-	uint32_t bitmap_size;
+	ptrGBloque bitmap_start;
+	uint32_t bitmap_size; // in blocks
 	unsigned char padding[4081];
 }Header;
 
+
+// sac server file struct
 typedef struct sac_server_gfile{
-	uint8_t state;
+	uint8_t state; // 0 deleted, 1 taken, 2 directory
 	unsigned char fname[MAX_NAME_SIZE];
-	uint32_t parent_dir_block;
+	ptrGBloque parent_dir_block;
 	uint32_t file_size;
 	uint64_t create_date;
 	uint64_t modify_date;
-	ptrGBloque blk_indirect[BLKINDIRECT];
+	ptrGBloque indirect_blocks_array[BLKINDIRECT];
 }GFile;
 
-/* Starts server,creates a logger and loads configuration */
+
+// memory mapping data definition
+struct sac_server_header *header_start;
+struct sac_server_gfile *node_table_start;
+struct ptrGBloque *data_block_start, *bitmap_start;
+
+/*
+ Starts server,creates a logger and loads configuration
 int sac_start_service(ConnectionHandler ch);
 
-/* Stops server,frees resources */
+ Stops server,frees resources
 void sac_stop_service();
 
-/* Decides wich message has arrived
+ Decides wich message has arrived
  * and depending on the message 
- * does an action */
+ * does an action
 void message_handler(Message *m,int sock);
+*/
 
 #endif
