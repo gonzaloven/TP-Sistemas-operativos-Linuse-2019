@@ -1,22 +1,142 @@
 #ifndef SAC_CLIENT_H
 #define SAC_CLIENT_H
 
-#include<stdio.h>
+// Definition of functions to be implemented //
 
-// Definition of functions to be implemented
-// Todavia no se si los parametros van a quedar asi o nos va a convenir
-// definirlos diferente, esto es un copy paste de las funciones posta
+// Reading functions //
+/*
+ * @DESC
+ *  This function will be called when the FUSE library receives an order to obtain
+ *   the metadata of a file / directory. This can be size, type, permits, owner, etc ..
+ *
+ * @PARAMETERS
+ * 		path - The path is relative to the mount point and is the way by which we must
+ * 		 find the file or directory that we are requested
+ * 		stbuf - This structure is what we must complete
+ *
+ * 	@RETURN
+ * 		O file/directory found. -ENOENT file/directory found not found
+ *
+ * 	@PERMISSIONS
+ * 		If it is a directory and must has permissions:
+ * 			stbuf->st_mode = S_IFDIR | 0777;
+ * 			stbuf->st_nlink = 2;
+ * 		If it is a file:
+ * 			stbuf->st_mode = S_IFREG | 0777;
+ * 			stbuf->st_nlink = 1;
+ * 			stbuf->st_size = [SIZE];
+ *
+ */
+int linuse_getattr(const char *path, struct stat *stbuf);
 
-// Reading functions
-ssize_t linuse_read(int fd, void *buf, size_t count); // read bits of a file
+/*
+ * @DESC
+ *  This function will be called when the FUSE library takes you a request to
+ *  obtain the list of files or directories that are within a directory
+ *
+ * @PARAMETERS
+ * 		path - The path is relative to the mount point and is the way by which we must
+ * 		 find the file or directory that we are requested
+ * 		buf - This is a buffer where the names of the files and directories that are inside
+ * 		 the directory indicated by the path will be placed
+ * 		filler - This is a pointer to a function, which knows how to save a string inside the buf field
+ *
+ * 	@RETURN
+ * 		O directory found. -ENOENT directory not found
+ */
+int linuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) //
 
-// Writing functions
-int linuse_mkdir(const char *pathname, mode_t mode); // make a directory
-int linuse_mknod (const char *pathname, mode_t mode, dev_t dev); // make a file
-int linuse_rmdir(const char *pathname); // delete a directory
-int linuse_unlink(const char *pathname); // delete a file
-ssize_t linuse_write(int fd, const void *buf, size_t count); // write bits of a file
+/*
+ * @DESC
+ *  This function will be called when the FUSE library takes you a request to obtain the
+ *   contents of a file
+ *
+ * @PARAMETERS
+ * 		path - The path is relative to the mount point and is the way by which we must
+ * 		 find the file or directory that we are requested
+ * 		buf - This is the buffer where the requested content will be saved
+ * 		size - How much bytes we have to read
+ * 		offset - Indicates from what position of the file we have to read
+ *
+ * 	@RETURN
+ * 		If the direct_io parameter is used, the return values ​​are 0 if the file was found
+ * 		or -ENOENT if an error occurred. If the direct_io parameter is not present, the return values
+ * 		​​are the number of bytes read if everithing ok or -ENOENT if an error occurred.
+ */
+int linuse_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
+// Writing functions //
+
+/*
+ *  @ DESC
+ * 		This function will create a directory in the filesystem
+ *
+ * 	@ PARAM
+ *
+ * 		-path: The path where the directory will be created
+ *
+ * 		-mode: It contains the permissions that the directory must have and other metadata
+ *
+ * 	@ RET
+ * 		It returns 0 on success, or -1 if an error ocurred
+ */
+int linuse_mkdir(const char *pathname, mode_t mode);
+
+/*
+ *  @DESC
+ *  	This function will create a file in the filesystem
+ *
+ *  @PARAM
+ *  	path - The path where the directory will be created
+ *  	mode - File's options
+ *  	dev - Parameter not used
+ *
+ *  @RET
+ *  	It returns 0 on success, or -1 if an error ocurred
+ */
+int linuse_mknod (const char *pathname, mode_t mode, dev_t dev);
+
+/*
+ *	@DESC
+ *		This function will remove a directory of the filesystem
+ *
+ *	@PARAM
+ *		Path - The path of the directory to be removed
+ *
+ *	@RET
+ *		It returns 0 on success, or -ENOENT if an error ocurred
+ *
+ */
+int linuse_rmdir(const char *pathname);
+
+/*
+ *  @DESC
+ *  	This function will remove a file of the filesystem
+ *
+ *  @PARAM
+ *  	path - The path of the directory to be removed
+ *
+ *  @RET
+ *  	It returns 0 on success, or -ENOENT if an error ocurred
+ */
+int linuse_unlink(const char *pathname);
+
+/*
+ * 	@DESC
+ * 		Function to write files
+ *
+ * 	@PARAM
+ * 		path - The path of the file
+ * 		buf - Buffer that contains the data to be copied
+ * 		size - Size of the data to be copied
+ * 		offset - Indicates from what position of the file we have to write
+ * 		fi - File info. Contains flags and other things not used
+ *
+ * 	@RET
+ * 		It returns the size of bytes writeen on success, or a negative number
+ * 		if an error ocurred, and errno is set appropriately.
+ */
+int linuse_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 
 #endif
