@@ -1,7 +1,9 @@
 #ifndef SAC_SERVER_H
 #define SAC_SERVER_H
 
-#include "network.h"
+#include <stdio.h>
+#include <stdint.h>
+// #include "network.h"
 
 #define BLOQUE_SIZE 4096
 #define MAX_FILE_SIZE 1024

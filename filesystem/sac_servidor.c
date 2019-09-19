@@ -1,9 +1,20 @@
 #include "sac_servidor.h"
+
+
+
+
+
+
+
+
+/*
+#include "sac_servidor.h"
 #include "network.h"
 #include "rpc.h"
 #include <commons/log.h>
 #include <commons/config.h>
 #include <signal.h>
+
 
 t_log *sac_logger = NULL;
 sac_configuration *sac_config = NULL;
@@ -91,4 +102,4 @@ int main(int argc,char *argv[])
 
 	sac_start_service(handler);
 	return 0;
-}
+}*/

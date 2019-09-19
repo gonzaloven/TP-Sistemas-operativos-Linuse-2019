@@ -1,6 +1,10 @@
 #ifndef SAC_CLIENT_H
 #define SAC_CLIENT_H
 
+#include <stdio.h>
+#include <stdint.h>
+#include <fuse.h>
+
 // Definition of functions to be implemented //
 
 // Reading functions //
@@ -27,7 +31,7 @@
  * 			stbuf->st_size = [SIZE];
  *
  */
-int linuse_getattr(const char *path, struct stat *stbuf);
+int sac_getattr(const char *path, struct stat *stbuf);
 
 /*
  * @DESC
@@ -44,7 +48,7 @@ int linuse_getattr(const char *path, struct stat *stbuf);
  * 	@RETURN
  * 		O directory found. -ENOENT directory not found
  */
-int linuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) //
+int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) //
 
 /*
  * @DESC
@@ -63,7 +67,7 @@ int linuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t of
  * 		or -ENOENT if an error occurred. If the direct_io parameter is not present, the return values
  * 		​​are the number of bytes read if everithing ok or -ENOENT if an error occurred.
  */
-int linuse_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
+int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 // Writing functions //
 
@@ -80,7 +84,7 @@ int linuse_read(const char *path, char *buf, size_t size, off_t offset, struct f
  * 	@ RET
  * 		It returns 0 on success, or -1 if an error ocurred
  */
-int linuse_mkdir(const char *pathname, mode_t mode);
+int sac_mkdir(const char *pathname, mode_t mode);
 
 /*
  *  @DESC
@@ -94,7 +98,7 @@ int linuse_mkdir(const char *pathname, mode_t mode);
  *  @RET
  *  	It returns 0 on success, or -1 if an error ocurred
  */
-int linuse_mknod (const char *pathname, mode_t mode, dev_t dev);
+int sac_mknod (const char *pathname, mode_t mode, dev_t dev);
 
 /*
  *	@DESC
@@ -107,7 +111,7 @@ int linuse_mknod (const char *pathname, mode_t mode, dev_t dev);
  *		It returns 0 on success, or -ENOENT if an error ocurred
  *
  */
-int linuse_rmdir(const char *pathname);
+int sac_rmdir(const char *pathname);
 
 /*
  *  @DESC
@@ -136,7 +140,7 @@ int linuse_unlink(const char *pathname);
  * 		It returns the size of bytes writeen on success, or a negative number
  * 		if an error ocurred, and errno is set appropriately.
  */
-int linuse_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
+int sac_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 
 #endif
