@@ -3,7 +3,7 @@ CC:=gcc
 UTILS:= ../utils/
 CFLAGS:= -g
 INCDIR:= -I$(UTILS)
-SRCS := muse.c $(UTILS)network.c $(UTILS)message.c $(UTILS)rpc.c $(UTILS)cJSON.c
+SRCS := muse.c main_memory.c $(UTILS)network.c $(UTILS)message.c 
 LFLAGS := -lpthread -lcommons
 
 muse:
