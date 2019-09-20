@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include <fuse.h>
 
+// This is our path, relative to the mount point, file inside the FS
+#define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
+#define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
+
 // Definition of functions to be implemented //
 
 // Reading functions //
@@ -31,7 +35,7 @@
  * 			stbuf->st_size = [SIZE];
  *
  */
-int sac_getattr(const char *path, struct stat *stbuf);
+int sac_clie_getattr(const char *path, struct stat *stbuf);
 
 /*
  * @DESC
@@ -48,7 +52,7 @@ int sac_getattr(const char *path, struct stat *stbuf);
  * 	@RETURN
  * 		O directory found. -ENOENT directory not found
  */
-int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) //
+int sac_clie_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) //
 
 /*
  * @DESC
@@ -67,7 +71,7 @@ int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offse
  * 		or -ENOENT if an error occurred. If the direct_io parameter is not present, the return values
  * 		​​are the number of bytes read if everithing ok or -ENOENT if an error occurred.
  */
-int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
+int sac_clie_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 // Writing functions //
 
@@ -84,7 +88,7 @@ int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse
  * 	@ RET
  * 		It returns 0 on success, or -1 if an error ocurred
  */
-int sac_mkdir(const char *pathname, mode_t mode);
+int sac_clie_mkdir(const char *pathname, mode_t mode);
 
 /*
  *  @DESC
@@ -98,7 +102,7 @@ int sac_mkdir(const char *pathname, mode_t mode);
  *  @RET
  *  	It returns 0 on success, or -1 if an error ocurred
  */
-int sac_mknod (const char *pathname, mode_t mode, dev_t dev);
+int sac_clie_mknod (const char *pathname, mode_t mode, dev_t dev);
 
 /*
  *	@DESC
@@ -111,7 +115,7 @@ int sac_mknod (const char *pathname, mode_t mode, dev_t dev);
  *		It returns 0 on success, or -ENOENT if an error ocurred
  *
  */
-int sac_rmdir(const char *pathname);
+int sac_clie_rmdir(const char *pathname);
 
 /*
  *  @DESC
@@ -123,7 +127,7 @@ int sac_rmdir(const char *pathname);
  *  @RET
  *  	It returns 0 on success, or -ENOENT if an error ocurred
  */
-int linuse_unlink(const char *pathname);
+int sac_clie_unlink(const char *pathname);
 
 /*
  * 	@DESC
@@ -140,7 +144,7 @@ int linuse_unlink(const char *pathname);
  * 		It returns the size of bytes writeen on success, or a negative number
  * 		if an error ocurred, and errno is set appropriately.
  */
-int sac_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
+int sac_clie_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 
 #endif

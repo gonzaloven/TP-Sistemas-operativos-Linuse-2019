@@ -12,15 +12,15 @@ struct t_runtime_options {
  * the library what functions it has to invoke according to the request.
 */
 static struct fuse_operations sac_oper = {
-		.getattr = sac_getattr,
-		.read = sac_read,
-		.readdir = sac_readdir,
-		.mkdir = sac_mkdir,
-		.rmdir = sac_rmdir,
-		.truncate = sac_truncate,
-		.write = sac_write,
-		.mknod = sac_mknod,
-		.unlink = sac_unlink,
+		.getattr = sac_clie_getattr,
+		.read = sac_clie_read,
+		.readdir = sac_clie_readdir,
+		.mkdir = sac_clie_mkdir,
+		.rmdir = sac_clie_rmdir,
+		.truncate = sac_clie_truncate,
+		.write = sac_clie_write,
+		.mknod = sac_clie_mknod,
+		.unlink = sac_clie_unlink,
 };
 
 /** keys for FUSE_OPT_ options */
