@@ -30,11 +30,13 @@ int call(Function *f)
 	MessageHeader header;
 
 	
-	create_message_header(&header,MESSAGE_CALL,sizeof(Function));
+	create_message_header(&header,MESSAGE_CALL,1,sizeof(Function));
 	create_function_message(&msg,&header,f);
 
 	send_message(master_socket,&msg);
 	receive_message(master_socket,&msg);
+	int *response = msg.data;
+	return *response;
 }
 
 void muse_close()
@@ -81,11 +83,12 @@ void muse_free(uint32_t dir)
 int muse_get(void* dst, uint32_t src, size_t n)
 {
 	Function f;
-	Arg arg[2];
+	Arg arg[3];
+	uint32_t *d = (uint32_t *)dst;
 
 	arg[0].type = VAR_VOID_PTR;
 	arg[0].size = sizeof(uint32_t);
-	arg[0].value.val_voidptr = dst;
+	arg[0].value.val_u32 = *d;
 
 	arg[1].type = VAR_UINT32;
 	arg[1].size = sizeof(uint32_t);
@@ -101,13 +104,35 @@ int muse_get(void* dst, uint32_t src, size_t n)
 	f.args[1] = arg[1];
 	f.args[2] = arg[2];
 
-	int result = call(&f);
-	return result;
+	*d = call(&f);
+	return 0;
 }
 
 int muse_cpy(uint32_t dst, void* src, int n)
 {
-	int result=0;
+	Function f;
+	Arg arg[3];
+	uint32_t *s = (uint32_t *)src;
+
+	arg[0].type = VAR_UINT32;
+	arg[0].size = sizeof(uint32_t);
+	arg[0].value.val_u32 = dst;
+
+	arg[1].type = VAR_VOID_PTR;
+	arg[1].size = sizeof(uint32_t);
+	arg[1].value.val_u32 = *s;
+
+	arg[2].type = VAR_UINT32;
+	arg[2].size = sizeof(uint32_t);
+	arg[2].value.val_u32 = n;
+
+	f.type = FUNCTION_COPY;
+	f.num_args = 3;
+	f.args[0] = arg[0];
+	f.args[1] = arg[1];
+	f.args[2] = arg[2];
+
+	int result = call(&f);
 	return result;
 }
 
