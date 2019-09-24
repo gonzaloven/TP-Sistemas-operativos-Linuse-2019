@@ -4,6 +4,57 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <fuse.h>
+#include <commons/log.h>
+
+
+struct t_runtime_options {
+	char* welcome_msg;
+	char* define_disc_path;
+	char* log_level_param;
+	char* log_path_param;
+} runtime_options;
+
+/*
+ * This is the main structure of FUSE with which we tell
+ * the library what functions it has to invoke according to the request.
+*/
+static struct fuse_operations sac_oper = {
+		.getattr = sac_clie_getattr,
+		.read = sac_clie_read,
+		.readdir = sac_clie_readdir,
+		.mkdir = sac_clie_mkdir,
+		.rmdir = sac_clie_rmdir,
+		.truncate = sac_clie_truncate,
+		.write = sac_clie_write,
+		.mknod = sac_clie_mknod,
+		.unlink = sac_clie_unlink,
+};
+
+/** keys for FUSE_OPT_ options */
+
+enum {
+	KEY_VERSION,
+	KEY_HELP,
+};
+
+static struct fuse_opt fuse_options[] = {
+
+		// Option that uses the "--Disc-Path" parameter if it is passed:
+		CUSTOM_FUSE_OPT_KEY("--Disc-Path=%s", define_disc_path, 0),
+
+		// Define the log level
+		CUSTOM_FUSE_OPT_KEY("--ll=%s", log_level_param, 0),
+
+		// Define the log path
+		CUSTOM_FUSE_OPT_KEY("--Log-Path", log_path_param, 0),
+
+		// Default fuse parameters
+		FUSE_OPT_KEY("-V", KEY_VERSION),
+		FUSE_OPT_KEY("--version", KEY_VERSION),
+		FUSE_OPT_KEY("-h", KEY_HELP),
+		FUSE_OPT_KEY("--help", KEY_HELP),
+		FUSE_OPT_END,
+};
 
 // This is our path, relative to the mount point, file inside the FS
 #define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
@@ -145,6 +196,5 @@ int sac_clie_unlink(const char *pathname);
  * 		if an error ocurred, and errno is set appropriately.
  */
 int sac_clie_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
-
 
 #endif

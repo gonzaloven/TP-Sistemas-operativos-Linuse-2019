@@ -7,6 +7,8 @@
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
+#include <commons/log.h>
+#include "protocol.h"
 // #include "network.h"
 
 #define BLOQUE_SIZE 4096
@@ -66,10 +68,26 @@ struct sac_server_gfile *node_table_start, *data_block_start, *bitmap_start;
 
 //semaphore that will be used to write:
 pthread_rwlock_t rwlock;
+t_log* logger;
 
 // Use this structure to store the descriptor number in which the disk was opened
-/* 000000000000000000000000000000000 UNUSED YET 000000000000000000000000000000000000000000000*/
 int discDescriptor;
+
+// Functions to handle the disk
+
+/* * To read, documentation sac_client.h */
+int sac_server_getatrr(char* payload);
+int sac_server_readdir(char* payload);
+int sac_server_read(char* payload);
+
+/* * To write, documentation sac_client.h */
+// 00000000000000000000000000 IDK IF THE PARAMETERS ARE GOING TO BE EXACTLY THESE 0000000000000000000000000
+int sac_server_mkdir(char* payload);
+int sac_server_rmdir(char* payload);
+int sac_server_write(char* payload);
+int sac_server_mknod(char* payload);
+int sac_server_unlink(char* payload);
+
 
 // Auxiliary structure management functions, located in sac_handlers
 
@@ -84,7 +102,7 @@ int discDescriptor;
  *
  */
 
-ptrGBloque determine_nodo(const char* path);
+ptrGBloque determine_node(const char* path);
 
 /*
  * 	@DESC

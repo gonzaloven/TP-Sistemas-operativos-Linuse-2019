@@ -11,12 +11,26 @@
 typedef struct {
 	int8_t  type;
 	int16_t length;
-	char    payload[MAX_BUFFER];
+} __attribute__ ((__packed__)) tHeader;
+
+typedef struct {
+	int8_t  type;
+	int16_t length;
+	char payload[MAX_BUFFER];
 } __attribute__ ((__packed__)) tPackage;
 
 typedef enum {
-
-
+	/* Filesystem functions  */
+	FF_GETATRR,
+	FF_READDIR,
+	FF_READ,
+	FF_MKDIR,
+	FF_RMDIR,
+	FF_WRITE,
+	FF_MKNOD,
+	FF_UNLINK,
+	FF_ERROR,
+	DESCONEXION
 } tMessage;
 
 // Definition of payloads to be send in the package
@@ -74,26 +88,29 @@ typedef struct{
 
 // encode / decode
 
-int getatrr_encode(t_Message message_type, t_Getatrr function, tPaquete* pPaquete);
+int int_encode(t_Message message_type, int num, tPaquete* pPaquete);
+int int_decode(char* payload);
+
+int getatrr_encode(t_Message message_type, t_Getatrr parameters, tPaquete* pPaquete);
 t_Getatrr* getatrr_decode(char* payload);
 
-int readdir_encode(t_Message message_type, t_Readdir function, tPaquete* pPaquete);
+int readdir_encode(t_Message message_type, t_Readdir parameters, tPaquete* pPaquete);
 t_Readdir* readdir_decode(char* payload);
 
-int read_encode(t_Message message_type, t_Read function, tPaquete* pPaquete);
+int read_encode(t_Message message_type, t_Read parameters, tPaquete* pPaquete);
 t_Read* read_decode(char* payload);
 
-int mkdir_encode(t_Message message_type, t_Mkdir function, tPaquete* pPaquete);
+int mkdir_encode(t_Message message_type, t_Mkdir parameters, tPaquete* pPaquete);
 t_Mkdir* mkdir_decode(char* payload);
 
-int mknod_encode(t_Message message_type, t_Mknod function, tPaquete* pPaquete);
+int mknod_encode(t_Message message_type, t_Mknod parameters, tPaquete* pPaquete);
 t_Mknod* mknod_decode(char* payload);
 
-int rmdir_encode(t_Message message_type, t_Rmdir function, tPaquete* pPaquete);
+int rmdir_encode(t_Message message_type, t_Rmdir parameters, tPaquete* pPaquete);
 t_Rmdir* rmdir_decode(char* payload);
 
-int unlink_encode(t_Message message_type, t_Unlink function, tPaquete* pPaquete);
+int unlink_encode(t_Message message_type, t_Unlink parameters, tPaquete* pPaquete);
 t_Unlink* unlink_decode(char* payload);
 
-int write_encode(t_Message message_type, t_Write function, tPaquete* pPaquete);
+int write_encode(t_Message message_type, t_Write parameters, tPaquete* pPaquete);
 t_Write* write_decode(char* payload);

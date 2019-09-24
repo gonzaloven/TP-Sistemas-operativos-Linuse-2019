@@ -1,6 +1,6 @@
 #include<sac_servidor.h>
 
-// TODO add logs
+
 ptrGBloque determine_nodo(const char* path){
 
 	// If it is the root directory, it returns 0
@@ -20,6 +20,7 @@ ptrGBloque determine_nodo(const char* path){
 
 
 	pthread_rwlock_rdlock(&rwlock); //Takes a lock for read
+	log_lock_trace(logger, "Determinar_nodo: Toma lock lectura. Cantidad de lectores: %d", rwlock.__data.__nr_readers);
 	node = node_table_start;
 
 	// Search the node where is the name
@@ -31,13 +32,13 @@ ptrGBloque determine_nodo(const char* path){
 
 	// Close connections and free memory. Contemplate error cases.
 	pthread_rwlock_unlock(&rwlock);
+	log_lock_trace(logger, "Determinar_nodo: Libera lock lectura. Cantidad de lectores: %d", rwlock.__data.__nr_readers);
 	free(start);
 	free(start_super_path);
 	if (err != 0) return err;
 	if (i >= GFILEBYTABLE) return -1;
 
-	return (i+1); // +1 because /home is node position 1 (0 is the root), and i = 0 because doest
-				 //enter the loop
+	return (i); // +1?
 }
 
 int split_path(const char* path, char** super_path, char** name){
