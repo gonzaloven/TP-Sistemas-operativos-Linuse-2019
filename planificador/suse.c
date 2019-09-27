@@ -1,24 +1,40 @@
 #include "suse.h"
 #include "network.h"
-#include "rpc.h"
+#include "semaphore.h"
 #include <commons/log.h>
 #include <commons/config.h>
 #include <signal.h>
+#include <time.h>
+#include <string.h>
+
+#define SEM_ID_MAX_LENGTH 
 
 t_log *suse_logger = NULL;
 suse_configuration *suse_config = NULL;
 
-void *handler(void *args);
-suse_configuration *load_configuration(char *path);
+void *client_handler(void *args);
+void *report_metrics(void *args);
+suse_configuration *load_configuration(char *path);o
 
-int suse_start_service(ConnectionHandler ch)
+int running_flag;
+
+semaphore_t * suse_semaphores;
+unsigned int suse_nsemaphores;
+
+int _suse_init(ConnectionHandler ch)
 {
 	suse_config = load_configuration(SUSE_CONFIG_PATH);
 	suse_logger = log_create("../logs/suse.log","SUSE",true,LOG_LEVEL_TRACE);
-	server_start(suse_config->listen_port,ch);
+
+	suse_initialize_semaphores();
+
+	signal(SIGALRM, report_metrics);
+	alarm(suse_config->metrics_timer);
+
+	server_start(suse_config->listen_port, ch);
 }
 
-void suse_stop_service()
+void _suse_stop_service()
 {
 	int i;
 	log_info(suse_logger,"Received SIGINT signal shuting down!");
@@ -44,7 +60,44 @@ void suse_stop_service()
 	server_stop();
 }
 
-void *handler(void *args)
+int _suse_create(void (*f)(void *))
+{
+
+}
+
+/* TCB??? */ _suse_schedule_next(/* ??? */)
+{
+
+}
+
+int _suse_wait(char * sem_id)
+{
+	int i = 0;
+
+	do {
+		if (i == suse_nsemaphores)
+		{
+			log_error(suse_logger, "Semaphore identifier not found");
+			return -1;
+		}
+
+		i++;
+	} while (strncmp(sem_id, suse_semaphores[i], SEM_ID_MAX_LENGTH));
+
+
+}
+
+int _suse_signal(/* ??? */)
+{
+
+}
+
+/* ??? */ _suse_join(/* ??? */)
+{
+
+}
+
+void *client_handler(void *args)
 {
 	ConnectionArgs *conna = (ConnectionArgs *)args;
 	Message msg;
@@ -61,9 +114,27 @@ void *handler(void *args)
 			message_handler(&msg,sock);
 		}
 	}	
+
 	log_debug(suse_logger,"The client was disconnected!");
 	close(sock);
-	return (void*)NULL;
+
+	return (void*) NULL;
+}
+
+void *report_metrics(void *args) {
+	char *log_string;
+
+	/* Thread metrics */
+
+	/* Process metrics */
+
+	/* Semaphore metrics */
+	for (int i = 0; i < suse_nsemaphores; i++) {
+		sprintf(log_string, "Semaphore \"%s\" is currently at value %d", suse_semaphores[i]->id, suse_semaphores[i]->val);
+		log_info(suse_logger, log_string);
+	}
+		
+	alarm(suse_config->metrics_timer);
 }
 
 suse_configuration *load_configuration(char *path)
@@ -88,6 +159,19 @@ suse_configuration *load_configuration(char *path)
 
 	config_destroy(config);
 	return sc;
+}
+
+void suse_initialize_semaphores()
+{
+	suse_nsemaphores = sizeof(suse_configuration->sem_id) / sizeof(char *);
+
+	for (int i = 0; i < suse_nsemaphores, i++)
+	{
+		suse_semaphores[i]->id = suse_config->sem_id[i];
+		suse_semaphores[i]->val = atoi(suse_config->sem_init[i]);
+		suse_semaphores[i]->max_val = atoi(suse_config->sem_max[i]);
+		suse_semaphores[i]->waiting_queue = NULL;
+	}
 }
 
 void message_handler(Message *m,int sock)
@@ -119,6 +203,6 @@ int main(int argc,char *argv[])
 	//When Ctrl-C is pressed stops SUSE and frees resources
 	signal(SIGINT,suse_stop_service);
 
-	suse_start_service(handler);
+	_suse_init(client_handler);
 	return 0;
 }
