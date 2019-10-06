@@ -1,48 +1,5 @@
 #include "sac_cliente.h"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*#include <stddef.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <fuse.h>
 #include <stdio.h>
@@ -300,4 +257,3 @@ int main(int argc, char *argv[]) {
 	// en varios threads
 	return fuse_main(args.argc, args.argv, &sac_cliente_oper, NULL);
 }
-*/*/

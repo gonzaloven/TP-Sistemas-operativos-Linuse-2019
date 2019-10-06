@@ -49,7 +49,7 @@ typedef struct sac_server_block{
 
 // sac server header struct
 typedef struct sac_server_header{
-	unsigned char identificador[] = "SAC";
+	unsigned char identificador[MAGIC_NUMBER_NAME];
 	uint32_t version = 1;
 	uint32_t bitmap_start;
 	uint32_t bitmap_size; // in blocks
@@ -59,7 +59,7 @@ typedef struct sac_server_header{
 
 // sac server file struct
 typedef struct sac_server_gfile{
-	uint8_t state; // 0 deleted, 1 taken, 2 directory
+	uint8_t state; // 0 deleted, 1 file, 2 directory
 	unsigned char fname[MAX_NAME_SIZE];
 	ptrGBloque parent_dir_block;
 	uint32_t file_size;
