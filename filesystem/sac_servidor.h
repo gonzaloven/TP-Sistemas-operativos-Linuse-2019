@@ -13,10 +13,13 @@
 
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024
+#define MAGIC_NUMBER_NAME 3
 #define HEADER_BLOCK_SIZE 1
 #define MAX_NAME_SIZE 71
 #define BLKINDIRECT 1000
 #define GFILEBYTABLE 1024
+#define BITMAP_START_BLOCK 1
+#define BITMAP_SIZE_BLOCKS 1
 
 /*
 #define TIPOGETATTR 1
@@ -39,12 +42,16 @@ typedef struct sac_configuration_s{
 
 typedef uint32_t ptrGBloque;
 
+// sac server block struct
+typedef struct sac_server_block{
+	unsigned char bytes[BLOQUE_SIZE];
+}GBlock;
 
 // sac server header struct
 typedef struct sac_server_header{
 	unsigned char identificador[] = "SAC";
 	uint32_t version = 1;
-	ptrGBloque bitmap_start;
+	uint32_t bitmap_start;
 	uint32_t bitmap_size; // in blocks
 	unsigned char padding[4081];
 }Header;
