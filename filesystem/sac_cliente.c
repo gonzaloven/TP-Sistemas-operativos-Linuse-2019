@@ -25,20 +25,22 @@
 #define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
 
 
-
-
+ /*
  * Esta es una estructura auxiliar utilizada para almacenar parametros
  * que nosotros le pasemos por linea de comando a la funcion principal
  * de FUSE
+ */
 
 struct t_runtime_options {
 	char* welcome_msg;
 } runtime_options;
 
 
+ /*
  * Esta Macro sirve para definir nuestros propios parametros que queremos que
  * FUSE interprete. Esta va a ser utilizada mas abajo para completar el campos
  * welcome_msg de la variable runtime_options
+ */
 
 #define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
 
@@ -61,19 +63,13 @@ static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 	int res = 0;
 
 	memset(stbuf, 0, sizeof(struct stat));
+	
+	attr = deserializar_Gettattr_Rta(payload);
 
-	//Si path es igual a "/" nos estan pidiendo los atributos del punto de montaje
-
-	if (strcmp(path, "/") == 0) {
-		stbuf->st_mode = S_IFDIR | 0755;
-		stbuf->st_nlink = 2;
-	} else if (strcmp(path, DEFAULT_FILE_PATH) == 0) {
-		stbuf->st_mode = S_IFREG | 0444;
-		stbuf->st_nlink = 1;
-		stbuf->st_size = strlen(DEFAULT_FILE_CONTENT);
-	} else {
-		res = -ENOENT;
-	}
+	stbuf->st_mode = attr.modo;
+	stbuf->st_nlink = attr.nlink;
+	stbuf->st_size = attr.total_size;
+	
 	return res;
 }
 

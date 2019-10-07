@@ -26,7 +26,20 @@ void writeBitmap(GBlock *punteroDisco){
     int bitsToSet = 1 + BITMAP_SIZE_BLOCKS + MAX_NUMBER_OF_FILES;
     
     for(int bit = 0, bit < bitsToSet; bit++){
-
+        
     }
 }
 */
+
+int main(int argc, char **argv){
+    char* fileName;
+    bool shouldFormat;
+
+    if(argc == 3 && (strcmp(arg[1], "--format") || (strcmp(argv[1], "-f")))){
+        shouldFormat = true;
+        fileName = argv[2];
+    } else {
+        shouldFormat = false;
+        fileName = argv[1];
+    }
+}

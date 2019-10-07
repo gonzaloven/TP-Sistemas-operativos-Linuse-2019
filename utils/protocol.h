@@ -9,19 +9,19 @@
 #define MAX_BUFFER 1024
 
 typedef struct {
-	int8_t  type;
+	int8_t type;
 	int16_t length;
 } __attribute__ ((__packed__)) tHeader;
 
 typedef struct {
-	int8_t  type;
+	int8_t type;
 	int16_t length;
 	char payload[MAX_BUFFER];
-} __attribute__ ((__packed__)) tPackage;
+} __attribute__ ((__packed__)) tPaquete;
 
 typedef enum {
 	/* Filesystem functions  */
-	FF_GETATRR,
+	FF_GETATTR,
 	FF_READDIR,
 	FF_READ,
 	FF_MKDIR,
@@ -33,6 +33,12 @@ typedef enum {
 	DESCONEXION
 } tMessage;
 
+typedef struct {
+	mode_t modo;
+	nlink_t nlink;
+	off_t total_size;
+}DesAttr_resp;
+
 // Definition of payloads to be send in the package
 
 // ------------ el contenido de las struct esta mal, deberian ser los parametros de las funciones
@@ -40,8 +46,13 @@ typedef enum {
 
 typedef struct {
 	const char *path;
-	struct stat *stbuf;
-} t_Getatrr;
+} t_Getattr;
+
+typedef struct {
+	mode_t modo, 
+	nlink_t links, 
+	off_t total_size
+} t_Rta_Getattr;
 
 typedef struct{
 	const char *path;
@@ -91,8 +102,8 @@ typedef struct{
 int int_encode(t_Message message_type, int num, tPaquete* pPaquete);
 int int_decode(char* payload);
 
-int getatrr_encode(t_Message message_type, t_Getatrr parameters, tPaquete* pPaquete);
-t_Getatrr* getatrr_decode(char* payload);
+int getattr_encode(t_Message message_type, t_Getattr parameters, tPaquete* pPaquete);
+t_Getatrr* getattr_decode(char* payload);
 
 int readdir_encode(t_Message message_type, t_Readdir parameters, tPaquete* pPaquete);
 t_Readdir* readdir_decode(char* payload);
