@@ -59,6 +59,7 @@ struct t_runtime_options {
  * 	@RETURN
  * 		O archivo/directorio fue encontrado. -ENOENT archivo/directorio no encontrado
 
+//hay que terminar esto
 static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 	int res = 0;
 
