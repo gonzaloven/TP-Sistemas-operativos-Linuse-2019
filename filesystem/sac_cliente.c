@@ -59,21 +59,43 @@ struct t_runtime_options {
  * 	@RETURN
  * 		O archivo/directorio fue encontrado. -ENOENT archivo/directorio no encontrado
 
-//hay que terminar esto
 static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
-	int res = 0;
+	DesAttr_resp attr;
+	tPaquete paquete;
+	char* path_;
 
 	memset(stbuf, 0, sizeof(struct stat));
+
+	int pathSize = strlen(path) + 1;
+	path_ = malloc(pathSize);
+	memcpy(path_, path, pathSize);
+
+	paquete.type = FF_GETATTR;
+	paquete.length = pathSize;
+	memcpy(paquete.payload, path_, pathSize);
+
+	send_package(master_socket, &paquete, logger, "Se envia el path del cual se necesita la metadata");
+
+	tMensaje tipoDeMensaje;
+	char* payload;
+
+	recieve_package(master_socket, &tipoDeMensaje, &payload, logger, "Se recibe la estructura con la metadata");
+
+	if(tipoDeMensaje != RTA_GETATTR){
+		return -ENOENT;
+		free(path_);
+	}
 	
-	attr = deserializar_Gettattr_Rta(payload);
+	free(path_);
+
+	attr = deserializar_readdir_Rta(paquete.length, payload);
 
 	stbuf->st_mode = attr.modo;
 	stbuf->st_nlink = attr.nlink;
 	stbuf->st_size = attr.total_size;
 	
-	return res;
+	return 0;
 }
-
 
 
  * @DESC
@@ -95,16 +117,51 @@ static int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t fill
 	(void) offset;
 	(void) fi;
 
-	if (strcmp(path, "/") != 0)
+	tPaquete paquete;
+	char* path_;
+	DesReaddir_resp respuesta;
+	uint8_t tam_dir = 0;
+	uint16_t off = 0;
+
+	int pathSize = strlen(path) + 1;
+	path_ = malloc(pathSize);
+	memcpy(path_, path, pathSize);
+
+	paquete.type = FF_READDIR;
+	paquete.length = pathSize;
+	memcpy(paquete.payload, path_, pathSize);
+
+	send_package(master_socket, &paquete, logger, "Se envia el path del cual se necesita la lista de archivos que contiene");
+
+	tMensaje tipoDeMensaje;
+	char* payload;
+
+	recieve_package(master_socket, &tipoDeMensaje, &payload, logger, "Se recibe la estructura con la lista");
+
+
+	if(tipoDeMensaje != RTA_READDIR){
 		return -ENOENT;
+		free(path_);
+	}
 
-	// "." y ".." son entradas validas, la primera es una referencia al directorio donde estamos parados
-	// y la segunda indica el directorio padre
-	filler(buf, ".", NULL, 0);
-	filler(buf, "..", NULL, 0);
-	filler(buf, DEFAULT_FILE_NAME, NULL, 0);
+	//No se si deberia ser asi
+	respuesta = deserializar_Readdir_Rta(tamano_paquete, payload);
 
-  return 0;
+	while(off < respuesta.tamano){
+
+		memcpy(&tam_dir, respuesta.lista_nombres + off, sizeof(uint8_t));
+		off = off + sizeof(uint8_t);
+		mandar = malloc(tam_dir);
+		memcpy(mandar, respuesta.lista_nombres+ off, tam_dir);
+		off = off + tam_dir;
+		filler(buf, mandar, NULL, 0);
+		free(mandar);
+
+	};
+
+	free(path_);
+
+	return 0;
 }
 
 

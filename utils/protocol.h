@@ -22,6 +22,7 @@ typedef struct {
 typedef enum {
 	/* Filesystem functions  */
 	FF_GETATTR,
+	RTA_GETATTR,
 	FF_READDIR,
 	FF_READ,
 	FF_MKDIR,
@@ -38,6 +39,11 @@ typedef struct {
 	nlink_t nlink;
 	off_t total_size;
 }DesAttr_resp;
+
+typedef struct {
+	uint16_t tamano;
+	char* lista_nombres;
+}DesReaddir_resp;
 
 // Definition of payloads to be send in the package
 

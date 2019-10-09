@@ -5,6 +5,7 @@ int serializar_Gettattr_Resp(t_Rta_Getattr parametros, tPaquete *paquete){
 	paquete->type = TIPOGETATTR;
 	paquete->length = sizeof(parametros->modo) + sizeof(parametros->nlink) + sizeof(parametros->total_size);
 	memcpy(paquete->payload, &parametros->modo, sizeof(parametros->modo));
+
 	offset = sizeof(parametros->modo);
 	memcpy(paquete->payload+offset, &parametros->nlink, sizeof(parametros->nlink));
 	offset = offset + sizeof(parametros->nlink);
@@ -32,4 +33,16 @@ DesAttr_resp deserializar_Gettattr_Resp(char* payload){
 	attr.total_size = (off_t)total_size;
 
 	return attr;
+};
+
+//No se si esto deberia tener el parametro del tamanio o no
+DesReaddir_resp deserializar_Readdir_Rta(uint16_t payloadLength, void* payload) {
+
+	DesReadDir_resp respuesta;
+
+	respuesta.tamano = payloadLength;
+	respuesta.lista_nombres = malloc(respuesta.tamano);
+	memcpy(respuesta.lista_nombres,payload,respuesta.tamano);
+
+	return respuesta;
 };
