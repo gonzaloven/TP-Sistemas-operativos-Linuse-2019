@@ -3,6 +3,8 @@
 #include "semaphore.h"
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/collections/node.h>
+#include <commons/collections/queue.h>
 #include <signal.h>
 #include <time.h>
 #include <string.h>
@@ -14,7 +16,7 @@ suse_configuration *suse_config = NULL;
 
 void *client_handler(void *args);
 void *report_metrics(void *args);
-suse_configuration *load_configuration(char *path);o
+suse_configuration *load_configuration(char *path);
 
 int running_flag;
 
