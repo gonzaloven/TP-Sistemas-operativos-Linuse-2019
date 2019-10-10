@@ -7,45 +7,6 @@
 #include <errno.h>
 #include <fcntl.h>
 
-/* Este es el contenido por defecto que va a contener
- * el unico archivo que se encuentre presente en el FS.
- * Si se modifica la cadena se podra ver reflejado cuando
- * se lea el contenido del archivo*/
-
-#define DEFAULT_FILE_CONTENT "Hello World!\n"
-
-
-// Este es el nombre del archivo que se va a encontrar dentro de nuestro FS
-
-#define DEFAULT_FILE_NAME "hello"
-
-
-// Este es el path de nuestro, relativo al punto de montaje, archivo dentro del FS
-
-#define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
-
-
- /*
- * Esta es una estructura auxiliar utilizada para almacenar parametros
- * que nosotros le pasemos por linea de comando a la funcion principal
- * de FUSE
- */
-
-struct t_runtime_options {
-	char* welcome_msg;
-} runtime_options;
-
-
- /*
- * Esta Macro sirve para definir nuestros propios parametros que queremos que
- * FUSE interprete. Esta va a ser utilizada mas abajo para completar el campos
- * welcome_msg de la variable runtime_options
- */
-
-#define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
-
-
-
 /* * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
  * para obtener la metadata de un archivo/directorio. Esto puede ser tamaño, tipo,
