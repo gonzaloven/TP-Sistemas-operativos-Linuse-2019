@@ -7,10 +7,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
- Este es el contenido por defecto que va a contener
+/* Este es el contenido por defecto que va a contener
  * el unico archivo que se encuentre presente en el FS.
  * Si se modifica la cadena se podra ver reflejado cuando
- * se lea el contenido del archivo
+ * se lea el contenido del archivo*/
 
 #define DEFAULT_FILE_CONTENT "Hello World!\n"
 
@@ -46,7 +46,7 @@ struct t_runtime_options {
 
 
 
- * @DESC
+/* * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
  * para obtener la metadata de un archivo/directorio. Esto puede ser tamaño, tipo,
  * permisos, dueño, etc ...
@@ -57,7 +57,7 @@ struct t_runtime_options {
  * 		stbuf - Esta esta estructura es la que debemos completar
  *
  * 	@RETURN
- * 		O archivo/directorio fue encontrado. -ENOENT archivo/directorio no encontrado
+ * 		O archivo/directorio fue encontrado. -ENOENT archivo/directorio no encontrado*/
 
 static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 	DesAttr_resp attr;
@@ -98,7 +98,7 @@ static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 }
 
 
- * @DESC
+/* * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
  * para obtener la lista de archivos o directorios que se encuentra dentro de un directorio
  *
@@ -111,7 +111,7 @@ static int sac_cliente_getattr(const char *path, struct stat *stbuf) {
  * 		         del campo buf
  *
  * 	@RETURN
- * 		O directorio fue encontrado. -ENOENT directorio no encontrado
+ * 		O directorio fue encontrado. -ENOENT directorio no encontrado*/
 
 static int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
 	(void) offset;
@@ -165,7 +165,7 @@ static int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t fill
 }
 
 
- * @DESC
+/* * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
  * para tratar de abrir un archivo
  *
@@ -175,7 +175,7 @@ static int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t fill
  * 		fi - es una estructura que contiene la metadata del archivo indicado en el path
  *
  * 	@RETURN
- * 		O archivo fue encontrado. -EACCES archivo no es accesible
+ * 		O archivo fue encontrado. -EACCES archivo no es accesible*/
 
 static int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
 	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
@@ -188,7 +188,7 @@ static int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
 }
 
 
- * @DESC
+/* * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
  * para obtener el contenido de un archivo
  *
@@ -203,7 +203,7 @@ static int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
  * 		Si se usa el parametro direct_io los valores de retorno son 0 si  elarchivo fue encontrado
  * 		o -ENOENT si ocurrio un error. Si el parametro direct_io no esta presente se retorna
  * 		la cantidad de bytes leidos o -ENOENT si ocurrio un error. ( Este comportamiento es igual
- * 		para la funcion write )
+ * 		para la funcion write )*/
 
 static int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
 	size_t len;
@@ -243,9 +243,9 @@ static int sac_cliente_rmdir(const char* path){
 }
 
 
- * Esta es la estructura principal de FUSE con la cual nosotros le decimos a
+/* * Esta es la estructura principal de FUSE con la cual nosotros le decimos a
  * biblioteca que funciones tiene que invocar segun que se le pida a FUSE.
- * Como se observa la estructura contiene punteros a funciones.
+ * Como se observa la estructura contiene punteros a funciones.*/
 
 
 static struct fuse_operations sac_cliente_oper = {
@@ -269,8 +269,8 @@ enum {
 
 
 
- * Esta estructura es utilizada para decirle a la biblioteca de FUSE que
- * parametro puede recibir y donde tiene que guardar el valor de estos
+/* * Esta estructura es utilizada para decirle a la biblioteca de FUSE que
+ * parametro puede recibir y donde tiene que guardar el valor de estos*/
 
 static struct fuse_opt fuse_options[] = {
 		// Este es un parametro definido por nosotros
