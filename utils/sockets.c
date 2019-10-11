@@ -59,12 +59,12 @@ int create_listen_socket(int port, t_log *logger) {
 	return socketEscucha;
 }
 
-int send_package(int socketServer, tPackage *pPackageToSend, t_log *logger,
+int send_package(int socket, tPackage *pPackageToSend, t_log *logger,
 		char *info) {
 	int byteEnviados;
 	log_debug(logger, ">>> %s", info);
 
-	byteEnviados = send(socketServidor, (char*) pPackageToSend,
+	byteEnviados = send(socket, (char*) pPackageToSend,
 			sizeof(tHeader) + pPackageToSend->length, 0);
 
 	if (byteEnviados == -1) {
@@ -76,14 +76,14 @@ int send_package(int socketServer, tPackage *pPackageToSend, t_log *logger,
 	}
 }
 
-int recieve_package(int socketReceptor, tMessage *tipoMensaje, char **psPayload,
+int recieve_package(int socket, tMessage *tipoMensaje, char **psPayload,
 		t_log *pLogger, char *sMensajeLogger) {
 	tHeader header;
 	int bytesRecibidosHeader = 0;
 	int bytesRecibidos = 0;
 
 	log_debug(pLogger, "<<< %s", sMensajeLogger);
-	bytesRecibidosHeader = recv(socketReceptor, &header, sizeof(tHeader),
+	bytesRecibidosHeader = recv(socket, &header, sizeof(tHeader),
 			MSG_WAITALL);
 
 	if (bytesRecibidosHeader == 0) {
@@ -99,7 +99,7 @@ int recieve_package(int socketReceptor, tMessage *tipoMensaje, char **psPayload,
 	if (header.length > 0) {
 		*psPayload = malloc(header.length);
 
-		bytesRecibidos = recv(socketReceptor, *psPayload, header.length,
+		bytesRecibidos = recv(socket, *psPayload, header.length,
 				MSG_WAITALL);
 
 		if (bytesRecibidos < 0) {

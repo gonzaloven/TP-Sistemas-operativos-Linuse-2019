@@ -108,6 +108,8 @@ typedef struct{
 int int_encode(t_Message message_type, int num, tPaquete* pPaquete);
 int int_decode(char* payload);
 
+int path_encode(t_message message_type, const char* path, tPaquete* pPaquete);
+
 int getattr_encode(t_Message message_type, t_Getattr parameters, tPaquete* pPaquete);
 t_Getatrr* getattr_decode(char* payload);
 
