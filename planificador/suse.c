@@ -8,8 +8,9 @@
 #include <signal.h>
 #include <time.h>
 #include <string.h>
+#include <commons/collections/queue.h>
 
-#define SEM_ID_MAX_LENGTH 
+#define SEM_ID_MAX_LENGTH 32
 
 t_log *suse_logger = NULL;
 suse_configuration *suse_config = NULL;
@@ -18,15 +19,16 @@ void *client_handler(void *args);
 void *report_metrics(void *args);
 suse_configuration *load_configuration(char *path);
 
-int running_flag;
-
 semaphore_t * suse_semaphores;
 unsigned int suse_nsemaphores;
 
-int _suse_init(ConnectionHandler ch)
+int suse_init(ConnectionHandler ch)
 {
 	suse_config = load_configuration(SUSE_CONFIG_PATH);
 	suse_logger = log_create("../logs/suse.log","SUSE",true,LOG_LEVEL_TRACE);
+
+	t_queue *ready_queue = queue_create();
+	t_queue *running_queue = queue_create();
 
 	suse_initialize_semaphores();
 
@@ -36,7 +38,7 @@ int _suse_init(ConnectionHandler ch)
 	server_start(suse_config->listen_port, ch);
 }
 
-void _suse_stop_service()
+void suse_stop_service()
 {
 	int i;
 	log_info(suse_logger,"Received SIGINT signal shuting down!");
@@ -62,17 +64,17 @@ void _suse_stop_service()
 	server_stop();
 }
 
-int _suse_create(void (*f)(void *))
+int suse_create(void (*f)(void *))
 {
 
 }
 
-/* TCB??? */ _suse_schedule_next(/* ??? */)
+/* TCB??? */ suse_schedule_next(/* ??? */)
 {
 
 }
 
-int _suse_wait(char * sem_id)
+int suse_wait(char * sem_id)
 {
 	int i = 0;
 
@@ -89,12 +91,12 @@ int _suse_wait(char * sem_id)
 
 }
 
-int _suse_signal(/* ??? */)
+int suse_signal(/* ??? */)
 {
 
 }
 
-/* ??? */ _suse_join(/* ??? */)
+/* ??? */ suse_join(/* ??? */)
 {
 
 }
@@ -205,6 +207,6 @@ int main(int argc,char *argv[])
 	//When Ctrl-C is pressed stops SUSE and frees resources
 	signal(SIGINT,suse_stop_service);
 
-	_suse_init(client_handler);
+	suse_init(client_handler);
 	return 0;
 }
