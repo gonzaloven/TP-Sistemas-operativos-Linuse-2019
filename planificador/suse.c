@@ -8,7 +8,6 @@
 #include <signal.h>
 #include <time.h>
 #include <string.h>
-#include <commons/collections/queue.h>
 
 #define SEM_ID_MAX_LENGTH 32
 

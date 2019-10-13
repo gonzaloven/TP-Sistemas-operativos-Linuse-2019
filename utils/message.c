@@ -47,7 +47,7 @@ int message_encode(Message *msg,void *buffer,size_t buffer_size)
 			result += message_function_encode(msg,cursor,buffer_size);
 			break;
 		case MESSAGE_NEW_ULT:
-			printf("TODO\n");
+			result += message_new_ult_encode(msg, cursor, buffer_size); // TODO: complete implementation
 			break;
 		case MESSAGE_FUNCTION_RET:
 			result += message_function_return_encode(msg,cursor,buffer_size);
@@ -74,7 +74,7 @@ int message_decode(void *buffer,size_t buffer_size,Message *result)
 			res += message_function_decode(cursor,buffer_size,result);
 			break;
 		case MESSAGE_NEW_ULT:
-			printf("TODO\n");
+			res += message_new_ult_decode(cursor, buffer_size, result); // TODO: complete implementation
 			break;
 		case MESSAGE_FUNCTION_RET:
 			res += message_function_return_decode(cursor,buffer_size,result);
@@ -214,6 +214,16 @@ int message_function_decode(void *buffer,size_t buffer_size,Message *result)
 	}
 	result->data = (void *)f;
 	return cursor - buffer;
+}
+
+int message_new_ult_encode(Message *msg, void *buffer, size_t buffer_size)
+{
+	// TODO
+}
+
+int message_function_decode(void *buffer, size_t buffer_size, Message *result)
+{
+	// TODO
 }
 
 int create_response_message(Message *msg,MessageHeader *header,uint16_t response)
