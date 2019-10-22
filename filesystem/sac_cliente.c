@@ -56,7 +56,7 @@ int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 
 	send_package(master_socket, &paquete, logger, "Se envia el path del cual se necesita la lista de archivos que contiene");
 
-	tMensaje tipoDeMensaje;
+	tMessage tipoDeMensaje;
 	char* payload;
 
 	recieve_package(master_socket, &tipoDeMensaje, &payload, logger, "Se recibe la estructura con la lista");
@@ -87,47 +87,140 @@ int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 	return 0;
 }
 
-
-/* * @DESC
- *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
- * para tratar de abrir un archivo
- *
- * @PARAMETROS
- * 		path - El path es relativo al punto de montaje y es la forma mediante la cual debemos
- * 		       encontrar el archivo o directorio que nos solicitan
- * 		fi - es una estructura que contiene la metadata del archivo indicado en el path
- *
- * 	@RETURN
- * 		O archivo fue encontrado. -EACCES archivo no es accesible*/
-
 int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
-	return 0;
+	tPaquete paquete;
+
+	path_encode(FF_OPEN, path, &paquete);
+
+	send_package(serverSocket, &paquete, logger, "Se envia el path a abrir");
+
+	tMessage tipoDeMensaje;
+	char* payload;
+
+	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
+
+	int respuesta = deserializar_Resultado_Resp(payload);
+	
+	return respuesta;
 }
 
 int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-  return 0;
+
+	tPaquete paquete;
+	t_Read parametros;
+	char *lectura;
+	
+	parametros.path = path;
+	parametros.offset = offset;
+	parametros.size = size;
+
+	read_encode(FF_READ, parametros, &paquete);
+
+	send_package(serverSocket, &paquete, logger, "Se envia el path a leer");
+
+	tMessage tipoDeMensaje;
+	char* payload;
+
+	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe la lectura del path");
+
+	//no se si aca deberia tener el tamanio del paquete
+	lectura = deserializar_Read_Resp(payload);
+
+	//memcpy(buf, lectura, tamanio de lectura);
+  
+  	//return tamanio de la lectura;
 }
 
 int sac_cliente_mknod(const char* path, mode_t mode, dev_t rdev){
-	return 0;
+	tPaquete paquete;
+
+	path_encode(FF_MKNOD, path, &paquete);
+
+	send_package(serverSocket, &paquete, logger, "Se envia el path donde crear el archivo");
+
+	tMessage tipoDeMensaje;
+	char* payload;
+
+	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
+
+	int respuesta = deserializar_Resultado_Resp(payload);
+
+	return respuesta;
 }
 
 int sac_cliente_write(const char* path, char *buf, size_t size, off_t offset, struct fuse_file_info* fi){
-	return 0;
+	tPaquete paquete;
+	t_Write parametros;
+
+	parametros.buf = buf;
+	parametros.size = size;
+	parametros.path = path;
+	parametros.offset = offset;
+
+	write_encode(FF_WRITE, parametros, &paquete);
+
+	send_package(serverSocket, &paquete, logger, "Se envian los datos para escribir en el path");
+
+	tMessage tipoDeMensaje;
+	char* payload;
+
+	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe la cantidad de bytes escritos");
+
+	int escritos = deserializar_Write_Resp(payload);
+
+	return escritos;
 }
 
 int sac_cliente_unlink(const char* path){
-	return 0;
+	tPaquete paquete;
+
+	path_encode(FF_UNLINK, path, &paquete);
+
+	send_package(serverSocket, &paquete, logger, "Se envia el path donde debe borrar");
+
+	tMessage tipoDeMensaje;
+	char* payload;
+
+	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
+
+	int respuesta = deserializar_Resultado_Resp(payload);
+
+	return respuesta;
 }
 
 int sac_cliente_mkdir(const char* path, mode_t mode){
-	return 0;
+	tPaquete paquete;
+
+	path_encode(FF_MKDIR, path, &paquete);
+
+	send_package(serverSocket, &paquete, logger, "Se envia el path del directorio a crear");
+
+	tMessage tipoDeMensaje;
+	char* payload;
+
+	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
+
+	int respuesta = deserializar_Resultado_Resp(payload);
+
+	return respuesta;
 }
 
 int sac_cliente_rmdir(const char* path){
-	return 0;
-}
+	tPaquete paquete;
 
+	path_encode(FF_RMDIR, path, &paquete);
+
+	send_package(serverSocket, &paquete, logger, "Se envia el path del directorio a borrar");
+
+	tMessage tipoDeMensaje;
+	char* payload;
+
+	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
+
+	int respuesta = deserializar_Resultado_Resp(payload);
+
+	return respuesta;
+}
 
 // Dentro de los argumentos que recibe nuestro programa obligatoriamente
 // debe estar el path al directorio donde vamos a montar nuestro FS

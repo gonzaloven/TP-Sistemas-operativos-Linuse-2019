@@ -124,6 +124,20 @@ int sac_clie_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t 
  */
 int sac_clie_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
+/* * @DESC
+ *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
+ * para tratar de abrir un archivo
+ *
+ * @PARAMETROS
+ * 		path - El path es relativo al punto de montaje y es la forma mediante la cual debemos
+ * 		       encontrar el archivo o directorio que nos solicitan
+ * 		fi - es una estructura que contiene la metadata del archivo indicado en el path
+ *
+ * 	@RETURN
+ * 		O archivo fue encontrado. -EACCES archivo no es accesible*/
+
+int sac_cliente_open(const char *path, struct fuse_file_info *fi);
+
 // Writing functions //
 
 /*

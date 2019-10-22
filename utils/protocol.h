@@ -24,6 +24,7 @@ typedef enum {
 	FF_GETATTR,
 	RTA_GETATTR,
 	FF_READDIR,
+	FF_OPEN,
 	FF_READ,
 	FF_MKDIR,
 	FF_RMDIR,
@@ -70,10 +71,8 @@ typedef struct{
 
 typedef struct{
 	const char *path;
-	char *buf;
 	size_t size;
 	off_t offset;
-	struct fuse_file_info *fi;
 } t_Read;
 
 typedef struct{
@@ -100,7 +99,6 @@ typedef struct{
 	const char *buf;
 	size_t size;
 	off_t offset;
-	struct fuse_file_info *fi;
 } t_Write;
 
 // encode / decode
