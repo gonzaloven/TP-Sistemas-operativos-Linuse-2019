@@ -62,7 +62,7 @@ int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 	recieve_package(master_socket, &tipoDeMensaje, &payload, logger, "Se recibe la estructura con la lista");
 
 
-	if(tipoDeMensaje != RTA_READDIR){
+	if(tipoDeMensaje != FF_READDIR){
 		return -ENOENT;
 		free(path_);
 	}

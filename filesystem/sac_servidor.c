@@ -1,4 +1,6 @@
 #include "sac_servidor.h"
+#include <sys/mman.h>
+#include "protocol.h"
 
 int sac_server_read(char* payload, int fd){
 	t_Getatrr* p_param = getatrr_decode(payload);
@@ -91,8 +93,47 @@ int sac_server_read(char* payload, int fd){
 
 }
 
+int sac_server_getattr(char* payload){
+	t_Rta_Getattr metadata;
 
+	ptrGBloque nodoBuscadoPosicion = determine_node(payload->path);
 
+	bool esArchivo = tablaDeNodos[nodoBuscadoPosicion].state == 1;
+
+	metadata.modo = esArchivo == 1 ? S_IFREG | 0444 : S_IFDIR | 0755; //permisos default para directorios y para archivos respectivamente
+	metadata.nlink_t = 1; //esto esta hardcodeado en otros tps porque no podemos crear hardlinks nosotros, asi que no tenemos como calcular cuantos tiene
+	metadata.total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
+
+	//Deberia completarse el envio del mensaje y seria eso
+
+}
+
+int sac_server_mknod (char* payload){
+	int currNode = 0;
+
+	size_t diskSize = //sacar el tamanio del archivo del config en algun atributo de ahi y usar esta funcion para sacarlo -> getFileSize(filename);
+	GBlock* disco = mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,1,0);
+
+	GFile* tablaDeNodos = disco + 3;
+
+	while(tablaDeNodos[currNode].state != 0 && currNode < MAX_NAME_SIZE){
+		currNode++;
+	}
+
+	if(currNode >= MAX_NAME_SIZE){
+		return EDQUOT;
+	}
+
+	GFile* nodoVacio = tablaDeNodos + currNode;
+
+	strcpy((char*) nodoVacio->fname, payload->path+1);
+	nodoVacio->file_size = 0;
+	nodoVacio->state = 1;
+
+	msync(disco, diskSize, MS_SYNC);
+	return 0;
+
+}
 
 
 
