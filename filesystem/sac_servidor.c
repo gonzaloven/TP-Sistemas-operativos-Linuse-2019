@@ -108,6 +108,31 @@ int sac_server_getattr(char* payload){
 
 }
 
+int sac_server_readdir (char* payload) {
+	//declaro una lista o un array no se como funciona asi que lo pongo en pseudocodigo por ahora
+	//listaRespuesta es la que se envia con los nombres de los archivos y directorios
+
+	ptrGBloque nodoPadre = determine_node(payload->path);
+
+	while(i < MAX_NUMBER_OF_FILES){
+		if(tablaDeNodos->state != 0)
+		{
+			if(tablaDeNodos->parent_dir_block == nodoPadre)
+			{
+				//esto lo copie de otro lado asi que no se si esta bien
+				char * name = malloc(MAX_NAME_SIZE + 1 *sizeof(char));
+				strcpy(name, tablaDeNodos->fname);
+				*(name + MAX_NAME_SIZE) = '\0';
+
+				//listaRespuesta[PosicionActual] = name;
+			}
+		}
+		tablaDeNodos++;
+		//tambien incrementar el indice de la lista resultado
+	}
+	//finalmente tendria que enviar la lista resultado al sac cli para que use la funcion filler despues
+}
+
 int sac_server_mknod (char* payload){
 	int currNode = 0;
 
