@@ -39,12 +39,12 @@ typedef struct {
 	mode_t modo;
 	nlink_t nlink;
 	off_t total_size;
-}DesAttr_resp;
+}t_GetAttrResp;
 
 typedef struct {
 	uint16_t tamano;
 	char* lista_nombres;
-}DesReaddir_resp;
+}t_ReaddirResp;
 
 // Definition of payloads to be send in the package
 
@@ -53,13 +53,7 @@ typedef struct {
 
 typedef struct {
 	const char *path;
-} t_Getattr;
-
-typedef struct {
-	mode_t modo, 
-	nlink_t links, 
-	off_t total_size
-} t_Rta_Getattr;
+} t_Path;
 
 typedef struct{
 	const char *path;
@@ -107,27 +101,32 @@ int int_encode(t_Message message_type, int num, tPaquete* pPaquete);
 int int_decode(char* payload);
 
 int path_encode(t_message message_type, const char* path, tPaquete* pPaquete);
-
-int getattr_encode(t_Message message_type, t_Getattr parameters, tPaquete* pPaquete);
-t_Getatrr* getattr_decode(char* payload);
+int path_decode(char* payload, t_Path* tipoPath);
 
 int readdir_encode(t_Message message_type, t_Readdir parameters, tPaquete* pPaquete);
-t_Readdir* readdir_decode(char* payload);
+int readdir_decode(char* payload, t_Readdir* tipoReaddir);
 
 int read_encode(t_Message message_type, t_Read parameters, tPaquete* pPaquete);
-t_Read* read_decode(char* payload);
+int read_decode(char* payload, t_Read* tipoRead);
 
 int mkdir_encode(t_Message message_type, t_Mkdir parameters, tPaquete* pPaquete);
-t_Mkdir* mkdir_decode(char* payload);
+int mkdir_decode(char* payload, t_Mkdir* tipoMkdir);
 
 int mknod_encode(t_Message message_type, t_Mknod parameters, tPaquete* pPaquete);
-t_Mknod* mknod_decode(char* payload);
+int mknod_decode(char* payload, t_Mknod* tipoMknod);
 
 int rmdir_encode(t_Message message_type, t_Rmdir parameters, tPaquete* pPaquete);
-t_Rmdir* rmdir_decode(char* payload);
+int rmdir_decode(char* payload, t_Rmdir* tipoRmdir);
 
 int unlink_encode(t_Message message_type, t_Unlink parameters, tPaquete* pPaquete);
-t_Unlink* unlink_decode(char* payload);
+int unlink_decode(char* payload, t_Unlink* tipoUnlink);
 
 int write_encode(t_Message message_type, t_Write parameters, tPaquete* pPaquete);
-t_Write* write_decode(char* payload);
+int write_decode(char* payload, t_Write* tipoWrite);
+
+int serializar_Gettattr_Resp(t_GetAttrResp parametros, tPaquete *paquete);
+int deserializar_Gettattr_Resp(char *payload, t_GetAttrResp* tipoAtrrResp);
+
+int deserializar_Readdir_Rta(uint16_t payloadLength, void *payload, t_ReaddirResp* tipoReaddirResp);
+
+

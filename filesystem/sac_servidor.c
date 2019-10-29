@@ -2,6 +2,21 @@
 #include <sys/mman.h>
 #include "protocol.h"
 
+int sac_server_getattr(char* payload){
+	t_Rta_Getattr metadata;
+
+	ptrGBloque nodoBuscadoPosicion = determine_node(payload->path);
+
+	bool esArchivo = tablaDeNodos[nodoBuscadoPosicion].state == 1;
+
+	metadata.modo = esArchivo == 1 ? S_IFREG | 0444 : S_IFDIR | 0755; //permisos default para directorios y para archivos respectivamente
+	metadata.nlink_t = 1; //esto esta hardcodeado en otros tps porque no podemos crear hardlinks nosotros, asi que no tenemos como calcular cuantos tiene
+	metadata.total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
+
+	//Deberia completarse el envio del mensaje y seria eso
+
+}
+
 int sac_server_read(char* payload, int fd){
 	t_Getatrr* p_param = getatrr_decode(payload);
 	log_info(logger, "Reading: Path: %s - Size: %d - Offset %d",
@@ -90,21 +105,6 @@ int sac_server_read(char* payload, int fd){
 	log_lock_trace(logger, "Read: Libera lock lectura. Cantidad de lectores: %d", rwlock.__data.__nr_readers);
 	log_trace(logger, "Terminada lectura.");
 	return res;
-
-}
-
-int sac_server_getattr(char* payload){
-	t_Rta_Getattr metadata;
-
-	ptrGBloque nodoBuscadoPosicion = determine_node(payload->path);
-
-	bool esArchivo = tablaDeNodos[nodoBuscadoPosicion].state == 1;
-
-	metadata.modo = esArchivo == 1 ? S_IFREG | 0444 : S_IFDIR | 0755; //permisos default para directorios y para archivos respectivamente
-	metadata.nlink_t = 1; //esto esta hardcodeado en otros tps porque no podemos crear hardlinks nosotros, asi que no tenemos como calcular cuantos tiene
-	metadata.total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
-
-	//Deberia completarse el envio del mensaje y seria eso
 
 }
 

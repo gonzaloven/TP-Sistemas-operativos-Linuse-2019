@@ -8,12 +8,19 @@ int path_encode(t_message message_type, const char *path, tPaquete *pPaquete) {
 	pPaquete.length = pathSize;
 	memcpy(pPaquete.payload, path, pathSize);
 
-	free(path_);
+	return EXIT_SUCCESS;
+}
+
+int path_decode(char* payload, t_Path* tipoPath){
+
+	tipoPath->path = malloc(sizeof(payload));
+
+	memcpy(tipoPath->path, payload, sizeof(payload));
 
 	return EXIT_SUCCESS;
 }
 
-int serializar_Gettattr_Resp(t_Rta_Getattr parametros, tPaquete *paquete) {
+int serializar_Gettattr_Resp(t_GetAttrResp parametros, tPaquete *paquete) {
 
 	uint16_t offset = 0;
 
@@ -33,9 +40,8 @@ int serializar_Gettattr_Resp(t_Rta_Getattr parametros, tPaquete *paquete) {
 }
 ;
 
-DesAttr_resp deserializar_Gettattr_Resp(char *payload) {
+int deserializar_Gettattr_Resp(char *payload, t_GetAttrResp* attr) {
 
-	DesAttr_resp attr;
 	uint16_t off = 0;
 	mode_t modo;
 	nlink_t nlink;
@@ -51,19 +57,17 @@ DesAttr_resp deserializar_Gettattr_Resp(char *payload) {
 	attr.nlink = nlink;
 	attr.total_size = (off_t) total_size;
 
-	return attr;
+	return EXIT_SUCCESS;
 }
 ;
 
 //No se si esto deberia tener el parametro del tamanio o no
-DesReaddir_resp deserializar_Readdir_Rta(uint16_t payloadLength, void *payload) {
-
-	DesReadDir_resp respuesta;
+int deserializar_Readdir_Rta(uint16_t payloadLength, void *payload, t_ReaddirResp* respuesta) {
 
 	respuesta.tamano = payloadLength;
 	respuesta.lista_nombres = malloc(respuesta.tamano); // tener cuidado de hacer free
 	memcpy(respuesta.lista_nombres, payload, respuesta.tamano);
 
-	return respuesta;
+	return EXIT_SUCCESS;
 }
 ;

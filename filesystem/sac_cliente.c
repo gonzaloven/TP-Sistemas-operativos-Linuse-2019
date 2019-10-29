@@ -9,14 +9,16 @@
 #include <fcntl.h>
 
 int sac_cliente_getattr(const char *path, struct stat *stbuf) {
-	DesAttr_resp attr;
-	tPaquete paquete;
+	t_GetAttrResp* attr = malloc(sizeof(t_GetAttrResp));
+	tPaquete* paquete = malloc(sizeof(tPaquete));
 
 	memset(stbuf, 0, sizeof(struct stat));
 
-	path_encode(FF_GETATTR, path, &paquete);
+	path_encode(FF_GETATTR, path, paquete);
 
-	send_package(serverSocket, &paquete, logger, "Se envia el path del cual se necesita la metadata");
+	send_package(serverSocket, paquete, logger, "Se envia el path del cual se necesita la metadata");
+
+	free(paquete);
 
 	tMensaje tipoDeMensaje;
 	char* payload;
@@ -27,15 +29,19 @@ int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 		return -ENOENT;
 	}
 
-	attr = deserializar_Gettattr_Resp(payload);
+	deserializar_Gettattr_Resp(payload, attr);
 
 	stbuf->st_mode = attr.modo;
 	stbuf->st_nlink = attr.nlink;
 	stbuf->st_size = attr.total_size;
 	
+	free(attr);
+
 	return 0;
 }
 
+
+//quede aca en la correcion con el cambio en el protocolo
 int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
 	(void) offset;
 	(void) fi;
@@ -63,8 +69,8 @@ int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 
 
 	if(tipoDeMensaje != FF_READDIR){
-		return -ENOENT;
 		free(path_);
+		return -ENOENT;
 	}
 
 	//No se si deberia ser asi
