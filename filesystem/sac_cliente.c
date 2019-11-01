@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <fcntl.h>
 
+int serverSocket = 0;
+
 int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 	t_GetAttrResp* attr = malloc(sizeof(t_GetAttrResp));
 	tPaquete* paquete = malloc(sizeof(tPaquete));
@@ -20,7 +22,7 @@ int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 
 	free(paquete);
 
-	tMensaje tipoDeMensaje;
+	tMessage tipoDeMensaje;
 	char* payload;
 
 	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe la estructura con la metadata");
@@ -60,12 +62,12 @@ int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 	paquete.length = pathSize;
 	memcpy(paquete.payload, path_, pathSize);
 
-	send_package(master_socket, &paquete, logger, "Se envia el path del cual se necesita la lista de archivos que contiene");
+	send_package(serverSocket, &paquete, logger, "Se envia el path del cual se necesita la lista de archivos que contiene");
 
 	tMessage tipoDeMensaje;
 	char* payload;
 
-	recieve_package(master_socket, &tipoDeMensaje, &payload, logger, "Se recibe la estructura con la lista");
+	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe la estructura con la lista");
 
 
 	if(tipoDeMensaje != FF_READDIR){
@@ -137,7 +139,7 @@ int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, str
   	//return tamanio de la lectura;
 }
 
-int sac_cliente_mknod(const char* path, mode_t mode, dev_t rdev){
+int sac_cliente_mknod(const char* path, mode_t mode, dev_t rdmev){
 	tPaquete paquete;
 
 	path_encode(FF_MKNOD, path, &paquete);
@@ -233,6 +235,10 @@ int sac_cliente_rmdir(const char* path){
 int main(int argc, char *argv[]) {
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
+	////////////////////////////////no se donde hacer el close del socket////////////////////////////////////////
+	//esta bastante hardcodeado esto, creo que deberia tomarlo del config
+	serverSocket = connect_to("127.0.0.1",8003);
+
 	// Limpio la estructura que va a contener los parametros
 	memset(&runtime_options, 0, sizeof(struct t_runtime_options));
 
@@ -253,5 +259,5 @@ int main(int argc, char *argv[]) {
 	// Esta es la funcion principal de FUSE, es la que se encarga
 	// de realizar el montaje, comuniscarse con el kernel, delegar todo
 	// en varios threads
-	return fuse_main(args.argc, args.argv, &sac_cliente_oper, NULL);
+	return fuse_main(args.argc, args.argv, &sac_oper, NULL);
 }

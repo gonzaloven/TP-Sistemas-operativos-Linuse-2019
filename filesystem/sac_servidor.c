@@ -1,6 +1,110 @@
-#include "sac_servidor.h"
 #include <sys/mman.h>
 #include "protocol.h"
+#include "sac_servidor.h"
+#include "network.h"
+#include "rpc.h"
+#include <commons/log.h>
+#include <commons/config.h>
+#include <signal.h>
+
+
+t_log *sac_logger = NULL;
+sac_configuration *sac_config = NULL;
+
+void *handler(void *args);
+sac_configuration *load_configuration(char *path);
+
+int sac_start_service(ConnectionHandler connectionHandler)
+{
+	sac_config = load_configuration(SAC_CONFIG_PATH);
+	sac_logger = log_create("../logs/sac_server.log","FUSE",true,LOG_LEVEL_TRACE);
+	server_start(sac_config->listen_port,connectionHandler);
+}
+
+void sac_stop_service()
+{
+	log_info(sac_logger,"Received SIGINT signal shuting down!");
+
+	log_destroy(sac_logger);
+	server_stop();
+}
+
+void *handler(void *args)
+{
+	ConnectionArgs *conna = (ConnectionArgs *)args;
+	char* payload;
+	int n=0;
+	tMessage tipoDeMensaje;
+	int sock = conna->client_fd;
+	struct sockaddr_in client_address = conna->client_addr;
+	
+	while((n=recieve_package(sock, &tipoDeMensaje, &payload, sac_logger, "Se recibe la operacion en el servidor")) > 0)
+	{
+		// este if no se como adaptarlo a lo nuestro
+		//if((n = message_decode(buffer,n,&msg)) > 0)
+		{
+			//deberia fijarme si esto lo pase bien o si tengo que ponerle el &
+			message_handler(tipoDeMensaje, payload, sock);
+		}
+	}	
+	log_debug(sac_logger,"The client was disconnected!");
+	close(sock);
+	return (void*)NULL;
+}
+
+sac_configuration *load_configuration(char *path)
+{
+	t_config *config = config_create(path);
+	sac_configuration *sc = (sac_configuration *)malloc(sizeof(sac_configuration));
+
+	if(config == NULL)
+	{	
+		log_error(sac_logger,"Configuration couldn't be loaded.Quitting program!");
+		free(sc);
+		exit(-1);
+	}
+	
+	sc->listen_port = config_get_int_value(config,"LISTEN_PORT");
+	config_destroy(config);
+	return sc;
+}
+
+void message_handler(tMessage tipoDeMensaje, char* payload, int sock)
+{
+	switch(tipoDeMensaje)
+	{
+		case FF_GETATTR:
+			log_debug(sac_logger,"Getattr recibido!");
+			sac_server_getattr(payload);
+			break;
+		case FF_READDIR:
+			log_debug(sac_logger,"Readdir recibido!");
+			sac_server_readdir(payload);
+			break;
+		case FF_READ:
+			log_debug(sac_logger,"Read recibido!");
+			sac_server_read(payload);
+			break;
+		case FF_MKNOD:
+			log_debug(sac_logger,"Mknod recibido!");
+			sac_server_mknod(payload);
+			break;
+		default:
+			log_error(sac_logger,"Undefined message");
+			break;
+	}
+	return;
+
+}
+
+int main(int argc,char *argv[])
+{
+	//When Ctrl-C is pressed stops SUSE and frees resources
+	signal(SIGINT,sac_stop_service);
+
+	sac_start_service(handler);
+	return 0;
+}
 
 int sac_server_getattr(char* payload){
 	t_Rta_Getattr metadata;
@@ -133,7 +237,7 @@ int sac_server_readdir (char* payload) {
 	//finalmente tendria que enviar la lista resultado al sac cli para que use la funcion filler despues
 }
 
-int sac_server_mknod (char* payload){
+/*int sac_server_mknod (char* payload){
 	int currNode = 0;
 
 	size_t diskSize = //sacar el tamanio del archivo del config en algun atributo de ahi y usar esta funcion para sacarlo -> getFileSize(filename);
@@ -145,11 +249,10 @@ int sac_server_mknod (char* payload){
 		currNode++;
 	}
 
-	if(currNode >= MAX_NAME_SIZE){
-		return EDQUOT;
-	}
+	msync(disco, diskSize, MS_SYNC);
+	return 0;
 
-	GFile* nodoVacio = tablaDeNodos + currNode;
+}
 
 	strcpy((char*) nodoVacio->fname, payload->path+1);
 	nodoVacio->file_size = 0;
@@ -158,104 +261,4 @@ int sac_server_mknod (char* payload){
 	msync(disco, diskSize, MS_SYNC);
 	return 0;
 
-}
-
-
-
-
-/*
-#include "sac_servidor.h"
-#include "network.h"
-#include "rpc.h"
-#include <commons/log.h>
-#include <commons/config.h>
-#include <signal.h>
-
-
-t_log *sac_logger = NULL;
-sac_configuration *sac_config = NULL;
-
-void *handler(void *args);
-sac_configuration *load_configuration(char *path);
-
-int sac_start_service(ConnectionHandler ch)
-{
-	sac_config = load_configuration(SAC_CONFIG_PATH);
-	sac_logger = log_create("../logs/sac_server.log","SUSE",true,LOG_LEVEL_TRACE);
-	server_start(sac_config->listen_port,ch);
-}
-
-void sac_stop_service()
-{
-	log_info(sac_logger,"Received SIGINT signal shuting down!");
-
-	log_destroy(sac_logger);
-	server_stop();
-}
-
-void *handler(void *args)
-{
-	ConnectionArgs *conna = (ConnectionArgs *)args;
-	Message msg;
-	char buffer[1024];
-	int n=0;
-	int sock = conna->client_fd;
-	struct sockaddr_in client_address = conna->client_addr;
-	
-	while((n=receive_packet(sock,buffer,1024)) > 0)
-	{
-		if((n = message_decode(buffer,n,&msg)) > 0)
-		{
-			message_handler(&msg,sock);
-		}
-	}	
-	log_debug(sac_logger,"The client was disconnected!");
-	close(sock);
-	return (void*)NULL;
-}
-
-sac_configuration *load_configuration(char *path)
-{
-	t_config *config = config_create(path);
-	sac_configuration *sc = (sac_configuration *)malloc(sizeof(sac_configuration));
-
-	if(config == NULL)
-	{	
-		log_error(sac_logger,"Configuration couldn't be loaded.Quitting program!");
-		free(sc);
-		exit(-1);
-	}
-	
-	sc->listen_port = config_get_int_value(config,"LISTEN_PORT");
-	config_destroy(config);
-	return sc;
-}
-
-void message_handler(Message *m,int sock)
-{
-	switch(m->header.message_type)
-	{
-		case MESSAGE_STRING:
-			log_debug(sac_logger,"Received -> %s",m->data);	
-			break;
-		case MESSAGE_CALL:
-			log_debug(sac_logger,"Remote call received!");
-			//rpc_server_invoke(m->data,sock);
-			//message_free_data(m);
-			break;
-		default:
-			log_error(sac_logger,"Undefined message");
-			break;
-	}
-	return;
-
-}
-
-int main(int argc,char *argv[])
-{
-	//When Ctrl-C is pressed stops SUSE and frees resources
-	signal(SIGINT,sac_stop_service);
-
-	sac_start_service(handler);
-	return 0;
 }*/
