@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <fcntl.h>
 
+int serverSocket = 0;
+
 int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 	t_GetAttrResp* attr = malloc(sizeof(t_GetAttrResp));
 	tPaquete* paquete = malloc(sizeof(tPaquete));
@@ -165,7 +167,7 @@ int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, str
 }
 
 int sac_cliente_mknod(const char* path, mode_t mode, dev_t rdev){
-	tPaquete* paquete;
+	tPaquete* paquete = malloc(sizeof(tPaquete));
 
 	path_encode(FF_MKNOD, path, paquete); // ?? no envia mas info?
 
@@ -191,7 +193,7 @@ int sac_cliente_mknod(const char* path, mode_t mode, dev_t rdev){
 }
 
 int sac_cliente_write(const char* path, char *buf, size_t size, off_t offset, struct fuse_file_info* fi){
-	tPaquete* paquete;
+	tPaquete* paquete = malloc(sizeof(tPaquete));
 	t_Write parametros;
 
 	parametros.pathLength = strlen(path) + 1;
@@ -228,7 +230,7 @@ int sac_cliente_write(const char* path, char *buf, size_t size, off_t offset, st
 // aca voy
 
 int sac_cliente_unlink(const char* path){
-	tPaquete* paquete;
+	tPaquete* paquete = malloc(sizeof(tPaquete));
 
 	path_encode(FF_UNLINK, path, paquete);
 
@@ -252,7 +254,7 @@ int sac_cliente_unlink(const char* path){
 }
 
 int sac_cliente_mkdir(const char* path, mode_t mode){
-	tPaquete* paquete;
+	tPaquete* paquete = malloc(sizeof(tPaquete));
 
 	path_encode(FF_MKDIR, path, paquete);
 
@@ -278,7 +280,7 @@ int sac_cliente_mkdir(const char* path, mode_t mode){
 }
 
 int sac_cliente_rmdir(const char* path){
-	tPaquete* paquete;
+	tPaquete* paquete = malloc(sizeof(tPaquete));
 
 	path_encode(FF_RMDIR, path, paquete);
 
@@ -304,6 +306,10 @@ int sac_cliente_rmdir(const char* path){
 int main(int argc, char *argv[]) {
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
+	////////////////////////////////no se donde hacer el close del socket////////////////////////////////////////
+	//esta bastante hardcodeado esto, creo que deberia tomarlo del config
+	serverSocket = connect_to("127.0.0.1",8003);
+
 	// Limpio la estructura que va a contener los parametros
 	memset(&runtime_options, 0, sizeof(struct t_runtime_options));
 
@@ -324,5 +330,5 @@ int main(int argc, char *argv[]) {
 	// Esta es la funcion principal de FUSE, es la que se encarga
 	// de realizar el montaje, comuniscarse con el kernel, delegar todo
 	// en varios threads
-	return fuse_main(args.argc, args.argv, &sac_cliente_oper, NULL);
+	return fuse_main(args.argc, args.argv, &sac_oper, NULL);
 }
