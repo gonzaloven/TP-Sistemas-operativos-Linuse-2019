@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <fuse.h>
 #include <commons/log.h>
+#include "sockets.h"
 
 
 struct t_runtime_options {
@@ -59,6 +60,10 @@ static struct fuse_opt fuse_options[] = {
 // This is our path, relative to the mount point, file inside the FS
 #define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
 #define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
+
+t_log *logger;
+
+int serverSocket;
 
 // Definition of functions to be implemented //
 

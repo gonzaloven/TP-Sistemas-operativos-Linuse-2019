@@ -80,7 +80,7 @@ int recieve_package(int socket, tMessage *tipoMensaje, char **psPayload,
 		t_log *pLogger, char *sMensajeLogger) {
 	tHeader header;
 	int bytesRecibidosHeader = 0;
-	int bytesRecibidos = 0;
+	int bytesRecibidosPayload = 0;
 
 	log_debug(pLogger, "<<< %s", sMensajeLogger);
 	bytesRecibidosHeader = recv(socket, &header, sizeof(tHeader),
@@ -99,7 +99,7 @@ int recieve_package(int socket, tMessage *tipoMensaje, char **psPayload,
 	if (header.length > 0) {
 		*psPayload = malloc(header.length);
 
-		bytesRecibidos = recv(socket, *psPayload, header.length,
+		bytesRecibidosPayload = recv(socket, *psPayload, header.length,
 				MSG_WAITALL);
 
 		if (bytesRecibidos < 0) {
@@ -108,7 +108,7 @@ int recieve_package(int socket, tMessage *tipoMensaje, char **psPayload,
 			return -1;
 		}
 	}
-	return bytesRecibidos + bytesRecibidosHeader;
+	return bytesRecibidosPayload + bytesRecibidosHeader;
 }
 
 /*

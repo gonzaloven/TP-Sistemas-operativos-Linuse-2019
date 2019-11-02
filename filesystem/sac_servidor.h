@@ -9,7 +9,6 @@
 #include <errno.h>
 #include <commons/log.h>
 #include "protocol.h"
-// #include "network.h"
 
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024
@@ -20,20 +19,6 @@
 #define GFILEBYTABLE 1024
 #define BITMAP_START_BLOCK 1
 #define BITMAP_SIZE_BLOCKS 1
-
-/*
-#define TIPOGETATTR 1
-#define TIPOREADDIR 2
-#define TIPOOPEN 3
-#define TIPOREAD 4
-#define TIPOWRITE 5
-#define TIPOMKNOD 6
-#define TIPOUNLINK 7
-#define TIPOTRUNCATE 8
-#define TIPORMDIR 9
-#define TIPOMKDIR 10
-*/
-
 #define SAC_CONFIG_PATH "../configs/filesystem.config"
 
 typedef struct sac_configuration_s{
@@ -75,7 +60,7 @@ struct sac_server_gfile *node_table_start, *data_block_start, *bitmap_start;
 
 //semaphore that will be used to write:
 pthread_rwlock_t rwlock;
-t_log* logger;
+t_log *logger;
 
 // Use this structure to store the descriptor number in which the disk was opened
 int discDescriptor;

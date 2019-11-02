@@ -111,8 +111,11 @@ int sac_server_read(char* payload, int fd){
 int sac_server_readdir (char* payload) {
 	//declaro una lista o un array no se como funciona asi que lo pongo en pseudocodigo por ahora
 	//listaRespuesta es la que se envia con los nombres de los archivos y directorios
+	t_Path* tipoPath = malloc(sizeof(t_Path));
 
-	ptrGBloque nodoPadre = determine_node(payload->path);
+	path_decode(payload, tipoPath);
+
+	ptrGBloque nodoPadre = determine_node(tipoPath->path);
 
 	while(i < MAX_NUMBER_OF_FILES){
 		if(tablaDeNodos->state != 0)
@@ -120,10 +123,9 @@ int sac_server_readdir (char* payload) {
 			if(tablaDeNodos->parent_dir_block == nodoPadre)
 			{
 				//esto lo copie de otro lado asi que no se si esta bien
-				char * name = malloc(MAX_NAME_SIZE + 1 *sizeof(char));
+				char * name = malloc(MAX_NAME_SIZE + 1 * sizeof(char)); // esto esta mal, deberia ser strlen fname + 1
 				strcpy(name, tablaDeNodos->fname);
-				*(name + MAX_NAME_SIZE) = '\0';
-
+				*(name + MAX_NAME_SIZE + 1) = '\0';
 				//listaRespuesta[PosicionActual] = name;
 			}
 		}

@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "fuse.h"
+#include <commons/list.h>
 
 #define MAX_BUFFER 1024
 
@@ -16,21 +17,28 @@ typedef struct {
 typedef struct {
 	int8_t type;
 	int16_t length;
-	char payload[MAX_BUFFER];
-} __attribute__ ((__packed__)) tPaquete;
+	char* payload;
+} tPaquete;
 
 typedef enum {
 	/* Filesystem functions  */
 	FF_GETATTR,
 	RTA_GETATTR,
 	FF_READDIR,
+	RTA_READDIR,
 	FF_OPEN,
+	RTA_OPEN,
 	FF_READ,
+	RTA_READ,
 	FF_MKDIR,
+	RTA_MKDIR,
 	FF_RMDIR,
 	FF_WRITE,
+	RTA_WRITE,
 	FF_MKNOD,
+	RTA_MKNOD,
 	FF_UNLINK,
+	RTA_UNLINK,
 	FF_ERROR,
 	DESCONEXION
 } tMessage;
@@ -52,7 +60,8 @@ typedef struct {
 // que va a utilizar el sac_server ej de memcpy-----------------------------------------
 
 typedef struct {
-	const char *path;
+	uint16_t length;
+	char *path;
 } t_Path;
 
 typedef struct{
@@ -64,10 +73,20 @@ typedef struct{
 } t_Readdir;
 
 typedef struct{
+	uint16_t pathLength;
 	const char *path;
 	size_t size;
 	off_t offset;
 } t_Read;
+
+typedef struct{
+	uint16_t pathLength;
+	const char *path;
+	uint16_t bufLength;
+	const char *buf;
+	size_t size;
+	off_t offset;
+} t_Write;
 
 typedef struct{
 	const char *pathname;
@@ -88,40 +107,34 @@ typedef struct{
 	const char *pathname;
 } t_Unlink;
 
-typedef struct{
-	const char *path;
-	const char *buf;
-	size_t size;
-	off_t offset;
-} t_Write;
 
 // encode / decode
 
-int int_encode(t_Message message_type, int num, tPaquete* pPaquete);
+int int_encode(tMessage message_type, int num, tPaquete* pPaquete);
 int int_decode(char* payload);
 
-int path_encode(t_message message_type, const char* path, tPaquete* pPaquete);
+int path_encode(tMessage message_type, const char* path, tPaquete* pPaquete);
 int path_decode(char* payload, t_Path* tipoPath);
 
-int readdir_encode(t_Message message_type, t_Readdir parameters, tPaquete* pPaquete);
+int readdir_encode(tMessage message_type, t_Readdir parameters, tPaquete* pPaquete);
 int readdir_decode(char* payload, t_Readdir* tipoReaddir);
 
-int read_encode(t_Message message_type, t_Read parameters, tPaquete* pPaquete);
+int read_encode(tMessage message_type, t_Read parameters, tPaquete* pPaquete);
 int read_decode(char* payload, t_Read* tipoRead);
 
-int mkdir_encode(t_Message message_type, t_Mkdir parameters, tPaquete* pPaquete);
+int mkdir_encode(tMessage message_type, t_Mkdir parameters, tPaquete* pPaquete);
 int mkdir_decode(char* payload, t_Mkdir* tipoMkdir);
 
-int mknod_encode(t_Message message_type, t_Mknod parameters, tPaquete* pPaquete);
+int mknod_encode(tMessage message_type, t_Mknod parameters, tPaquete* pPaquete);
 int mknod_decode(char* payload, t_Mknod* tipoMknod);
 
-int rmdir_encode(t_Message message_type, t_Rmdir parameters, tPaquete* pPaquete);
+int rmdir_encode(tMessage message_type, t_Rmdir parameters, tPaquete* pPaquete);
 int rmdir_decode(char* payload, t_Rmdir* tipoRmdir);
 
-int unlink_encode(t_Message message_type, t_Unlink parameters, tPaquete* pPaquete);
+int unlink_encode(tMessage message_type, t_Unlink parameters, tPaquete* pPaquete);
 int unlink_decode(char* payload, t_Unlink* tipoUnlink);
 
-int write_encode(t_Message message_type, t_Write parameters, tPaquete* pPaquete);
+int write_encode(tMessage message_type, t_Write parameters, tPaquete* pPaquete);
 int write_decode(char* payload, t_Write* tipoWrite);
 
 int serializar_Gettattr_Resp(t_GetAttrResp parametros, tPaquete *paquete);
