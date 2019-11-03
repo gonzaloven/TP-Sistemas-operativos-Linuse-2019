@@ -1,15 +1,4 @@
 #include "sac_cliente.h"
-#include "protocol.h"
-#include <stddef.h>
-#include <stdlib.h>
-#include <fuse.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <cstdlib>
-
-int master_socket = 0;
 
 int send_call(Function *f)
 {

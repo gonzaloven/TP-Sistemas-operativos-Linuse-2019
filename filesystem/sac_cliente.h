@@ -3,7 +3,12 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stddef.h>
+#include <stdlib.h>
 #include <fuse.h>
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <commons/log.h>
 #include "message.h"
 #include "network.h"
@@ -62,9 +67,15 @@ static struct fuse_opt fuse_options[] = {
 #define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
 #define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
 
-t_log *logger;
 
-int serverSocket;
+//variables globales
+t_log *logger;
+int master_socket;
+
+//functions
+
+int send_call(Function *f);
+int send_path(FuncType func_type, const char *path);
 
 // Definition of functions to be implemented //
 
@@ -216,9 +227,5 @@ int sac_clie_unlink(const char *pathname);
  * 		if an error ocurred, and errno is set appropriately.
  */
 int sac_clie_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
-
-// variables globales
-
-int serverSocket;
 
 #endif
