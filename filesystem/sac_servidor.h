@@ -25,6 +25,12 @@ typedef struct sac_configuration_s{
 	int listen_port;
 }sac_configuration;
 
+typedef struct fuse_configuration_s
+{
+	int listen_port;
+	int disk_size;
+}fuse_configuration;
+
 typedef uint32_t ptrGBloque;
 
 // sac server block struct
