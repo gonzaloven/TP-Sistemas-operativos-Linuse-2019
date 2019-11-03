@@ -10,6 +10,9 @@ int header_encode(MessageHeader *header,void *buffer,size_t buffer_size)
 	memcpy(cursor,&(header->message_type),sizeof(uint8_t));
 	cursor += sizeof(uint8_t);
 	
+	memcpy(cursor,&(header->caller_id),sizeof(uint16_t));
+	cursor += sizeof(uint16_t);
+
 	memcpy(cursor,&(header->data_size),sizeof(uint16_t));
 	cursor += sizeof(uint16_t);
 
@@ -24,6 +27,9 @@ int header_decode(void *buffer,size_t buffer_size,MessageHeader *result)
 	memcpy(&result->message_type,cursor,sizeof(uint8_t));
 	cursor += sizeof(uint8_t);
 	
+	memcpy(&result->caller_id,cursor,sizeof(uint16_t));
+	cursor += sizeof(uint16_t);
+
 	memcpy(&result->data_size,cursor,sizeof(uint16_t));
 	cursor += sizeof(uint16_t);
 
@@ -33,7 +39,7 @@ int header_decode(void *buffer,size_t buffer_size,MessageHeader *result)
 int message_encode(Message *msg,void *buffer,size_t buffer_size)
 {
 	int result = 0;
-	size_t min_size = sizeof(uint8_t) + sizeof(uint16_t) + msg->header.data_size;
+	size_t min_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
 	if(buffer_size < min_size) return -1;
 
 	void *cursor = buffer;
@@ -47,7 +53,7 @@ int message_encode(Message *msg,void *buffer,size_t buffer_size)
 			result += message_function_encode(msg,cursor,buffer_size);
 			break;
 		case MESSAGE_NEW_ULT:
-			result += message_new_ult_encode(msg, cursor, buffer_size); // TODO: complete implementation
+			printf("TODO\n");
 			break;
 		case MESSAGE_FUNCTION_RET:
 			result += message_function_return_encode(msg,cursor,buffer_size);
@@ -74,7 +80,7 @@ int message_decode(void *buffer,size_t buffer_size,Message *result)
 			res += message_function_decode(cursor,buffer_size,result);
 			break;
 		case MESSAGE_NEW_ULT:
-			res += message_new_ult_decode(cursor, buffer_size, result); // TODO: complete implementation
+			printf("TODO\n");
 			break;
 		case MESSAGE_FUNCTION_RET:
 			res += message_function_return_decode(cursor,buffer_size,result);
@@ -87,21 +93,21 @@ int message_decode(void *buffer,size_t buffer_size,Message *result)
 }
 int message_function_return_encode(Message *msg,void *buffer,size_t buffer_size)
 {
-	int min_size = sizeof(uint8_t) + sizeof(uint16_t) + msg->header.data_size;
+	int min_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
 	if(buffer_size < min_size) return -1;
 
 	void *cursor = buffer;
-	memcpy(cursor,&msg->data,sizeof(uint16_t));
-	cursor += sizeof(uint16_t);
+	memcpy(cursor,msg->data,sizeof(uint32_t));
+	cursor += sizeof(uint32_t);
 	return cursor - buffer;
 }
 
 int message_function_return_decode(void *buffer,size_t buffer_size,Message *result)
 {
 	void *cursor = buffer;
-	result->data = malloc(sizeof(uint16_t));
-	memcpy(&result->data,cursor,sizeof(uint16_t));
-	cursor += sizeof(uint16_t);
+	result->data = malloc(sizeof(uint32_t));
+	memcpy(result->data,cursor,sizeof(uint32_t));
+	cursor += sizeof(uint32_t);
 	return cursor - buffer;
 }
 
@@ -117,20 +123,20 @@ int function_arg_encode(Arg arg,void *buffer,size_t buffer_size)
 	switch(arg.type)
 	{
 		case VAR_UINT32:
-			memcpy(cursor,&arg.value.val_u32,sizeof(uint32_t));
-			cursor += sizeof(uint32_t);
+			memcpy(cursor,&(arg.value.val_u32),arg.size);
+			cursor += arg.size;
 			break;
 		case VAR_CHAR_PTR:
-			memcpy(cursor,&arg.value.val_u32,strlen(arg.value.val_charptr));
-			cursor += strlen(arg.value.val_charptr);
+			memcpy(cursor,arg.value.val_charptr,arg.size);
+			cursor += arg.size;
 			break;
 		case VAR_SIZE_T:
-			memcpy(cursor,&arg.value.val_sizet,sizeof(size_t));
-			cursor += sizeof(size_t);
+			memcpy(cursor,&(arg.value.val_sizet),arg.size);
+			cursor += arg.size;
 			break;
 		case VAR_VOID_PTR:
-			memcpy(cursor,&arg.value.val_voidptr,sizeof(uint32_t));
-			cursor += sizeof(uint32_t);
+			memcpy(cursor,arg.value.val_voidptr,arg.size);
+			cursor += arg.size;
 	}
 	return cursor - buffer;
 }
@@ -148,29 +154,30 @@ int function_arg_decode(void *buffer,size_t buffer_size,Arg *arg)
 	switch(arg->type)
 	{
 		case VAR_UINT32:
-			memcpy(&arg->value,cursor,sizeof(uint32_t));
-			cursor += sizeof(uint32_t);
-			break;	
+			memcpy(&(arg->value.val_charptr),cursor,arg->size);
+			cursor += arg->size;
+			break;
 		case VAR_CHAR_PTR:
-			memcpy(&arg->value,cursor,arg->size);
+			memcpy(arg->value.val_charptr,cursor,arg->size);
 			cursor += arg->size;
 			break;
 		case VAR_VOID_PTR:
-			memcpy(&arg->value,cursor,sizeof(uint32_t));
-			cursor += sizeof(uint32_t);
+			memcpy(&arg->value.val_voidptr,cursor,arg->size);
+			cursor += arg->size;
 			break;
 		case VAR_SIZE_T:
-			memcpy(&arg->value,cursor,sizeof(size_t));
-			cursor += sizeof(size_t);
+			memcpy(&(arg->value.val_sizet),cursor,arg->size);
+			cursor += arg->size;
 			break;
 		default:
-			break;
+			return -1;
 	}
+	return cursor - buffer;
 }
 
 int message_function_encode(Message *msg,void *buffer,size_t buffer_size)
 {
-	int min_size = sizeof(uint8_t) + sizeof(uint16_t) + msg->header.data_size;
+	int min_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
 	if(buffer_size < min_size) return -1;
 
 	Function *f = (Function *)msg->data;
@@ -180,62 +187,61 @@ int message_function_encode(Message *msg,void *buffer,size_t buffer_size)
 	cursor += sizeof(uint8_t);
 
 	memcpy(cursor,&f->num_args,sizeof(uint8_t));
-	cursor += sizeof(uint8_t);
-
+	cursor += sizeof(uint8_t);	
+	
 	for(nargs=0;nargs < f->num_args;nargs++)
 	{
-		function_arg_encode(f->args[nargs],cursor,buffer_size);
+		 function_arg_encode(f->args[nargs],cursor,buffer_size);
+		cursor += sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);	
 	}
 	return cursor - buffer;
 }
 
-int message_function_decode(void *buffer,size_t buffer_size,Message *result)
+int message_function_decode(void *buffer,size_t buffer_size,Message *result) // ACA ESTOY 2
 {
 	Function *f= malloc(sizeof(uint8_t)*2 + sizeof(Arg)*10); //OJO CON LOS TAMAÑOS
-
+	int nargs;
 	f->type = 0;
 	f->num_args = 0;
-	memset(f->args,0,10);
-
-	int nargs;
+	
+	for(nargs= 0;nargs < 9;nargs++)
+	{
+		f->args[nargs].size = 0;
+		f->args[nargs].type = 0;
+		f->args[nargs].value.val_u32 = 0;
+		f->args[nargs].value.val_charptr = 0;
+		f->args[nargs].value.val_voidptr = 0;	
+	}	
+	
 	void *cursor = buffer;
-
-
 	memcpy(&f->type,cursor,sizeof(uint8_t));
 	cursor += sizeof(uint8_t);
 	
 	
 	memcpy(&f->num_args,cursor,sizeof(uint8_t));
 	cursor += sizeof(uint8_t);
-	
+
 	for(nargs = 0;nargs < f->num_args;nargs++)
 	{
-		function_arg_decode(cursor,buffer_size,&f->args[nargs]);
+		function_arg_decode(cursor,buffer_size,&f->args[nargs]);	
+		cursor += sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);	
 	}
 	result->data = (void *)f;
 	return cursor - buffer;
 }
 
-int message_new_ult_encode(Message *msg, void *buffer, size_t buffer_size)
-{
-	// TODO
-}
-
-int message_function_decode(void *buffer, size_t buffer_size, Message *result)
-{
-	// TODO
-}
-
-int create_response_message(Message *msg,MessageHeader *header,uint16_t response)
+int create_response_message(Message *msg,MessageHeader *header,uint32_t response)
 {
 	msg->header = *header;
-	msg->data = malloc(sizeof(uint8_t));
-	msg->data = (void *)&response;
+	msg->data = malloc(sizeof(uint32_t));
+	uint32_t *data = (uint32_t *) msg->data;
+	*data = response;
 	return 0;
 }
-int create_message_header(MessageHeader *header,uint8_t message_type,uint16_t data_size)
+int create_message_header(MessageHeader *header,uint8_t message_type,uint16_t caller_id,uint16_t data_size)
 {
 	header->message_type = message_type;
+	header->caller_id = caller_id;
 	header->data_size = data_size;
 	return 0;
 }
