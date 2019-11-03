@@ -1,10 +1,10 @@
 #include "libmuse.h"
 #include "network.h"
-#include "rpc.h"
 
 int master_socket = 0;
 
 int libmuse_init(char *ip,int port);
+int call(Function *f);
 
 int muse_init(int id)
 {
@@ -24,6 +24,19 @@ int libmuse_init(char *ip,int port)
 	return master_socket; 
 }
 
+int call(Function *f)
+{
+	Message msg;
+	MessageHeader header;
+
+	
+	create_message_header(&header,MESSAGE_CALL,sizeof(Function));
+	create_function_message(&msg,&header,f);
+
+	send_message(master_socket,&msg);
+	receive_message(master_socket,&msg);
+}
+
 void muse_close()
 {
 	close(master_socket);
@@ -32,112 +45,86 @@ void muse_close()
 
 uint32_t muse_alloc(uint32_t tam)
 { 
-	char value[32];
-	sprintf(value,"%lu",tam);
-	rpc_function_params params[] = {
-									{ "uint32_t","tam", value }
-								  };
-	int result = rpc_client_call(master_socket,"alloc",1,params);
-	return 0;
+	Function f;
+	Arg arg;
+
+	arg.type = VAR_UINT32;
+	arg.size = sizeof(uint32_t);
+	arg.value.val_u32 = tam;
+
+	f.type = FUNCTION_MALLOC;
+	f.num_args = 1;
+	f.args[0] = arg;
+	
+	int result = call(&f);
+	
+	return result;
 }
 
 void muse_free(uint32_t dir)
 {
-	char value[32];
-	sprintf(value,"%lu",dir);
+	Function f;
+	Arg arg;
 
-	rpc_function_params params[]={
-									{"uint32_t","dir",value}
-								 };
-	int result = rpc_client_call(master_socket,"free",1,params);
-	return 0;
+	arg.type = VAR_UINT32;
+	arg.size = sizeof(uint32_t);
+	arg.value.val_u32 = dir;
+
+	f.type = FUNCTION_FREE;
+	f.num_args = 1;
+	f.args[0] = arg;	
+
+	call(&f);
+	return;
 }
 
 int muse_get(void* dst, uint32_t src, size_t n)
 {
-	uint32_t *dest = (uint32_t *)dst;
-	char arg1[32];
-	char arg2[32];
-	char arg3[32];
+	Function f;
+	Arg arg[2];
 
-	sprintf(arg1,"%lu",*dest);
-	sprintf(arg2,"%lu",src);
-	sprintf(arg3,"%zu",n);
+	arg[0].type = VAR_VOID_PTR;
+	arg[0].size = sizeof(uint32_t);
+	arg[0].value.val_voidptr = dst;
 
-	rpc_function_params params[]={
-									{"void*","dst",arg1},
-									{"uint32_t","src",arg2},
-									{"size_t","n",arg3}
-								};
-	int result = rpc_client_call(master_socket,"get",3,params);
-	return 0;
+	arg[1].type = VAR_UINT32;
+	arg[1].size = sizeof(uint32_t);
+	arg[1].value.val_u32 = src;
+
+	arg[2].type = VAR_SIZE_T;
+	arg[2].size = sizeof(size_t);
+	arg[2].value.val_sizet = n;
+
+	f.type = FUNCTION_GET;
+	f.num_args = 3;
+	f.args[0] = arg[0];
+	f.args[1] = arg[1];
+	f.args[2] = arg[2];
+
+	int result = call(&f);
+	return result;
 }
 
 int muse_cpy(uint32_t dst, void* src, int n)
 {
-	uint32_t *source = (uint32_t)src;
-	char arg1[32];
-	char arg2[32];
-	char arg3[32];
-
-	sprintf(arg1,"%lu",dst);
-	sprintf(arg2,"%lu",*source);
-	sprintf(arg3,"%d",n);
-
-	rpc_function_params params[]={
-									{"uint32_t","dst",arg1},
-									{"void*","src",arg2},
-									{"int","n",arg3}
-								};
-	int result = rpc_client_call(master_socket,"cpy",3,params);
-	
-	return 0;
+	int result=0;
+	return result;
 }
 
 uint32_t muse_map(char *path, size_t length, int flags)
 {
-	char arg2[16];
-	char arg3[16];
-
-	sprintf(arg2,"%zu",length);
-	sprintf(arg3,"%d",flags);
-
-	rpc_function_params params[]={
-									{"char*","path",path},
-									{"size_t","length",arg2},
-									{"int","flags",arg3}
-								};
-	int result = rpc_client_call(master_socket,"map",3,params);
-	return 0;
+	int result=0;
+	return result;
 }
 
 int muse_sync(uint32_t addr, size_t len)
 {
-	char arg1[16];
-	char arg2[32];
-
-	sprintf(arg1,"%lu",addr);
-	sprintf(arg2,"%zu",len);
-
-	rpc_function_params params[]={
-									{"uint32_t","addr",arg1},
-									{"size_t","len",arg2}
-								};
-	int result = rpc_client_call(master_socket,"sync",2,params);
-	return 0;
+	int result=0;
+	return result;
 }
 
 int muse_unmap(uint32_t dir)
 {
-	char arg1[sizeof(uint32_t)];
-	sprintf(arg1,"%lu",dir);
-
-	rpc_function_params params[]={
-									{"uint32_t","dir",arg1}
-								};
-	int result = rpc_client_call(master_socket,"unmap",1,params);
-	return 0;
+	int result=0;
+	return result;
 }
-
-
-

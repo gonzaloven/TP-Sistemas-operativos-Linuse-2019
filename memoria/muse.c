@@ -1,23 +1,30 @@
 #include "muse.h"
 #include "network.h"
-#include "rpc.h"
+#include "main_memory.h"
 #include <commons/log.h>
 #include <commons/config.h>
+#include <string.h>
+#include <signal.h>
+#include <stdlib.h>
 
 t_log *muse_logger = NULL;
 muse_configuration *muse_config = NULL;
+
+int muse_invoke_function(Function *f);
 
 int muse_start_service(ConnectionHandler ch)
 {
 	muse_config = load_configuration(MUSE_CONFIG_PATH);
 	muse_logger = log_create("../logs/muse.log","MUSE",true,LOG_LEVEL_TRACE);
+	muse_main_memory_init(muse_config->memory_size,muse_config->page_size);
 	server_start(muse_config->listen_port,ch);
 }
 
 void muse_stop_service()
 {
+	log_info(muse_logger,"SIGINT received.Shuting down!");
 	free(muse_config);
-	free(muse_logger);
+	log_destroy(muse_logger);
 	server_stop();
 }
 
@@ -31,11 +38,14 @@ void* handler(void *args)
 	struct sockaddr_in client_address = conna->client_addr;
 
 	printf("A client has connected!\n");
+
+	//cambiar esto
 	while((n=receive_packet(sock,buffer,1024)) > 0)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
 			message_handler(&msg,sock);
+			memset(buffer,'\0',1024);
 		}
 	}	
 	log_debug(muse_logger,"The client was disconnected!");
@@ -59,27 +69,26 @@ muse_configuration *load_configuration(char *path)
 	mc->memory_size = config_get_int_value(config,"MEMORY_SIZE");
 	mc->page_size = config_get_int_value(config,"PAGE_SIZE");
 	mc->swap_size = config_get_int_value(config,"SWAP_SIZE");
+	config_destroy(config);
 	return mc;
 }
 
 void message_handler(Message *m,int sock)
 {
+	int res= 0;;
+	Message msg;
+	MessageHeader head;
 	switch(m->header.message_type)
 	{
-		case MESSAGE_STRING:
-			log_debug(muse_logger,"Received -> %s",m->data);	
-			break;
 		case MESSAGE_CALL:
-			uint32_t *res = rpc_server_invoke(m->data);
+			res = muse_invoke_function((Function *)m->data);
+			log_info(muse_logger,"Call received!");
 			message_free_data(m);
-
-			Message msg;
-			MessageHeader header;
-			create_message_header(&header,MESSAGE_FUNCTION_RET); //MESSAGE_FUNCTION_RET
-			msg.data_size=sizeof(uint32_t);
-			msg.data = res;
+			
+			create_message_header(&head,MESSAGE_FUNCTION_RET,sizeof(uint8_t));
+			create_response_message(&msg,&head,res);
 			send_message(sock,&msg);
-
+			message_free_data(&msg);
 			break;
 		default:
 			log_error(muse_logger,"Undefined message");
@@ -89,9 +98,18 @@ void message_handler(Message *m,int sock)
 
 }
 
+int muse_invoke_function(Function *f)
+{
+	log_debug(muse_logger,"function type %d function args %d arg[0] %d ",f->type,f->num_args,f->args[0].value);
+	return 0;
+
+}
+
 int main(int argc,char *argv[])
 {
+	signal(SIGINT,muse_stop_service);
 	muse_start_service(handler); 
 	return 0;
 }
+
 
