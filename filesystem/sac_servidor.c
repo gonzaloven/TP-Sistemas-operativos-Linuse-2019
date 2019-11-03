@@ -6,103 +6,155 @@
 #include <commons/log.h>
 #include <commons/config.h>
 #include <signal.h>
+#include <libgen.h>
 
+t_log *fuse_logger = NULL;
+fuse_configuration *fuse_config = NULL;
+GBlock* disco = NULL;
+GFile* tablaDeNodos = NULL;
+t_bitarray* bitmap = NULL;
+size_t diskSize = NULL;
 
-t_log *sac_logger = NULL;
-sac_configuration *sac_config = NULL;
+uint32_t fuse_invoke_function(Function *f,uint32_t pid);
 
-void *handler(void *args);
-sac_configuration *load_configuration(char *path);
-
-int sac_start_service(ConnectionHandler connectionHandler)
+int fuse_start_service(ConnectionHandler ch)
 {
-	sac_config = load_configuration(SAC_CONFIG_PATH);
-	sac_logger = log_create("../logs/sac_server.log","FUSE",true,LOG_LEVEL_TRACE);
-	server_start(sac_config->listen_port,connectionHandler);
+	fuse_config = load_configuration(SAC_CONFIG_PATH);
+	fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
+	server_start(fuse_config->listen_port,ch);
 }
 
-void sac_stop_service()
+void fuse_stop_service()
 {
-	log_info(sac_logger,"Received SIGINT signal shuting down!");
-
-	log_destroy(sac_logger);
+	log_info(fuse_logger,"SIGINT received.Shuting down!");
+	free(fuse_config);
+	log_destroy(fuse_logger);
 	server_stop();
 }
 
-void *handler(void *args)
+void* handler(void *args)
 {
 	ConnectionArgs *conna = (ConnectionArgs *)args;
-	char* payload;
+	Message msg;
+	char buffer[1024];
 	int n=0;
-	tMessage tipoDeMensaje;
 	int sock = conna->client_fd;
 	struct sockaddr_in client_address = conna->client_addr;
-	
-	while((n=recieve_package(sock, &tipoDeMensaje, &payload, sac_logger, "Se recibe la operacion en el servidor")) > 0)
+
+	printf("A client has connected!\n");
+
+	//cambiar esto
+	while((n=receive_packet(sock,buffer,1024)) > 0)
 	{
-		// este if no se como adaptarlo a lo nuestro
-		//if((n = message_decode(buffer,n,&msg)) > 0)
+		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
-			//deberia fijarme si esto lo pase bien o si tengo que ponerle el &
-			message_handler(tipoDeMensaje, payload, sock);
+			message_handler(&msg,sock);
+			memset(buffer,'\0',1024);
 		}
 	}	
-	log_debug(sac_logger,"The client was disconnected!");
+	log_debug(fuse_logger,"The client was disconnected!");
 	close(sock);
 	return (void*)NULL;
 }
 
-sac_configuration *load_configuration(char *path)
+fuse_configuration *load_configuration(char *path)
 {
 	t_config *config = config_create(path);
-	sac_configuration *sc = (sac_configuration *)malloc(sizeof(sac_configuration));
+	fuse_configuration *fc = (fuse_configuration *)malloc(sizeof(fuse_configuration)); 
 
 	if(config == NULL)
-	{	
-		log_error(sac_logger,"Configuration couldn't be loaded.Quitting program!");
-		free(sc);
+	{
+		log_error(fuse_logger,"Configuration couldn't be loaded.Quitting program!");
+		fuse_stop_service();
 		exit(-1);
 	}
 	
-	sc->listen_port = config_get_int_value(config,"LISTEN_PORT");
+	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
+	fc->disk_size = config_get_int_value(config,"DISK_SIZE");
 	config_destroy(config);
-	return sc;
+	return fc;
 }
 
-void message_handler(tMessage tipoDeMensaje, char* payload, int sock)
+/*
+void message_handler(Message *m,int sock)
 {
-	switch(tipoDeMensaje)
+	uint32_t res= 0;
+	Message msg;
+	MessageHeader head;
+	switch(m->header.message_type)
 	{
-		case FF_GETATTR:
-			log_debug(sac_logger,"Getattr recibido!");
-			sac_server_getattr(payload);
-			break;
-		case FF_READDIR:
-			log_debug(sac_logger,"Readdir recibido!");
-			sac_server_readdir(payload);
-			break;
-		case FF_READ:
-			log_debug(sac_logger,"Read recibido!");
-			sac_server_read(payload);
-			break;
-		case FF_MKNOD:
-			log_debug(sac_logger,"Mknod recibido!");
-			sac_server_mknod(payload);
+		case MESSAGE_CALL:
+			res = fuse_invoke_function((Function *)m->data,m->header.caller_id);
+			log_trace(fuse_logger,"Call received!");
+			message_free_data(m);
+			
+			create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
+			create_response_message(&msg,&head,res);
+			send_message(sock,&msg);
+			message_free_data(&msg);
 			break;
 		default:
-			log_error(sac_logger,"Undefined message");
+			log_error(fuse_logger,"Undefined message");
 			break;
 	}
 	return;
 
 }
 
+uint32_t fuse_invoke_function(Function *f,uint32_t pid) 
+{
+	uint32_t func_ret = 0;
+	switch(f->type)
+	{
+		case FUNCTION_MALLOC:
+			log_debug(muse_logger,"Malloc called with args ->%d",f->args[0].value.val_u32);
+			func_ret = muse_malloc(f->args[0].value.val_u32,pid);//TODO put the caller_id in func
+			break;
+		case FUNCTION_FREE:
+			log_debug(muse_logger,"Free called");
+			func_ret = muse_free(f->args[0].value.val_u32,pid);
+			break;
+		case FUNCTION_GET:
+			log_debug(muse_logger,"Get called");
+			func_ret = muse_get(f->args[0].value.val_voidptr,
+								f->args[1].value.val_u32,f->args[2].value.val_sizet,pid);
+			break;
+		case FUNCTION_COPY:
+			log_debug(muse_logger,"Copy called with args -> arg[0] %d  arg[1] %d arg[2] %d",f->args[0].value.val_u32,f->args[1].value.val_u32,f->args[2].value.val_u32);
+			func_ret = muse_cpy(f->args[0].value.val_u32,
+								&f->args[1].value.val_u32,f->args[2].value.val_u32,pid);
+			break;
+		case FUNCTION_MAP:
+			log_debug(muse_logger,"Map called");
+			func_ret = muse_map(f->args[0].value.val_charptr,
+								f->args[1].value.val_sizet,f->args[2].value.val_u32,pid);
+			break;
+		case FUNCTION_SYNC:
+			log_debug(muse_logger,"Sync called");
+			func_ret = muse_sync(f->args[0].value.val_u32,f->args[1].value.val_sizet,pid);
+			break;
+		case FUNCTION_UNMAP:
+			log_debug(muse_logger,"Unmap called");
+			func_ret = muse_unmap(f->args[0].value.val_u32,pid);
+			break;
+		default:
+			log_error(muse_logger,"Unknown function");
+			func_ret = 0;
+			break;
+	}
+	return func_ret;currNode
+
+}
+*/
+
 int main(int argc,char *argv[])
 {
-	//When Ctrl-C is pressed stops SUSE and frees resources
-	signal(SIGINT,sac_stop_service);
-
-	sac_start_service(handler);
+	signal(SIGINT,fuse_stop_service);
+	fuse_start_service(handler); 
+	&disco = mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,1,0);
+	tablaDeNodos = disco + 2;
+	bitmap = bitarray_create_with_mode(disco + 1, BLOQUE_SIZE, LSB_FIRST);
+	diskSize = fuse_config->disk_size;
 	return 0;
 }
 
@@ -213,54 +265,128 @@ int sac_server_read(char* payload, int fd){
 }
 
 int sac_server_readdir (char* payload) {
-	//declaro una lista o un array no se como funciona asi que lo pongo en pseudocodigo por ahora
-	//listaRespuesta es la que se envia con los nombres de los archivos y directorios
-	t_Path* tipoPath = malloc(sizeof(t_Path));
-
-	path_decode(payload, tipoPath);
-
-	ptrGBloque nodoPadre = determine_node(tipoPath->path);
+	t_list* listaDeArchivos = list_create();
+	int i = 0;
+	ptrGBloque nodoPadre = get_nodo_path_payload(payload);
 
 	while(i < MAX_NUMBER_OF_FILES){
 		if(tablaDeNodos->state != 0)
 		{
 			if(tablaDeNodos->parent_dir_block == nodoPadre)
 			{
-				//esto lo copie de otro lado asi que no se si esta bien
-				char * name = malloc(MAX_NAME_SIZE + 1 * sizeof(char)); // esto esta mal, deberia ser strlen fname + 1
+				char * name = malloc(MAX_NAME_SIZE + 1 * (strlen(fname)+1));
 				strcpy(name, tablaDeNodos->fname);
 				*(name + MAX_NAME_SIZE + 1) = '\0';
-				//listaRespuesta[PosicionActual] = name;
+				list_add(listaDeArchivos, fname);
+				free(name);
 			}
 		}
 		tablaDeNodos++;
-		//tambien incrementar el indice de la lista resultado
 	}
-	//finalmente tendria que enviar la lista resultado al sac cli para que use la funcion filler despues
+
+	//aca deberia enviarse el paquete con la lista serializada
+
+	list_destroy(listaDeArchivos);
+	return 0;
 }
 
-/*int sac_server_mknod (char* payload){
+int sac_server_mknod (char* payload){
+	crear_nuevo_nodo(payload, 1);
+	return 0;
+}
+
+int sac_server_mkdir (char* payload){
+	crear_nuevo_nodo(payload, 2);
+	return 0;
+}
+
+int sac_server_unlink (char* payload){
+	
+	ptrGBloque nodoPath = get_nodo_path_payload(payload);
+	//tengo que validar si no existe el nodo para ese path
+	GFile* nodoABorrar = tablaDeNodos + nodoPath;
+
+	borrar_archivo(nodoABorrar, nodoPath);
+
+	return 0;
+}
+
+int sac_server_rmdir (char* payload){
+	ptrGBloque nodoPadre = get_nodo_path_payload(payload);
+	//validar que no sea el directorio raiz
+
+	borrar_directorio(nodoPadre);
+
+	return 0;
+}
+
+void borrar_directorio (ptrGBloque nodoPosicion){
 	int currNode = 0;
 
-	size_t diskSize = //sacar el tamanio del archivo del config en algun atributo de ahi y usar esta funcion para sacarlo -> getFileSize(filename);
-	GBlock* disco = mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,1,0);
+	GFile *nodoPadre = tablaDeNodos + nodoPosicion;
+	borrar_archivo(nodoPadre, nodoPosicion);
 
-	GFile* tablaDeNodos = disco + 3;
+	while(currNode < MAX_NUMBER_OF_FILES){
+		if(tablaDeNodos[currNode].state != 0)
+		{
+			if(tablaDeNodos[currNode].parent_dir_block == nodoPosicion)
+			{
+				GFile *nodoABorrar = tablaDeNodos + currNode;
+				if(tablaDeNodos[currNode].state == 1){
+					borrar_archivo(nodoABorrar, currNode);
+				}else{
+					borrar_directorio(currNode);
+				}
+			}
+		}
+		currNode++;
+	}
+}
 
-	while(tablaDeNodos[currNode].state != 0 && currNode < MAX_NAME_SIZE){
+void borrar_archivo(GFile* nodo, ptrGBloque nodoPosicion){
+	nodo->state = 0;
+
+	bitarray_clean_bit(bitmap, nodoPosicion + 2);
+}
+
+ptrGBloque get_nodo_path_payload(char* payload){
+	t_Path* tipoPath = malloc(sizeof(t_Path));
+
+	path_decode(payload, tipoPath);
+	return determine_node(tipoPath->path);
+}
+
+void crear_nuevo_nodo (char* payload, int tipoDeArchivo){
+	int currNode = 0;
+	t_Path *tipoPath = malloc(sizeof(t_Path));
+	char *parentDirPath;
+	char *fileName;
+
+	while(tablaDeNodos[currNode].state != 0 && currNode < MAX_NUMBER_OF_FILES){
 		currNode++;
 	}
 
-	msync(disco, diskSize, MS_SYNC);
-	return 0;
+	if (currNode >= MAX_NUMBER_OF_FILES) 
+	{
+		return EDQUOT;
+	}
 
-}
+	path_decode(payload, tipoPath);
+	parentDirPath = dirname(tipoPath->path);
+	ptrGBloque nodoPadre = determine_node(parentDirPath);
 
-	strcpy((char*) nodoVacio->fname, payload->path+1);
+	fileName = basename(payload->path);
+
+	GFile *nodoVacio = tablaDeNodos + currNode;
+
+	strcpy((char*) nodoVacio->fname, fileName+1);
 	nodoVacio->file_size = 0;
-	nodoVacio->state = 1;
+	nodoVacio->parent_dir_block = nodoPadre;
+	nodoVacio->state = tipoDeArchivo;
+	// nodoVacio->create_date
+	// nodoVacio->modify_date
+
+	bitarray_set_bit(bitmap, currNode + 2);
 
 	msync(disco, diskSize, MS_SYNC);
-	return 0;
-
-}*/
+}
