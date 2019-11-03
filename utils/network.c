@@ -128,12 +128,6 @@ ssize_t receive_packet(int socket,void *buffer,size_t buffer_size)
 	return recv_bytes;
 }
 
-//Deprecated dont use!!
-ssize_t receive_packet_no_wait(int socket_fd,void *buffer,size_t buffer_size)
-{
-	return recv(socket_fd,buffer,buffer_size,0);
-}
-
 ssize_t send_packet(int socket_fd,void *buffer,size_t buffer_size)
 {
 	return send(socket_fd,buffer,buffer_size,0);

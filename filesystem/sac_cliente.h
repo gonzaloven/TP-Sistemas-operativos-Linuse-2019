@@ -5,7 +5,8 @@
 #include <stdint.h>
 #include <fuse.h>
 #include <commons/log.h>
-#include "sockets.h"
+#include "message.h"
+#include "network.h"
 
 
 struct t_runtime_options {

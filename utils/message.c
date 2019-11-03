@@ -105,7 +105,7 @@ int message_function_return_encode(Message *msg,void *buffer,size_t buffer_size)
 int message_function_return_decode(void *buffer,size_t buffer_size,Message *result)
 {
 	void *cursor = buffer;
-	result->data = malloc(sizeof(uint16_t));
+	result->data = malloc(sizeof(uint32_t));
 	memcpy(result->data,cursor,sizeof(uint32_t));
 	cursor += sizeof(uint32_t);
 	return cursor - buffer;
@@ -123,23 +123,20 @@ int function_arg_encode(Arg arg,void *buffer,size_t buffer_size)
 	switch(arg.type)
 	{
 		case VAR_UINT32:
-		case VAR_VOID_PTR:
-			memcpy(cursor,&arg.value.val_u32,sizeof(uint32_t));
-			cursor += sizeof(uint32_t);
+			memcpy(cursor,&(arg.value.val_u32),arg.size);
+			cursor += arg.size;
 			break;
 		case VAR_CHAR_PTR:
-			memcpy(cursor,arg.value.val_charptr,strlen(arg.value.val_charptr));
-			cursor += strlen(arg.value.val_charptr);
+			memcpy(cursor,arg.value.val_charptr,arg.size);
+			cursor += arg.size;
 			break;
 		case VAR_SIZE_T:
-			memcpy(cursor,&arg.value.val_sizet,sizeof(size_t));
-			cursor += sizeof(size_t);
+			memcpy(cursor,&(arg.value.val_sizet),arg.size);
+			cursor += arg.size;
 			break;
-/*
 		case VAR_VOID_PTR:
-			memcpy(cursor,arg.value.val_voidptr,sizeof(uint32_t));
-			cursor += sizeof(uint32_t);
-*/
+			memcpy(cursor,arg.value.val_voidptr,arg.size);
+			cursor += arg.size;
 	}
 	return cursor - buffer;
 }
@@ -157,26 +154,23 @@ int function_arg_decode(void *buffer,size_t buffer_size,Arg *arg)
 	switch(arg->type)
 	{
 		case VAR_UINT32:
-		 case VAR_VOID_PTR:
-			memcpy(&arg->value,cursor,sizeof(uint32_t));
-			cursor += sizeof(uint32_t);
-			break;	
-		case VAR_CHAR_PTR:
-			memcpy(&arg->value,cursor,arg->size);
+			memcpy(&(arg->value.val_charptr),cursor,arg->size);
 			cursor += arg->size;
 			break;
-/*
-		case VAR_VOID_PTR:
-			memcpy(&arg->value,cursor,sizeof(uint32_t));
-			cursor += sizeof(uint32_t);
+		case VAR_CHAR_PTR:
+			memcpy(arg->value.val_charptr,cursor,arg->size);
+			cursor += arg->size;
 			break;
-*/
+		case VAR_VOID_PTR:
+			memcpy(&arg->value.val_voidptr,cursor,arg->size);
+			cursor += arg->size;
+			break;
 		case VAR_SIZE_T:
-			memcpy(&arg->value,cursor,sizeof(size_t));
-			cursor += sizeof(size_t);
+			memcpy(&(arg->value.val_sizet),cursor,arg->size);
+			cursor += arg->size;
 			break;
 		default:
-			break;
+			return -1;
 	}
 	return cursor - buffer;
 }
@@ -203,7 +197,7 @@ int message_function_encode(Message *msg,void *buffer,size_t buffer_size)
 	return cursor - buffer;
 }
 
-int message_function_decode(void *buffer,size_t buffer_size,Message *result)
+int message_function_decode(void *buffer,size_t buffer_size,Message *result) // ACA ESTOY 2
 {
 	Function *f= malloc(sizeof(uint8_t)*2 + sizeof(Arg)*10); //OJO CON LOS TAMAÑOS
 	int nargs;

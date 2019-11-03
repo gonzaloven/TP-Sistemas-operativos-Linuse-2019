@@ -7,42 +7,65 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <cstdlib>
 
-int serverSocket = 0;
+int master_socket = 0;
+
+int send_call(Function *f)
+{
+	Message msg;
+	MessageHeader header;
+
+	create_message_header(&header,MESSAGE_CALL,1,sizeof(Function));
+	create_function_message(&msg,&header,f);
+
+	int resultado = send_message(master_socket,&msg);
+
+	free(msg.data);
+
+	return resultado;
+}
+
+int send_path(FuncType func_type, const char *path){
+	Function f;
+	Arg arg;
+
+	arg.type = VAR_CHAR_PTR;
+	arg.size = strlen(path) + 1;
+	strcpy(arg.value.val_charptr,path);
+
+	f.type = func_type;
+	f.num_args = 1;
+	f.args[0] = arg;
+
+	int resultado = send_call(&f);
+
+	return resultado;
+}
 
 int sac_cliente_getattr(const char *path, struct stat *stbuf) {
-	t_GetAttrResp* attr = malloc(sizeof(t_GetAttrResp));
-	tPaquete* paquete = malloc(sizeof(tPaquete));
+	Message msg;
 
 	memset(stbuf, 0, sizeof(struct stat));
 
-	path_encode(FF_GETATTR, path, paquete);
+	if(send_path(FUNCTION_GETATTR, path) == -1)
+		return EXIT_FAILURE;
 
-	send_package(serverSocket, paquete, logger, "Se envia el path del cual se necesita la metadata");
+	receive_message(master_socket,&msg);
 
-	free(paquete->payload);
-	free(paquete);
+	Function* f = msg.data;
 
-	tMessage tipoDeMensaje;
-	char* payload;
-
-	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe la estructura con la metadata");
-
-	if(tipoDeMensaje != RTA_GETATTR){
+	if(f->type != FUNCTION_RTA_GETATTR){
 		return -ENOENT;
 	}
-
-	deserializar_Gettattr_Resp(payload, attr);
-
-	free(payload);
-
-	stbuf->st_mode = attr->modo;
-	stbuf->st_nlink = attr->nlink;
-	stbuf->st_size = attr->total_size;
 	
-	free(attr);
+	stbuf->st_mode = f->args[0].value.val_u32; // fijarse que pegue int 32, sino agregarlo a menssage (junto con type etc) o usar char*
+	stbuf->st_nlink = f->args[1].value.val_u32;
+	stbuf->st_size = f->args[2].value.val_u32;
 
-	return EXIT_SUCCESS;
+	free(f);
+
+	return EXIT_SUCESS;
 }
 
 
@@ -50,49 +73,36 @@ int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 
 	(void) fi;
 	(void) offset;
-
-	tPaquete* paquete = malloc(sizeof(tPaquete));
-	t_ReaddirResp* respuesta = malloc(sizeof(t_ReaddirResp));
+	Message msg;
 	uint8_t tam_dir = 0;
 	uint16_t off = 0;
 
-	path_encode(FF_READDIR, path, paquete);
+	if(send_path(FUNCTION_READDIR, path) == -1)
+			return EXIT_FAILURE;
 
-	send_package(serverSocket, paquete, logger, "Se envia el path del cual se necesita la lista de archivos que contiene");
+	receive_message(master_socket,&msg);
 
-	free(paquete->payload);
-	free(paquete);
+	Function* f = msg.data;
 
-	tMessage tipoDeMensaje;
-	char* payload;
-
-	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe la estructura con la lista");
-
-
-	if(tipoDeMensaje != RTA_READDIR){
+	if(f->type != FUNCTION_RTA_READDIR){
 		return -ENOENT;
 	}
 
-	deserializar_Readdir_Rta(payload, respuesta);
-
-	free(payload);
-
 	char* mandar;
 
-	while(off < respuesta->tamano){
+	while(off < f->args[0].size){
 
-		memcpy(&tam_dir, respuesta->lista_nombres + off, sizeof(uint8_t));
+		memcpy(&tam_dir, f->args[0].value.val_charptr + off, sizeof(uint8_t));
 		off = off + sizeof(uint8_t);
 		mandar = malloc(tam_dir);
-		memcpy(mandar, respuesta->lista_nombres + off, tam_dir);
+		memcpy(mandar, f->args[0].value.val_charptr + off, tam_dir);
 		off = off + tam_dir;
 		filler(buf, mandar, NULL, 0);
 		free(mandar);
 
 	};
-
-	free(respuesta->lista_nombres);
-	free(respuesta);
+	// no veo que le haga malloc al char*, por las dudas verificar despues
+	free(f);
 
 	return EXIT_SUCCESS;
 }
@@ -101,204 +111,174 @@ int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
 
 	//chequeo si el archivo existe, ignoro permisos
 
-	tPaquete* paquete = malloc(sizeof(tPaquete));
+	Message msg;
 
-	path_encode(FF_OPEN, path, paquete);
+	if(send_path(FUNCTION_GETATTR, path) == -1)
+		return EXIT_FAILURE;
 
-	send_package(serverSocket, paquete, logger, "Se envia el path a abrir");
+	receive_message(master_socket,&msg);
 
-	free(paquete->payload);
-	free(paquete);
+	int *response = msg.data;
+	int respuesta = *response;
 
-	tMessage tipoDeMensaje;
-	char* payload;
-
-	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
-
-	if(tipoDeMensaje != RTA_OPEN){
-			return -ENOENT;
-		}
-
-	int respuesta = deserializar_int(payload);
-	
-	free(payload);
+	free(msg.data);
 
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
 int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
 
-	tPaquete* paquete = malloc(sizeof(tPaquete));
-	t_Read parametros;
+	Message msg;
 	char *lectura;
 	
-	parametros.pathLength = strlen(path) + 1;
-	parametros.path = path;
-	parametros.offset = offset;
-	parametros.size = size;
+	Function fsend;
+	Arg arg[3];
 
-	read_encode(FF_READ, parametros, paquete);
+	arg[0].type = VAR_CHAR_PTR;
+	arg[0].size = strlen(path) + 1;
+	strcpy(arg[0].value.val_charptr,path);
 
-	send_package(serverSocket, paquete, logger, "Se envia el path a leer");
+	arg[1].type = VAR_SIZE_T;
+	arg[1].size = sizeof(size_t);
+	arg[1].value.val_sizet = size;
 
-	free(paquete->payload);
-	free(paquete);
+	arg[2].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	arg[2].size = sizeof(uint32_t);
+	arg[2].value.val_u32 = offset;
 
-	tMessage tipoDeMensaje;
-	char* payload;
+	fsend.type = FUNCTION_READ;
+	fsend.num_args = 3;
+	fsend.args[0] = arg[0];
+	fsend.args[1] = arg[1];
+	fsend.args[2] = arg[2];
 
-	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe la lectura del path");
+	if(send_call(&fsend) == -1)
+		return EXIT_FAILURE;
 
-	if(tipoDeMensaje != RTA_READ){
+	receive_message(master_socket,&msg);
+
+	Function* freceive = msg.data;
+
+	if(freceive->type != FUNCTION_RTA_READ){
 		return -ENOENT;
 	}
 
-	// se podria checkear por si se recibe payload length 0
+	int tamanioLectura = freceive->args[0].size;
 
-	int tamanioLectura = deserializar_Read_Rta(&lectura, payload);
+	memcpy(buf, freceive->args[0].value.val_charptr, tamanioLectura);
 
-	free(payload);
-
-	memcpy(buf, lectura, tamanioLectura);
-
-	free(lectura);
+	// no veo que le haga malloc al char*, por las dudas verificar despues
+	free(freceive);
   
   	return tamanioLectura;
 }
 
 int sac_cliente_mknod(const char* path, mode_t mode, dev_t rdev){
-	tPaquete* paquete = malloc(sizeof(tPaquete));
+	Message msg;
 
-	path_encode(FF_MKNOD, path, paquete); // ?? no envia mas info?
+	if(send_path(FUNCTION_MKNOD, path) == -1)
+		return EXIT_FAILURE;
 
-	send_package(serverSocket, paquete, logger, "Se envia el path donde crear el archivo");
+	receive_message(master_socket,&msg);
 
-	free(paquete->payload);
-	free(paquete);
+	int *response = msg.data;
+	int respuesta = *response;
 
-	tMessage tipoDeMensaje;
-	char* payload;
+	free(msg.data);
 
-	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
-
-	if(tipoDeMensaje != RTA_MKNOD){
-		return -ENOENT;
-	}
-
-	int respuesta = deserializar_int(payload); // 0 exito, -1 error
-
-	free(payload);
-
-	return respuesta;
+	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
 int sac_cliente_write(const char* path, char *buf, size_t size, off_t offset, struct fuse_file_info* fi){
-	tPaquete* paquete = malloc(sizeof(tPaquete));
-	t_Write parametros;
 
-	parametros.pathLength = strlen(path) + 1;
-	parametros.bufLength = strlen(buf) + 1;
-	parametros.buf = buf;
-	parametros.size = size;
-	parametros.path = path;
-	parametros.offset = offset;
+	Message msg;
 
-	write_encode(FF_WRITE, parametros, paquete);
+	Function f;
+	Arg arg[4];
 
-	send_package(serverSocket, &paquete, logger, "Se envian los datos para escribir en el path");
+	arg[0].type = VAR_CHAR_PTR;
+	arg[0].size = strlen(path) + 1;
+	strcpy(arg[0].value.val_charptr,path);
 
-	free(paquete->payload);
-	free(paquete);
+	arg[1].type = VAR_CHAR_PTR;
+	arg[1].size = strlen(buf) + 1;
+	strcpy(arg[1].value.val_charptr,buf);
 
-	tMessage tipoDeMensaje;
-	char* payload;
+	arg[2].type = VAR_SIZE_T;
+	arg[2].size = sizeof(size_t);
+	arg[2].value.val_sizet = size;
 
-	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe la cantidad de bytes escritos");
+	arg[3].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	arg[3].size = sizeof(uint32_t);
+	arg[3].value.val_u32 = offset;
 
-	if (tipoDeMensaje != RTA_WRITE) {
-		return -ENOENT;
-	}
+	f.type = FUNCTION_WRITE;
+	f.num_args = 4;
+	f.args[0] = arg[0];
+	f.args[1] = arg[1];
+	f.args[2] = arg[2];
+	f.args[3] = arg[3];
 
+	if(send_call(&f) == -1)
+		return EXIT_FAILURE;
 
-	int escritos = deserializar_int(payload);
+	receive_message(master_socket,&msg);
 
-	free(payload);
+	int *response = msg.data;
+	int bytesEscritos = *response;
 
-	return escritos; // podria verificar que sean los mismos que los pedidos o sino error
+	free(msg.data);
+
+	return bytesEscritos; // podria verificar que sean los mismos que los pedidos o sino error
 }
 
-// aca voy
 
 int sac_cliente_unlink(const char* path){
-	tPaquete* paquete = malloc(sizeof(tPaquete));
+	Message msg;
 
-	path_encode(FF_UNLINK, path, paquete);
+	if(send_path(FUNCTION_UNLINK, path) == -1)
+		return EXIT_FAILURE;
 
-	send_package(serverSocket, paquete, logger, "Se envia el path donde debe borrar");
+	receive_message(master_socket,&msg);
 
-	free(paquete->payload);
-	free(paquete);
+	int *response = msg.data;
+	int respuesta = *response;
 
-	tMessage tipoDeMensaje;
-	char* payload;
+	free(msg.data);
 
-	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
-
-	if (tipoDeMensaje != RTA_UNLINK) {
-		return -ENOENT;
-	}
-
-	int respuesta = deserializar_int(payload);
-
-	return respuesta;  // 0 exito, -1 error
+	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
 int sac_cliente_mkdir(const char* path, mode_t mode){
-	tPaquete* paquete = malloc(sizeof(tPaquete));
+	Message msg;
 
-	path_encode(FF_MKDIR, path, paquete);
+	if(send_path(FUNCTION_MKDIR, path) == -1)
+		return EXIT_FAILURE;
 
-	send_package(serverSocket, paquete, logger, "Se envia el path del directorio a crear");
+	receive_message(master_socket,&msg);
 
-	free(paquete->payload);
-	free(paquete);
+	int *response = msg.data;
+	int respuesta = *response;
 
-	tMessage tipoDeMensaje;
-	char* payload;
+	free(msg.data);
 
-	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
-
-	if (tipoDeMensaje != RTA_MKDIR) {
-		return -ENOENT;
-	}
-
-	int respuesta = deserializar_int(payload);
-
-	free(payload);
-
-	return respuesta; // 0 exito, -1 error
+	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
 int sac_cliente_rmdir(const char* path){
-	tPaquete* paquete = malloc(sizeof(tPaquete));
+	Message msg;
 
-	path_encode(FF_RMDIR, path, paquete);
+	if(send_path(FUNCTION_RMDIR, path) == -1)
+		return EXIT_FAILURE;
 
-	send_package(serverSocket, paquete, logger, "Se envia el path del directorio a borrar");
+	receive_message(master_socket,&msg);
 
-	free(paquete->payload);
-	free(paquete);
+	int *response = msg.data;
+	int respuesta = *response;
 
-	tMessage tipoDeMensaje;
-	char* payload;
+	free(msg.data);
 
-	recieve_package(serverSocket, &tipoDeMensaje, &payload, logger, "Se recibe si ha funcionado correctamente o no la operacion");
-
-	int respuesta = deserializar_int(payload);
-
-	free(payload);
-
-	return respuesta; // 0 exito, -1 error
+	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
 // Dentro de los argumentos que recibe nuestro programa obligatoriamente
