@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include "sac_servidor.h"
 
 ptrGBloque determine_nodo(const char* path){
 
@@ -16,7 +17,7 @@ ptrGBloque determine_nodo(const char* path){
 
 	split_path(path, &super_path, &nombre);
 
-	nodo_anterior = determinar_nodo(super_path);
+	nodo_anterior = determine_nodo(super_path);
 
 
 	pthread_rwlock_rdlock(&rwlock); //Takes a lock for read
