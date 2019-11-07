@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <commons/log.h>
 #include "message.h"
+#include "network.h"
 
 t_log *logger;
 

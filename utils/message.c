@@ -2,6 +2,26 @@
 #include <stdlib.h>
 #include <string.h>
 
+int message_function_return_encode(Message *msg,void *buffer,size_t buffer_size)
+{
+	int min_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
+	if(buffer_size < min_size) return -1;
+
+	void *cursor = buffer;
+	memcpy(cursor,msg->data,sizeof(uint32_t));
+	cursor += sizeof(uint32_t);
+	return cursor - buffer;
+}
+
+int message_function_return_decode(void *buffer,size_t buffer_size,Message *result)
+{
+	void *cursor = buffer;
+	result->data = malloc(sizeof(uint32_t));
+	memcpy(result->data,cursor,sizeof(uint32_t));
+	cursor += sizeof(uint32_t);
+	return cursor - buffer;
+}
+
 int header_encode(MessageHeader *header,void *buffer,size_t buffer_size)
 {
 	if(buffer_size < sizeof(uint8_t)) return -1;
@@ -90,25 +110,6 @@ int message_decode(void *buffer,size_t buffer_size,Message *result)
 			break;
 	}
 	return res;
-}
-int message_function_return_encode(Message *msg,void *buffer,size_t buffer_size)
-{
-	int min_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
-	if(buffer_size < min_size) return -1;
-
-	void *cursor = buffer;
-	memcpy(cursor,msg->data,sizeof(uint32_t));
-	cursor += sizeof(uint32_t);
-	return cursor - buffer;
-}
-
-int message_function_return_decode(void *buffer,size_t buffer_size,Message *result)
-{
-	void *cursor = buffer;
-	result->data = malloc(sizeof(uint32_t));
-	memcpy(result->data,cursor,sizeof(uint32_t));
-	cursor += sizeof(uint32_t);
-	return cursor - buffer;
 }
 
 int function_arg_encode(Arg arg,void *buffer,size_t buffer_size)
