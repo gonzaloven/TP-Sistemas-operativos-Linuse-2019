@@ -3,12 +3,12 @@ CC:=gcc
 UTILS:= ../utils/
 CFLAGS:= -g
 INCDIR:= -I$(UTILS)
-SRCS := suse.c $(UTILS)network.c $(UTILS)message.c $(UTILS)rpc.c $(UTILS)cJSON.c
-LFLAGS := -lpthread -lcommons
+SRCS := suse.c metrics.c $(UTILS)network.c $(UTILS)message.c
+LFLAGS := -pthread -lcommons
 
 suse:
 		$(CC) $(CFLAGS) $(INCDIR) $(SRCS) -o $(TARGET) $(LFLAGS)
 
 clean:
-		rm suse *.o
+		rm -f suse *.o
 

@@ -38,7 +38,7 @@ int connect_to(char *ip,int port);
  * to receive.
  * @param buffer: pointer to the buffer receiving data.
  * @param buffer_size: size of buffer */
-ssize_t recieve_packet(int socket_fd,void *buffer,size_t buffer_size);
+ssize_t receive_packet(int socket_fd,void *buffer,size_t buffer_size);
 ssize_t receive_packet_no_wait(int socket_fd,void *buffer,size_t buffer_size);
 
 /* Same as above but for sending */

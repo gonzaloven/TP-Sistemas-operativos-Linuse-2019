@@ -227,10 +227,11 @@ void suse_create(struct TCB* tcb)
 {
 	MessageHeader header;
 	Message msg;
-	char *process_data = rpc_form_new_ult_msg(tcb);
-	
-	create_message_header(&header,MESSAGE_NEW_ULT);
-	create_string_message(&msg,&header,process_data);
-	send_message(master_socket,&msg);
-	message_free_data(&msg);
+	// se habia deleteado rpc porque usaba json, hay que hacerlo con la nueva serealizacion
+	// idem los demas mensajes, estan deprecados
+	//char *process_data = rpc_form_new_ult_msg(tcb);
+	//create_message_header(&header,MESSAGE_NEW_ULT);
+	//create_string_message(&msg,&header,process_data);
+	//send_message(master_socket,&msg);
+	//message_free_data(&msg);
 }

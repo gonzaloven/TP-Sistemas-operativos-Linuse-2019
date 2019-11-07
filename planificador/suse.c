@@ -1,9 +1,4 @@
 #include "suse.h"
-#include "network.h"
-#include "rpc.h"
-#include <commons/log.h>
-#include <commons/config.h>
-#include <signal.h>
 
 t_log *suse_logger = NULL;
 suse_configuration *suse_config = NULL;
@@ -99,7 +94,8 @@ void message_handler(Message *m,int sock)
 			break;
 		case MESSAGE_CALL:
 			log_debug(suse_logger,"Remote call received!");
-			rpc_server_invoke(m->data,sock);
+			//deprecated rcp se usaba json, actualiza a actual serializacion
+			//rpc_server_invoke(m->data,sock);
 			message_free_data(m);
 			break;
 		case MESSAGE_NEW_ULT:

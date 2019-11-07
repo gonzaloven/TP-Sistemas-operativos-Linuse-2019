@@ -18,12 +18,12 @@ all: sac
 sac: $(OBJS)
 	$(CC) $(CFLAGS) -o sac $(OBJS)
 
-sac_cliente.o: sac_cliente.c sac_cliente.h 
+sac_cliente.o: sac_cliente.c
 	$(CC) -g $(INCDIR) $(CFLAGS) $(SAC_CLI_SRC) -o $(TARGET_SAC_CLI) $(LIBSCLI)
 
-sac_servidor.o: sac_servidor.c sac_handlers.c sac_servidor.h
+sac_servidor.o: sac_servidor.c sac_handlers.c
 	$(CC) -g $(INCDIR) $(SAC_SERV_SRC) -o $(TARGET_SAC_SERVER) $(LIBSCLI)
 
 clean:
-	rm -f $(OBJS) *.o
+	rm -f sac *.o
 

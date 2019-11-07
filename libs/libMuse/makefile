@@ -6,15 +6,19 @@ CFLAGS:= -c -g -fpic
 SRCS:= libmuse.c $(UTILS)network.c $(UTILS)message.c
 LIBFLAGS:= -shared -o 
 
-makedir:
-	mkdir -p ../bin
+#all
+all: libmuse
 
-libmuse.o:makedir
-	$(CC) $(CFLAGS) $(INCDIR) $(SRCS)
-	
+#libmuse
 libmuse: libmuse.o
 	$(CC) -g $(LIBFLAGS) $(TARGET) libmuse.o
 	mv libmuse.so ../bin
+
+libmuse.o:makedir libmuse.c
+	$(CC) $(CFLAGS) $(INCDIR) $(SRCS)
+
+makedir:
+	mkdir -p ../bin
 
 
 clean:

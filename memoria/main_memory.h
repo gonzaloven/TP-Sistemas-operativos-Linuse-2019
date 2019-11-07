@@ -1,6 +1,8 @@
 #ifndef MAIN_MEMORY_H
 #define MAIN_MEMORY_H
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <inttypes.h>
 #include <stddef.h>
 #include <commons/collections/list.h>

@@ -1,21 +1,26 @@
-CC:=gcc
+CC:= gcc
 TARGET:= libhilolay.so
 UTILS:= ../../utils/
 INCDIR:= -I$(UTILS)
 CFLAGS:= -g -c -fpic
 SRCS:= hilolay.c $(UTILS)network.c $(UTILS)message.c
-LIBFLAGS:= -shared -o 
+LIBFLAGS:= -shared -o
+OBJS:= hilolay.o
 
-makedir:
-	mkdir -p ../bin
+#all
+all:libhilolay
 
-hilolay.o: makedir
-		$(CC) $(CFLAGS) $(INCDIR) $(SRCS) 
-			
+#libhilolay
 libhilolay: hilolay.o
 		$(CC) -g $(LIBFLAGS) $(TARGET) hilolay.o
 		mv -f libhilolay.so ../bin
 
+hilolay.o: makedir hilolay.c
+		$(CC) $(CFLAGS) $(INCDIR) $(SRCS)
+
+makedir:
+	mkdir -p ../bin
+
 clean:
-		rm *.o
+		rm -f $(OBJS) *.o
 
