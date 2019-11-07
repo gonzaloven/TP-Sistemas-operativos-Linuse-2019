@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -g -D_FILE_OFFSET_BITS=64 
+CFLAGS := -g -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=27
 UTILS := ../utils/
 INCDIR := -I$(UTILS)
 SAC_CLI_SRC := sac_cliente.c $(UTILS)network.c $(UTILS)message.c 
@@ -23,4 +23,7 @@ sac_cliente.o: sac_cliente.c sac_cliente.h
 
 sac_servidor.o: sac_servidor.c sac_handlers.c sac_servidor.h
 	$(CC) -g $(INCDIR) $(SAC_SERV_SRC) -o $(TARGET_SAC_SERVER) $(LIBSCLI)
+
+clean:
+	rm -f $(OBJS) *.o
 

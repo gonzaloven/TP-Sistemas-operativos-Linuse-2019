@@ -1,59 +1,10 @@
 #include "sac_cliente.h"
+#include "message.h"
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 
-struct t_runtime_options {
-	char* welcome_msg;
-	char* define_disc_path;
-	char* log_level_param;
-	char* log_path_param;
-} runtime_options;
-
-/*
- * This is the main structure of FUSE with which we tell
- * the library what functions it has to invoke according to the request.
-*/
-static struct fuse_operations sac_oper = {
-		.getattr = sac_cliente_getattr,
-		.read = sac_cliente_read,
-		.readdir = sac_cliente_readdir,
-		.mkdir = sac_cliente_mkdir,
-		.rmdir = sac_cliente_rmdir,
-		.write = sac_cliente_write,
-		.mknod = sac_cliente_mknod,
-		.unlink = sac_cliente_unlink,
-};
-
-/** keys for FUSE_OPT_ options */
-
-enum {
-	KEY_VERSION,
-	KEY_HELP,
-};
-
-static struct fuse_opt fuse_options[] = {
-
-		// Option that uses the "--Disc-Path" parameter if it is passed:
-		CUSTOM_FUSE_OPT_KEY("--Disc-Path=%s", define_disc_path, 0),
-
-		// Define the log level
-		CUSTOM_FUSE_OPT_KEY("--ll=%s", log_level_param, 0),
-
-		// Define the log path
-		CUSTOM_FUSE_OPT_KEY("--Log-Path", log_path_param, 0),
-
-		// Default fuse parameters
-		FUSE_OPT_KEY("-V", KEY_VERSION),
-		FUSE_OPT_KEY("--version", KEY_VERSION),
-		FUSE_OPT_KEY("-h", KEY_HELP),
-		FUSE_OPT_KEY("--help", KEY_HELP),
-		FUSE_OPT_END,
-};
-
-// This is our path, relative to the mount point, file inside the FS
-#define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
-#define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
-
-
-int send_call(Function *f)
+static int send_call(Function *f)
 {
 	Message msg;
 	MessageHeader header;
@@ -61,14 +12,14 @@ int send_call(Function *f)
 	create_message_header(&header,MESSAGE_CALL,1,sizeof(Function));
 	create_function_message(&msg,&header,f);
 
-	int resultado = send_message(master_socket,&msg);
+	int resultado = send_message(serverSocket,&msg);
 
 	free(msg.data);
 
 	return resultado;
 }
 
-int send_path(FuncType func_type, const char *path){
+static int send_path(FuncType func_type, const char *path){
 	Function f;
 	Arg arg;
 
@@ -85,15 +36,16 @@ int send_path(FuncType func_type, const char *path){
 	return resultado;
 }
 
-int sac_cliente_getattr(const char *path, struct stat *stbuf) {
+static int sac_getattr(const char *path, struct stat *stbuf) {
 	Message msg;
 
 	memset(stbuf, 0, sizeof(struct stat));
 
-	if(send_path(FUNCTION_GETATTR, path) == -1)
+	if(send_path(FUNCTION_GETATTR, path) == -1){
 		return EXIT_FAILURE;
+	}
 
-	receive_message(master_socket,&msg);
+	receive_message(serverSocket,&msg);
 
 	Function* f = msg.data;
 
@@ -107,11 +59,11 @@ int sac_cliente_getattr(const char *path, struct stat *stbuf) {
 
 	free(f);
 
-	return EXIT_SUCESS;
+	return EXIT_SUCCESS;
 }
 
 
-int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
+static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
 
 	(void) fi;
 	(void) offset;
@@ -119,10 +71,11 @@ int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 	uint8_t tam_dir = 0;
 	uint16_t off = 0;
 
-	if(send_path(FUNCTION_READDIR, path) == -1)
+	if(send_path(FUNCTION_READDIR, path) == -1){
 			return EXIT_FAILURE;
+	}
 
-	receive_message(master_socket,&msg);
+	receive_message(serverSocket,&msg);
 
 	Function* f = msg.data;
 
@@ -149,16 +102,17 @@ int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
 	return EXIT_SUCCESS;
 }
 
-int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
+static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 	//chequeo si el archivo existe, ignoro permisos
 
 	Message msg;
 
-	if(send_path(FUNCTION_GETATTR, path) == -1)
+	if(send_path(FUNCTION_GETATTR, path) == -1){
 		return EXIT_FAILURE;
+	}
 
-	receive_message(master_socket,&msg);
+	receive_message(serverSocket,&msg);
 
 	int *response = msg.data;
 	int respuesta = *response;
@@ -168,7 +122,7 @@ int sac_cliente_open(const char *path, struct fuse_file_info *fi) {
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
-int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+static int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
 
 	Message msg;
 	char *lectura;
@@ -194,10 +148,11 @@ int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, str
 	fsend.args[1] = arg[1];
 	fsend.args[2] = arg[2];
 
-	if(send_call(&fsend) == -1)
+	if(send_call(&fsend) == -1){
 		return EXIT_FAILURE;
+	}
 
-	receive_message(master_socket,&msg);
+	receive_message(serverSocket,&msg);
 
 	Function* freceive = msg.data;
 
@@ -215,13 +170,14 @@ int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, str
   	return tamanioLectura;
 }
 
-int sac_cliente_mknod(const char* path, mode_t mode, dev_t rdev){
+static int sac_mknod(const char* path, mode_t mode, dev_t rdev){
 	Message msg;
 
-	if(send_path(FUNCTION_MKNOD, path) == -1)
+	if(send_path(FUNCTION_MKNOD, path) == -1){
 		return EXIT_FAILURE;
+	}
 
-	receive_message(master_socket,&msg);
+	receive_message(serverSocket,&msg);
 
 	int *response = msg.data;
 	int respuesta = *response;
@@ -231,7 +187,7 @@ int sac_cliente_mknod(const char* path, mode_t mode, dev_t rdev){
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
-int sac_cliente_write(const char* path, char *buf, size_t size, off_t offset, struct fuse_file_info* fi){
+static int sac_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi){
 
 	Message msg;
 
@@ -261,10 +217,11 @@ int sac_cliente_write(const char* path, char *buf, size_t size, off_t offset, st
 	f.args[2] = arg[2];
 	f.args[3] = arg[3];
 
-	if(send_call(&f) == -1)
+	if(send_call(&f) == -1){
 		return EXIT_FAILURE;
+	}
 
-	receive_message(master_socket,&msg);
+	receive_message(serverSocket,&msg);
 
 	int *response = msg.data;
 	int bytesEscritos = *response;
@@ -275,13 +232,14 @@ int sac_cliente_write(const char* path, char *buf, size_t size, off_t offset, st
 }
 
 
-int sac_cliente_unlink(const char* path){
+static int sac_unlink(const char* path){
 	Message msg;
 
-	if(send_path(FUNCTION_UNLINK, path) == -1)
+	if(send_path(FUNCTION_UNLINK, path) == -1){
 		return EXIT_FAILURE;
+	}
 
-	receive_message(master_socket,&msg);
+	receive_message(serverSocket,&msg);
 
 	int *response = msg.data;
 	int respuesta = *response;
@@ -291,13 +249,14 @@ int sac_cliente_unlink(const char* path){
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
-int sac_cliente_mkdir(const char* path, mode_t mode){
+static int sac_mkdir(const char* path, mode_t mode){
 	Message msg;
 
-	if(send_path(FUNCTION_MKDIR, path) == -1)
+	if(send_path(FUNCTION_MKDIR, path) == -1){
 		return EXIT_FAILURE;
+	}
 
-	receive_message(master_socket,&msg);
+	receive_message(serverSocket,&msg);
 
 	int *response = msg.data;
 	int respuesta = *response;
@@ -307,13 +266,14 @@ int sac_cliente_mkdir(const char* path, mode_t mode){
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
-int sac_cliente_rmdir(const char* path){
+static int sac_rmdir(const char* path){
 	Message msg;
 
-	if(send_path(FUNCTION_RMDIR, path) == -1)
+	if(send_path(FUNCTION_RMDIR, path) == -1){
 		return EXIT_FAILURE;
+	}
 
-	receive_message(master_socket,&msg);
+	receive_message(serverSocket,&msg);
 
 	int *response = msg.data;
 	int respuesta = *response;
@@ -322,32 +282,26 @@ int sac_cliente_rmdir(const char* path){
 
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
+
+static struct fuse_operations sac_oper = {
+		.getattr = sac_getattr,
+		.read = sac_read,
+		.readdir = sac_readdir,
+		.mkdir = sac_mkdir,
+		.rmdir = sac_rmdir,
+		.write = sac_write,
+		.mknod = sac_mknod,
+		.unlink = sac_unlink,
+};
 
 // Dentro de los argumentos que recibe nuestro programa obligatoriamente
 // debe estar el path al directorio donde vamos a montar nuestro FS
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]){
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
 	////////////////////////////////no se donde hacer el close del socket////////////////////////////////////////
 	//esta bastante hardcodeado esto, creo que deberia tomarlo del config
 	serverSocket = connect_to("127.0.0.1",8003);
-
-	// Limpio la estructura que va a contener los parametros
-	memset(&runtime_options, 0, sizeof(struct t_runtime_options));
-
-	// Esta funcion de FUSE lee los parametros recibidos y los intepreta
-	if (fuse_opt_parse(&args, &runtime_options, fuse_options, NULL) == -1){
-		* error parsing options
-		perror("Invalid arguments!");
-		return EXIT_FAILURE;
-	}
-
-	// Si se paso el parametro --welcome-msg
-	// el campo welcome_msg deberia tener el
-	// valor pasado
-	if( runtime_options.welcome_msg != NULL ){
-		printf("%s\n", runtime_options.welcome_msg);
-	}
 
 	// Esta es la funcion principal de FUSE, es la que se encarga
 	// de realizar el montaje, comuniscarse con el kernel, delegar todo

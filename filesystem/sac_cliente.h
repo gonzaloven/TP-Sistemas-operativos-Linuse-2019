@@ -3,25 +3,16 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include <fuse.h>
 #include <string.h>
+#include <stdlib.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <commons/log.h>
 #include "message.h"
-#include "network.h"
 
-
-//variables globales
 t_log *logger;
-int master_socket;
 
-//functions
-
-int send_call(Function *f);
-int send_path(FuncType func_type, const char *path);
+int serverSocket;
 
 // Definition of functions to be implemented //
 
@@ -49,7 +40,7 @@ int send_path(FuncType func_type, const char *path);
  * 			stbuf->st_size = [SIZE];
  *
  */
-int sac_cliente_getattr(const char *path, struct stat *stbuf);
+static int sac_getattr(const char *path, struct stat *stbuf);
 
 /*
  * @DESC
@@ -66,7 +57,7 @@ int sac_cliente_getattr(const char *path, struct stat *stbuf);
  * 	@RETURN
  * 		O directory found. -ENOENT directory not found
  */
-int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) //
+static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi);
 
 /*
  * @DESC
@@ -85,7 +76,7 @@ int sac_cliente_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off
  * 		or -ENOENT if an error occurred. If the direct_io parameter is not present, the return values
  * 		​​are the number of bytes read if everithing ok or -ENOENT if an error occurred.
  */
-int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
+static int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 /* * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
@@ -99,7 +90,7 @@ int sac_cliente_read(const char *path, char *buf, size_t size, off_t offset, str
  * 	@RETURN
  * 		O archivo fue encontrado. -EACCES archivo no es accesible*/
 
-int sac_cliente_open(const char *path, struct fuse_file_info *fi);
+static int sac_open(const char *path, struct fuse_file_info *fi);
 
 // Writing functions //
 
@@ -116,7 +107,7 @@ int sac_cliente_open(const char *path, struct fuse_file_info *fi);
  * 	@ RET
  * 		It returns 0 on success, or -1 if an error ocurred
  */
-int sac_cliente_mkdir(const char *pathname, mode_t mode);
+static int sac_mkdir(const char *pathname, mode_t mode);
 
 /*
  *  @DESC
@@ -130,7 +121,7 @@ int sac_cliente_mkdir(const char *pathname, mode_t mode);
  *  @RET
  *  	It returns 0 on success, or -1 if an error ocurred
  */
-int sac_cliente_mknod (const char *pathname, mode_t mode, dev_t dev);
+static int sac_mknod (const char *pathname, mode_t mode, dev_t dev);
 
 /*
  *	@DESC
@@ -143,7 +134,7 @@ int sac_cliente_mknod (const char *pathname, mode_t mode, dev_t dev);
  *		It returns 0 on success, or -ENOENT if an error ocurred
  *
  */
-int sac_cliente_rmdir(const char *pathname);
+static int sac_rmdir(const char *pathname);
 
 /*
  *  @DESC
@@ -155,7 +146,7 @@ int sac_cliente_rmdir(const char *pathname);
  *  @RET
  *  	It returns 0 on success, or -ENOENT if an error ocurred
  */
-int sac_cliente_unlink(const char *pathname);
+static int sac_unlink(const char *pathname);
 
 /*
  * 	@DESC
@@ -172,6 +163,6 @@ int sac_cliente_unlink(const char *pathname);
  * 		It returns the size of bytes writeen on success, or a negative number
  * 		if an error ocurred, and errno is set appropriately.
  */
-int sac_cliente_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
+static int sac_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 #endif

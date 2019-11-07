@@ -8,7 +8,6 @@
 #include <string.h>
 #include <errno.h>
 #include <commons/log.h>
-#include "protocol.h"
 
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024
@@ -28,7 +27,7 @@ typedef struct sac_configuration_s{
 typedef struct fuse_configuration_s
 {
 	int listen_port;
-	int disk_size;
+	uint32_t disk_size;
 }fuse_configuration;
 
 typedef uint32_t ptrGBloque;
