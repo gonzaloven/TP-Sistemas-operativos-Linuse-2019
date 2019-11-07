@@ -1,4 +1,3 @@
-#include<sac_servidor.h>
 
 
 ptrGBloque determine_nodo(const char* path){

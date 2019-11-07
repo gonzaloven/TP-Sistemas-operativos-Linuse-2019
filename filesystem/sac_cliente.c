@@ -1,5 +1,58 @@
 #include "sac_cliente.h"
 
+struct t_runtime_options {
+	char* welcome_msg;
+	char* define_disc_path;
+	char* log_level_param;
+	char* log_path_param;
+} runtime_options;
+
+/*
+ * This is the main structure of FUSE with which we tell
+ * the library what functions it has to invoke according to the request.
+*/
+static struct fuse_operations sac_oper = {
+		.getattr = sac_cliente_getattr,
+		.read = sac_cliente_read,
+		.readdir = sac_cliente_readdir,
+		.mkdir = sac_cliente_mkdir,
+		.rmdir = sac_cliente_rmdir,
+		.write = sac_cliente_write,
+		.mknod = sac_cliente_mknod,
+		.unlink = sac_cliente_unlink,
+};
+
+/** keys for FUSE_OPT_ options */
+
+enum {
+	KEY_VERSION,
+	KEY_HELP,
+};
+
+static struct fuse_opt fuse_options[] = {
+
+		// Option that uses the "--Disc-Path" parameter if it is passed:
+		CUSTOM_FUSE_OPT_KEY("--Disc-Path=%s", define_disc_path, 0),
+
+		// Define the log level
+		CUSTOM_FUSE_OPT_KEY("--ll=%s", log_level_param, 0),
+
+		// Define the log path
+		CUSTOM_FUSE_OPT_KEY("--Log-Path", log_path_param, 0),
+
+		// Default fuse parameters
+		FUSE_OPT_KEY("-V", KEY_VERSION),
+		FUSE_OPT_KEY("--version", KEY_VERSION),
+		FUSE_OPT_KEY("-h", KEY_HELP),
+		FUSE_OPT_KEY("--help", KEY_HELP),
+		FUSE_OPT_END,
+};
+
+// This is our path, relative to the mount point, file inside the FS
+#define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
+#define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
+
+
 int send_call(Function *f)
 {
 	Message msg;
