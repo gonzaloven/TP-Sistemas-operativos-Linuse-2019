@@ -49,7 +49,7 @@ typedef struct sac_server_block{
 // sac server header struct
 typedef struct sac_server_header{
 	unsigned char identificador[MAGIC_NUMBER_NAME];
-	uint32_t version = 1;
+	uint32_t version;
 	uint32_t bitmap_start;
 	uint32_t bitmap_size; // in blocks
 	unsigned char padding[4081];

@@ -1,4 +1,5 @@
-
+#include <stdlib.h>
+#include <string.h>
 
 ptrGBloque determine_nodo(const char* path){
 

@@ -108,7 +108,7 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 	Message msg;
 
-	if(send_path(FUNCTION_GETATTR, path) == -1){
+	if(send_path(FUNCTION_OPEN, path) == -1){
 		return EXIT_FAILURE;
 	}
 
