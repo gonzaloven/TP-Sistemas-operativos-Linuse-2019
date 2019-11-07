@@ -111,13 +111,8 @@ uint32_t fuse_invoke_function(Function *f,uint32_t pid)
 			func_ret = sac_server_open(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_READ:
-			log_debug(fuse_logger,"Read called with args -> arg[0] %d  arg[1] %d arg[2] %d",
-			f->args[0].value.val_charptr,
-			f->args[1].value.val_sizet,
-			f->args[2].value.val_u32);
-			func_ret = sac_server_read(f->args[0].value.val_charptr,
-									   f->args[1].value.val_sizet,
-									   f->args[2].value.val_u32);
+			log_debug(fuse_logger,"Read called with args -> arg[0] %d  arg[1] %d arg[2] %d", f->args[0].value.val_charptr, f->args[1].value.val_sizet, f->args[2].value.val_u32);
+			func_ret = sac_server_read(f->args[0].value.val_charptr, f->args[1].value.val_sizet, f->args[2].value.val_u32);
 			break;
 		case FUNCTION_OPENDIR:
 			log_debug(fuse_logger,"Opendir called");
@@ -129,10 +124,7 @@ uint32_t fuse_invoke_function(Function *f,uint32_t pid)
 			break;
 		case FUNCTION_WRITE:
 			log_debug(fuse_logger,"Write called");
-			func_ret = sac_server_write(f->args[0].value.val_charptr,
-								 		f->args[1].value.val_charptr,
-								 		f->args[2].value.val_sizet,
-								 		f->args[3].value.val_u32);
+			func_ret = sac_server_write(f->args[0].value.val_charptr, f->args[1].value.val_charptr, f->args[2].value.val_sizet, f->args[3].value.val_u32);
 			break;
 		case FUNCTION_UNLINK:
 			log_debug(fuse_logger,"Unlink called");
@@ -155,7 +147,7 @@ uint32_t fuse_invoke_function(Function *f,uint32_t pid)
 
 }
 
-/*int main(int argc,char *argv[])
+int main(int argc,char *argv[])
 {
 	signal(SIGINT,fuse_stop_service);
 	fuse_start_service(handler); 
@@ -164,12 +156,12 @@ uint32_t fuse_invoke_function(Function *f,uint32_t pid)
 	bitmap = bitarray_create_with_mode(disco + 1, BLOQUE_SIZE, LSB_FIRST);
 	diskSize = fuse_config->disk_size;
 	return 0;
-}*/
+}
 
-/*int sac_server_getattr(char* payload){
+int sac_server_getattr(char* path){
 	t_Rta_Getattr metadata;
 
-	ptrGBloque nodoBuscadoPosicion = determine_node(payload->path);
+	ptrGBloque nodoBuscadoPosicion = determine_node(path);
 
 	bool esArchivo = tablaDeNodos[nodoBuscadoPosicion].state == 1;
 
@@ -179,7 +171,7 @@ uint32_t fuse_invoke_function(Function *f,uint32_t pid)
 
 	//Deberia completarse el envio del mensaje y seria eso
 
-}*/
+}
 
 /*int sac_server_read(char* payload){
 	//t_Getatrr* p_param = getatrr_decode(payload);
