@@ -1,13 +1,22 @@
 #ifndef SAC_SERVER_H
 #define SAC_SERVER_H
 
+#include "network.h"
+#include <commons/log.h>
+#include <commons/config.h>
+#include <commons/bitarray.h>
+#include <commons/collections/list.h>
+#include <signal.h>
+#include <libgen.h>
+#include <sys/mman.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
-#include <commons/log.h>
+
 
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024

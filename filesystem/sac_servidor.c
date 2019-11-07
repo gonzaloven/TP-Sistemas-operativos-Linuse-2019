@@ -1,10 +1,4 @@
-#include <sys/mman.h>
 #include "sac_servidor.h"
-#include "network.h"
-#include <commons/log.h>
-#include <commons/config.h>
-#include <signal.h>
-#include <libgen.h>
 
 t_log *fuse_logger = NULL;
 fuse_configuration *fuse_config = NULL;
