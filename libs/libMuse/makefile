@@ -22,4 +22,4 @@ makedir:
 
 
 clean:
-	rm *.o
+	rm -f libmuse *.o

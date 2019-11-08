@@ -12,15 +12,15 @@ all:libhilolay
 
 #libhilolay
 libhilolay: hilolay.o
-		$(CC) -g $(LIBFLAGS) $(TARGET) hilolay.o
-		mv -f libhilolay.so ../bin
+	$(CC) -g $(LIBFLAGS) $(TARGET) hilolay.o
+	mv -f libhilolay.so ../bin
 
 hilolay.o: makedir hilolay.c
-		$(CC) $(CFLAGS) $(INCDIR) $(SRCS)
+	$(CC) $(CFLAGS) $(INCDIR) $(SRCS)
 
 makedir:
 	mkdir -p ../bin
 
 clean:
-		rm -f $(OBJS) *.o
+	rm -f libhilolay *.o
 

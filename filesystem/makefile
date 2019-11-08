@@ -8,9 +8,11 @@ INCDIR := -I$(UTILS)
 LFLAGSCLI := -lfuse -lcommons -pthread
 LFLAGSSV := -lcommons -pthread
 SRCSCLI := sac_handlers.c sac_cliente.c $(UTILS)network.c $(UTILS)message.c
-SRCSSV := sac_servidor.c $(UTILS)network.c $(UTILS)message.c 
+SRCSSV := sac_servidor.c $(UTILS)network.c $(UTILS)message.c
 
-sac_cliente: sac_servidor
+all: sac_cliente sac_servidor
+
+sac_cliente:
 	$(CC) $(CFLAGSCLI) $(INCDIR) $(SRCSCLI) -o $(TARGETCLI) $(LFLAGSCLI)
 
 sac_servidor:
