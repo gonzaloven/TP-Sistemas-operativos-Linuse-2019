@@ -22,5 +22,6 @@ makedir:
 	mkdir -p ../bin
 
 clean:
-	rm -f libhilolay *.o
+	rm -f *.o
+	rm ../bin/libhilolay.so
 
