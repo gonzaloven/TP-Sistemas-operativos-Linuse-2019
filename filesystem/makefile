@@ -10,11 +10,11 @@ LFLAGSSV := -lcommons -pthread
 SRCSCLI := sac_handlers.c sac_cliente.c $(UTILS)network.c $(UTILS)message.c
 SRCSSV := sac_servidor.c $(UTILS)network.c $(UTILS)message.c 
 
-sac_cliente: 
-	$(CC) $(CFLAGS) $(INCDIR) $(SRCSCLI) -o $(TARGETCLI) $(CFLAGSCLI)
+sac_cliente: sac_servidor
+	$(CC) $(CFLAGSCLI) $(INCDIR) $(SRCSCLI) -o $(TARGETCLI) $(LFLAGSCLI)
 
 sac_servidor:
-	$(CC) $(CFLAGS) $(INCDIR) $(SRCSSV) -o $(TARGETSV) $(CFLAGSSV)
+	$(CC) $(CFLAGSSV) $(INCDIR) $(SRCSSV) -o $(TARGETSV) $(LFLAGSSV)
 
 clean:
 	rm -f sac_cliente sac_servidor *.o

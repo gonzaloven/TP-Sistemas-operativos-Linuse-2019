@@ -82,7 +82,7 @@ int discDescriptor;
 // Functions to handle the disk
 
 /* * To read, documentation sac_client.h */
-int sac_server_getatrr(char* path);
+int sac_server_getattr(char* path);
 int sac_server_readdir(char* path);
 int sac_server_read(char* path, size_t size, uint32_t offset);
 int sac_server_open(char* path);

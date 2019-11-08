@@ -2,6 +2,7 @@
 #include <string.h>
 #include "sac_servidor.h"
 
+/*
 ptrGBloque determine_nodo(const char* path){
 
 	// If it is the root directory, it returns 0
@@ -41,6 +42,7 @@ ptrGBloque determine_nodo(const char* path){
 
 	return (i); // +1?
 }
+*/
 
 int split_path(const char* path, char** super_path, char** name){
 	int aux;

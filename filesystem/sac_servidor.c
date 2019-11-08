@@ -1,12 +1,12 @@
 #include "sac_servidor.h"
 #include <sys/stat.h>
 
-t_log *fuse_logger = NULL;
-fuse_configuration *fuse_config = NULL;
-GBlock* disco = NULL;
-GFile* tablaDeNodos = NULL;
-t_bitarray* bitmap = NULL;
-size_t diskSize = NULL;
+t_log *fuse_logger;
+fuse_configuration *fuse_config;
+GBlock* disco;
+GFile* tablaDeNodos;
+t_bitarray* bitmap;
+size_t diskSize;
 
 uint32_t fuse_invoke_function(Function *f,uint32_t pid);
 
@@ -23,6 +23,31 @@ void fuse_stop_service()
 	free(fuse_config);
 	log_destroy(fuse_logger);
 	server_stop();
+}
+
+void message_handler(Message *m,int sock)
+{
+	uint32_t res= 0;
+	Message msg;
+	MessageHeader head;
+	switch(m->header.message_type)
+	{
+		case MESSAGE_CALL:
+			res = fuse_invoke_function((Function *)m->data,m->header.caller_id);
+			log_trace(fuse_logger,"Call received!");
+			message_free_data(m);
+
+			create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
+			create_response_message(&msg,&head,res);
+			send_message(sock,&msg);
+			message_free_data(&msg);
+			break;
+		default:
+			log_error(fuse_logger,"Undefined message");
+			break;
+	}
+	return;
+
 }
 
 void* handler(void *args)
@@ -66,31 +91,6 @@ fuse_configuration* load_configuration(char *path)
 	fc->disk_size = config_get_int_value(config,"DISK_SIZE");
 	config_destroy(config);
 	return fc;
-}
-
-void message_handler(Message *m,int sock)
-{
-	uint32_t res= 0;
-	Message msg;
-	MessageHeader head;
-	switch(m->header.message_type)
-	{
-		case MESSAGE_CALL:
-			res = fuse_invoke_function((Function *)m->data,m->header.caller_id);
-			log_trace(fuse_logger,"Call received!");
-			message_free_data(m);
-			
-			create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
-			create_response_message(&msg,&head,res);
-			send_message(sock,&msg);
-			message_free_data(&msg);
-			break;
-		default:
-			log_error(fuse_logger,"Undefined message");
-			break;
-	}
-	return;
-
 }
 
 uint32_t fuse_invoke_function(Function *f,uint32_t pid) 
@@ -149,16 +149,36 @@ uint32_t fuse_invoke_function(Function *f,uint32_t pid)
 
 int main(int argc,char *argv[])
 {
+	/* te lo comente, el mmap devuelve *void habria que castearlo a *gbloque y tabla de nodos es gfile no gbloque
+	 * no se que onda la suma esa pero tambien me rompia
 	signal(SIGINT,fuse_stop_service);
-	fuse_start_service(handler); 
+	fuse_start_service(handler);
 	*disco = mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,1,0);
 	tablaDeNodos = disco + 2;
 	bitmap = bitarray_create_with_mode(disco + 1, BLOQUE_SIZE, LSB_FIRST);
 	diskSize = fuse_config->disk_size;
+	*/
+	return 0;
+}
+
+int sac_server_open(char* path){
+	//TODO
+	return 0;
+}
+
+int sac_server_opendir(char* path){
+	//TODO
+	return 0;
+}
+
+int sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
+	//TODO
 	return 0;
 }
 
 int sac_server_getattr(char* path){
+	/*
+	 * Lo comento porque t_rta_getattr ya no existe al eliminar protocolo
 	t_Rta_Getattr metadata;
 
 	ptrGBloque nodoBuscadoPosicion = determine_node(path);
@@ -170,10 +190,13 @@ int sac_server_getattr(char* path){
 	metadata.total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
 
 	//Deberia completarse el envio del mensaje y seria eso
+	 *
+	 */
 
 }
 
-/*int sac_server_read(char* payload){
+int sac_server_read(char* path, size_t size, uint32_t offset){
+	/*
 	//t_Getatrr* p_param = getatrr_decode(payload);
 	log_info(logger, "Reading: Path: %s - Size: %d - Offset %d",
 	//		p_param->path, p_param->size, p_param->offset);
@@ -261,10 +284,12 @@ int sac_server_getattr(char* path){
 	log_lock_trace(logger, "Read: Libera lock lectura. Cantidad de lectores: %d", rwlock.__data.__nr_readers);
 	log_trace(logger, "Terminada lectura.");
 	return res;
+	*/
+	return 0;
+}
 
-}*/
-
-/*int sac_server_readdir (char* payload) {
+int sac_server_readdir (char* payload) {
+	/*
 	t_list* listaDeArchivos = list_create();
 	int i = 0;
 	ptrGBloque nodoPadre = //get_nodo_path_payload(payload);
@@ -287,8 +312,9 @@ int sac_server_getattr(char* path){
 	//aca deberia enviarse el paquete con la lista serializada
 
 	list_destroy(listaDeArchivos);
+	*/
 	return 0;
-}*/
+}
 
 /*int crear_nuevo_nodo (char* payload, int tipoDeArchivo){
 	int currNode = 0;
@@ -326,15 +352,22 @@ int sac_server_getattr(char* path){
 	return 0;
 }*/
 
-/*int sac_server_mknod (char* payload){
+int sac_server_mknod (char* payload){
+	/*
 	return crear_nuevo_nodo(payload, 1);
+	*/
+	return 0;
 }
 
 int sac_server_mkdir (char* payload){
+	/*
 	return crear_nuevo_nodo(payload, 2);
+	*/
+	return 0;
 }
 
 void borrar_directorio (ptrGBloque nodoPosicion){
+	/*
 	int currNode = 0;
 
 	GFile *nodoPadre = tablaDeNodos + nodoPosicion;
@@ -355,37 +388,43 @@ void borrar_directorio (ptrGBloque nodoPosicion){
 		}
 		currNode++;
 	}
-}*/
+	*/
+}
 
-/*void borrar_archivo(GFile* nodo, ptrGBloque nodoPosicion){
+void borrar_archivo(GFile* nodo, ptrGBloque nodoPosicion){
+	/*
 	nodo->state = 0;
 
 	bitarray_clean_bit(bitmap, nodoPosicion + 2);
+	*/
 }
 
 int sac_server_unlink (char* payload){
-	
+	/*
 	ptrGBloque nodoPath = get_nodo_path_payload(payload);
 	//tengo que validar si no existe el nodo para ese path
 	GFile* nodoABorrar = tablaDeNodos + nodoPath;
 
 	borrar_archivo(nodoABorrar, nodoPath);
-
+	*/
 	return 0;
 }
 
 int sac_server_rmdir (char* payload){
+	/*
 	ptrGBloque nodoPadre = get_nodo_path_payload(payload);
 	//validar que no sea el directorio raiz
 
 	borrar_directorio(nodoPadre);
-
+	*/
 	return 0;
 }
 
 ptrGBloque get_nodo_path_payload(char* payload){
+	/*
 	t_Path* tipoPath = malloc(sizeof(t_Path));
 
 	path_decode(payload, tipoPath);
 	return determine_node(tipoPath->path);
-}*/
+	*/
+}
