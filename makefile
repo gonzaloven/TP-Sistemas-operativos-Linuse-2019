@@ -1,14 +1,14 @@
 all:
-	cd libs/Hilolay && make
-	cd libs/libMuse && make
-	cd filesystem && make
-	cd memoria && make
-	cd planificador && make
+	make -C libs/Hilolay
+	make -C libs/libMuse
+	make -C filesystem
+	make -C memoria
+	make -C planificador
 
 clean:
-	cd libs/Hilolay && make clean
-	cd libs/libMuse && make clean
-	cd filesystem && make clean
-	cd memoria && make clean
-	cd planificador && make clean
+	make clean -C libs/Hilolay
+	make clean -C libs/libMuse
+	make clean -C filesystem
+	make clean -C memoria
+	make clean -C planificador
 
