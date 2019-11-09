@@ -1,10 +1,6 @@
 #include "sac_cliente.h"
-#include "message.h"
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
 
-static int send_call(Function *f)
+int send_call(Function *f)
 {
 	Message msg;
 	MessageHeader header;
@@ -19,7 +15,7 @@ static int send_call(Function *f)
 	return resultado;
 }
 
-static int send_path(FuncType func_type, const char *path){
+int send_path(FuncType func_type, const char *path){
 	Function f;
 	Arg arg;
 

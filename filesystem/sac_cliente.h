@@ -10,6 +10,7 @@
 #include <commons/log.h>
 #include "message.h"
 #include "network.h"
+#include <stddef.h>
 
 t_log *logger;
 
