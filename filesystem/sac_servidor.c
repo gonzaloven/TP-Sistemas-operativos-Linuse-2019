@@ -3,9 +3,6 @@
 
 t_log *fuse_logger;
 fuse_configuration *fuse_config;
-GBlock* disco;
-GFile* tablaDeNodos;
-t_bitarray* bitmap;
 size_t diskSize;
 
 uint32_t fuse_invoke_function(Function *f,uint32_t pid);

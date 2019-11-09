@@ -44,29 +44,75 @@ ptrGBloque determine_nodo(const char* path){
 }
 */
 
-int split_path(const char* path, char** super_path, char** name){
-	int aux;
-	strcpy(*super_path, path);
-	strcpy(*name, path);
-	// Obtain and accommodate the file name.
-	if (lastchar(path, '/')) {
-		(*name)[strlen(*name)-1] = '\0';
-	}
-	*name = strrchr(*name, '/');
-	*name = *name + 1; // Accommodate the name, since the first digit is always '/'
+char **splitPath(char *path, int *size){
+    char *tmp;
+    char **splitted = NULL;
+    int i, length;
 
-	// Acomoda el super_path
-	if (lastchar(*super_path, '/')) {
-		(*super_path)[strlen(*super_path)-1] = '\0';
-	}
-	aux = strlen(*super_path) - strlen(*name);
-	(*super_path)[aux] = '\0';
+    if (!path){
+    	*size = 0;
+    	return NULL;
+    }
 
-	return 0;
+    tmp = strdup(path);
+    length = strlen(tmp);
+
+    *size = 1;
+    for (i = 0; i < length; i++) {
+        if (tmp[i] == '/') {
+            tmp[i] = '\0';
+            (*size)++;
+        }
+    }
+
+    splitted = (char **)malloc(*size * sizeof(*splitted));
+    if (!splitted) {
+        free(tmp);
+        *size = 0;
+        return NULL;
+    }
+
+    for (i = 0; i < *size; i++) {
+        splitted[i] = strdup(tmp);
+        tmp += strlen(splitted[i]) + 1;
+    }
+    return splitted;
 }
 
-int lastchar(const char* str, char chr){
-	if ( ( str[strlen(str)-1]  == chr) ) return 1;
-	return 0;
+bool esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre){
+
+	 return tablaDeNodos[nodo].state != 0 &&
+		    tablaDeNodos[nodo].parent_dir_block == nodoPadre &&
+		    tablaDeNodos[nodo].fname == filename;
+
 }
 
+int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre){
+	int currNode = 0;
+
+	while(esElNodoBuscado(currNode, filenameBuscado, nodoPadre) && currNode < MAX_NUMBER_OF_FILES){
+		currNode++;
+	}
+
+	return currNode;
+}
+
+int determine_nodo(char *path){
+	int nodoUltimoPadre = 0; //el nodo de "/"
+	char *filenameBuscado;
+
+	int dimListaSpliteada, i;
+	char **listaSpliteada;
+
+	listaSpliteada = splitPath(path, &dimListaSpliteada);
+
+	for(i=0 ; i<dimListaSpliteada; i++){
+
+		filenameBuscado = listaSpliteada[i];
+
+		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, nodoUltimoPadre);
+
+	}
+
+	return nodoUltimoPadre;
+}

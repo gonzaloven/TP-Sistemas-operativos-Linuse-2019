@@ -17,7 +17,6 @@
 #include <string.h>
 #include <errno.h>
 
-
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024
 #define MAGIC_NUMBER_NAME 3
@@ -67,6 +66,9 @@ typedef struct sac_server_gfile{
 	ptrGBloque indirect_blocks_array[BLKINDIRECT];
 }GFile;
 
+GBlock* disco;
+GFile* tablaDeNodos;
+t_bitarray* bitmap;
 
 // memory mapping data definition
 struct sac_server_header *header_start;
