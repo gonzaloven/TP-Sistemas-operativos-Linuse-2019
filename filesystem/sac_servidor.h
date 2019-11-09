@@ -36,6 +36,7 @@ typedef struct fuse_configuration_s
 {
 	int listen_port;
 	uint32_t disk_size;
+	char *path_archivo;
 }fuse_configuration;
 
 typedef uint32_t ptrGBloque;
@@ -43,7 +44,7 @@ typedef uint32_t ptrGBloque;
 // sac server block struct
 typedef struct sac_server_block{
 	unsigned char bytes[BLOQUE_SIZE];
-}GBlock;
+}__attribute__((packed)) GBlock;
 
 // sac server header struct
 typedef struct sac_server_header{
@@ -52,7 +53,7 @@ typedef struct sac_server_header{
 	uint32_t bitmap_start;
 	uint32_t bitmap_size; // in blocks
 	unsigned char padding[4081];
-}Header;
+}__attribute__((packed)) Header;
 
 
 // sac server file struct
@@ -64,10 +65,10 @@ typedef struct sac_server_gfile{
 	uint64_t create_date;
 	uint64_t modify_date;
 	ptrGBloque indirect_blocks_array[BLKINDIRECT];
-}GFile;
+}__attribute__((packed)) GFile;
 
-GBlock* disco;
-GFile* tablaDeNodos;
+GBlock *disco;
+GFile *tablaDeNodos;
 t_bitarray* bitmap;
 
 // memory mapping data definition

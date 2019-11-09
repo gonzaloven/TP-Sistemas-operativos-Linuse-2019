@@ -83,6 +83,7 @@ bool esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre){
 
 	 return tablaDeNodos[nodo].state != 0 &&
 		    tablaDeNodos[nodo].parent_dir_block == nodoPadre &&
+			//no se como hacer para que no joda (creo que esta bien)
 		    tablaDeNodos[nodo].fname == filename;
 
 }

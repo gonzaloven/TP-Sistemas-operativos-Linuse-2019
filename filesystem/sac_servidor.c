@@ -1,5 +1,6 @@
 #include "sac_servidor.h"
 #include <sys/stat.h>
+#include <fcntl.h>
 
 t_log *fuse_logger;
 fuse_configuration *fuse_config;
@@ -86,6 +87,7 @@ fuse_configuration* load_configuration(char *path)
 	
 	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
 	fc->disk_size = config_get_int_value(config,"DISK_SIZE");
+	fc->path_archivo = config_get_string_value(config,"PATH_ARCHIVO");
 	config_destroy(config);
 	return fc;
 }
@@ -144,16 +146,30 @@ uint32_t fuse_invoke_function(Function *f,uint32_t pid)
 
 }
 
+void configurar_server(){
+	int fileDescriptor;
+	diskSize = fuse_config->disk_size;
+	char *pathArchivo = fuse_config->path_archivo;
+	fileDescriptor = open(pathArchivo, O_RDONLY);
+
+	disco = (GBlock*) mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,fileDescriptor,0);
+
+	//el 2 en realidad deberia estar calculado, porque depende el tamanio del archivo, el bitmap mide distinto
+	tablaDeNodos = (GFile*) (disco + 2);
+
+	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
+}
+
 int main(int argc,char *argv[])
 {
 	/* te lo comente, el mmap devuelve *void habria que castearlo a *gbloque y tabla de nodos es gfile no gbloque
 	 * no se que onda la suma esa pero tambien me rompia
 	signal(SIGINT,fuse_stop_service);
+
 	fuse_start_service(handler);
-	*disco = mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,1,0);
-	tablaDeNodos = disco + 2;
-	bitmap = bitarray_create_with_mode(disco + 1, BLOQUE_SIZE, LSB_FIRST);
-	diskSize = fuse_config->disk_size;
+
+	configurar_server();
+
 	*/
 	return 0;
 }
