@@ -1,16 +1,23 @@
+TARGETCLI:= sac_cliente
+TARGETSV:= sac_servidor
 CC := gcc
-CFLAGS := -g -D_FILE_OFFSET_BITS=64 
+CFLAGSCLI := -g -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=27
+CFLAGSSV := -g
 UTILS := ../utils/
 INCDIR := -I$(UTILS)
-SAC_CLI_SRC := sac_cli.c
-SAC_SERV_SRC := sac_server.c $(UTILS)network.c $(UTILS)message.c $(UTILS)rpc.c $(UTILS)cJSON.c
-TARGET_SAC_CLI := sac_cli
-TARGET_SAC_SERVER := sac_srv
-LIBS := -lfuse
+LFLAGSCLI := -lfuse -lcommons -pthread
+LFLAGSSV := -lcommons -pthread
+SRCSCLI := sac_handlers.c sac_cliente.c $(UTILS)network.c $(UTILS)message.c
+SRCSSV := sac_servidor.c $(UTILS)network.c $(UTILS)message.c
 
-sac_cli:
-	$(CC) $(CFLAGS) $(SAC_CLI_SRC) -o $(TARGET_SAC_CLI) $(LIBS)
+all: sac_cliente sac_servidor
 
-sac_server:
-	$(CC) -g $(INCDIR) $(SAC_SERV_SRC) -o $(TARGET_SAC_SERVER) -lpthread -lcommons
+sac_cliente:
+	$(CC) $(CFLAGSCLI) $(INCDIR) $(SRCSCLI) -o $(TARGETCLI) $(LFLAGSCLI)
+
+sac_servidor:
+	$(CC) $(CFLAGSSV) $(INCDIR) $(SRCSSV) -o $(TARGETSV) $(LFLAGSSV)
+
+clean:
+	rm -f sac_cliente sac_servidor *.o
 

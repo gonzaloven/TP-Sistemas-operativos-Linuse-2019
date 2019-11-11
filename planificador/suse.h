@@ -1,7 +1,12 @@
 #ifndef SUSE_H
 #define SUSE_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "network.h"
+#include <commons/log.h>
+#include <commons/config.h>
+#include <signal.h>
 
 #define SUSE_CONFIG_PATH "../configs/planificador.config"
 

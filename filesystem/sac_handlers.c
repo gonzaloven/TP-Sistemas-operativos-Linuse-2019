@@ -1,6 +1,8 @@
-#include<sac_servidor.h>
+#include <stdlib.h>
+#include <string.h>
+#include "sac_servidor.h"
 
-
+/*
 ptrGBloque determine_nodo(const char* path){
 
 	// If it is the root directory, it returns 0
@@ -16,7 +18,7 @@ ptrGBloque determine_nodo(const char* path){
 
 	split_path(path, &super_path, &nombre);
 
-	nodo_anterior = determinar_nodo(super_path);
+	nodo_anterior = determine_nodo(super_path);
 
 
 	pthread_rwlock_rdlock(&rwlock); //Takes a lock for read
@@ -40,6 +42,7 @@ ptrGBloque determine_nodo(const char* path){
 
 	return (i); // +1?
 }
+*/
 
 int split_path(const char* path, char** super_path, char** name){
 	int aux;

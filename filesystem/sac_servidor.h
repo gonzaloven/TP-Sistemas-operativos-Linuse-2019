@@ -1,14 +1,22 @@
 #ifndef SAC_SERVER_H
 #define SAC_SERVER_H
 
+#include "network.h"
+#include <commons/log.h>
+#include <commons/config.h>
+#include <commons/bitarray.h>
+#include <commons/collections/list.h>
+#include <signal.h>
+#include <libgen.h>
+#include <sys/mman.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
-#include <commons/log.h>
-#include "protocol.h"
+
 
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024
@@ -28,7 +36,7 @@ typedef struct sac_configuration_s{
 typedef struct fuse_configuration_s
 {
 	int listen_port;
-	int disk_size;
+	uint32_t disk_size;
 }fuse_configuration;
 
 typedef uint32_t ptrGBloque;
@@ -41,7 +49,7 @@ typedef struct sac_server_block{
 // sac server header struct
 typedef struct sac_server_header{
 	unsigned char identificador[MAGIC_NUMBER_NAME];
-	uint32_t version = 1;
+	uint32_t version;
 	uint32_t bitmap_start;
 	uint32_t bitmap_size; // in blocks
 	unsigned char padding[4081];
@@ -74,17 +82,18 @@ int discDescriptor;
 // Functions to handle the disk
 
 /* * To read, documentation sac_client.h */
-int sac_server_getatrr(char* payload);
-int sac_server_readdir(char* payload);
-int sac_server_read(char* payload);
+int sac_server_getattr(char* path);
+int sac_server_readdir(char* path);
+int sac_server_read(char* path, size_t size, uint32_t offset);
+int sac_server_open(char* path);
+int sac_server_opendir(char* path);
 
 /* * To write, documentation sac_client.h */
-// 00000000000000000000000000 IDK IF THE PARAMETERS ARE GOING TO BE EXACTLY THESE 0000000000000000000000000
-int sac_server_mkdir(char* payload);
-int sac_server_rmdir(char* payload);
-int sac_server_write(char* payload);
-int sac_server_mknod(char* payload);
-int sac_server_unlink(char* payload);
+int sac_server_mkdir(char* path);
+int sac_server_rmdir(char* path);
+int sac_server_write(char* path, char* buf, size_t size, uint32_t offset);
+int sac_server_mknod(char* path);
+int sac_server_unlink(char* path);
 
 
 // Auxiliary structure management functions, located in sac_handlers

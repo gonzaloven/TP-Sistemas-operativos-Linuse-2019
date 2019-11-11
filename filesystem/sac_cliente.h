@@ -3,79 +3,18 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include <fuse.h>
 #include <string.h>
+#include <stdlib.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <commons/log.h>
 #include "message.h"
 #include "network.h"
+#include <stddef.h>
 
-
-struct t_runtime_options {
-	char* welcome_msg;
-	char* define_disc_path;
-	char* log_level_param;
-	char* log_path_param;
-} runtime_options;
-
-/*
- * This is the main structure of FUSE with which we tell
- * the library what functions it has to invoke according to the request.
-*/
-static struct fuse_operations sac_oper = {
-		.getattr = sac_clie_getattr,
-		.read = sac_clie_read,
-		.readdir = sac_clie_readdir,
-		.mkdir = sac_clie_mkdir,
-		.rmdir = sac_clie_rmdir,
-		.truncate = sac_clie_truncate,
-		.write = sac_clie_write,
-		.mknod = sac_clie_mknod,
-		.unlink = sac_clie_unlink,
-};
-
-/** keys for FUSE_OPT_ options */
-
-enum {
-	KEY_VERSION,
-	KEY_HELP,
-};
-
-static struct fuse_opt fuse_options[] = {
-
-		// Option that uses the "--Disc-Path" parameter if it is passed:
-		CUSTOM_FUSE_OPT_KEY("--Disc-Path=%s", define_disc_path, 0),
-
-		// Define the log level
-		CUSTOM_FUSE_OPT_KEY("--ll=%s", log_level_param, 0),
-
-		// Define the log path
-		CUSTOM_FUSE_OPT_KEY("--Log-Path", log_path_param, 0),
-
-		// Default fuse parameters
-		FUSE_OPT_KEY("-V", KEY_VERSION),
-		FUSE_OPT_KEY("--version", KEY_VERSION),
-		FUSE_OPT_KEY("-h", KEY_HELP),
-		FUSE_OPT_KEY("--help", KEY_HELP),
-		FUSE_OPT_END,
-};
-
-// This is our path, relative to the mount point, file inside the FS
-#define DEFAULT_FILE_PATH "/" DEFAULT_FILE_NAME
-#define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
-
-
-//variables globales
 t_log *logger;
-int master_socket;
 
-//functions
-
-int send_call(Function *f);
-int send_path(FuncType func_type, const char *path);
+int serverSocket;
 
 // Definition of functions to be implemented //
 
@@ -103,7 +42,7 @@ int send_path(FuncType func_type, const char *path);
  * 			stbuf->st_size = [SIZE];
  *
  */
-int sac_clie_getattr(const char *path, struct stat *stbuf);
+static int sac_getattr(const char *path, struct stat *stbuf);
 
 /*
  * @DESC
@@ -120,7 +59,7 @@ int sac_clie_getattr(const char *path, struct stat *stbuf);
  * 	@RETURN
  * 		O directory found. -ENOENT directory not found
  */
-int sac_clie_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) //
+static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi);
 
 /*
  * @DESC
@@ -139,7 +78,7 @@ int sac_clie_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t 
  * 		or -ENOENT if an error occurred. If the direct_io parameter is not present, the return values
  * 		​​are the number of bytes read if everithing ok or -ENOENT if an error occurred.
  */
-int sac_clie_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
+static int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 /* * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
@@ -153,7 +92,7 @@ int sac_clie_read(const char *path, char *buf, size_t size, off_t offset, struct
  * 	@RETURN
  * 		O archivo fue encontrado. -EACCES archivo no es accesible*/
 
-int sac_cliente_open(const char *path, struct fuse_file_info *fi);
+static int sac_open(const char *path, struct fuse_file_info *fi);
 
 // Writing functions //
 
@@ -170,7 +109,7 @@ int sac_cliente_open(const char *path, struct fuse_file_info *fi);
  * 	@ RET
  * 		It returns 0 on success, or -1 if an error ocurred
  */
-int sac_clie_mkdir(const char *pathname, mode_t mode);
+static int sac_mkdir(const char *pathname, mode_t mode);
 
 /*
  *  @DESC
@@ -184,7 +123,7 @@ int sac_clie_mkdir(const char *pathname, mode_t mode);
  *  @RET
  *  	It returns 0 on success, or -1 if an error ocurred
  */
-int sac_clie_mknod (const char *pathname, mode_t mode, dev_t dev);
+static int sac_mknod (const char *pathname, mode_t mode, dev_t dev);
 
 /*
  *	@DESC
@@ -197,7 +136,7 @@ int sac_clie_mknod (const char *pathname, mode_t mode, dev_t dev);
  *		It returns 0 on success, or -ENOENT if an error ocurred
  *
  */
-int sac_clie_rmdir(const char *pathname);
+static int sac_rmdir(const char *pathname);
 
 /*
  *  @DESC
@@ -209,7 +148,7 @@ int sac_clie_rmdir(const char *pathname);
  *  @RET
  *  	It returns 0 on success, or -ENOENT if an error ocurred
  */
-int sac_clie_unlink(const char *pathname);
+static int sac_unlink(const char *pathname);
 
 /*
  * 	@DESC
@@ -226,6 +165,6 @@ int sac_clie_unlink(const char *pathname);
  * 		It returns the size of bytes writeen on success, or a negative number
  * 		if an error ocurred, and errno is set appropriately.
  */
-int sac_clie_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
+static int sac_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi);
 
 #endif

@@ -1,25 +1,18 @@
-#include <sys/mman.h>
-#include "protocol.h"
 #include "sac_servidor.h"
-#include "network.h"
-#include "rpc.h"
-#include <commons/log.h>
-#include <commons/config.h>
-#include <signal.h>
-#include <libgen.h>
+#include <sys/stat.h>
 
-t_log *fuse_logger = NULL;
-fuse_configuration *fuse_config = NULL;
-GBlock* disco = NULL;
-GFile* tablaDeNodos = NULL;
-t_bitarray* bitmap = NULL;
-size_t diskSize = NULL;
+t_log *fuse_logger;
+fuse_configuration *fuse_config;
+GBlock* disco;
+GFile* tablaDeNodos;
+t_bitarray* bitmap;
+size_t diskSize;
 
 uint32_t fuse_invoke_function(Function *f,uint32_t pid);
 
 int fuse_start_service(ConnectionHandler ch)
 {
-	fuse_config = load_configuration(SAC_CONFIG_PATH);
+	//fuse_config = load_configuration(SAC_CONFIG_PATH);
 	fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
 	server_start(fuse_config->listen_port,ch);
 }
@@ -30,6 +23,31 @@ void fuse_stop_service()
 	free(fuse_config);
 	log_destroy(fuse_logger);
 	server_stop();
+}
+
+void message_handler(Message *m,int sock)
+{
+	uint32_t res= 0;
+	Message msg;
+	MessageHeader head;
+	switch(m->header.message_type)
+	{
+		case MESSAGE_CALL:
+			res = fuse_invoke_function((Function *)m->data,m->header.caller_id);
+			log_trace(fuse_logger,"Call received!");
+			message_free_data(m);
+
+			create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
+			create_response_message(&msg,&head,res);
+			send_message(sock,&msg);
+			message_free_data(&msg);
+			break;
+		default:
+			log_error(fuse_logger,"Undefined message");
+			break;
+	}
+	return;
+
 }
 
 void* handler(void *args)
@@ -57,7 +75,7 @@ void* handler(void *args)
 	return (void*)NULL;
 }
 
-fuse_configuration *load_configuration(char *path)
+fuse_configuration* load_configuration(char *path)
 {
 	t_config *config = config_create(path);
 	fuse_configuration *fc = (fuse_configuration *)malloc(sizeof(fuse_configuration)); 
@@ -75,108 +93,113 @@ fuse_configuration *load_configuration(char *path)
 	return fc;
 }
 
-/*
-void message_handler(Message *m,int sock)
-{
-	uint32_t res= 0;
-	Message msg;
-	MessageHeader head;
-	switch(m->header.message_type)
-	{
-		case MESSAGE_CALL:
-			res = fuse_invoke_function((Function *)m->data,m->header.caller_id);
-			log_trace(fuse_logger,"Call received!");
-			message_free_data(m);
-			
-			create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
-			create_response_message(&msg,&head,res);
-			send_message(sock,&msg);
-			message_free_data(&msg);
-			break;
-		default:
-			log_error(fuse_logger,"Undefined message");
-			break;
-	}
-	return;
-
-}
-
 uint32_t fuse_invoke_function(Function *f,uint32_t pid) 
 {
 	uint32_t func_ret = 0;
 	switch(f->type)
 	{
-		case FUNCTION_MALLOC:
-			log_debug(muse_logger,"Malloc called with args ->%d",f->args[0].value.val_u32);
-			func_ret = muse_malloc(f->args[0].value.val_u32,pid);//TODO put the caller_id in func
+		case FUNCTION_GETATTR:
+			log_debug(fuse_logger,"Getattr called");
+			func_ret = sac_server_getattr(f->args[0].value.val_charptr);
 			break;
-		case FUNCTION_FREE:
-			log_debug(muse_logger,"Free called");
-			func_ret = muse_free(f->args[0].value.val_u32,pid);
+		case FUNCTION_READDIR:
+			log_debug(fuse_logger,"Readdir called");
+			func_ret = sac_server_readdir(f->args[0].value.val_charptr);
 			break;
-		case FUNCTION_GET:
-			log_debug(muse_logger,"Get called");
-			func_ret = muse_get(f->args[0].value.val_voidptr,
-								f->args[1].value.val_u32,f->args[2].value.val_sizet,pid);
+		case FUNCTION_OPEN:
+			log_debug(fuse_logger,"Open called");
+			func_ret = sac_server_open(f->args[0].value.val_charptr);
 			break;
-		case FUNCTION_COPY:
-			log_debug(muse_logger,"Copy called with args -> arg[0] %d  arg[1] %d arg[2] %d",f->args[0].value.val_u32,f->args[1].value.val_u32,f->args[2].value.val_u32);
-			func_ret = muse_cpy(f->args[0].value.val_u32,
-								&f->args[1].value.val_u32,f->args[2].value.val_u32,pid);
+		case FUNCTION_READ:
+			log_debug(fuse_logger,"Read called with args -> arg[0] %d  arg[1] %d arg[2] %d", f->args[0].value.val_charptr, f->args[1].value.val_sizet, f->args[2].value.val_u32);
+			func_ret = sac_server_read(f->args[0].value.val_charptr, f->args[1].value.val_sizet, f->args[2].value.val_u32);
 			break;
-		case FUNCTION_MAP:
-			log_debug(muse_logger,"Map called");
-			func_ret = muse_map(f->args[0].value.val_charptr,
-								f->args[1].value.val_sizet,f->args[2].value.val_u32,pid);
+		case FUNCTION_OPENDIR:
+			log_debug(fuse_logger,"Opendir called");
+			func_ret = sac_server_opendir(f->args[0].value.val_charptr);
 			break;
-		case FUNCTION_SYNC:
-			log_debug(muse_logger,"Sync called");
-			func_ret = muse_sync(f->args[0].value.val_u32,f->args[1].value.val_sizet,pid);
+		case FUNCTION_MKNOD:
+			log_debug(fuse_logger,"Mknod called");
+			func_ret = sac_server_mknod(f->args[0].value.val_charptr);
 			break;
-		case FUNCTION_UNMAP:
-			log_debug(muse_logger,"Unmap called");
-			func_ret = muse_unmap(f->args[0].value.val_u32,pid);
+		case FUNCTION_WRITE:
+			log_debug(fuse_logger,"Write called");
+			func_ret = sac_server_write(f->args[0].value.val_charptr, f->args[1].value.val_charptr, f->args[2].value.val_sizet, f->args[3].value.val_u32);
+			break;
+		case FUNCTION_UNLINK:
+			log_debug(fuse_logger,"Unlink called");
+			func_ret = sac_server_unlink(f->args[0].value.val_charptr);
+			break;
+		case FUNCTION_MKDIR:
+			log_debug(fuse_logger,"Mkdir called");
+			func_ret = sac_server_mkdir(f->args[0].value.val_charptr);
+			break;
+		case FUNCTION_RMDIR:
+			log_debug(fuse_logger,"Rmdir called");
+			func_ret = sac_server_rmdir(f->args[0].value.val_charptr);
 			break;
 		default:
-			log_error(muse_logger,"Unknown function");
+			log_error(fuse_logger,"Unknown function");
 			func_ret = 0;
 			break;
 	}
-	return func_ret;currNode
+	return func_ret;
 
 }
-*/
 
 int main(int argc,char *argv[])
 {
+	/* te lo comente, el mmap devuelve *void habria que castearlo a *gbloque y tabla de nodos es gfile no gbloque
+	 * no se que onda la suma esa pero tambien me rompia
 	signal(SIGINT,fuse_stop_service);
-	fuse_start_service(handler); 
-	&disco = mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,1,0);
+	fuse_start_service(handler);
+	*disco = mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,1,0);
 	tablaDeNodos = disco + 2;
 	bitmap = bitarray_create_with_mode(disco + 1, BLOQUE_SIZE, LSB_FIRST);
 	diskSize = fuse_config->disk_size;
+	*/
 	return 0;
 }
 
-int sac_server_getattr(char* payload){
+int sac_server_open(char* path){
+	//TODO
+	return 0;
+}
+
+int sac_server_opendir(char* path){
+	//TODO
+	return 0;
+}
+
+int sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
+	//TODO
+	return 0;
+}
+
+int sac_server_getattr(char* path){
+	/*
+	 * Lo comento porque t_rta_getattr ya no existe al eliminar protocolo
 	t_Rta_Getattr metadata;
 
-	ptrGBloque nodoBuscadoPosicion = determine_node(payload->path);
+	ptrGBloque nodoBuscadoPosicion = determine_node(path);
 
 	bool esArchivo = tablaDeNodos[nodoBuscadoPosicion].state == 1;
 
-	metadata.modo = esArchivo == 1 ? S_IFREG | 0444 : S_IFDIR | 0755; //permisos default para directorios y para archivos respectivamente
+	metadata.modo = esArchivo == 1 ? (S_IFREG | 0444) : (S_IFDIR | 0755); //permisos default para directorios y para archivos respectivamente
 	metadata.nlink_t = 1; //esto esta hardcodeado en otros tps porque no podemos crear hardlinks nosotros, asi que no tenemos como calcular cuantos tiene
 	metadata.total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
 
 	//Deberia completarse el envio del mensaje y seria eso
+	 *
+	 */
 
 }
 
-int sac_server_read(char* payload, int fd){
-	t_Getatrr* p_param = getatrr_decode(payload);
+int sac_server_read(char* path, size_t size, uint32_t offset){
+	/*
+	//t_Getatrr* p_param = getatrr_decode(payload);
 	log_info(logger, "Reading: Path: %s - Size: %d - Offset %d",
-			p_param->path, p_param->size, p_param->offset);
+	//		p_param->path, p_param->size, p_param->offset);
 	(void) fi;
 	unsigned int node_n, bloque_punteros, num_bloque_datos;
 	unsigned int bloque_a_buscar; // Estructura auxiliar para no dejar choclos
@@ -186,7 +209,7 @@ int sac_server_read(char* payload, int fd){
 	size_t tam = p_param->size;
 	int res;
 
-	node_n = determine_node(p_param->path);
+	//node_n = determine_node(p_param->path);
 
 	if (node_n == -1) return -ENOENT; // contemplo que exista el nodo
 
@@ -261,23 +284,25 @@ int sac_server_read(char* payload, int fd){
 	log_lock_trace(logger, "Read: Libera lock lectura. Cantidad de lectores: %d", rwlock.__data.__nr_readers);
 	log_trace(logger, "Terminada lectura.");
 	return res;
-
+	*/
+	return 0;
 }
 
 int sac_server_readdir (char* payload) {
+	/*
 	t_list* listaDeArchivos = list_create();
 	int i = 0;
-	ptrGBloque nodoPadre = get_nodo_path_payload(payload);
+	ptrGBloque nodoPadre = //get_nodo_path_payload(payload);
 
 	while(i < MAX_NUMBER_OF_FILES){
 		if(tablaDeNodos->state != 0)
 		{
 			if(tablaDeNodos->parent_dir_block == nodoPadre)
 			{
-				char * name = malloc(MAX_NAME_SIZE + 1 * (strlen(fname)+1));
+				char * name = malloc(MAX_NAME_SIZE + 1 * (strlen(tablaDeNodos->fname)+1));
 				strcpy(name, tablaDeNodos->fname);
 				*(name + MAX_NAME_SIZE + 1) = '\0';
-				list_add(listaDeArchivos, fname);
+				list_add(listaDeArchivos, tablaDeNodos->fname);
 				free(name);
 			}
 		}
@@ -287,76 +312,11 @@ int sac_server_readdir (char* payload) {
 	//aca deberia enviarse el paquete con la lista serializada
 
 	list_destroy(listaDeArchivos);
+	*/
 	return 0;
 }
 
-int sac_server_mknod (char* payload){
-	crear_nuevo_nodo(payload, 1);
-	return 0;
-}
-
-int sac_server_mkdir (char* payload){
-	crear_nuevo_nodo(payload, 2);
-	return 0;
-}
-
-int sac_server_unlink (char* payload){
-	
-	ptrGBloque nodoPath = get_nodo_path_payload(payload);
-	//tengo que validar si no existe el nodo para ese path
-	GFile* nodoABorrar = tablaDeNodos + nodoPath;
-
-	borrar_archivo(nodoABorrar, nodoPath);
-
-	return 0;
-}
-
-int sac_server_rmdir (char* payload){
-	ptrGBloque nodoPadre = get_nodo_path_payload(payload);
-	//validar que no sea el directorio raiz
-
-	borrar_directorio(nodoPadre);
-
-	return 0;
-}
-
-void borrar_directorio (ptrGBloque nodoPosicion){
-	int currNode = 0;
-
-	GFile *nodoPadre = tablaDeNodos + nodoPosicion;
-	borrar_archivo(nodoPadre, nodoPosicion);
-
-	while(currNode < MAX_NUMBER_OF_FILES){
-		if(tablaDeNodos[currNode].state != 0)
-		{
-			if(tablaDeNodos[currNode].parent_dir_block == nodoPosicion)
-			{
-				GFile *nodoABorrar = tablaDeNodos + currNode;
-				if(tablaDeNodos[currNode].state == 1){
-					borrar_archivo(nodoABorrar, currNode);
-				}else{
-					borrar_directorio(currNode);
-				}
-			}
-		}
-		currNode++;
-	}
-}
-
-void borrar_archivo(GFile* nodo, ptrGBloque nodoPosicion){
-	nodo->state = 0;
-
-	bitarray_clean_bit(bitmap, nodoPosicion + 2);
-}
-
-ptrGBloque get_nodo_path_payload(char* payload){
-	t_Path* tipoPath = malloc(sizeof(t_Path));
-
-	path_decode(payload, tipoPath);
-	return determine_node(tipoPath->path);
-}
-
-void crear_nuevo_nodo (char* payload, int tipoDeArchivo){
+/*int crear_nuevo_nodo (char* payload, int tipoDeArchivo){
 	int currNode = 0;
 	t_Path *tipoPath = malloc(sizeof(t_Path));
 	char *parentDirPath;
@@ -389,4 +349,82 @@ void crear_nuevo_nodo (char* payload, int tipoDeArchivo){
 	bitarray_set_bit(bitmap, currNode + 2);
 
 	msync(disco, diskSize, MS_SYNC);
+	return 0;
+}*/
+
+int sac_server_mknod (char* payload){
+	/*
+	return crear_nuevo_nodo(payload, 1);
+	*/
+	return 0;
+}
+
+int sac_server_mkdir (char* payload){
+	/*
+	return crear_nuevo_nodo(payload, 2);
+	*/
+	return 0;
+}
+
+void borrar_directorio (ptrGBloque nodoPosicion){
+	/*
+	int currNode = 0;
+
+	GFile *nodoPadre = tablaDeNodos + nodoPosicion;
+	borrar_archivo(nodoPadre, nodoPosicion);
+
+	while(currNode < MAX_NUMBER_OF_FILES){
+		if(tablaDeNodos[currNode].state != 0)
+		{
+			if(tablaDeNodos[currNode].parent_dir_block == nodoPosicion)
+			{
+				GFile *nodoABorrar = tablaDeNodos + currNode;
+				if(tablaDeNodos[currNode].state == 1){
+					borrar_archivo(nodoABorrar, currNode);
+				}else{
+					borrar_directorio(currNode);
+				}
+			}
+		}
+		currNode++;
+	}
+	*/
+}
+
+void borrar_archivo(GFile* nodo, ptrGBloque nodoPosicion){
+	/*
+	nodo->state = 0;
+
+	bitarray_clean_bit(bitmap, nodoPosicion + 2);
+	*/
+}
+
+int sac_server_unlink (char* payload){
+	/*
+	ptrGBloque nodoPath = get_nodo_path_payload(payload);
+	//tengo que validar si no existe el nodo para ese path
+	GFile* nodoABorrar = tablaDeNodos + nodoPath;
+
+	borrar_archivo(nodoABorrar, nodoPath);
+	*/
+	return 0;
+}
+
+int sac_server_rmdir (char* payload){
+	/*
+	ptrGBloque nodoPadre = get_nodo_path_payload(payload);
+	//validar que no sea el directorio raiz
+
+	borrar_directorio(nodoPadre);
+	*/
+	return 0;
+}
+
+ptrGBloque get_nodo_path_payload(char* payload){
+	/*
+	t_Path* tipoPath = malloc(sizeof(t_Path));
+
+	path_decode(payload, tipoPath);
+	return determine_node(tipoPath->path);
+	*/
 }

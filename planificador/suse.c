@@ -18,7 +18,8 @@ void *client_handler(void *args);
 void *report_metrics(void *args);
 suse_configuration *load_configuration(char *path);
 
-semaphore_t * suse_semaphores;
+semaphore_t * suse_semaphores; // esto es una estructura que hizo el que estaba en planificacion en utils, ni idea si esta bien,
+								// esta vacio el .c
 unsigned int suse_nsemaphores;
 
 int suse_init(ConnectionHandler ch)
@@ -120,8 +121,6 @@ void *client_handler(void *args)
 
 	log_debug(suse_logger,"The client was disconnected!");
 	close(sock);
-
-	return (void*) NULL;
 }
 
 void *report_metrics(void *args) {
@@ -166,9 +165,9 @@ suse_configuration *load_configuration(char *path)
 
 void suse_initialize_semaphores()
 {
-	suse_nsemaphores = sizeof(suse_configuration->sem_id) / sizeof(char *);
+	suse_nsemaphores = sizeof(suse_config->sem_id) / sizeof(char *);
 
-	for (int i = 0; i < suse_nsemaphores, i++)
+	for(int i = 0; i < suse_nsemaphores; i++)
 	{
 		suse_semaphores[i]->id = suse_config->sem_id[i];
 		suse_semaphores[i]->val = atoi(suse_config->sem_init[i]);
@@ -186,7 +185,8 @@ void message_handler(Message *m,int sock)
 			break;
 		case MESSAGE_CALL:
 			log_debug(suse_logger,"Remote call received!");
-			rpc_server_invoke(m->data,sock);
+			//deprecated rcp se usaba json, actualiza a actual serializacion
+			//rpc_server_invoke(m->data,sock);
 			message_free_data(m);
 			break;
 		case MESSAGE_NEW_ULT:

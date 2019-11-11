@@ -3,12 +3,16 @@ CC:=gcc
 UTILS:= ../utils/
 CFLAGS:= -g
 INCDIR:= -I$(UTILS)
-SRCS := suse.c $(UTILS)network.c $(UTILS)message.c $(UTILS)rpc.c $(UTILS)cJSON.c
-LFLAGS := -lpthread -lcommons
+# Las metrics no se si van en un include de suse, no tengo idea para que la usa porque es un empty file
+# por las dudas la pongo como que la necesita para compilar pero al hacerla fijense
+SRCS := suse.c metrics.c $(UTILS)network.c $(UTILS)message.c
+LFLAGS := -pthread -lcommons
+
+all: suse
 
 suse:
-		$(CC) $(CFLAGS) $(INCDIR) $(SRCS) -o $(TARGET) $(LFLAGS)
+	$(CC) $(CFLAGS) $(INCDIR) $(SRCS) -o $(TARGET) $(LFLAGS)
 
 clean:
-		rm suse *.o
+	rm -f suse *.o
 

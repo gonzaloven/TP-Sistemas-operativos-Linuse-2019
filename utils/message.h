@@ -3,6 +3,8 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <commons/log.h>
+#include <pthread.h>
 
 typedef enum{
 	FUNCTION_MALLOC,
@@ -24,7 +26,8 @@ typedef enum{
 	FUNCTION_WRITE,
 	FUNCTION_UNLINK,
 	FUNCTION_MKDIR,
-	FUNCTION_RMDIR
+	FUNCTION_RMDIR,
+	FUNCTION_OPENDIR
 }FuncType;
 
 typedef enum{
