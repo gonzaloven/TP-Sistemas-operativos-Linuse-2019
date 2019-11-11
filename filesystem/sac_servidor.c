@@ -9,19 +9,38 @@ size_t diskSize;
 
 uint32_t fuse_invoke_function(Function *f,uint32_t pid);
 
-int fuse_start_service(ConnectionHandler ch)
-{
-	//fuse_config = load_configuration(SAC_CONFIG_PATH);
-	fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
-	server_start(fuse_config->listen_port,ch);
-}
-
 void fuse_stop_service()
 {
 	log_info(fuse_logger,"SIGINT received.Shuting down!");
 	free(fuse_config);
 	log_destroy(fuse_logger);
 	server_stop();
+}
+
+fuse_configuration* load_configuration(char *path)
+{
+	t_config *config = config_create(path);
+	fuse_configuration *fc = (fuse_configuration *)malloc(sizeof(fuse_configuration));
+
+	if(config == NULL)
+	{
+		log_error(fuse_logger,"Configuration couldn't be loaded.Quitting program!");
+		fuse_stop_service();
+		exit(-1);
+	}
+
+	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
+	fc->disk_size = config_get_int_value(config,"DISK_SIZE");
+	fc->path_archivo = config_get_string_value(config,"PATH_ARCHIVO");
+	config_destroy(config);
+	return fc;
+}
+
+int fuse_start_service(ConnectionHandler ch)
+{
+	fuse_config = load_configuration(SAC_CONFIG_PATH);
+	fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
+	server_start(fuse_config->listen_port,ch);
 }
 
 void message_handler(Message *m,int sock)
@@ -72,25 +91,6 @@ void* handler(void *args)
 	log_debug(fuse_logger,"The client was disconnected!");
 	close(sock);
 	return (void*)NULL;
-}
-
-fuse_configuration* load_configuration(char *path)
-{
-	t_config *config = config_create(path);
-	fuse_configuration *fc = (fuse_configuration *)malloc(sizeof(fuse_configuration)); 
-
-	if(config == NULL)
-	{
-		log_error(fuse_logger,"Configuration couldn't be loaded.Quitting program!");
-		fuse_stop_service();
-		exit(-1);
-	}
-	
-	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
-	fc->disk_size = config_get_int_value(config,"DISK_SIZE");
-	fc->path_archivo = config_get_string_value(config,"PATH_ARCHIVO");
-	config_destroy(config);
-	return fc;
 }
 
 uint32_t fuse_invoke_function(Function *f,uint32_t pid) 
