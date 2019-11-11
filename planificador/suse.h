@@ -22,9 +22,9 @@ typedef struct suse_configuration_s
 }suse_configuration;
 
 /* Starts server,creates a logger and loads configuration */
-int suse_start_service(ConnectionHandler ch);
+int _suse_init(ConnectionHandler ch);
 /* Stops server,frees resources */
-void suse_stop_service();
+void _suse_stop_service();
 
 /* Decides wich message has arrived
  * and depending on the message 

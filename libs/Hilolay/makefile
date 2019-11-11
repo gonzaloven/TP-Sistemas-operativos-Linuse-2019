@@ -3,7 +3,7 @@ TARGET:= libhilolay.so
 UTILS:= ../../utils/
 INCDIR:= -I$(UTILS)
 CFLAGS:= -g -c -fpic
-SRCS:= hilolay.c $(UTILS)network.c $(UTILS)message.c
+SRCS:= hilolay.c $(UTILS)network.c $(UTILS)message.c $(UTILS)semaphore.c
 LIBFLAGS:= -shared -o
 OBJS:= hilolay.o
 
@@ -11,7 +11,7 @@ OBJS:= hilolay.o
 all:libhilolay
 
 #libhilolay
-libhilolay: hilolay.o
+libhilolay: hilolay.o hilolay_internal.c hilolay_internal.h hilolay_alumnos.h
 	$(CC) -g $(LIBFLAGS) $(TARGET) hilolay.o
 	mv -f libhilolay.so ../bin
 
