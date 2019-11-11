@@ -16,6 +16,7 @@
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
+#include "sac_handlers.c"
 
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024
@@ -100,19 +101,6 @@ int sac_server_unlink(char* path);
 
 
 // Auxiliary structure management functions, located in sac_handlers
-
-/* @DESC
- * 		Determine which is the node where the path is located.
- *
- * 	@PARAM
- * 		path - Path of the directory/file to be found
- *
- * 	@RETURN
- * 		Returns the block number where is the path or -1 if an error ocurred
- *
- */
-
-ptrGBloque determine_node(const char* path);
 
 /*
  * 	@DESC

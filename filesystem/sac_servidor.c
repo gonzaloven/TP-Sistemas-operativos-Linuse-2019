@@ -162,20 +162,24 @@ void configurar_server(){
 
 int main(int argc,char *argv[])
 {
-	/* te lo comente, el mmap devuelve *void habria que castearlo a *gbloque y tabla de nodos es gfile no gbloque
-	 * no se que onda la suma esa pero tambien me rompia
 	signal(SIGINT,fuse_stop_service);
 
 	fuse_start_service(handler);
 
 	configurar_server();
 
-	*/
 	return 0;
 }
 
 int sac_server_open(char* path){
-	//TODO
+
+	ptrGBloque nodoBuscado = determine_nodo(path);
+
+	if(nodoBuscado == -1){
+		return -ENOENT;
+	}
+
+
 	return 0;
 }
 
@@ -191,16 +195,17 @@ int sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
 
 int sac_server_getattr(char* path){
 	/*
-	 * Lo comento porque t_rta_getattr ya no existe al eliminar protocolo
-	t_Rta_Getattr metadata;
+	uint32_t modo;
+	uint32_t nlink_t;
+	uint32_t total_size;
 
-	ptrGBloque nodoBuscadoPosicion = determine_node(path);
+	ptrGBloque nodoBuscadoPosicion = determine_nodo(path);
 
 	bool esArchivo = tablaDeNodos[nodoBuscadoPosicion].state == 1;
 
-	metadata.modo = esArchivo == 1 ? (S_IFREG | 0444) : (S_IFDIR | 0755); //permisos default para directorios y para archivos respectivamente
-	metadata.nlink_t = 1; //esto esta hardcodeado en otros tps porque no podemos crear hardlinks nosotros, asi que no tenemos como calcular cuantos tiene
-	metadata.total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
+	modo = esArchivo == 1 ? (S_IFREG | 0777) : (S_IFDIR | 0755); //permisos default para directorios y para archivos respectivamente
+	nlink_t = 1; //esto esta hardcodeado en otros tps porque no podemos crear hardlinks nosotros, asi que no tenemos como calcular cuantos tiene
+	total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
 
 	//Deberia completarse el envio del mensaje y seria eso
 	 *
@@ -301,11 +306,11 @@ int sac_server_read(char* path, size_t size, uint32_t offset){
 	return 0;
 }
 
-int sac_server_readdir (char* payload) {
+int sac_server_readdir (char* path) {
 	/*
 	t_list* listaDeArchivos = list_create();
 	int i = 0;
-	ptrGBloque nodoPadre = //get_nodo_path_payload(payload);
+	ptrGBloque nodoPadre = determine_nodo(path);
 
 	while(i < MAX_NUMBER_OF_FILES){
 		if(tablaDeNodos->state != 0)
@@ -329,9 +334,8 @@ int sac_server_readdir (char* payload) {
 	return 0;
 }
 
-/*int crear_nuevo_nodo (char* payload, int tipoDeArchivo){
+/*int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	int currNode = 0;
-	t_Path *tipoPath = malloc(sizeof(t_Path));
 	char *parentDirPath;
 	char *fileName;
 
@@ -344,11 +348,10 @@ int sac_server_readdir (char* payload) {
 		return EDQUOT;
 	}
 
-	path_decode(payload, tipoPath);
-	parentDirPath = dirname(tipoPath->path);
-	ptrGBloque nodoPadre = determine_node(parentDirPath);
+	parentDirPath = dirname(path);
+	ptrGBloque nodoPadre = determine_nodo(parentDirPath);
 
-	fileName = basename(payload->path);
+	fileName = basename(path);
 
 	GFile *nodoVacio = tablaDeNodos + currNode;
 
@@ -359,22 +362,20 @@ int sac_server_readdir (char* payload) {
 	// nodoVacio->create_date
 	// nodoVacio->modify_date
 
-	bitarray_set_bit(bitmap, currNode + 2);
-
 	msync(disco, diskSize, MS_SYNC);
 	return 0;
 }*/
 
-int sac_server_mknod (char* payload){
+int sac_server_mknod (char* path){
 	/*
-	return crear_nuevo_nodo(payload, 1);
+	return crear_nuevo_nodo(path, 1);
 	*/
 	return 0;
 }
 
-int sac_server_mkdir (char* payload){
+int sac_server_mkdir (char* path){
 	/*
-	return crear_nuevo_nodo(payload, 2);
+	return crear_nuevo_nodo(path, 2);
 	*/
 	return 0;
 }
@@ -408,13 +409,13 @@ void borrar_archivo(GFile* nodo, ptrGBloque nodoPosicion){
 	/*
 	nodo->state = 0;
 
-	bitarray_clean_bit(bitmap, nodoPosicion + 2);
+	aca tengo que hacer el borrado de todos los bloques de datos que tenga el archivo
 	*/
 }
 
-int sac_server_unlink (char* payload){
+int sac_server_unlink (char* path){
 	/*
-	ptrGBloque nodoPath = get_nodo_path_payload(payload);
+	ptrGBloque nodoPath =
 	//tengo que validar si no existe el nodo para ese path
 	GFile* nodoABorrar = tablaDeNodos + nodoPath;
 
@@ -423,21 +424,12 @@ int sac_server_unlink (char* payload){
 	return 0;
 }
 
-int sac_server_rmdir (char* payload){
+int sac_server_rmdir (char* path){
 	/*
-	ptrGBloque nodoPadre = get_nodo_path_payload(payload);
+	ptrGBloque nodoPadre = determine_nodo(path);
 	//validar que no sea el directorio raiz
 
 	borrar_directorio(nodoPadre);
 	*/
 	return 0;
-}
-
-ptrGBloque get_nodo_path_payload(char* payload){
-	/*
-	t_Path* tipoPath = malloc(sizeof(t_Path));
-
-	path_decode(payload, tipoPath);
-	return determine_node(tipoPath->path);
-	*/
 }
