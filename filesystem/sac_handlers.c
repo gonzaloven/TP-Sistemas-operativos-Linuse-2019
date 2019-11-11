@@ -11,7 +11,7 @@ ptrGBloque determine_nodo(const char* path){
 	int i, nodo_anterior, err = 0;
 
 	// Super_path used to get the top of the path, without the name.
-	char *super_path = (char*) malloc(strlen(path) +1), *nombre = (char*) malloc(strlen(path)+1);
+	char *super_path ude "sac_servidor.h"= (char*) malloc(strlen(path) +1), *nombre = (char*) malloc(strlen(path)+1);
 	char *start = nombre, *start_super_path = super_path; //Pointers used to free memory.
 	struct sac_server_gfile *node;
 	unsigned char *node_name;
@@ -98,7 +98,7 @@ int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre){
 	return currNode;
 }
 
-int determine_nodo(char *path){
+ptrGBloque determine_nodo(char *path){
 	int nodoUltimoPadre = 0; //el nodo de "/"
 	char *filenameBuscado;
 

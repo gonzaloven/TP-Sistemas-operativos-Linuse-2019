@@ -16,7 +16,6 @@
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
-#include "sac_handlers.c"
 
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024
