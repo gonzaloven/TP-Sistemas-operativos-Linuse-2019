@@ -7,7 +7,7 @@ t_log *fuse_logger;
 fuse_configuration *fuse_config;
 size_t diskSize;
 
-uint32_t fuse_invoke_function(Function *f,uint32_t pid);
+Function fuse_invoke_function(Function *f);
 
 void fuse_stop_service()
 {
@@ -45,20 +45,19 @@ int fuse_start_service(ConnectionHandler ch)
 
 void message_handler(Message *m,int sock)
 {
-	uint32_t res= 0;
+	Function frespuesta;
 	Message msg;
 	MessageHeader head;
 	switch(m->header.message_type)
 	{
 		case MESSAGE_CALL:
-			res = fuse_invoke_function((Function *)m->data,m->header.caller_id);
+			frespuesta = fuse_invoke_function((Function *)m->data);
 			log_trace(fuse_logger,"Call received!");
-			message_free_data(m);
-
-			create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
-			create_response_message(&msg,&head,res);
+			message_free_data(m->data);
+			create_message_header(&head,MESSAGE_CALL,1,sizeof(Function));
+			create_function_message(&msg,&head,&frespuesta);
 			send_message(sock,&msg);
-			message_free_data(&msg);
+			message_free_data(msg.data);
 			break;
 		default:
 			log_error(fuse_logger,"Undefined message");
@@ -93,9 +92,9 @@ void* handler(void *args)
 	return (void*)NULL;
 }
 
-uint32_t fuse_invoke_function(Function *f,uint32_t pid) 
+Function fuse_invoke_function(Function *f)
 {
-	uint32_t func_ret = 0;
+	Function func_ret;
 	switch(f->type)
 	{
 		case FUNCTION_GETATTR:
@@ -140,7 +139,6 @@ uint32_t fuse_invoke_function(Function *f,uint32_t pid)
 			break;
 		default:
 			log_error(fuse_logger,"Unknown function");
-			func_ret = 0;
 			break;
 	}
 	return func_ret;
@@ -172,29 +170,31 @@ int main(int argc,char *argv[])
 	return 0;
 }
 
-int sac_server_open(char* path){
-
+Function sac_server_open(char* path){
+	Function f;
 	ptrGBloque nodoBuscado = determine_nodo(path);
 
 	if(nodoBuscado == -1){
-		return -ENOENT;
+	//	return -ENOENT;
 	}
 
 
-	return 0;
+	return f;
 }
 
-int sac_server_opendir(char* path){
+Function sac_server_opendir(char* path){
 	//TODO
-	return 0;
+	Function f;
+	return f;
 }
 
-int sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
+Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
 	//TODO
-	return 0;
+	Function f;
+	return f;
 }
 
-int sac_server_getattr(char* path){
+Function sac_server_getattr(char* path){
 	/*
 	uint32_t modo;
 	uint32_t nlink_t;
@@ -211,10 +211,12 @@ int sac_server_getattr(char* path){
 	//Deberia completarse el envio del mensaje y seria eso
 	 *
 	 */
+	Function f;
+	return f;
 
 }
 
-int sac_server_read(char* path, size_t size, uint32_t offset){
+Function sac_server_read(char* path, size_t size, uint32_t offset){
 	/*
 	//t_Getatrr* p_param = getatrr_decode(payload);
 	log_info(logger, "Reading: Path: %s - Size: %d - Offset %d",
@@ -304,10 +306,11 @@ int sac_server_read(char* path, size_t size, uint32_t offset){
 	log_trace(logger, "Terminada lectura.");
 	return res;
 	*/
-	return 0;
+	Function f;
+	return f;
 }
 
-int sac_server_readdir (char* path) {
+Function sac_server_readdir (char* path) {
 	/*
 	t_list* listaDeArchivos = list_create();
 	int i = 0;
@@ -332,7 +335,8 @@ int sac_server_readdir (char* path) {
 
 	list_destroy(listaDeArchivos);
 	*/
-	return 0;
+	Function f;
+	return f;
 }
 
 /*int crear_nuevo_nodo (char* path, int tipoDeArchivo){
@@ -367,18 +371,20 @@ int sac_server_readdir (char* path) {
 	return 0;
 }*/
 
-int sac_server_mknod (char* path){
+Function sac_server_mknod (char* path){
 	/*
 	return crear_nuevo_nodo(path, 1);
 	*/
-	return 0;
+	Function f;
+	return f;
 }
 
-int sac_server_mkdir (char* path){
+Function sac_server_mkdir (char* path){
 	/*
 	return crear_nuevo_nodo(path, 2);
 	*/
-	return 0;
+	Function f;
+	return f;
 }
 
 void borrar_directorio (ptrGBloque nodoPosicion){
@@ -414,7 +420,7 @@ void borrar_archivo(GFile* nodo, ptrGBloque nodoPosicion){
 	*/
 }
 
-int sac_server_unlink (char* path){
+Function sac_server_unlink (char* path){
 	/*
 	ptrGBloque nodoPath =
 	//tengo que validar si no existe el nodo para ese path
@@ -422,15 +428,17 @@ int sac_server_unlink (char* path){
 
 	borrar_archivo(nodoABorrar, nodoPath);
 	*/
-	return 0;
+	Function f;
+	return f;
 }
 
-int sac_server_rmdir (char* path){
+Function sac_server_rmdir (char* path){
 	/*
 	ptrGBloque nodoPadre = determine_nodo(path);
 	//validar que no sea el directorio raiz
 
 	borrar_directorio(nodoPadre);
 	*/
-	return 0;
+	Function f;
+	return f;
 }

@@ -85,18 +85,18 @@ int discDescriptor;
 // Functions to handle the disk
 
 /* * To read, documentation sac_client.h */
-int sac_server_getattr(char* path);
-int sac_server_readdir(char* path);
-int sac_server_read(char* path, size_t size, uint32_t offset);
-int sac_server_open(char* path);
-int sac_server_opendir(char* path);
+Function sac_server_getattr(char* path);
+Function sac_server_readdir(char* path);
+Function sac_server_read(char* path, size_t size, uint32_t offset);
+Function sac_server_open(char* path);
+Function sac_server_opendir(char* path);
 
 /* * To write, documentation sac_client.h */
-int sac_server_mkdir(char* path);
-int sac_server_rmdir(char* path);
-int sac_server_write(char* path, char* buf, size_t size, uint32_t offset);
-int sac_server_mknod(char* path);
-int sac_server_unlink(char* path);
+Function sac_server_mkdir(char* path);
+Function sac_server_rmdir(char* path);
+Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset);
+Function sac_server_mknod(char* path);
+Function sac_server_unlink(char* path);
 
 
 // Auxiliary structure management functions, located in sac_handlers
