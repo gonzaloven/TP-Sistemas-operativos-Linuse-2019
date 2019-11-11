@@ -1,1 +1,0 @@
-Libreria hilolay interfaz entre programa y SUSE
