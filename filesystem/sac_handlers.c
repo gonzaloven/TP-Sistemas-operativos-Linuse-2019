@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
-#include "sac_servidor.h"
+#include "sac_handlers.h"
 
 /*
 ptrGBloque determine_nodo(const char* path){
@@ -79,12 +77,12 @@ char **splitPath(char *path, int *size){
     return splitted;
 }
 
-bool esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre){
+int esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre){
 
 	 return tablaDeNodos[nodo].state != 0 &&
 		    tablaDeNodos[nodo].parent_dir_block == nodoPadre &&
 			//no se como hacer para que no joda (creo que esta bien)
-		    tablaDeNodos[nodo].fname == filename;
+		    strcmp(tablaDeNodos[nodo].fname, filename);
 
 }
 

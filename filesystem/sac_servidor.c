@@ -1,6 +1,7 @@
 #include "sac_servidor.h"
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "sac_handlers.h"
 
 t_log *fuse_logger;
 fuse_configuration *fuse_config;
