@@ -22,12 +22,15 @@ int send_path(FuncType func_type, const char *path){
 
 	f.args[0].type = VAR_CHAR_PTR;
 	f.args[0].size = strlen(path) + 1;
-	strcpy(f.args[0].value.val_charptr, path);
+	f.args[0].value.val_charptr = malloc(f.args[0].size);
+	memcpy(f.args[0].value.val_charptr, path, f.args[0].size);
 
 	f.type = func_type;
 	f.num_args = 1;
 
 	int resultado = send_call(&f);
+
+	//free(f.args[0].value.val_charptr);
 
 	return resultado;
 }
@@ -159,7 +162,8 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 
 	fsend.args[0].type = VAR_CHAR_PTR;
 	fsend.args[0].size = strlen(path) + 1;
-	strcpy(fsend.args[0].value.val_charptr,path);
+	fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
+	memcpy(fsend.args[0].value.val_charptr, path, fsend.args[0].size);
 
 	fsend.args[1].type = VAR_SIZE_T;
 	fsend.args[1].size = sizeof(size_t);
@@ -172,6 +176,8 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	if(send_call(&fsend) == -1){
 		return EXIT_FAILURE;
 	}
+
+	//free(fsend.args[0].value.val_charptr);
 
 	receive_message(serverSocket,&msg);
 
@@ -224,11 +230,13 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 
 	f.args[0].type = VAR_CHAR_PTR;
 	f.args[0].size = strlen(path) + 1;
-	strcpy(f.args[0].value.val_charptr,path);
+	f.args[0].value.val_charptr = malloc(f.args[0].size);
+	memcpy(f.args[0].value.val_charptr, path, f.args[0].size);
 
 	f.args[1].type = VAR_CHAR_PTR;
 	f.args[1].size = strlen(buf) + 1;
-	strcpy(f.args[1].value.val_charptr,buf);
+	f.args[1].value.val_charptr = malloc(f.args[1].size);
+	memcpy(f.args[1].value.val_charptr, buf, f.args[1].size);
 
 	f.args[2].type = VAR_SIZE_T;
 	f.args[2].size = sizeof(size_t);
@@ -241,6 +249,9 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	if(send_call(&f) == -1){
 		return EXIT_FAILURE;
 	}
+
+	//free(f.args[1].value.val_charptr);
+	//free(f.args[0].value.val_charptr);
 
 	receive_message(serverSocket,&msg);
 

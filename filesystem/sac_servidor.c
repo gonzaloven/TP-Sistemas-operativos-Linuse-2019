@@ -94,7 +94,7 @@ void message_handler(Message *m,int sock)
 			create_message_header(&head,MESSAGE_CALL,1,sizeof(Function));
 			create_function_message(&msg,&head,&frespuesta);
 			send_message(sock,&msg);
-			message_free_data(msg.data);
+			//message_free_data(msg.data);
 			break;
 		default:
 			log_error(fuse_logger,"Undefined message");
@@ -406,10 +406,12 @@ Function sac_server_readdir (char* path) {
 	fsend.num_args = 1;
 	fsend.args[0].type = VAR_CHAR_PTR;
 	fsend.args[0].size = strlen(listaNombres) + 1;
-	strcpy(fsend.args[0].value.val_charptr, listaNombres);
+	fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
+	memcpy(fsend.args[0].value.val_charptr, listaNombres, fsend.args[0].size);
 
 	list_destroy(listaDeArchivos);
 	free(listaNombres);
+	// free(fsend.args[0].value.val_charptr);
 
 	return fsend;
 }
