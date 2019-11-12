@@ -62,11 +62,26 @@ void configurar_server(){
 
 	tablaDeNodos = (GFile*) (disco + inicioTabla);
 
+	printf("\033[0;34m");
+	printf("-----------Contenido de la tabla de nodos-----------\n");
+	printf("\033[0m");
+
 	//es para monitorear los archivos que hay en el filesystem, solo para testing
 	for(int i=0; i<100; i++){
-		printf("i: %d %d %s %d \n", i, tablaDeNodos[i].state, tablaDeNodos[i].fname, tablaDeNodos[i].parent_dir_block);
+
+		printf("Nodo:%d Bloque:%d Estado:%d Nombre:%s Bloque padre:%d\n",
+						i,
+						inicioTabla + i,
+						tablaDeNodos[i].state,
+						tablaDeNodos[i].fname,
+						tablaDeNodos[i].parent_dir_block);
+		printf("------------------------------------------------------------\n");
 
 	}
+
+	printf("\033[0;34m");
+	printf("-----------Fin tabla de nodos-----------\n");
+	printf("\033[0m");
 
 	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
 }
