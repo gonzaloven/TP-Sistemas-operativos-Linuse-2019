@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sac_servidor.h"
+#include <commons/string.h>
 
 char **splitPath(char *path, int *size);
 
@@ -16,6 +17,8 @@ int determine_nodo(char *path, int inicioTablaDeNodos);
 int tamano_malloc_list(t_list*);
 
 void lista_a_string(t_list* lista, char** string);
+
+int largoListaString(char** lista);
 
 
 #endif /* FILESYSTEM_SAC_HANDLERS_H_ */

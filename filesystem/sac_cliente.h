@@ -12,6 +12,8 @@
 #include "network.h"
 #include <stddef.h>
 #include "sac_handlers.h"
+#include <commons/string.h>
+#include "sac_handlers.h"
 
 t_log *logger;
 

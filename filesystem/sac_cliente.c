@@ -101,7 +101,8 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 		return 0;
 	}
 
-	listaSpliteada = splitPath(f->args[0].value.val_charptr, &dimListaSpliteada);
+	listaSpliteada = string_split(f->args[0].value.val_charptr, "/");
+	dimListaSpliteada = largoListaString(listaSpliteada);
 
 	for(int i=0 ; i<dimListaSpliteada; i++){
 
@@ -320,7 +321,7 @@ static int sac_mkdir(const char* path, mode_t mode){
 
 	int respuesta = fresp->args[0].value.val_u32;
 
-	free(msg.data);
+	//free(msg.data);
 
 	return respuesta;
 }

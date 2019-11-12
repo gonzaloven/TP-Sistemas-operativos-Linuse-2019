@@ -57,6 +57,16 @@ int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre){
 	return resultado;
 }
 
+int largoListaString(char** lista){
+	int largo = 0;
+	int i = 0;
+	for(i=0; lista[i] != NULL; i++){
+		largo++;
+	}
+
+	return largo;
+}
+
 int determine_nodo(char *path, int inicioTablaDeNodos){
 	ptrGBloque nodoUltimoPadre = inicioTablaDeNodos;
 	char *filenameBuscado;
@@ -64,18 +74,11 @@ int determine_nodo(char *path, int inicioTablaDeNodos){
 	int dimListaSpliteada, i;
 	char **listaSpliteada;
 
-	listaSpliteada = splitPath(path, &dimListaSpliteada);
+	listaSpliteada = string_split(path, "/");
+	dimListaSpliteada = largoListaString(listaSpliteada);
 
-	char* directorio = malloc(strlen(path) + 1);
-	char* pathOriginal = malloc(strlen(path) + 1);
-	char* filename = malloc(strlen(path) + 1);
-
-	memcpy(pathOriginal, path, strlen(path) + 1);
-	memcpy(directorio, dirname(path), strlen(path) + 1);
-	memcpy(filename, basename(pathOriginal), strlen(basename(pathOriginal)) + 1);
-
-	if(!strcmp(directorio, "/")){
-		filenameBuscado = filename;
+	if(dimListaSpliteada == 1){
+		filenameBuscado = listaSpliteada[0];
 		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, 0);
 		return nodoUltimoPadre;
 	}
@@ -91,20 +94,19 @@ int determine_nodo(char *path, int inicioTablaDeNodos){
 		}
 	}
 
-	free(directorio);
-	free(pathOriginal);
-	free(filename);
 	free(listaSpliteada);
 	return nodoUltimoPadre;
 }
 
 int tamano_malloc_list(t_list* lista){
 	int tamano = 0;
+	char* nombre;
 	for(int i=0; i < list_size(lista); i++){
-		tamano+= strlen((char*)list_get(lista, i));
+		nombre = (char*)list_get(lista, i);
+		tamano+= strlen((char*)list_get(lista, i)) + 1;
 	}
 
-	return tamano + 1; // +1 por el \0
+	return tamano;
 }
 
 void lista_a_string(t_list* lista, char** string){
@@ -117,4 +119,6 @@ void lista_a_string(t_list* lista, char** string){
 		strcat(*string, "/");
 		strcat(*string, (char*)list_get(lista, i));
 	}
+
+	int jamon = 1;
 }

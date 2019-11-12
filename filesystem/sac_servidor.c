@@ -464,8 +464,8 @@ Function sac_server_readdir (char* path) {
 	fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
 	memcpy(fsend.args[0].value.val_charptr, listaNombres, fsend.args[0].size);
 
-	list_destroy(listaDeArchivos);
-	free(listaNombres);
+	//list_destroy(listaDeArchivos);
+	//free(listaNombres);
 	// free(fsend.args[0].value.val_charptr);
 
 	return fsend;
@@ -476,23 +476,15 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	char *parentDirPath;
 	char *fileName;
 	int nodoPadre;
+	int dimListaSpliteada;
+	char **listaSpliteada;
 
-	//Esto es porque dirname y basename te cambian el valor de path aparentemente, no se como hacerlo sino
-	//Tengo que descubrir la forma de hacerlo sin repetir 40 veces lo mismo TODO
-	char* pathOriginal;
-	char* copiaPathOriginal;
-
-	pathOriginal = malloc(strlen(path) + 1);
-	copiaPathOriginal = malloc(strlen(path) + 1);
-	char* copia2PathOriginal = malloc(strlen(path) + 1);
-	char* filename = malloc(strlen(path) + 1);
-
-	memcpy(pathOriginal, path, strlen(path) + 1);
-	memcpy(copiaPathOriginal, path, strlen(path) + 1);
-	memcpy(filename, basename(copia2PathOriginal), strlen(basename(copia2PathOriginal)) + 1);
+	listaSpliteada = string_split(path, "/");
+	dimListaSpliteada = largoListaString(listaSpliteada);
+	fileName = listaSpliteada[dimListaSpliteada - 1];
 
 	while(tablaDeNodos[currNode].state != 0 && currNode < MAX_NUMBER_OF_FILES){
-		if(!strcmp(filename, tablaDeNodos[currNode].fname)){
+		if(!strcmp(fileName, tablaDeNodos[currNode].fname)){
 			return EEXIST;
 		}else{
 			currNode++;
@@ -509,19 +501,17 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	tiempoAhora = time(0);
 	timestamp = (uint64_t) tiempoAhora;
 
-	if(strcmp(dirname(path), "/")){
-		parentDirPath = dirname(path);
+	if(dimListaSpliteada > 1){
+		parentDirPath = listaSpliteada[dimListaSpliteada - 2];
 		nodoPadre = determine_nodo(parentDirPath, inicioTablaDeNodos());
 	}
-
-	fileName = basename(pathOriginal);
 
 	GFile *nodoVacio = tablaDeNodos + currNode;
 
 	strcpy((char*) nodoVacio->fname, fileName);
 	nodoVacio->file_size = 0;
 
-	if(strcmp(dirname(copiaPathOriginal), "/")){
+	if(dimListaSpliteada > 1){
 		nodoVacio->parent_dir_block = nodoPadre + inicioTablaDeNodos();
 	}else{
 		nodoVacio->parent_dir_block = 0;
@@ -532,10 +522,6 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	nodoVacio->modify_date = timestamp;
 
 	msync(disco, diskSize, MS_SYNC);
-	free(pathOriginal);
-	free(copiaPathOriginal);
-	free(copia2PathOriginal);
-	free(filename);
 	return 0;
 }
 
