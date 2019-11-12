@@ -171,12 +171,16 @@ int main(int argc,char *argv[])
 }
 
 Function sac_server_open(char* path){
+
+
+
 	Function f;
+	/*
 	ptrGBloque nodoBuscado = determine_nodo(path);
 
 	if(nodoBuscado == -1){
 	//	return -ENOENT;
-	}
+	}*/
 
 
 	return f;
@@ -195,7 +199,10 @@ Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
 }
 
 Function sac_server_getattr(char* path){
-	/*
+	Message msg;
+	Function fsend;
+	Arg arg[3];
+
 	uint32_t modo;
 	uint32_t nlink_t;
 	uint32_t total_size;
@@ -204,16 +211,29 @@ Function sac_server_getattr(char* path){
 
 	bool esArchivo = tablaDeNodos[nodoBuscadoPosicion].state == 1;
 
-	modo = esArchivo == 1 ? (S_IFREG | 0777) : (S_IFDIR | 0755); //permisos default para directorios y para archivos respectivamente
-	nlink_t = 1; //esto esta hardcodeado en otros tps porque no podemos crear hardlinks nosotros, asi que no tenemos como calcular cuantos tiene
+	modo = esArchivo == 1 ? (S_IFREG | 0777) : (S_IFDIR | 0755);
+	nlink_t = 1;
 	total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
 
-	//Deberia completarse el envio del mensaje y seria eso
-	 *
-	 */
-	Function f;
-	return f;
+	arg[0].type = VAR_UINT32;
+	arg[0].size = sizeof(uint32_t);
+	arg[0].value.val_u32 = modo;
 
+	arg[1].type = VAR_UINT32;
+	arg[1].size = sizeof(uint32_t);
+	arg[1].value.val_u32 = nlink_t;
+
+	arg[2].type = VAR_UINT32;
+	arg[2].size = sizeof(uint32_t);
+	arg[2].value.val_u32 = total_size;
+
+	fsend.type = FUNCTION_RTA_GETATTR;
+	fsend.num_args = 3;
+	fsend.args[0] = arg[0];
+	fsend.args[1] = arg[1];
+	fsend.args[2] = arg[2];
+
+	return fsend;
 }
 
 Function sac_server_read(char* path, size_t size, uint32_t offset){

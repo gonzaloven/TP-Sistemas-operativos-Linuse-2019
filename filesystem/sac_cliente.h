@@ -94,6 +94,8 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 
 static int sac_open(const char *path, struct fuse_file_info *fi);
 
+static int sac_opendir(const char *path, struct fuse_file_info *fi);
+
 // Writing functions //
 
 /*

@@ -1,5 +1,9 @@
 #include "sac_cliente.h"
 
+//para el opendir
+#include <sys/types.h>
+#include <dirent.h>
+
 int send_call(Function *f)
 {
 	Message msg;
@@ -116,6 +120,19 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 	free(msg.data);
 
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
+}
+
+static int sac_opendir(const char *path, struct fuse_file_info *fi){
+	//esto es para testear
+	DIR *dp;
+
+	dp = opendir(path);
+
+	if (dp == NULL){
+		return -errno;
+	}
+
+	return 0;
 }
 
 static int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
@@ -283,6 +300,8 @@ static struct fuse_operations sac_oper = {
 		.getattr = sac_getattr,
 		.read = sac_read,
 		.readdir = sac_readdir,
+		.open = sac_open,
+		.opendir = sac_opendir,
 		.mkdir = sac_mkdir,
 		.rmdir = sac_rmdir,
 		.write = sac_write,
