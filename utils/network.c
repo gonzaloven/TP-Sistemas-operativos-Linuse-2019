@@ -13,7 +13,7 @@ int server_listen_connections(int listen_socket,ConnectionHandler f,ConnectionAr
 
 int server_start(int port,ConnectionHandler handler)
 {
-	server_logger = log_create("../logs/server.log","SERVER",true,LOG_LEVEL_TRACE);
+	server_logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/server.log","SERVER",true,LOG_LEVEL_TRACE);
     struct sockaddr_in server_address;
 	memset(&server_address,0,sizeof(server_address));
 	server_address.sin_family = AF_INET;

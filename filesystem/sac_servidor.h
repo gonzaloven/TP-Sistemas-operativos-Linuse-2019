@@ -26,7 +26,10 @@
 #define GFILEBYTABLE 1024
 #define BITMAP_START_BLOCK 1
 #define BITMAP_SIZE_BLOCKS 1
-#define SAC_CONFIG_PATH "../configs/filesystem.config"
+
+//NO DEJAR ASI
+#define SAC_CONFIG_PATH2 "../configs/filesystem.config"
+#define SAC_CONFIG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/configs/filesystem.config"
 
 typedef struct sac_configuration_s{
 	int listen_port;

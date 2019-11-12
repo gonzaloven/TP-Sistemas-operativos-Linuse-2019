@@ -1,9 +1,5 @@
 #include "sac_cliente.h"
 
-//para el opendir
-#include <sys/types.h>
-#include <dirent.h>
-
 int send_call(Function *f)
 {
 	Message msg;
@@ -14,18 +10,21 @@ int send_call(Function *f)
 
 	int resultado = send_message(serverSocket,&msg);
 
-	free(msg.data);
+	//free(msg.data);
 
 	return resultado;
+
 }
 
 int send_path(FuncType func_type, const char *path){
 	Function f;
 	Arg arg;
 
+	arg.value.val_charptr = malloc(strlen(path) + 1);
+
 	arg.type = VAR_CHAR_PTR;
 	arg.size = strlen(path) + 1;
-	strcpy(arg.value.val_charptr,path);
+	memcpy(arg.value.val_charptr, path, arg.size);
 
 	f.type = func_type;
 	f.num_args = 1;
@@ -123,16 +122,20 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 }
 
 static int sac_opendir(const char *path, struct fuse_file_info *fi){
-	//esto es para testear
-	DIR *dp;
+	Message msg;
 
-	dp = opendir(path);
-
-	if (dp == NULL){
-		return -errno;
+	if(send_path(FUNCTION_OPENDIR, path) == -1){
+		return EXIT_FAILURE;
 	}
 
-	return 0;
+	receive_message(serverSocket,&msg);
+
+	int *response = msg.data;
+	int respuesta = *response;
+
+	free(msg.data);
+
+	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
 
 static int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {

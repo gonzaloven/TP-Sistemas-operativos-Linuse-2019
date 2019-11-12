@@ -21,7 +21,6 @@ fuse_configuration* load_configuration(char *path)
 {
 	t_config *config = config_create(path);
 	fuse_configuration *fc = (fuse_configuration *)malloc(sizeof(fuse_configuration));
-
 	if(config == NULL)
 	{
 		log_error(fuse_logger,"Configuration couldn't be loaded.Quitting program!");
@@ -32,14 +31,16 @@ fuse_configuration* load_configuration(char *path)
 	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
 	fc->disk_size = config_get_int_value(config,"DISK_SIZE");
 	fc->path_archivo = config_get_string_value(config,"PATH_ARCHIVO");
+
 	config_destroy(config);
 	return fc;
 }
 
-int fuse_start_service(ConnectionHandler ch)
+void fuse_start_service(ConnectionHandler ch)
 {
 	fuse_config = load_configuration(SAC_CONFIG_PATH);
-	fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
+	fuse_logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs","FUSE",true,LOG_LEVEL_TRACE);
+	//fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
 	server_start(fuse_config->listen_port,ch);
 }
 
@@ -78,7 +79,6 @@ void* handler(void *args)
 
 	printf("A client has connected!\n");
 
-	//cambiar esto
 	while((n=receive_packet(sock,buffer,1024)) > 0)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
@@ -163,33 +163,43 @@ int main(int argc,char *argv[])
 {
 	signal(SIGINT,fuse_stop_service);
 
-	fuse_start_service(handler);
 
+	fuse_start_service(handler);
 	configurar_server();
 
 	return 0;
 }
 
-Function sac_server_open(char* path){
+Function validarSiExiste(char* path, FuncType tipoFuncion){
+	Message msg;
+	Function fsend;
+	Arg arg[1];
 
-
-
-	Function f;
-	/*
 	ptrGBloque nodoBuscado = determine_nodo(path);
 
 	if(nodoBuscado == -1){
-	//	return -ENOENT;
-	}*/
+		arg[0].type = VAR_UINT32;
+		arg[0].size = sizeof(uint32_t);
+		arg[0].value.val_u32 = -ENOENT;
+	}else{
+		arg[0].type = VAR_UINT32;
+		arg[0].size = sizeof(uint32_t);
+		arg[0].value.val_u32 = 0;
+	}
 
+	fsend.type = tipoFuncion;
+	fsend.num_args = 1;
+	fsend.args[0] = arg[0];
 
-	return f;
+	return fsend;
+}
+
+Function sac_server_open(char* path){
+	return validarSiExiste(path, FUNCTION_RTA_OPEN);
 }
 
 Function sac_server_opendir(char* path){
-	//TODO
-	Function f;
-	return f;
+	return validarSiExiste(path, FUNCTION_RTA_OPENDIR);
 }
 
 Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
@@ -331,7 +341,10 @@ Function sac_server_read(char* path, size_t size, uint32_t offset){
 }
 
 Function sac_server_readdir (char* path) {
-	/*
+	Message msg;
+	Function fsend;
+	Arg arg[1];
+
 	t_list* listaDeArchivos = list_create();
 	int i = 0;
 	ptrGBloque nodoPadre = determine_nodo(path);
@@ -351,12 +364,18 @@ Function sac_server_readdir (char* path) {
 		tablaDeNodos++;
 	}
 
-	//aca deberia enviarse el paquete con la lista serializada
+	//Aca hay que hacer que la serializacion acepte poner un tipo de dato que sea t_list, capaz usandola como un char*
+	//arg[0].type = VAR_CHAR_PTR;
+	//arg[0].size = strlen(listaDeArchivos) + 1;
+	//strcpy(arg[0].value.val_charptr,listaDeArchivos);
+
+	fsend.type = FUNCTION_RTA_READDIR;
+	fsend.num_args = 1;
+	fsend.args[0] = arg[0];
 
 	list_destroy(listaDeArchivos);
-	*/
-	Function f;
-	return f;
+
+	return fsend;
 }
 
 /*int crear_nuevo_nodo (char* path, int tipoDeArchivo){
