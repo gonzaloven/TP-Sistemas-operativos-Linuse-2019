@@ -10,7 +10,8 @@ int send_call(Function *f)
 
 	int resultado = send_message(serverSocket,&msg);
 
-	free(msg.data);
+	//free(msg->data);
+	//free(msg);
 
 	return resultado;
 
@@ -29,7 +30,7 @@ int send_path(FuncType func_type, const char *path){
 
 	int resultado = send_call(&f);
 
-	free(f.args[0].value.val_charptr);
+	//free(f.args[0].value.val_charptr);
 
 	return resultado;
 }
