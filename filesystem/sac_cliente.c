@@ -112,8 +112,13 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 	receive_message(serverSocket,&msg);
 
-	int *response = msg.data;
-	int respuesta = *response;
+	Function* f = msg.data;
+
+	if(f->type != FUNCTION_RTA_OPEN){
+		return -ENOENT;
+	}
+
+	int respuesta = f->args[0].value.val_u32;
 
 	free(msg.data);
 
@@ -129,8 +134,13 @@ static int sac_opendir(const char *path, struct fuse_file_info *fi){
 
 	receive_message(serverSocket,&msg);
 
-	int *response = msg.data;
-	int respuesta = *response;
+	Function* f = msg.data;
+
+	if(f->type != FUNCTION_RTA_OPENDIR){
+		return -ENOENT;
+	}
+
+	int respuesta = f->args[0].value.val_u32;
 
 	free(msg.data);
 
@@ -194,8 +204,13 @@ static int sac_mknod(const char* path, mode_t mode, dev_t rdev){
 
 	receive_message(serverSocket,&msg);
 
-	int *response = msg.data;
-	int respuesta = *response;
+	Function* f = msg.data;
+
+	if(f->type != FUNCTION_RTA_MKNOD){
+		return -ENOENT;
+	}
+
+	int respuesta = f->args[0].value.val_u32;
 
 	free(msg.data);
 
@@ -238,8 +253,13 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 
 	receive_message(serverSocket,&msg);
 
-	int *response = msg.data;
-	int bytesEscritos = *response;
+	Function* fresp = msg.data;
+
+	if(fresp->type != FUNCTION_RTA_WRITE){
+		return -ENOENT;
+	}
+
+	int bytesEscritos = fresp->args[0].value.val_u32;
 
 	free(msg.data);
 
@@ -256,8 +276,13 @@ static int sac_unlink(const char* path){
 
 	receive_message(serverSocket,&msg);
 
-	int *response = msg.data;
-	int respuesta = *response;
+	Function* fresp = msg.data;
+
+	if(fresp->type != FUNCTION_RTA_UNLINK){
+		return -ENOENT;
+	}
+
+	int respuesta = fresp->args[0].value.val_u32;
 
 	free(msg.data);
 
@@ -273,8 +298,13 @@ static int sac_mkdir(const char* path, mode_t mode){
 
 	receive_message(serverSocket,&msg);
 
-	int *response = msg.data;
-	int respuesta = *response;
+	Function* fresp = msg.data;
+
+	if(fresp->type != FUNCTION_RTA_MKDIR){
+		return -ENOENT;
+	}
+
+	int respuesta = fresp->args[0].value.val_u32;
 
 	free(msg.data);
 
@@ -290,8 +320,13 @@ static int sac_rmdir(const char* path){
 
 	receive_message(serverSocket,&msg);
 
-	int *response = msg.data;
-	int respuesta = *response;
+	Function* fresp = msg.data;
+
+	if(fresp->type != FUNCTION_RTA_RMDIR){
+		return -ENOENT;
+	}
+
+	int respuesta = fresp->args[0].value.val_u32;
 
 	free(msg.data);
 
