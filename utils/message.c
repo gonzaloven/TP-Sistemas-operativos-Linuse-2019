@@ -152,18 +152,21 @@ int function_arg_decode(void *buffer,size_t buffer_size,Arg *arg)
 	memcpy(&arg->size,cursor,sizeof(uint16_t));
 	cursor += sizeof(uint16_t);
 
+
 	switch(arg->type)
 	{
 		case VAR_UINT32:
-			memcpy(&(arg->value.val_charptr),cursor,arg->size);
+			memcpy(&(arg->value.val_u32),cursor,arg->size);
 			cursor += arg->size;
 			break;
 		case VAR_CHAR_PTR:
+			arg->value.val_charptr = malloc(arg->size);
 			memcpy(arg->value.val_charptr,cursor,arg->size);
 			cursor += arg->size;
 			break;
 		case VAR_VOID_PTR:
-			memcpy(&arg->value.val_voidptr,cursor,arg->size);
+			arg->value.val_voidptr = malloc(arg->size);
+			memcpy(arg->value.val_voidptr,cursor,arg->size);
 			cursor += arg->size;
 			break;
 		case VAR_SIZE_T:

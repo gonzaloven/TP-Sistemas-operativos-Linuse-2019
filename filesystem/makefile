@@ -17,6 +17,9 @@ sac_cliente:
 
 sac_servidor:
 	$(CC) $(CFLAGSSV) $(INCDIR) $(SRCSSV) -o $(TARGETSV) $(LFLAGSSV)
+	
+run_cliente:
+	./sac_cliente ./home -f -d
 
 clean:
 	rm -f sac_cliente sac_servidor *.o

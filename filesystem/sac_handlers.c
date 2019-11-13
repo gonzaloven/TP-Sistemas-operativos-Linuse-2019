@@ -79,16 +79,14 @@ char **splitPath(char *path, int *size){
 
 int esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre){
 
-	 return tablaDeNodos[nodo].state != 0 &&
-		    tablaDeNodos[nodo].parent_dir_block == nodoPadre &&
-		    strcmp(tablaDeNodos[nodo].fname, filename);
-
+	return tablaDeNodos[nodo].state != 0;
+	//&& tablaDeNodos[nodo].parent_dir_block == nodoPadre && strcmp(tablaDeNodos[nodo].fname, filename);
 }
 
 int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre){
 	int currNode = 0;
 
-	while(esElNodoBuscado(currNode, filenameBuscado, nodoPadre) && currNode < MAX_NUMBER_OF_FILES){
+	while(!esElNodoBuscado(currNode, filenameBuscado, nodoPadre) && currNode < MAX_NUMBER_OF_FILES){
 		currNode++;
 	}
 

@@ -28,18 +28,35 @@ fuse_configuration* load_configuration(char *path)
 		exit(-1);
 	}
 
+	fc->path_archivo = malloc(strlen(config_get_string_value(config,"PATH_ARCHIVO")) + 1);
+
 	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
 	fc->disk_size = config_get_int_value(config,"DISK_SIZE");
-	fc->path_archivo = config_get_string_value(config,"PATH_ARCHIVO");
+	strcpy(fc->path_archivo,config_get_string_value(config,"PATH_ARCHIVO"));
 
-	config_destroy(config);
+	//config_destroy(config);
 	return fc;
+}
+
+void configurar_server(){
+	int fileDescriptor;
+	diskSize = fuse_config->disk_size;
+	char *pathArchivo = fuse_config->path_archivo;
+	fileDescriptor = open(pathArchivo, O_RDONLY, 0);
+
+	disco = (GBlock*) mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,fileDescriptor,0);
+
+	//el 2 en realidad deberia estar calculado, porque depende el tamanio del archivo, el bitmap mide distinto
+	tablaDeNodos = (GFile*) (disco + 2);
+
+	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
 }
 
 void fuse_start_service(ConnectionHandler ch)
 {
 	fuse_config = load_configuration(SAC_CONFIG_PATH);
 	fuse_logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
+	configurar_server();
 	//fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
 	server_start(fuse_config->listen_port,ch);
 }
@@ -145,27 +162,11 @@ Function fuse_invoke_function(Function *f)
 
 }
 
-void configurar_server(){
-	int fileDescriptor;
-	diskSize = fuse_config->disk_size;
-	char *pathArchivo = fuse_config->path_archivo;
-	fileDescriptor = open(pathArchivo, O_RDONLY);
-
-	disco = (GBlock*) mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,fileDescriptor,0);
-
-	//el 2 en realidad deberia estar calculado, porque depende el tamanio del archivo, el bitmap mide distinto
-	tablaDeNodos = (GFile*) (disco + 2);
-
-	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
-}
-
 int main(int argc,char *argv[])
 {
 	signal(SIGINT,fuse_stop_service);
 
-
 	fuse_start_service(handler);
-	configurar_server();
 
 	return 0;
 }
