@@ -10,7 +10,7 @@ int send_call(Function *f)
 
 	int resultado = send_message(serverSocket,&msg);
 
-	//free(msg.data);
+	free(msg.data);
 
 	return resultado;
 
@@ -18,19 +18,18 @@ int send_call(Function *f)
 
 int send_path(FuncType func_type, const char *path){
 	Function f;
-	Arg arg;
 
-	arg.value.val_charptr = malloc(strlen(path) + 1);
-
-	arg.type = VAR_CHAR_PTR;
-	arg.size = strlen(path) + 1;
-	memcpy(arg.value.val_charptr, path, arg.size);
+	f.args[0].type = VAR_CHAR_PTR;
+	f.args[0].size = strlen(path) + 1;
+	f.args[0].value.val_charptr = malloc(f.args[0].size);
+	memcpy(f.args[0].value.val_charptr, path, f.args[0].size);
 
 	f.type = func_type;
 	f.num_args = 1;
-	f.args[0] = arg;
 
 	int resultado = send_call(&f);
+
+	free(f.args[0].value.val_charptr);
 
 	return resultado;
 }
