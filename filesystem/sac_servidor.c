@@ -39,12 +39,12 @@ fuse_configuration* load_configuration(char *path)
 }
 
 void configurar_server(){
-	int fileDescriptor;
+	int fileDescriptor = 0;
 	diskSize = fuse_config->disk_size;
 	char *pathArchivo = fuse_config->path_archivo;
-	fileDescriptor = open(pathArchivo, O_RDONLY, 0);
+	fileDescriptor = open(pathArchivo, O_RDWR, 0);
 
-	disco = (GBlock*) mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED,fileDescriptor,0);
+	disco = (GBlock*) mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_SHARED,fileDescriptor,0);
 
 	//el 2 en realidad deberia estar calculado, porque depende el tamanio del archivo, el bitmap mide distinto
 	tablaDeNodos = (GFile*) (disco + 2);
@@ -71,7 +71,7 @@ void message_handler(Message *m,int sock)
 		case MESSAGE_CALL:
 			frespuesta = fuse_invoke_function((Function *)m->data);
 			log_trace(fuse_logger,"Call received!");
-			message_free_data(m->data);
+			//message_free_data(m->data);
 			create_message_header(&head,MESSAGE_CALL,1,sizeof(Function));
 			create_function_message(&msg,&head,&frespuesta);
 			send_message(sock,&msg);

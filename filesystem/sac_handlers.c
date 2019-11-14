@@ -79,8 +79,9 @@ char **splitPath(char *path, int *size){
 
 int esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre){
 
-	return tablaDeNodos[nodo].state != 0;
-	//&& tablaDeNodos[nodo].parent_dir_block == nodoPadre && strcmp(tablaDeNodos[nodo].fname, filename);
+	return tablaDeNodos[nodo].state != 0
+		&& tablaDeNodos[nodo].parent_dir_block == nodoPadre
+		&& strcmp(tablaDeNodos[nodo].fname, filename);
 }
 
 int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre){
@@ -88,6 +89,10 @@ int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre){
 
 	while(!esElNodoBuscado(currNode, filenameBuscado, nodoPadre) && currNode < MAX_NUMBER_OF_FILES){
 		currNode++;
+	}
+
+	if(currNode == MAX_NUMBER_OF_FILES){
+		return -1;
 	}
 
 	return currNode;
@@ -102,12 +107,16 @@ ptrGBloque determine_nodo(char *path){
 
 	listaSpliteada = splitPath(path, &dimListaSpliteada);
 
+
 	for(i=0 ; i<dimListaSpliteada; i++){
 
 		filenameBuscado = listaSpliteada[i];
 
 		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, nodoUltimoPadre);
 
+		if(nodoUltimoPadre == -1){
+			return -1;
+		}
 	}
 
 	return nodoUltimoPadre;
