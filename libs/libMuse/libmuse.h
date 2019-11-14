@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "network.h"
 
 /**
 * Inicializa la biblioteca de MUSE.

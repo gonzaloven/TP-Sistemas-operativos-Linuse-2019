@@ -1,3 +1,16 @@
+/*
+* Estructura administrativa de la memoria,
+* Permite inizializar memoria, liberarla, 
+* buscar un programa en la tabla de programas, 
+* y buscar páginas libre
+*
+*
+* @TODO :
+* Por alguna razón, se declararon acá las siguientes funciones: 
+* muse_free,muse_get,muse_cpy,muse_map,muse_sync,muse_unmap
+* que también están por defecto en libmuse. 
+*/
+
 #include "main_memory.h"
 
 frame *main_memory = NULL;
@@ -9,7 +22,7 @@ t_list *program_list = NULL;
 void muse_main_memory_init(int memory_size,int page_size)
 {
 	main_memory = (frame *)malloc(memory_size);
-	page *p = (page*)malloc(memory_size / page_size); //cambiar esto
+	page *pag = (page*)malloc(memory_size / page_size); //cambiar esto
 	program_list = list_create();
 
 	void *mem_ptr = main_memory;
@@ -27,11 +40,11 @@ void muse_main_memory_init(int memory_size,int page_size)
 	pages = list_create();
 	for(i=0;i<memory_size/page_size;i++)
 	{
-		p->is_present = true;
-		p->page_num = curr_page_num;
-		p->fr = &main_memory[i];
+		pag->is_present = true;
+		pag->page_num = curr_page_num;
+		pag->fr = &main_memory[i];
 		curr_page_num += i;
-		list_add(pages,p);
+		list_add(pages,pag);
 	}
 }
 
@@ -45,11 +58,11 @@ void muse_main_memory_stop()
 int search_program(uint32_t pid)
 {
 	int i = 0;
-	program *p;
+	program *prog;
 	while(i<list_size(program_list) )
 	{
-		p = list_get(program_list,i);
-		if(p->pid == pid)
+		prog = list_get(program_list,i);
+		if(prog->pid == pid)
 		{
 			return i;
 		}
@@ -58,14 +71,14 @@ int search_program(uint32_t pid)
 	return -1;
 }
 
-int has_segment_with_free_space(program *p,int size)
+int has_segment_with_free_space(program *prog,int size)
 {
 	int i=0;
-	segment *s;
-	while(i < list_size(p->segment_table))
+	segment *seg;
+	while(i < list_size(prog->segment_table))
 	{
-		s = list_get(p->segment_table,i);
-		if(s->free_size >= size)
+		seg = list_get(prog->segment_table,i);
+		if(seg->free_size >= size)
 		{
 			return i;
 		}
@@ -77,13 +90,13 @@ int has_segment_with_free_space(program *p,int size)
 page *find_free_page()
 {
 	int i=0;
-	page *p;
+	page *pag;
 	while(i<list_size(pages))
 	{
-		p = list_get(pages,i);
-		if(p->fr->metadata.is_free)
+		pag = list_get(pages,i);
+		if(pag->fr->metadata.is_free)
 		{
-			return p;
+			return pag;
 		}
 	}
 	return NULL;
@@ -95,8 +108,8 @@ uint32_t muse_malloc(int size,uint32_t pid)
 	uint32_t seg_id;
 	uint32_t page_id;
 	uint32_t logical_address = 0;
-	page *p;
-	segment *s;
+	page *pag;
+	segment *seg;
 	program *prog;
 
 	if((prog_id = search_program(pid)) != -1)
@@ -104,38 +117,38 @@ uint32_t muse_malloc(int size,uint32_t pid)
 		prog = list_get(program_list,prog_id);
 		if((seg_id = has_segment_with_free_space(prog,size)) != -1 )
 		{
-			s = list_get(prog->segment_table,seg_id);
-			p = find_free_page();
-			if(p == NULL)
+			seg = list_get(prog->segment_table,seg_id);
+			pag = find_free_page();
+			if(pag == NULL)
 			{
 				printf("All pages have been used!\n");
 				return 0;
 			}
-			s->free_size -= 32;
-			list_add(prog->segment_table,p);
+			seg->free_size -= 32;
+			list_add(prog->segment_table,pag);
 
 		}
 		else
 		{
-			s = (segment *)malloc(sizeof(segment));
-			s->free_size = size - 32;
-			s->page_table = list_create();
-			page_id = list_add(s->page_table,find_free_page());
-			seg_id = list_add(prog->segment_table,s);
+			seg = (segment *)malloc(sizeof(segment));
+			seg->free_size = size - 32;
+			seg->page_table = list_create();
+			page_id = list_add(seg->page_table,find_free_page());
+			seg_id = list_add(prog->segment_table,seg);
 			//logical_addr
 		}
 	}else
 	{
 		prog = (program *) malloc(sizeof(program));
-		s = (segment *)malloc(sizeof(segment));
-		s->free_size = size - 32;
-		s->page_table = list_create();
+		seg = (segment *)malloc(sizeof(segment));
+		seg->free_size = size - 32;
+		seg->page_table = list_create();
 
 		prog->pid = pid;
 		prog->segment_table = list_create();
 
-		page_id = list_add(s->page_table,find_free_page());
-		seg_id = list_add(prog->segment_table,s);
+		page_id = list_add(seg->page_table,find_free_page());
+		seg_id = list_add(prog->segment_table,seg);
 		list_add(program_list,prog);
 		logical_address = seg_id * 10 + page_id;
 	}
@@ -156,9 +169,9 @@ uint32_t muse_get(void *dst,uint32_t src,size_t n,uint32_t pid)
 	uint32_t destination = 0;
 
 	program *prg = list_get(program_list,i);
-	segment *s = list_get(prg->segment_table,0);
-	page *p = list_get(s->page_table,0);
-	memcpy(&destination,p->fr->data,n);
+	segment *seg = list_get(prg->segment_table,0);
+	page *pag = list_get(seg->page_table,0);
+	memcpy(&destination,pag->fr->data,n);
 	return destination;
 }
 
@@ -166,9 +179,9 @@ uint32_t muse_cpy(uint32_t dst,void *src,int n,uint32_t pid)
 {
 	int i= search_program(pid);
 	program *prg = list_get(program_list,i);
-	segment *s = list_get(prg->segment_table,0);
-	page *p = list_get(s->page_table,0);
-	memcpy(p->fr->data,src,n);
+	segment *seg = list_get(prg->segment_table,0);
+	page *pag = list_get(seg->page_table,0);
+	memcpy(pag->fr->data,src,n);
 	
 	return 0;
 }
@@ -188,10 +201,7 @@ int muse_unmap(uint32_t dir,uint32_t pid)
 	return 0;
 }
 
-uint32_t muse_add_segment_to_program(program *p,int segm_size,uint32_t pid)
+uint32_t muse_add_segment_to_program(program *prog,int segm_size,uint32_t pid)
 {
 	return 0;
 }
-
-
-

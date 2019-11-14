@@ -1,16 +1,14 @@
 #include "muse.h"
-#include "network.h"
-#include "main_memory.h"
-#include <commons/log.h>
-#include <commons/config.h>
-#include <string.h>
-#include <signal.h>
-#include <stdlib.h>
 
 t_log *muse_logger = NULL;
 muse_configuration *muse_config = NULL;
 
-uint32_t muse_invoke_function(Function *f,uint32_t pid);
+int main(int argc,char *argv[])
+{
+	signal(SIGINT,muse_stop_service);
+	muse_start_service(handler); 
+	return 0;
+}
 
 int muse_start_service(ConnectionHandler ch)
 {
@@ -142,12 +140,3 @@ uint32_t muse_invoke_function(Function *f,uint32_t pid)
 	return func_ret;
 
 }
-
-int main(int argc,char *argv[])
-{
-	signal(SIGINT,muse_stop_service);
-	muse_start_service(handler); 
-	return 0;
-}
-
-

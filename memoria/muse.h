@@ -1,6 +1,13 @@
 #ifndef MUSE_H
 #define MUSE_H
+
 #include "network.h"
+#include "main_memory.h"
+#include <commons/log.h>
+#include <commons/config.h>
+#include <string.h>
+#include <signal.h>
+#include <stdlib.h>
 
 #define MUSE_CONFIG_PATH "../configs/memoria.config"
 
@@ -11,6 +18,8 @@ typedef struct muse_configuration_s
 	int page_size;
 	int swap_size;
 }muse_configuration;
+
+uint32_t muse_invoke_function(Function *f,uint32_t pid);
 
 /* Starts server,logger and loads configuration. */
 int muse_start_service(ConnectionHandler ch);

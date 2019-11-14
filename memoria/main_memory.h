@@ -1,5 +1,6 @@
 #ifndef MAIN_MEMORY_H
 #define MAIN_MEMORY_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +14,7 @@ typedef struct program_s
 	t_list *segment_table;
 }program;
 
-typedef struct HeapMetadata
+typedef struct HeapMetadata //usada x cada uno de los segmentos
 {
 	uint32_t size;
 	bool is_free;
