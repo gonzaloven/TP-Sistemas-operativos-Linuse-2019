@@ -121,3 +121,24 @@ ptrGBloque determine_nodo(char *path){
 
 	return nodoUltimoPadre;
 }
+
+int tamano_malloc_list(t_list* lista){
+	int tamano = 0;
+	for(int i=0; i < list_size(lista); i++){
+		tamano+= strlen((char*)list_get(lista, i));
+	}
+
+	return tamano + 1; // +1 por el \0
+}
+
+void lista_a_string(t_list* lista, char** string){
+	*string = malloc(tamano_malloc_list(lista));
+
+	if(list_size(lista) > 0)
+		strcpy(*string, (char*)list_get(lista, 0));
+
+	for(int i=1; i < list_size(lista); i++){
+		strcat(*string, "#");
+		strcat(*string, (char*)list_get(lista, i));
+	}
+}

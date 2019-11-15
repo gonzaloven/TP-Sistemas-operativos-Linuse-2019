@@ -13,5 +13,9 @@ int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre);
 
 ptrGBloque determine_nodo(char *path);
 
+int tamano_malloc_list(t_list*);
+
+void lista_a_string(t_list* lista, char** string);
+
 
 #endif /* FILESYSTEM_SAC_HANDLERS_H_ */
