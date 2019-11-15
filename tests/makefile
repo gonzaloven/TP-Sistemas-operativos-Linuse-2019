@@ -3,7 +3,7 @@ CC:=gcc
 UTILS:= ../utils/
 INCDIR:= -I$(UTILS) -I../libs/libMuse -I../libs/Hilolay
 CFLAGS:= -g
-LIB-SRCS:= libmuse-test.c $(UTILS)network.c $(UTILS)message.c 
+LIB-SRCS:= memoria_test_libmuse.c $(UTILS)network.c $(UTILS)message.c 
 LIBS:= -L../libs/bin/ 
 LFLAGS:= -lcommons -lpthread -lmuse
 LIBPATH:=../libs/bin
@@ -15,7 +15,7 @@ test-libhilolay:
 	$(CC) $(INCDIR) $(CFLAGS) libhilolay-test.c ../utils/network.c ../utils/message.c -o libh $(LIBS) -lpthread -lcommons -lhilolay -Wl,-rpath=$(LIBPATH)
 
 test-muse-alloc:
-	$(CC) $(INCDIR) $(CFLAGS) muse_test_alloc.c $(UTILS)network.c $(UTILS)message.c -o muse_test_alloc $(LIBS) -lpthread -lcommons -lmuse -Wl,-rpath=$(LIBPATH)
+	$(CC) $(INCDIR) $(CFLAGS) memoria_test_alloc.c $(UTILS)network.c $(UTILS)message.c -o muse_test_alloc $(LIBS) -lpthread -lcommons -lmuse -Wl,-rpath=$(LIBPATH)
 
 test-hilolay-create:
 	$(CC) $(INCDIR) $(CFLAGS) test_hilolay_create.c $(UTILS)network.c $(UTILS)message.c -o hilolay_test_create $(LIBS) -lpthread -lcommons -lhilolay -Wl,-rpath=$(LIBPATH)

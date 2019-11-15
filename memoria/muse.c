@@ -13,9 +13,10 @@ int main(int argc,char *argv[])
 int muse_start_service(ConnectionHandler ch)
 {
 	muse_config = load_configuration(MUSE_CONFIG_PATH);
-	muse_logger = log_create("../logs/muse.log","MUSE",true,LOG_LEVEL_TRACE);
+	muse_logger = log_create(MUSE_LOG_PATH,"MUSE",true,LOG_LEVEL_TRACE);
 	muse_main_memory_init(muse_config->memory_size,muse_config->page_size);
 	server_start(muse_config->listen_port,ch);
+	printf("MUSE has been initialized correctly!\n");
 }
 
 void muse_stop_service()
@@ -54,7 +55,7 @@ void* handler(void *args)
 muse_configuration *load_configuration(char *path)
 {
 	t_config *config = config_create(path);
-	muse_configuration *mc = (muse_configuration *)malloc(sizeof(muse_configuration)); 
+	muse_configuration *configuracion = (muse_configuration *)malloc(sizeof(muse_configuration)); 
 
 	if(config == NULL)
 	{
@@ -63,12 +64,12 @@ muse_configuration *load_configuration(char *path)
 		exit(-1);
 	}
 	
-	mc->listen_port = config_get_int_value(config,"LISTEN_PORT");
-	mc->memory_size = config_get_int_value(config,"MEMORY_SIZE");
-	mc->page_size = config_get_int_value(config,"PAGE_SIZE");
-	mc->swap_size = config_get_int_value(config,"SWAP_SIZE");
+	configuracion->listen_port = config_get_int_value(config,"LISTEN_PORT");
+	configuracion->memory_size = config_get_int_value(config,"MEMORY_SIZE");
+	configuracion->page_size = config_get_int_value(config,"PAGE_SIZE");
+	configuracion->swap_size = config_get_int_value(config,"SWAP_SIZE");
 	config_destroy(config);
-	return mc;
+	return configuracion;
 }
 
 void message_handler(Message *m,int sock)
@@ -96,41 +97,41 @@ void message_handler(Message *m,int sock)
 
 }
 
-uint32_t muse_invoke_function(Function *f,uint32_t pid) 
+uint32_t muse_invoke_function(Function *function,uint32_t pid) 
 {
 	uint32_t func_ret = 0;
-	switch(f->type)
+	switch(function->type)
 	{
 		case FUNCTION_MALLOC:
-			log_debug(muse_logger,"Malloc called with args ->%d",f->args[0].value.val_u32);
-			func_ret = muse_malloc(f->args[0].value.val_u32,pid);//TODO put the caller_id in func
+			log_debug(muse_logger,"Malloc called with args ->%d",function->args[0].value.val_u32);
+			func_ret = muse_malloc(function->args[0].value.val_u32,pid);//TODO put the caller_id in func
 			break;
 		case FUNCTION_FREE:
 			log_debug(muse_logger,"Free called");
-			func_ret = muse_free(f->args[0].value.val_u32,pid);
+			func_ret = memory_free(function->args[0].value.val_u32,pid);
 			break;
 		case FUNCTION_GET:
 			log_debug(muse_logger,"Get called");
-			func_ret = muse_get(f->args[0].value.val_voidptr,
-								f->args[1].value.val_u32,f->args[2].value.val_sizet,pid);
+			func_ret = memory_get(function->args[0].value.val_voidptr,
+								function->args[1].value.val_u32,function->args[2].value.val_sizet,pid);
 			break;
 		case FUNCTION_COPY:
-			log_debug(muse_logger,"Copy called with args -> arg[0] %d  arg[1] %d arg[2] %d",f->args[0].value.val_u32,f->args[1].value.val_u32,f->args[2].value.val_u32);
-			func_ret = muse_cpy(f->args[0].value.val_u32,
-								&f->args[1].value.val_u32,f->args[2].value.val_u32,pid);
+			log_debug(muse_logger,"Copy called with args -> arg[0] %d  arg[1] %d arg[2] %d",function->args[0].value.val_u32,function->args[1].value.val_u32,function->args[2].value.val_u32);
+			func_ret = memory_cpy(function->args[0].value.val_u32,
+								&function->args[1].value.val_u32,function->args[2].value.val_u32,pid);
 			break;
 		case FUNCTION_MAP:
 			log_debug(muse_logger,"Map called");
-			func_ret = muse_map(f->args[0].value.val_charptr,
-								f->args[1].value.val_sizet,f->args[2].value.val_u32,pid);
+			func_ret = memory_map(function->args[0].value.val_charptr,
+								function->args[1].value.val_sizet,function->args[2].value.val_u32,pid);
 			break;
 		case FUNCTION_SYNC:
 			log_debug(muse_logger,"Sync called");
-			func_ret = muse_sync(f->args[0].value.val_u32,f->args[1].value.val_sizet,pid);
+			func_ret = memory_sync(function->args[0].value.val_u32,function->args[1].value.val_sizet,pid);
 			break;
 		case FUNCTION_UNMAP:
 			log_debug(muse_logger,"Unmap called");
-			func_ret = muse_unmap(f->args[0].value.val_u32,pid);
+			func_ret = memory_unmap(function->args[0].value.val_u32,pid);
 			break;
 		default:
 			log_error(muse_logger,"Unknown function");
@@ -138,5 +139,4 @@ uint32_t muse_invoke_function(Function *f,uint32_t pid)
 			break;
 	}
 	return func_ret;
-
 }

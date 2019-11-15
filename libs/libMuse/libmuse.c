@@ -2,8 +2,6 @@
 
 int master_socket = 0;
 
-int libmuse_init(char *ip,int port);
-int call(Function *function);
 
 int muse_init(int id)
 {
@@ -46,7 +44,7 @@ void muse_close()
 uint32_t muse_alloc(uint32_t tam)
 { 
 	Function function;
-	Arg arg;
+	Arg arg; //argumento
 
 	arg.type = VAR_UINT32;
 	arg.size = sizeof(uint32_t);
@@ -109,7 +107,7 @@ int muse_get(void* dst, uint32_t src, size_t n)
 int muse_cpy(uint32_t dst, void* src, int n)
 {
 	Function function;
-	Arg arg[3];
+	Arg arg[3];	//argumento
 	uint32_t *s = (uint32_t *)src;
 
 	arg[0].type = VAR_UINT32;
@@ -134,10 +132,20 @@ int muse_cpy(uint32_t dst, void* src, int n)
 	return result;
 }
 
+
+/*
+	Ejemplo de uso
+	uint32_t map = muse_map("hola.txt", filesize, MAP_PRIVATE);		
+	opens the "hola.txt" file in RDONLY mode
+	map is a position _mapped_ of pages of a given 'filesize' of the "hola.txt" file  
+	muse_map basically is just putting the hola.txt file in memory    
+*/
 uint32_t muse_map(char *path, size_t length, int flags)
 {
-	int result=0;
-	return result;
+   	int file_descriptor = open(*path, O_RDONLY, 0);
+   	void* map = mmap(NULL, length, NULL, flags, file_descriptor, 0);
+   	printf(map, length);   
+	return *(int*) map;
 }
 
 int muse_sync(uint32_t addr, size_t len)
@@ -148,6 +156,8 @@ int muse_sync(uint32_t addr, size_t len)
 
 int muse_unmap(uint32_t dir)
 {
-	int result=0;
+	result = 1;
+	//munmap(dir, filesize);
+   	//close(filedescriptor);
 	return result;
 }

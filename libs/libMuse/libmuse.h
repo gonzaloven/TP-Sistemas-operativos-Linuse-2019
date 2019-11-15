@@ -83,4 +83,13 @@ int muse_sync(uint32_t addr, size_t len);
 * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
 */
 int muse_unmap(uint32_t dir);
+
+
+/* Agregadas x los pibes */
+
+/* ejemplo call(printf("PutoElQueLee")
+*   @TODO probar
+ */ 
+int call(Function *function);
+
 #endif

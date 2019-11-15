@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 #define MUSE_CONFIG_PATH "../configs/memoria.config"
+#define MUSE_LOG_PATH "../logs/muse.log"
 
 typedef struct muse_configuration_s
 {

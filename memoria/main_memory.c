@@ -8,6 +8,8 @@
 * @TODO :
 * Por alguna razón, se declararon acá las siguientes funciones: 
 * muse_free,muse_get,muse_cpy,muse_map,muse_sync,muse_unmap
+*
+* CORECCION: se cambiaron a memory_free/get/...
 * que también están por defecto en libmuse. 
 */
 
@@ -156,14 +158,15 @@ uint32_t muse_malloc(int size,uint32_t pid)
 }
 
 
-uint8_t muse_free(uint32_t virtual_address,uint32_t pid)
+uint8_t memory_free(uint32_t virtual_address,uint32_t pid)
 {
 	//uint8_t seg_index = virual_address >> ;
 	//uint8_t page_index = virtual_address & PAGE_MASK >> 
 	return 0;
 }
 
-uint32_t muse_get(void *dst,uint32_t src,size_t n,uint32_t pid)
+//No se que es dst pero no lo usa, idem src
+uint32_t memory_get(void *dst,uint32_t src,size_t n,uint32_t pid)
 {
 	int i= search_program(pid);
 	uint32_t destination = 0;
@@ -175,7 +178,7 @@ uint32_t muse_get(void *dst,uint32_t src,size_t n,uint32_t pid)
 	return destination;
 }
 
-uint32_t muse_cpy(uint32_t dst,void *src,int n,uint32_t pid)
+uint32_t memory_cpy(uint32_t dst,void *src,int n,uint32_t pid)
 {
 	int i= search_program(pid);
 	program *prg = list_get(program_list,i);
@@ -186,17 +189,17 @@ uint32_t muse_cpy(uint32_t dst,void *src,int n,uint32_t pid)
 	return 0;
 }
 
-uint32_t muse_map(char *path,size_t length,int flags,uint32_t pid)
+uint32_t memory_map(char *path,size_t length,int flags,uint32_t pid)
 {
 	return 0;
 }
 
-uint32_t muse_sync(uint32_t addr,size_t len,uint32_t pid)
+uint32_t memory_sync(uint32_t addr,size_t len,uint32_t pid)
 {
 	return 0;
 }
 
-int muse_unmap(uint32_t dir,uint32_t pid)
+int memory_unmap(uint32_t dir,uint32_t pid)
 {
 	return 0;
 }

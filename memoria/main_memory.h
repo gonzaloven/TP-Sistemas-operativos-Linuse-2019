@@ -58,17 +58,17 @@ uint32_t muse_malloc(int size,uint32_t pid);
  * @param virtual_address: the address of memory to free
  * return: -1 -> SEGFAULT ,0 -> ok
  */
-uint8_t muse_free(uint32_t virtual_address,uint32_t pid);
+uint8_t memory_free(uint32_t virtual_address,uint32_t pid);
 
-uint32_t muse_get(void *dst,uint32_t src,size_t n,uint32_t pid);
+uint32_t memory_get(void *dst,uint32_t src,size_t n,uint32_t pid);
 
-uint32_t muse_cpy(uint32_t dst,void *src,int n,uint32_t pid);
+uint32_t memory_cpy(uint32_t dst,void *src,int n,uint32_t pid);
 
-uint32_t muse_map(char *path,size_t length,int flags,uint32_t pid);
+uint32_t memory_map(char *path,size_t length,int flags,uint32_t pid);
 
-uint32_t muse_sync(uint32_t addr,size_t len,uint32_t pid);
+uint32_t memory_sync(uint32_t addr,size_t len,uint32_t pid);
 
-int muse_unmap(uint32_t dir,uint32_t pid);
+int memory_unmap(uint32_t dir,uint32_t pid);
 
 uint32_t muse_add_segment_to_program(program *p,int segm_size,uint32_t pid);
 
