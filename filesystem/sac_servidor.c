@@ -171,6 +171,20 @@ int main(int argc,char *argv[])
 	return 0;
 }
 
+Function retornar_error(Function funcionAEnviar){
+	Arg argerror[1];
+
+	argerror[0].type = VAR_UINT32;
+	argerror[0].size = sizeof(uint32_t);
+	argerror[0].value.val_u32 = -1;
+
+	funcionAEnviar.type = -1;
+	funcionAEnviar.num_args = 1;
+	funcionAEnviar.args[0] = argerror[0];
+
+	return funcionAEnviar;
+}
+
 Function validarSiExiste(char* path, FuncType tipoFuncion){
 	Message msg;
 	Function fsend;
@@ -182,13 +196,14 @@ Function validarSiExiste(char* path, FuncType tipoFuncion){
 		arg[0].type = VAR_UINT32;
 		arg[0].size = sizeof(uint32_t);
 		arg[0].value.val_u32 = -ENOENT;
+		fsend.type = -1;
 	}else{
 		arg[0].type = VAR_UINT32;
 		arg[0].size = sizeof(uint32_t);
 		arg[0].value.val_u32 = 0;
+		fsend.type = tipoFuncion;
 	}
 
-	fsend.type = tipoFuncion;
 	fsend.num_args = 1;
 	fsend.args[0] = arg[0];
 
@@ -219,6 +234,10 @@ Function sac_server_getattr(char* path){
 	uint32_t total_size;
 
 	ptrGBloque nodoBuscadoPosicion = determine_nodo(path);
+
+	if(nodoBuscadoPosicion == -1){
+		return retornar_error(fsend);
+	}
 
 	bool esArchivo = tablaDeNodos[nodoBuscadoPosicion].state == 1;
 
@@ -379,7 +398,7 @@ Function sac_server_readdir (char* path) {
 	return fsend;
 }
 
-/*int crear_nuevo_nodo (char* path, int tipoDeArchivo){
+int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	int currNode = 0;
 	char *parentDirPath;
 	char *fileName;
@@ -409,22 +428,49 @@ Function sac_server_readdir (char* path) {
 
 	msync(disco, diskSize, MS_SYNC);
 	return 0;
-}*/
+}
 
 Function sac_server_mknod (char* path){
-	/*
-	return crear_nuevo_nodo(path, 1);
-	*/
-	Function f;
-	return f;
+	int respuesta = crear_nuevo_nodo(path, 1);
+	Message msg;
+	Function fsend;
+	Arg arg[1];
+
+	if(respuesta == 0){
+		arg[0].type = VAR_UINT32;
+		arg[0].size = sizeof(uint32_t);
+		arg[0].value.val_u32 = 0;
+		fsend.type = FUNCTION_RTA_MKNOD;
+	}else{
+		return retornar_error(fsend);
+	}
+
+	fsend.num_args = 1;
+	fsend.args[0] = arg[0];
+
+	return fsend;
 }
 
 Function sac_server_mkdir (char* path){
-	/*
-	return crear_nuevo_nodo(path, 2);
-	*/
-	Function f;
-	return f;
+	int respuesta = crear_nuevo_nodo(path, 2);
+
+	Message msg;
+	Function fsend;
+	Arg arg[1];
+
+	if(respuesta == 0){
+		arg[0].type = VAR_UINT32;
+		arg[0].size = sizeof(uint32_t);
+		arg[0].value.val_u32 = 0;
+		fsend.type = FUNCTION_RTA_MKNOD;
+	}else{
+		return retornar_error(fsend);
+	}
+
+	fsend.num_args = 1;
+	fsend.args[0] = arg[0];
+
+	return fsend;
 }
 
 void borrar_directorio (ptrGBloque nodoPosicion){

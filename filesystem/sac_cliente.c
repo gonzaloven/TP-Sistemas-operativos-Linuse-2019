@@ -116,7 +116,7 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 	Function* f = msg.data;
 
 	if(f->type != FUNCTION_RTA_OPEN){
-		return -ENOENT;
+		return -EACCES;
 	}
 
 	int respuesta = f->args[0].value.val_u32;
@@ -138,7 +138,7 @@ static int sac_opendir(const char *path, struct fuse_file_info *fi){
 	Function* f = msg.data;
 
 	if(f->type != FUNCTION_RTA_OPENDIR){
-		return -ENOENT;
+		return -EACCES;
 	}
 
 	int respuesta = f->args[0].value.val_u32;
@@ -208,14 +208,14 @@ static int sac_mknod(const char* path, mode_t mode, dev_t rdev){
 	Function* f = msg.data;
 
 	if(f->type != FUNCTION_RTA_MKNOD){
-		return -ENOENT;
+		return -1;
 	}
 
 	int respuesta = f->args[0].value.val_u32;
 
 	free(msg.data);
 
-	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
+	return respuesta;
 }
 
 static int sac_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi){
@@ -302,14 +302,14 @@ static int sac_mkdir(const char* path, mode_t mode){
 	Function* fresp = msg.data;
 
 	if(fresp->type != FUNCTION_RTA_MKDIR){
-		return -ENOENT;
+		return -1;
 	}
 
 	int respuesta = fresp->args[0].value.val_u32;
 
 	free(msg.data);
 
-	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
+	return respuesta;
 }
 
 static int sac_rmdir(const char* path){
