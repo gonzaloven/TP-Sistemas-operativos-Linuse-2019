@@ -16,6 +16,7 @@
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024

@@ -83,8 +83,10 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 	char **listaSpliteada;
 	char* filename;
 
-	listaSpliteada = splitPath(f->args[0].value.val_charptr, &dimListaSpliteada);
+	filler(buf, ".", NULL, 0);
+	filler(buf, "..", NULL, 0);
 
+	listaSpliteada = splitPath(f->args[0].value.val_charptr, &dimListaSpliteada);
 
 	for(int i=0 ; i<dimListaSpliteada; i++){
 

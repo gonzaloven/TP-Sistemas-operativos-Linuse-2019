@@ -11,7 +11,7 @@ Function fuse_invoke_function(Function *f);
 
 void fuse_stop_service()
 {
-	log_info(fuse_logger,"SIGINT received.Shuting down!");
+	log_info(fuse_logger,"SIGINT recibida. Servidor desconectado!");
 	free(fuse_config);
 	log_destroy(fuse_logger);
 	server_stop();
@@ -23,7 +23,7 @@ fuse_configuration* load_configuration(char *path)
 	fuse_configuration *fc = (fuse_configuration *)malloc(sizeof(fuse_configuration));
 	if(config == NULL)
 	{
-		log_error(fuse_logger,"Configuration couldn't be loaded.Quitting program!");
+		log_error(fuse_logger,"No se pudo cargar la configuracion. Apagando servidor...!");
 		fuse_stop_service();
 		exit(-1);
 	}
@@ -34,7 +34,7 @@ fuse_configuration* load_configuration(char *path)
 	fc->disk_size = config_get_int_value(config,"DISK_SIZE");
 	strcpy(fc->path_archivo,config_get_string_value(config,"PATH_ARCHIVO"));
 
-	//config_destroy(config);
+	config_destroy(config);
 	return fc;
 }
 
@@ -48,6 +48,25 @@ void configurar_server(){
 
 	//el 2 en realidad deberia estar calculado, porque depende el tamanio del archivo, el bitmap mide distinto
 	tablaDeNodos = (GFile*) (disco + 2);
+
+	if(tablaDeNodos[0].state == 0){
+		GFile* nodoRaiz = tablaDeNodos;
+
+		time_t tiempoAhora;
+		uint64_t timestamp;
+		tiempoAhora = time(0);
+		timestamp = (uint64_t) tiempoAhora;
+
+		char *nombre = "root";
+
+		strcpy((char*) nodoRaiz->fname, nombre);
+		nodoRaiz->file_size = 0;
+		nodoRaiz->state = 2;
+		nodoRaiz->create_date = timestamp;
+		nodoRaiz->modify_date = timestamp;
+
+		msync(disco, diskSize, MS_SYNC);
+	}
 
 	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
 }
@@ -70,7 +89,7 @@ void message_handler(Message *m,int sock)
 	{
 		case MESSAGE_CALL:
 			frespuesta = fuse_invoke_function((Function *)m->data);
-			log_trace(fuse_logger,"Call received!");
+			log_trace(fuse_logger,"Generando respuesta...");
 			//message_free_data(m->data);
 			create_message_header(&head,MESSAGE_CALL,1,sizeof(Function));
 			create_function_message(&msg,&head,&frespuesta);
@@ -94,7 +113,7 @@ void* handler(void *args)
 	int sock = conna->client_fd;
 	struct sockaddr_in client_address = conna->client_addr;
 
-	printf("A client has connected!\n");
+	printf("Un cliente se ha conectado!\n");
 
 	while((n=receive_packet(sock,buffer,1024)) > 0)
 	{
@@ -104,7 +123,7 @@ void* handler(void *args)
 			memset(buffer,'\0',1024);
 		}
 	}	
-	log_debug(fuse_logger,"The client was disconnected!");
+	log_debug(fuse_logger,"El cliente se desconecto!");
 	close(sock);
 	return (void*)NULL;
 }
@@ -115,47 +134,47 @@ Function fuse_invoke_function(Function *f)
 	switch(f->type)
 	{
 		case FUNCTION_GETATTR:
-			log_debug(fuse_logger,"Getattr called");
+			log_debug(fuse_logger,"Getattr llamado");
 			func_ret = sac_server_getattr(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_READDIR:
-			log_debug(fuse_logger,"Readdir called");
+			log_debug(fuse_logger,"Readdir llamado");
 			func_ret = sac_server_readdir(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_OPEN:
-			log_debug(fuse_logger,"Open called");
+			log_debug(fuse_logger,"Open llamado");
 			func_ret = sac_server_open(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_READ:
-			log_debug(fuse_logger,"Read called with args -> arg[0] %d  arg[1] %d arg[2] %d", f->args[0].value.val_charptr, f->args[1].value.val_sizet, f->args[2].value.val_u32);
+			log_debug(fuse_logger,"Read llamado with args -> arg[0] %d  arg[1] %d arg[2] %d", f->args[0].value.val_charptr, f->args[1].value.val_sizet, f->args[2].value.val_u32);
 			func_ret = sac_server_read(f->args[0].value.val_charptr, f->args[1].value.val_sizet, f->args[2].value.val_u32);
 			break;
 		case FUNCTION_OPENDIR:
-			log_debug(fuse_logger,"Opendir called");
+			log_debug(fuse_logger,"Opendir llamado");
 			func_ret = sac_server_opendir(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_MKNOD:
-			log_debug(fuse_logger,"Mknod called");
+			log_debug(fuse_logger,"Mknod llamado");
 			func_ret = sac_server_mknod(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_WRITE:
-			log_debug(fuse_logger,"Write called");
+			log_debug(fuse_logger,"Write llamado");
 			func_ret = sac_server_write(f->args[0].value.val_charptr, f->args[1].value.val_charptr, f->args[2].value.val_sizet, f->args[3].value.val_u32);
 			break;
 		case FUNCTION_UNLINK:
-			log_debug(fuse_logger,"Unlink called");
+			log_debug(fuse_logger,"Unlink llamado");
 			func_ret = sac_server_unlink(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_MKDIR:
-			log_debug(fuse_logger,"Mkdir called");
+			log_debug(fuse_logger,"Mkdir llamado");
 			func_ret = sac_server_mkdir(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_RMDIR:
-			log_debug(fuse_logger,"Rmdir called");
+			log_debug(fuse_logger,"Rmdir llamado");
 			func_ret = sac_server_rmdir(f->args[0].value.val_charptr);
 			break;
 		default:
-			log_error(fuse_logger,"Unknown function");
+			log_error(fuse_logger,"Funcion desconocida");
 			break;
 	}
 	return func_ret;
@@ -416,12 +435,17 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 
 	GFile *nodoVacio = tablaDeNodos + currNode;
 
+	time_t tiempoAhora;
+	uint64_t timestamp;
+	tiempoAhora = time(0);
+	timestamp = (uint64_t) tiempoAhora;
+
 	strcpy((char*) nodoVacio->fname, fileName+1);
 	nodoVacio->file_size = 0;
 	nodoVacio->parent_dir_block = nodoPadre;
 	nodoVacio->state = tipoDeArchivo;
-	// nodoVacio->create_date
-	// nodoVacio->modify_date
+	nodoVacio->create_date = timestamp;
+	nodoVacio->modify_date = timestamp;
 
 	msync(disco, diskSize, MS_SYNC);
 	return 0;

@@ -107,6 +107,9 @@ ptrGBloque determine_nodo(char *path){
 
 	listaSpliteada = splitPath(path, &dimListaSpliteada);
 
+	if(!strcmp(path, "/")){
+		return 0;
+	}
 
 	for(i=0 ; i<dimListaSpliteada; i++){
 
