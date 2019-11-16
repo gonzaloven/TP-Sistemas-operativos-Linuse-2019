@@ -140,6 +140,8 @@ int split_path(const char* path, char** super_path, char** name);
  */
 int lastchar(const char* str, char chr);
 
+int inicioTablaDeNodos();
+
 /*
  Starts server,creates a logger and loads configuration
 int sac_start_service(ConnectionHandler ch);

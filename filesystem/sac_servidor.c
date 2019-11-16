@@ -40,9 +40,14 @@ fuse_configuration* load_configuration(char *path)
 
 int inicioTablaDeNodos(){
 	int tamanioHeader = 1;
-	int tamanioBitmap = ceil((fuse_config->disk_size / BLOQUE_SIZE / 8) / BLOQUE_SIZE);
+	double diskSize = (double) fuse_config->disk_size;
+	double tamanioBloque = (double) BLOQUE_SIZE;
+	double divisionUno = diskSize / tamanioBloque;
+	double divisionDos = divisionUno / (double) 8;
+	double divisionTres = divisionDos / tamanioBloque;
+	int tamanioBitmapBloque = ceil(divisionTres);
 
-	return tamanioHeader + tamanioBitmap;
+	return tamanioHeader + tamanioBitmapBloque;
 }
 
 void configurar_server(){
@@ -209,7 +214,7 @@ Function validarSiExiste(char* path, FuncType tipoFuncion){
 
 	}
 
-	int nodoBuscado = determine_nodo(path);
+	int nodoBuscado = determine_nodo(path, inicioTablaDeNodos());
 
 	if(nodoBuscado == -1){
 		arg[0].type = VAR_UINT32;
@@ -256,7 +261,7 @@ Function sac_server_getattr(char* path){
 		Arg argNodoRaiz[2];
 		argNodoRaiz[0].type = VAR_UINT32;
 		argNodoRaiz[0].size = sizeof(uint32_t);
-		argNodoRaiz[0].value.val_u32 = (S_IFDIR | 0755);
+		argNodoRaiz[0].value.val_u32 = (S_IFDIR | 0777);
 
 		argNodoRaiz[1].type = VAR_UINT32;
 		argNodoRaiz[1].size = sizeof(uint32_t);
@@ -269,7 +274,7 @@ Function sac_server_getattr(char* path){
 		return fsend;
 	}
 
-	int nodoBuscadoPosicion = determine_nodo(path);
+	int nodoBuscadoPosicion = determine_nodo(path, inicioTablaDeNodos());
 
 	if(nodoBuscadoPosicion == -1){
 		return retornar_error(fsend);
@@ -421,7 +426,7 @@ Function sac_server_readdir (char* path) {
 	if(!strcmp(path, "/")){
 		completar_lista_con_fileNames(listaDeArchivos, 0);
 	}else{
-		int nodoPadre = determine_nodo(path);
+		int nodoPadre = determine_nodo(path, inicioTablaDeNodos());
 		completar_lista_con_fileNames(listaDeArchivos, nodoPadre + inicioTablaDeNodos());
 	}
 
@@ -464,6 +469,15 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	int currNode = 0;
 	char *parentDirPath;
 	char *fileName;
+	int nodoPadre;
+
+	//Esto es porque dirname y basename te cambian el valor de path aparentemente, no se como hacerlo sino
+	char* pathOriginal;
+	char* copiaPathOriginal;
+	pathOriginal = malloc(strlen(path) + 1);
+	copiaPathOriginal = malloc(strlen(path) + 1);
+	memcpy(pathOriginal, path, strlen(path) + 1);
+	memcpy(copiaPathOriginal, path, strlen(path) + 1);
 
 	while(tablaDeNodos[currNode].state != 0 && currNode < MAX_NUMBER_OF_FILES){
 		currNode++;
@@ -474,26 +488,35 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 		return EDQUOT;
 	}
 
-	parentDirPath = dirname(path);
-	int nodoPadre = determine_nodo(parentDirPath);
-
-	fileName = basename(path);
-
-	GFile *nodoVacio = tablaDeNodos + currNode;
-
 	time_t tiempoAhora;
 	uint64_t timestamp;
 	tiempoAhora = time(0);
 	timestamp = (uint64_t) tiempoAhora;
 
-	strcpy((char*) nodoVacio->fname, fileName+1);
+	if(strcmp(dirname(path), "/")){
+		parentDirPath = dirname(path);
+		nodoPadre = determine_nodo(parentDirPath, inicioTablaDeNodos());
+	}
+
+	fileName = basename(pathOriginal);
+
+	GFile *nodoVacio = tablaDeNodos + currNode;
+
+	strcpy((char*) nodoVacio->fname, fileName);
 	nodoVacio->file_size = 0;
-	nodoVacio->parent_dir_block = nodoPadre + inicioTablaDeNodos();
+
+	if(strcmp(dirname(copiaPathOriginal), "/")){
+		nodoVacio->parent_dir_block = nodoPadre + inicioTablaDeNodos();
+	}else{
+		nodoVacio->parent_dir_block = 0;
+	}
+
 	nodoVacio->state = tipoDeArchivo;
 	nodoVacio->create_date = timestamp;
 	nodoVacio->modify_date = timestamp;
 
 	msync(disco, diskSize, MS_SYNC);
+	free(pathOriginal);
 	return 0;
 }
 
@@ -529,7 +552,7 @@ Function sac_server_mkdir (char* path){
 		arg[0].type = VAR_UINT32;
 		arg[0].size = sizeof(uint32_t);
 		arg[0].value.val_u32 = 0;
-		fsend.type = FUNCTION_RTA_MKNOD;
+		fsend.type = FUNCTION_RTA_MKDIR;
 	}else{
 		return retornar_error(fsend);
 	}
@@ -587,7 +610,7 @@ Function sac_server_unlink (char* path){
 
 Function sac_server_rmdir (char* path){
 	/*
-	int nodoPadre = determine_nodo(path);
+	int nodoPadre = determine_nodo(path, inicioTablaDeNodos());
 	//validar que no sea el directorio raiz
 
 	borrar_directorio(nodoPadre);

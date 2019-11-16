@@ -56,8 +56,8 @@ int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre){
 	return currNode;
 }
 
-int determine_nodo(char *path){
-	int nodoUltimoPadre = 0;
+int determine_nodo(char *path, int inicioTablaDeNodos){
+	int nodoUltimoPadre = inicioTablaDeNodos;
 	char *filenameBuscado;
 
 	int dimListaSpliteada, i;
