@@ -363,37 +363,34 @@ Function sac_server_read(char* path, size_t size, uint32_t offset){
 Function sac_server_readdir (char* path) {
 	Message msg;
 	Function fsend;
-	Arg arg[1];
+	char* listaNombres;
 
 	t_list* listaDeArchivos = list_create();
-	int i = 0;
 	ptrGBloque nodoPadre = determine_nodo(path);
 
-	while(i < MAX_NUMBER_OF_FILES){
-		if(tablaDeNodos->state != 0)
+	for(int i = 0; i < MAX_NUMBER_OF_FILES; i++){
+		if(tablaDeNodos[i].state != 0)
 		{
-			if(tablaDeNodos->parent_dir_block == nodoPadre)
+			if(tablaDeNodos[i].parent_dir_block == nodoPadre)
 			{
-				char * name = malloc(MAX_NAME_SIZE + 1 * (strlen(tablaDeNodos->fname)+1));
-				strcpy(name, tablaDeNodos->fname);
-				*(name + MAX_NAME_SIZE + 1) = '\0';
-				list_add(listaDeArchivos, tablaDeNodos->fname);
+				char * name = malloc(strlen(tablaDeNodos[i].fname) + 1);
+				strcpy(name, tablaDeNodos[i].fname);
+				list_add(listaDeArchivos, tablaDeNodos[i].fname);
 				free(name);
 			}
 		}
-		tablaDeNodos++;
 	}
 
-	//Aca hay que hacer que la serializacion acepte poner un tipo de dato que sea t_list, capaz usandola como un char*
-	//arg[0].type = VAR_CHAR_PTR;
-	//arg[0].size = strlen(listaDeArchivos) + 1;
-	//strcpy(arg[0].value.val_charptr,listaDeArchivos);
+	lista_a_string(listaDeArchivos, &listaNombres);
 
 	fsend.type = FUNCTION_RTA_READDIR;
 	fsend.num_args = 1;
-	fsend.args[0] = arg[0];
+	fsend.args[0].type = VAR_CHAR_PTR;
+	fsend.args[0].size = strlen(listaNombres) + 1;
+	strcpy(fsend.args[0].value.val_charptr, listaNombres);
 
 	list_destroy(listaDeArchivos);
+	free(listaNombres);
 
 	return fsend;
 }

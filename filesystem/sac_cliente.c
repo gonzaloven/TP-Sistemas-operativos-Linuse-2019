@@ -22,16 +22,12 @@ int send_path(FuncType func_type, const char *path){
 
 	f.args[0].type = VAR_CHAR_PTR;
 	f.args[0].size = strlen(path) + 1;
-	f.args[0].value.val_charptr = malloc(f.args[0].size);
-	memcpy(f.args[0].value.val_charptr, path, f.args[0].size);
+	strcpy(f.args[0].value.val_charptr, path);
 
 	f.type = func_type;
 	f.num_args = 1;
 
 	int resultado = send_call(&f);
-
-	//free(f.args[0].value.val_charptr);
-	//free(f);
 
 	return resultado;
 }
@@ -155,25 +151,21 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	char *lectura;
 	
 	Function fsend;
-	Arg arg[3];
-
-	arg[0].type = VAR_CHAR_PTR;
-	arg[0].size = strlen(path) + 1;
-	strcpy(arg[0].value.val_charptr,path);
-
-	arg[1].type = VAR_SIZE_T;
-	arg[1].size = sizeof(size_t);
-	arg[1].value.val_sizet = size;
-
-	arg[2].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
-	arg[2].size = sizeof(uint32_t);
-	arg[2].value.val_u32 = offset;
 
 	fsend.type = FUNCTION_READ;
 	fsend.num_args = 3;
-	fsend.args[0] = arg[0];
-	fsend.args[1] = arg[1];
-	fsend.args[2] = arg[2];
+
+	fsend.args[0].type = VAR_CHAR_PTR;
+	fsend.args[0].size = strlen(path) + 1;
+	strcpy(fsend.args[0].value.val_charptr,path);
+
+	fsend.args[1].type = VAR_SIZE_T;
+	fsend.args[1].size = sizeof(size_t);
+	fsend.args[1].value.val_sizet = size;
+
+	fsend.args[2].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	fsend.args[2].size = sizeof(uint32_t);
+	fsend.args[2].value.val_u32 = offset;
 
 	if(send_call(&fsend) == -1){
 		return EXIT_FAILURE;
@@ -191,7 +183,7 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 
 	memcpy(buf, freceive->args[0].value.val_charptr, tamanioLectura);
 
-	// no veo que le haga malloc al char*, por las dudas verificar despues
+	free(freceive->args[0].value.val_charptr);
 	free(freceive);
   
   	return tamanioLectura;
@@ -224,30 +216,25 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	Message msg;
 
 	Function f;
-	Arg arg[4];
-
-	arg[0].type = VAR_CHAR_PTR;
-	arg[0].size = strlen(path) + 1;
-	strcpy(arg[0].value.val_charptr,path);
-
-	arg[1].type = VAR_CHAR_PTR;
-	arg[1].size = strlen(buf) + 1;
-	strcpy(arg[1].value.val_charptr,buf);
-
-	arg[2].type = VAR_SIZE_T;
-	arg[2].size = sizeof(size_t);
-	arg[2].value.val_sizet = size;
-
-	arg[3].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
-	arg[3].size = sizeof(uint32_t);
-	arg[3].value.val_u32 = offset;
 
 	f.type = FUNCTION_WRITE;
 	f.num_args = 4;
-	f.args[0] = arg[0];
-	f.args[1] = arg[1];
-	f.args[2] = arg[2];
-	f.args[3] = arg[3];
+
+	f.args[0].type = VAR_CHAR_PTR;
+	f.args[0].size = strlen(path) + 1;
+	strcpy(f.args[0].value.val_charptr,path);
+
+	f.args[1].type = VAR_CHAR_PTR;
+	f.args[1].size = strlen(buf) + 1;
+	strcpy(f.args[1].value.val_charptr,buf);
+
+	f.args[2].type = VAR_SIZE_T;
+	f.args[2].size = sizeof(size_t);
+	f.args[2].value.val_sizet = size;
+
+	f.args[3].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	f.args[3].size = sizeof(uint32_t);
+	f.args[3].value.val_u32 = offset;
 
 	if(send_call(&f) == -1){
 		return EXIT_FAILURE;
