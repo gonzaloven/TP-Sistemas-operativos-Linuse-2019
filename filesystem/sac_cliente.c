@@ -31,6 +31,7 @@ int send_path(FuncType func_type, const char *path){
 	int resultado = send_call(&f);
 
 	//free(f.args[0].value.val_charptr);
+	//free(f);
 
 	return resultado;
 }
@@ -82,21 +83,21 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 		return -ENOENT;
 	}
 
-	char* mandar;
+	int dimListaSpliteada;
+	char **listaSpliteada;
+	char* filename;
 
-	while(off < f->args[0].size){
+	listaSpliteada = splitPath(f->args[0].value.val_charptr, &dimListaSpliteada);
 
-		memcpy(&tam_dir, f->args[0].value.val_charptr + off, sizeof(uint8_t));
-		off = off + sizeof(uint8_t);
-		mandar = malloc(tam_dir);
-		memcpy(mandar, f->args[0].value.val_charptr + off, tam_dir);
-		off = off + tam_dir;
-		filler(buf, mandar, NULL, 0);
-		free(mandar);
 
-	};
-	// no veo que le haga malloc al char*, por las dudas verificar despues
-	free(f);
+	for(int i=0 ; i<dimListaSpliteada; i++){
+
+		filename = listaSpliteada[i];
+		filler(buf, filename, NULL, 0);
+	}
+
+	free(listaSpliteada);
+	free(f->args[0].value.val_charptr);
 
 	return EXIT_SUCCESS;
 }
