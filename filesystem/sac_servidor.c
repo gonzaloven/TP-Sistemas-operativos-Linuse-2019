@@ -83,7 +83,7 @@ void message_handler(Message *m,int sock)
 			create_message_header(&head,MESSAGE_CALL,1,sizeof(Function));
 			create_function_message(&msg,&head,&frespuesta);
 			send_message(sock,&msg);
-			message_free_data(msg.data);
+			//message_free_data(msg.data);
 			break;
 		default:
 			log_error(fuse_logger,"Undefined message");
@@ -253,19 +253,19 @@ Function sac_server_getattr(char* path){
 	uint32_t total_size;
 
 	if(!strcmp(path, "/")){
-		Arg arg[2];
-		arg[0].type = VAR_UINT32;
-		arg[0].size = sizeof(uint32_t);
-		arg[0].value.val_u32 = (S_IFDIR | 0755);
+		Arg argNodoRaiz[2];
+		argNodoRaiz[0].type = VAR_UINT32;
+		argNodoRaiz[0].size = sizeof(uint32_t);
+		argNodoRaiz[0].value.val_u32 = (S_IFDIR | 0755);
 
-		arg[1].type = VAR_UINT32;
-		arg[1].size = sizeof(uint32_t);
-		arg[1].value.val_u32 = 1;
+		argNodoRaiz[1].type = VAR_UINT32;
+		argNodoRaiz[1].size = sizeof(uint32_t);
+		argNodoRaiz[1].value.val_u32 = 1;
 
 		fsend.type = FUNCTION_RTA_GETATTR_NODORAIZ;
 		fsend.num_args = 2;
-		fsend.args[0] = arg[0];
-		fsend.args[1] = arg[1];
+		fsend.args[0] = argNodoRaiz[0];
+		fsend.args[1] = argNodoRaiz[1];
 		return fsend;
 	}
 
@@ -396,44 +396,66 @@ Function sac_server_read(char* path, size_t size, uint32_t offset){
 	return f;
 }
 
+void completar_lista_con_fileNames(t_list* listaDeArchivos, ptrGBloque nodoPadre){
+	for(int i = 0; i < MAX_NUMBER_OF_FILES; i++){
+		if(tablaDeNodos[i].state != 0)
+		{
+			if(tablaDeNodos[i].parent_dir_block == nodoPadre)
+			{
+				char * name = malloc(strlen(tablaDeNodos[i].fname) + 1);
+				strcpy(name, tablaDeNodos[i].fname);
+				list_add(listaDeArchivos, tablaDeNodos[i].fname);
+				free(name);
+			}
+		}
+	}
+}
+
 Function sac_server_readdir (char* path) {
-	/*
 	Message msg;
 	Function fsend;
-	Arg arg[1];
+	char* listaNombres;
 
 	t_list* listaDeArchivos = list_create();
-	int i = 0;
-	int nodoPadre = determine_nodo(path);
 
-	while(i < MAX_NUMBER_OF_FILES){
-        if(tablaDeNodos[i].state != 0)
-        {
-            if(tablaDeNodos[i].parent_dir_block == nodoPadre)
-            {
-                char * name = malloc(strlen(tablaDeNodos[i].fname) + 1);
-                strcpy(name, tablaDeNodos[i].fname);
-                list_add(listaDeArchivos, tablaDeNodos[i].fname);
-                free(name);
-            }
-        }
-        i++;
-    }
+	if(!strcmp(path, "/")){
+		completar_lista_con_fileNames(listaDeArchivos, 0);
+	}else{
+		int nodoPadre = determine_nodo(path);
+		completar_lista_con_fileNames(listaDeArchivos, nodoPadre + inicioTablaDeNodos());
+	}
 
-	//Aca hay que hacer que la serializacion acepte poner un tipo de dato que sea t_list, capaz usandola como un char*
-	//arg[0].type = VAR_CHAR_PTR;
-	//arg[0].size = strlen(listaDeArchivos) + 1;
-	//strcpy(arg[0].value.val_charptr,listaDeArchivos);
+	if(list_size(listaDeArchivos) == 0){
+		char* stringVacia[1];
+		stringVacia[0] = '\0';
+
+		fsend.type = FUNCTION_RTA_READDIR;
+		fsend.num_args = 1;
+		fsend.args[0].type = VAR_CHAR_PTR;
+		fsend.args[0].size = 1;
+		fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
+		memcpy(fsend.args[0].value.val_charptr, stringVacia, fsend.args[0].size);
+
+		list_destroy(listaDeArchivos);
+
+		return fsend;
+	}
+
+	//Trate de sacar factor comun y delegar este cacho de codigo que se repite
+	//Pero me tira warnings y no logre hacerlo, rarisimo
+
+	lista_a_string(listaDeArchivos, &listaNombres);
 
 	fsend.type = FUNCTION_RTA_READDIR;
 	fsend.num_args = 1;
-	fsend.args[0] = arg[0];
+	fsend.args[0].type = VAR_CHAR_PTR;
+	fsend.args[0].size = strlen(listaNombres) + 1;
+	fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
+	memcpy(fsend.args[0].value.val_charptr, listaNombres, fsend.args[0].size);
 
 	list_destroy(listaDeArchivos);
-	*/
-	Function fsend;
-
-
+	free(listaNombres);
+	// free(fsend.args[0].value.val_charptr);
 
 	return fsend;
 }
