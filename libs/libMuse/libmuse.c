@@ -1,23 +1,16 @@
 #include "libmuse.h"
+#define LIBMUSE_CONFIG_PATH "../configs/libmuse.config"
 
 int master_socket = 0;
-
+int SERVER_IP;
+int SERVER_PORT;
+config = config_create(LIBMUSE_CONFIG_PATH);
 
 int muse_init(int id)
 {
-	//TODO: hardcoded change!!
-	//the configuration should be loaded here ?
-	if(libmuse_init("127.0.0.1",5003) <= 0)
-	{
-		return -1;
-	}
-	return 0;
-
-}
-
-int libmuse_init(char *ip,int port)
-{
-	master_socket = connect_to(ip,port);
+	SERVER_IP = config_get_int_value(config,"SERVER_IP");
+	SERVER_PORT = config_get_int_value(config,"SERVER_PORT");	
+	master_socket = connect_to(SERVER_IP,SERVER_PORT);
 	return master_socket; 
 }
 

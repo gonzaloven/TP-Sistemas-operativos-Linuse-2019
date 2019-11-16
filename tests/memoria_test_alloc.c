@@ -17,7 +17,6 @@ int main(int argc,char *argv[])
 	muse_get(y,r,4);
 	printf("%d\n",*y);
 
-
 	//Memoria Compartida
 	size_t filesize = 16;
 	int MAP_PRIVATE = 1;	//esto pa' que compile
@@ -28,7 +27,7 @@ int main(int argc,char *argv[])
 		map is a position _mapped_ of pages of a given 'filesize' of the "hola.txt" file  
 		muse_map basically is just putting the hola.txt file in memory    
 	*/
-		uint32_t my_memory = muse_alloc(10); //única porción central de memoria
+	uint32_t my_memory = muse_alloc(10); //única porción central de memoria
 	int memory_x = 10;
 	int*memory_y = malloc(4);
 	muse_cpy(my_memory, &memory_x, 4); //copies 4 bytes from local memory_x area to my_memory area
@@ -41,9 +40,6 @@ int main(int argc,char *argv[])
 	muse_sync(map, filesize); //drop a 'filesize' amount of bytes and write them to the file in FileSystem
 
 	muse_unmap(map); 
-
-
-
 
 	muse_free(r);
 	free(y);
