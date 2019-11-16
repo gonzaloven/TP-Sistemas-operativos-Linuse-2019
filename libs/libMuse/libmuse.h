@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "network.h"
+#include <fcntl.h> //for open() funct
+#include <sys/mman.h> //for mmap() & munmap()
 
 /**
 * Inicializa la biblioteca de MUSE.
@@ -89,7 +91,7 @@ int muse_unmap(uint32_t dir);
 
 /* ejemplo call(printf("PutoElQueLee")
 *   @TODO probar
- */ 
+*/ 
 int call(Function *function);
 
 #endif

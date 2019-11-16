@@ -156,8 +156,11 @@ int muse_sync(uint32_t addr, size_t len)
 
 int muse_unmap(uint32_t dir)
 {
-	result = 1;
-	//munmap(dir, filesize);
-   	//close(filedescriptor);
-	return result;
+	int unmap_result = munmap(dir, 1 << 10); //TODO: ¿¿ 1 << 10 ??
+  	if (unmap_result != ) {
+		printf("Could not unmap");
+		//log_error(muse_logger,"Could not unmap");
+		return -1;
+	}
+	return 0
 }
