@@ -6,7 +6,7 @@ CFLAGSSV := -g
 UTILS := ../utils/
 INCDIR := -I$(UTILS)
 LFLAGSCLI := -lfuse -lcommons -pthread
-LFLAGSSV := -lcommons -pthread
+LFLAGSSV := -lcommons -pthread -lm
 SRCSCLI := sac_handlers.c sac_cliente.c $(UTILS)network.c $(UTILS)message.c
 SRCSSV := sac_handlers.c sac_servidor.c $(UTILS)network.c $(UTILS)message.c
 

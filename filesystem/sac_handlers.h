@@ -11,7 +11,7 @@ int esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre);
 
 int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre);
 
-ptrGBloque determine_nodo(char *path);
+int determine_nodo(char *path);
 
 int tamano_malloc_list(t_list*);
 

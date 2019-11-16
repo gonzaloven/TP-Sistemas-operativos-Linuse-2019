@@ -38,6 +38,13 @@ fuse_configuration* load_configuration(char *path)
 	return fc;
 }
 
+int inicioTablaDeNodos(){
+	int tamanioHeader = 1;
+	int tamanioBitmap = ceil((fuse_config->disk_size / BLOQUE_SIZE / 8) / BLOQUE_SIZE);
+
+	return tamanioHeader + tamanioBitmap;
+}
+
 void configurar_server(){
 	int fileDescriptor = 0;
 	diskSize = fuse_config->disk_size;
@@ -46,27 +53,9 @@ void configurar_server(){
 
 	disco = (GBlock*) mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_SHARED,fileDescriptor,0);
 
-	//el 2 en realidad deberia estar calculado, porque depende el tamanio del archivo, el bitmap mide distinto
-	tablaDeNodos = (GFile*) (disco + 2);
+	int inicioTabla = inicioTablaDeNodos();
 
-	if(tablaDeNodos[0].state == 0){
-		GFile* nodoRaiz = tablaDeNodos;
-
-		time_t tiempoAhora;
-		uint64_t timestamp;
-		tiempoAhora = time(0);
-		timestamp = (uint64_t) tiempoAhora;
-
-		char *nombre = "root";
-
-		strcpy((char*) nodoRaiz->fname, nombre);
-		nodoRaiz->file_size = 0;
-		nodoRaiz->state = 2;
-		nodoRaiz->create_date = timestamp;
-		nodoRaiz->modify_date = timestamp;
-
-		msync(disco, diskSize, MS_SYNC);
-	}
+	tablaDeNodos = (GFile*) (disco + inicioTabla);
 
 	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
 }
@@ -209,7 +198,18 @@ Function validarSiExiste(char* path, FuncType tipoFuncion){
 	Function fsend;
 	Arg arg[1];
 
-	ptrGBloque nodoBuscado = determine_nodo(path);
+	if(!strcmp(path, "/")){
+		arg[0].type = VAR_UINT32;
+		arg[0].size = sizeof(uint32_t);
+		arg[0].value.val_u32 = 0;
+		fsend.type = tipoFuncion;
+		fsend.num_args = 1;
+		fsend.args[0] = arg[0];
+		return fsend;
+
+	}
+
+	int nodoBuscado = determine_nodo(path);
 
 	if(nodoBuscado == -1){
 		arg[0].type = VAR_UINT32;
@@ -252,7 +252,24 @@ Function sac_server_getattr(char* path){
 	uint32_t nlink_t;
 	uint32_t total_size;
 
-	ptrGBloque nodoBuscadoPosicion = determine_nodo(path);
+	if(!strcmp(path, "/")){
+		Arg arg[2];
+		arg[0].type = VAR_UINT32;
+		arg[0].size = sizeof(uint32_t);
+		arg[0].value.val_u32 = (S_IFDIR | 0755);
+
+		arg[1].type = VAR_UINT32;
+		arg[1].size = sizeof(uint32_t);
+		arg[1].value.val_u32 = 1;
+
+		fsend.type = FUNCTION_RTA_GETATTR_NODORAIZ;
+		fsend.num_args = 2;
+		fsend.args[0] = arg[0];
+		fsend.args[1] = arg[1];
+		return fsend;
+	}
+
+	int nodoBuscadoPosicion = determine_nodo(path);
 
 	if(nodoBuscadoPosicion == -1){
 		return retornar_error(fsend);
@@ -387,22 +404,21 @@ Function sac_server_readdir (char* path) {
 
 	t_list* listaDeArchivos = list_create();
 	int i = 0;
-	ptrGBloque nodoPadre = determine_nodo(path);
+	int nodoPadre = determine_nodo(path);
 
 	while(i < MAX_NUMBER_OF_FILES){
-		if(tablaDeNodos->state != 0)
-		{
-			if(tablaDeNodos->parent_dir_block == nodoPadre)
-			{
-				char * name = malloc(MAX_NAME_SIZE + 1 * (strlen(tablaDeNodos->fname)+1));
-				strcpy(name, tablaDeNodos->fname);
-				*(name + MAX_NAME_SIZE + 1) = '\0';
-				list_add(listaDeArchivos, tablaDeNodos->fname);
-				free(name);
-			}
-		}
-		tablaDeNodos++;
-	}
+        if(tablaDeNodos[i].state != 0)
+        {
+            if(tablaDeNodos[i].parent_dir_block == nodoPadre)
+            {
+                char * name = malloc(strlen(tablaDeNodos[i].fname) + 1);
+                strcpy(name, tablaDeNodos[i].fname);
+                list_add(listaDeArchivos, tablaDeNodos[i].fname);
+                free(name);
+            }
+        }
+        i++;
+    }
 
 	//Aca hay que hacer que la serializacion acepte poner un tipo de dato que sea t_list, capaz usandola como un char*
 	//arg[0].type = VAR_CHAR_PTR;
@@ -416,6 +432,8 @@ Function sac_server_readdir (char* path) {
 	list_destroy(listaDeArchivos);
 	*/
 	Function fsend;
+
+
 
 	return fsend;
 }
@@ -435,7 +453,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	}
 
 	parentDirPath = dirname(path);
-	ptrGBloque nodoPadre = determine_nodo(parentDirPath);
+	int nodoPadre = determine_nodo(parentDirPath);
 
 	fileName = basename(path);
 
@@ -448,7 +466,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 
 	strcpy((char*) nodoVacio->fname, fileName+1);
 	nodoVacio->file_size = 0;
-	nodoVacio->parent_dir_block = nodoPadre;
+	nodoVacio->parent_dir_block = nodoPadre + inicioTablaDeNodos();
 	nodoVacio->state = tipoDeArchivo;
 	nodoVacio->create_date = timestamp;
 	nodoVacio->modify_date = timestamp;
@@ -500,7 +518,7 @@ Function sac_server_mkdir (char* path){
 	return fsend;
 }
 
-void borrar_directorio (ptrGBloque nodoPosicion){
+void borrar_directorio (int nodoPosicion){
 	/*
 	int currNode = 0;
 
@@ -525,7 +543,7 @@ void borrar_directorio (ptrGBloque nodoPosicion){
 	*/
 }
 
-void borrar_archivo(GFile* nodo, ptrGBloque nodoPosicion){
+void borrar_archivo(GFile* nodo, int nodoPosicion){
 	/*
 	nodo->state = 0;
 
@@ -535,7 +553,7 @@ void borrar_archivo(GFile* nodo, ptrGBloque nodoPosicion){
 
 Function sac_server_unlink (char* path){
 	/*
-	ptrGBloque nodoPath =
+	int nodoPath =
 	//tengo que validar si no existe el nodo para ese path
 	GFile* nodoABorrar = tablaDeNodos + nodoPath;
 
@@ -547,7 +565,7 @@ Function sac_server_unlink (char* path){
 
 Function sac_server_rmdir (char* path){
 	/*
-	ptrGBloque nodoPadre = determine_nodo(path);
+	int nodoPadre = determine_nodo(path);
 	//validar que no sea el directorio raiz
 
 	borrar_directorio(nodoPadre);

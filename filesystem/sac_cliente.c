@@ -49,6 +49,13 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	Function* f = msg.data;
 
+	if(f->type == FUNCTION_RTA_GETATTR_NODORAIZ){
+		stbuf->st_mode = f->args[0].value.val_u32;
+		stbuf->st_nlink = f->args[1].value.val_u32;
+		free(f);
+		return EXIT_SUCCESS;
+	}
+
 	if(f->type != FUNCTION_RTA_GETATTR){
 		return -ENOENT;
 	}
