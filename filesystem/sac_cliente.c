@@ -84,6 +84,9 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 	char* mandar;
 
+	filler(buf, ".", NULL, 0);
+	filler(buf, "..", NULL, 0);
+
 	while(off < f->args[0].size){
 
 		memcpy(&tam_dir, f->args[0].value.val_charptr + off, sizeof(uint8_t));
