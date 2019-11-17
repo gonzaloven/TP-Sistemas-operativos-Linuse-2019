@@ -62,6 +62,12 @@ void configurar_server(){
 
 	tablaDeNodos = (GFile*) (disco + inicioTabla);
 
+	//es para monitorear los archivos que hay en el filesystem, solo para testing
+	for(int i=0; i<100; i++){
+		printf("i: %d %d %s %d \n", i, tablaDeNodos[i].state, tablaDeNodos[i].fname, tablaDeNodos[i].parent_dir_block);
+
+	}
+
 	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
 }
 
@@ -472,15 +478,25 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	int nodoPadre;
 
 	//Esto es porque dirname y basename te cambian el valor de path aparentemente, no se como hacerlo sino
+	//Tengo que descubrir la forma de hacerlo sin repetir 40 veces lo mismo TODO
 	char* pathOriginal;
 	char* copiaPathOriginal;
+
 	pathOriginal = malloc(strlen(path) + 1);
 	copiaPathOriginal = malloc(strlen(path) + 1);
+	char* copia2PathOriginal = malloc(strlen(path) + 1);
+	char* filename = malloc(strlen(path) + 1);
+
 	memcpy(pathOriginal, path, strlen(path) + 1);
 	memcpy(copiaPathOriginal, path, strlen(path) + 1);
+	memcpy(filename, basename(copia2PathOriginal), strlen(basename(copia2PathOriginal)) + 1);
 
 	while(tablaDeNodos[currNode].state != 0 && currNode < MAX_NUMBER_OF_FILES){
-		currNode++;
+		if(!strcmp(filename, tablaDeNodos[currNode].fname)){
+			return EEXIST;
+		}else{
+			currNode++;
+		}
 	}
 
 	if (currNode >= MAX_NUMBER_OF_FILES) 
@@ -517,6 +533,9 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 
 	msync(disco, diskSize, MS_SYNC);
 	free(pathOriginal);
+	free(copiaPathOriginal);
+	free(copia2PathOriginal);
+	free(filename);
 	return 0;
 }
 

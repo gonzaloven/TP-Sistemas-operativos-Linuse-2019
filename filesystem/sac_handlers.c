@@ -38,26 +38,27 @@ char **splitPath(char *path, int *size){
 int esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre){
 
 	return tablaDeNodos[nodo].state != 0
-		&& tablaDeNodos[nodo].parent_dir_block == nodoPadre
-		&& strcmp(tablaDeNodos[nodo].fname, filename);
+			&& tablaDeNodos[nodo].parent_dir_block == nodoPadre
+			&& !strcmp(tablaDeNodos[nodo].fname, filename);
 }
 
 int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre){
-	int currNode = 0;
+	int resultado = -1;
 
-	while(!esElNodoBuscado(currNode, filenameBuscado, nodoPadre) && currNode < MAX_NUMBER_OF_FILES){
-		currNode++;
+	for(int i=0; i< MAX_NUMBER_OF_FILES; i++){
+		if(!esElNodoBuscado(i, filenameBuscado, nodoPadre)){
+			i++;
+		}else{
+			resultado = i;
+			break;
+		}
 	}
 
-	if(currNode == MAX_NUMBER_OF_FILES){
-		return -1;
-	}
-
-	return currNode;
+	return resultado;
 }
 
 int determine_nodo(char *path, int inicioTablaDeNodos){
-	int nodoUltimoPadre = inicioTablaDeNodos;
+	ptrGBloque nodoUltimoPadre = inicioTablaDeNodos;
 	char *filenameBuscado;
 
 	int dimListaSpliteada, i;
@@ -65,8 +66,18 @@ int determine_nodo(char *path, int inicioTablaDeNodos){
 
 	listaSpliteada = splitPath(path, &dimListaSpliteada);
 
-	if(!strcmp(path, "/")){
-		return 0;
+	char* directorio = malloc(strlen(path) + 1);
+	char* pathOriginal = malloc(strlen(path) + 1);
+	char* filename = malloc(strlen(path) + 1);
+
+	memcpy(pathOriginal, path, strlen(path) + 1);
+	memcpy(directorio, dirname(path), strlen(path) + 1);
+	memcpy(filename, basename(pathOriginal), strlen(basename(pathOriginal)) + 1);
+
+	if(!strcmp(directorio, "/")){
+		filenameBuscado = filename;
+		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, 0);
+		return nodoUltimoPadre;
 	}
 
 	for(i=0 ; i<dimListaSpliteada; i++){
@@ -80,6 +91,9 @@ int determine_nodo(char *path, int inicioTablaDeNodos){
 		}
 	}
 
+	free(directorio);
+	free(pathOriginal);
+	free(filename);
 	free(listaSpliteada);
 	return nodoUltimoPadre;
 }
