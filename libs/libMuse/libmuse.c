@@ -1,14 +1,17 @@
 #include "libmuse.h"
+#include <commons/config.h>
 #define LIBMUSE_CONFIG_PATH "../configs/libmuse.config"
 
 int master_socket = 0;
-int SERVER_IP;
+char* SERVER_IP;
 int SERVER_PORT;
-config = config_create(LIBMUSE_CONFIG_PATH);
+t_config* config = config_create(LIBMUSE_CONFIG_PATH);
 
 int muse_init(int id)
 {
-	SERVER_IP = config_get_int_value(config,"SERVER_IP");
+	//SERVER_IP = config_get_int_value(config,"SERVER_IP"); 
+	//Se debería cambiar lo de abajo
+	SERVER_IP = "127.0.0.1"
 	SERVER_PORT = config_get_int_value(config,"SERVER_PORT");	
 	master_socket = connect_to(SERVER_IP,SERVER_PORT);
 	return master_socket; 
@@ -131,7 +134,12 @@ int muse_cpy(uint32_t dst, void* src, int n)
 	uint32_t map = muse_map("hola.txt", filesize, MAP_PRIVATE);		
 	opens the "hola.txt" file in RDONLY mode
 	map is a position _mapped_ of pages of a given 'filesize' of the "hola.txt" file  
-	muse_map basically is just putting the hola.txt file in memory    
+	muse_map basically is just putting the hola.txt file in memory 
+
+	@Return
+	On success, mmap() returns a pointer to the mapped area. On error,
+	the value MAP_FAILED (that is, (void *) -1) is returned, and errno
+	is set appropriately.
 */
 uint32_t muse_map(char *path, size_t length, int flags)
 {
@@ -147,13 +155,18 @@ int muse_sync(uint32_t addr, size_t len)
 	return result;
 }
 
+/*
+	@Return
+	On success, munmap() returns 0, on failure -1,
+	and errno is set (probably to EINVAL).
+*/
 int muse_unmap(uint32_t dir)
 {
 	int unmap_result = munmap(dir, 1 << 10); //TODO: ¿¿ 1 << 10 ??
-  	if (unmap_result != ) {
+  	if (unmap_result == 0 ) {
 		printf("Could not unmap");
 		//log_error(muse_logger,"Could not unmap");
 		return -1;
 	}
-	return 0
+	return 0;
 }
