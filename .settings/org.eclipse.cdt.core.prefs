@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+environment/project/0.377491551/LANG/delimiter=\:
+environment/project/0.377491551/LANG/operation=replace
+environment/project/0.377491551/LANG/value=en_US
+environment/project/0.377491551/LC_ALL/delimiter=\:
+environment/project/0.377491551/LC_ALL/operation=replace
+environment/project/0.377491551/LC_ALL/value=en_US
+environment/project/0.377491551/LD_LIBRARY_PATH/delimiter=\:
+environment/project/0.377491551/LD_LIBRARY_PATH/operation=replace
+environment/project/0.377491551/LD_LIBRARY_PATH/value=${workspace_loc}/tp-2019-2c-Los-Trapitos/Libs/Debug
+environment/project/0.377491551/append=true
+environment/project/0.377491551/appendContributed=true
