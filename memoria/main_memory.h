@@ -7,14 +7,18 @@
 #include <inttypes.h>
 #include <stddef.h>
 #include <commons/collections/list.h>
+#include <commons/log.h>
 
+
+/* Estructura ppal: nos dice para cada pid su numero de tabla de segmento*/
 typedef struct program_s
 {
 	uint16_t pid;
 	t_list *segment_table;
 }program;
 
-typedef struct HeapMetadata //usada x cada uno de los segmentos
+/* Estructura de Metadata, una por cada segmento */
+typedef struct HeapMetadata 
 {
 	uint32_t size;
 	bool is_free;
@@ -26,13 +30,18 @@ typedef struct frame_s
 	void *data;
 }frame;
 
+/*De cada pagina sabemos si está presente, su numero y a que frame apunta */
 typedef struct page_s
 {
-	bool is_present;
+	bool is_present; //sirve para páginas compartidas
 	uint16_t page_num;
 	frame *fr; 
 }page;
 
+/* 
+ * Estructura del segmento, sabemos su espacio libre
+ * un puntero a su base, uno a su limite y uno a su tabla de páginas
+ */
 typedef struct segment_s
 {
 	//segment_lock;
@@ -42,21 +51,39 @@ typedef struct segment_s
 	t_list *page_table;
 }segment;
 
+/*
+ * @param Salen del archivo config
+ */
 void muse_main_memory_init(int memory_size,int page_size);
 
 void muse_main_memory_stop();
 
+/*
+ * Busca el process_id en program_list
+ * @return -1 if no está, else devuelve el nro de programa en program_list
+ */
+int search_program(uint32_t pid);
+
+/*
+ * @return -1 if no hay espacio libre, else devuelve la base para el tamaño pedido
+ */
+int has_segment_with_free_space(program *prog,int size);
+
+/*
+ * @return NULL if error, page if OK 
+ */
+page *find_free_page();
 
 /* Allocates memory in UCM
- * @param size: size of the memory to allocate 
- * @return: virtual address
+ * @param size size of the memory to allocate 
+ * @return virtual address
  */
-uint32_t muse_malloc(int size,uint32_t pid);
+uint32_t memory_malloc(int size,uint32_t pid);
 
 /*
  * Frees a memory allocation
  * @param virtual_address: the address of memory to free
- * return: -1 -> SEGFAULT ,0 -> ok
+ * @return -1 => SEGFAULT ,0 => ok
  */
 uint8_t memory_free(uint32_t virtual_address,uint32_t pid);
 

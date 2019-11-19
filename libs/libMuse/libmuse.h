@@ -6,14 +6,18 @@
 #include "network.h"
 #include <fcntl.h> //for open() funct
 #include <sys/mman.h> //for mmap() & munmap()
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <commons/config.h>
+
 
 /**
 * Inicializa la biblioteca de MUSE.
 * @param id El Process (o Thread) ID para identificar el caller en MUSE.
 * @return Si pasa un error, retorna -1. Si se inicializó correctamente, retorna 0.
 * @see Para obtener el id de un proceso pueden usar getpid() de la lib POSIX (unistd.h)
-* @note Debido a la naturaleza centralizada de MUSE, esta función deberá definir
-*  el ID del proceso/hilo según "IP-ID".
+* @note Debido a la naturaleza centralizada de MUSE, esta función deberá 
+* definir el ID del proceso/hilo según "IP-ID".
 */
 int muse_init(int id);
 
@@ -89,8 +93,7 @@ int muse_unmap(uint32_t dir);
 
 /* Agregadas x los pibes */
 
-/* ejemplo call(printf("PutoElQueLee")
-*   @TODO probar
+/* call es el serializador, hay varios funciones prehechas que se pueden usar
 */ 
 int call(Function *function);
 

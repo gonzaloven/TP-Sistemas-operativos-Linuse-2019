@@ -1,20 +1,31 @@
 #include "libmuse.h"
-#include <commons/config.h>
-#define LIBMUSE_CONFIG_PATH "../configs/libmuse.config"
+#include <stdlib.h>
+
+#define LIBMUSE_CONFIG_PATH "../../configs/libmuse.config"
+
+t_config *config;
 
 int master_socket = 0;
-char* SERVER_IP;
-int SERVER_PORT;
-t_config* config = config_create(LIBMUSE_CONFIG_PATH);
 
 int muse_init(int id)
 {
-	//SERVER_IP = config_get_int_value(config,"SERVER_IP"); 
-	//Se debería cambiar lo de abajo
-	SERVER_IP = "127.0.0.1"
-	SERVER_PORT = config_get_int_value(config,"SERVER_PORT");	
+	config = config_create(LIBMUSE_CONFIG_PATH);
+
+	if(config == NULL)
+	{
+		//log_error(muse_logger,"Configuration couldn't be loaded.Quitting program!");
+		printf("Configuration couldn't be loaded.Quitting program!\n");
+		return(-1);
+	}
+
+	char* SERVER_IP = config_get_string_value(config, "SERVER_IP");
+	int SERVER_PORT = config_get_int_value(config, "SERVER_PORT");
+	
 	master_socket = connect_to(SERVER_IP,SERVER_PORT);
-	return master_socket; 
+
+	config_destroy(config);
+
+	return 0; 
 }
 
 int call(Function *function)
@@ -76,11 +87,11 @@ int muse_get(void* dst, uint32_t src, size_t n)
 {
 	Function function;
 	Arg arg[3];
-	uint32_t *d = (uint32_t *)dst;
+	uint32_t *direccion = (uint32_t *)dst;
 
 	arg[0].type = VAR_VOID_PTR;
 	arg[0].size = sizeof(uint32_t);
-	arg[0].value.val_u32 = *d;
+	arg[0].value.val_u32 = *direccion;
 
 	arg[1].type = VAR_UINT32;
 	arg[1].size = sizeof(uint32_t);
@@ -96,7 +107,7 @@ int muse_get(void* dst, uint32_t src, size_t n)
 	function.args[1] = arg[1];
 	function.args[2] = arg[2];
 
-	*d = call(&function);
+	*direccion = call(&function);
 	return 0;
 }
 
@@ -143,8 +154,8 @@ int muse_cpy(uint32_t dst, void* src, int n)
 */
 uint32_t muse_map(char *path, size_t length, int flags)
 {
-   	int file_descriptor = open(*path, O_RDONLY, 0);
-   	void* map = mmap(NULL, length, NULL, flags, file_descriptor, 0);
+   	int file_descriptor = open(path, O_RDONLY);
+   	void* map = mmap(NULL, length, PROT_NONE, flags, file_descriptor, 0);
    	printf(map, length);   
 	return *(int*) map;
 }
@@ -162,7 +173,8 @@ int muse_sync(uint32_t addr, size_t len)
 */
 int muse_unmap(uint32_t dir)
 {
-	int unmap_result = munmap(dir, 1 << 10); //TODO: ¿¿ 1 << 10 ??
+	void *dir2 = &dir;
+	int unmap_result = munmap(dir2, 1 << 10); //TODO: ¿¿ 1 << 10 ??
   	if (unmap_result == 0 ) {
 		printf("Could not unmap");
 		//log_error(muse_logger,"Could not unmap");

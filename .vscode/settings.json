@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "muse.h": "c",
+        "libmuse.h": "c",
+        "server.h": "c",
+        "basic.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}

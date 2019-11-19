@@ -43,7 +43,7 @@ int server_start(int port,ConnectionHandler handler)
 		return -1;
 	}
 
-	log_debug(server_logger,"Servidor inicializado correctamente.Escuchando conexiones");
+	log_debug(server_logger,"Servidor inicializado correctamente. Escuchando conexiones");
 	return server_listen_connections(listen_socket,handler,conn);
 }
 
@@ -88,6 +88,7 @@ void server_stop()
 {
 	running = 0;
 	close(listen_socket);
+	log_debug(server_logger,"Cerrando Servidor");
 	log_destroy(server_logger);
 }
 
@@ -111,6 +112,7 @@ int connect_to(char *ip,int port)
 		//Failed
 		return -1;
 	}
+	
 	return sock;
 }
 
@@ -125,6 +127,9 @@ ssize_t receive_packet(int socket,void *buffer,size_t buffer_size)
 	header_decode(cursor,buffer_size,&header);
 	cursor += recv_bytes;	
 	recv_bytes += recv(socket,cursor,header.data_size,MSG_WAITALL);
+
+	//log_debug(server_logger,"Se recibio un paquete de %d bytes",recv_bytes);
+	
 	return recv_bytes;
 }
 

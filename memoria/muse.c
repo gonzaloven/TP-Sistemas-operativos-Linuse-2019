@@ -10,21 +10,22 @@ int main(int argc,char *argv[])
 	return 0;
 }
 
-int muse_start_service(ConnectionHandler ch)
+void muse_start_service(ConnectionHandler ch)
 {
 	muse_config = load_configuration(MUSE_CONFIG_PATH);
 	muse_logger = log_create(MUSE_LOG_PATH,"MUSE",true,LOG_LEVEL_TRACE);
 	muse_main_memory_init(muse_config->memory_size,muse_config->page_size);
 	server_start(muse_config->listen_port,ch);
-	printf("MUSE has been initialized correctly!\n");
+	//Va a funcionar hasta que le manden un ctrl+c
 }
 
 void muse_stop_service()
 {
-	log_info(muse_logger,"SIGINT received.Shuting down!");
+	log_info(muse_logger,"SIGINT received.Shuting down!");	
 	free(muse_config);
 	log_destroy(muse_logger);
 	server_stop();
+	printf("Thanks for using MUSE, goodbye!\n");
 }
 
 void* handler(void *args)
@@ -33,22 +34,22 @@ void* handler(void *args)
 	Message msg;
 	char buffer[1024];
 	int n=0;
-	int sock = conna->client_fd;
+	int socket = conna->client_fd;
 	struct sockaddr_in client_address = conna->client_addr;
-
-	printf("A client has connected!\n");
+	
+	log_debug(muse_logger,"A client in socket: %d has connected!",socket);
 
 	//cambiar esto
-	while((n=receive_packet(sock,buffer,1024)) > 0)
+	while((n=receive_packet(socket,buffer,1024)) > 0)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
-			message_handler(&msg,sock);
+			message_handler(&msg,socket);
 			memset(buffer,'\0',1024);
 		}
 	}	
-	log_debug(muse_logger,"The client was disconnected!");
-	close(sock);
+	log_debug(muse_logger,"The client in socket: %d was disconnected!",socket);
+	close(socket);
 	return (void*)NULL;
 }
 
@@ -72,7 +73,7 @@ muse_configuration *load_configuration(char *path)
 	return configuracion;
 }
 
-void message_handler(Message *m,int sock)
+void message_handler(Message *m,int socket)
 {
 	uint32_t res= 0;
 	Message msg;
@@ -86,7 +87,7 @@ void message_handler(Message *m,int sock)
 			
 			create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
 			create_response_message(&msg,&head,res);
-			send_message(sock,&msg);
+			send_message(socket,&msg);
 			message_free_data(&msg);
 			break;
 		default:
@@ -97,14 +98,20 @@ void message_handler(Message *m,int sock)
 
 }
 
+
+/*
+function vendria a ser la funcion que libmuse quiere ejecutar, 
+pid es el process_id de libmuse
+
+*/
 uint32_t muse_invoke_function(Function *function,uint32_t pid) 
 {
 	uint32_t func_ret = 0;
 	switch(function->type)
 	{
 		case FUNCTION_MALLOC:
-			log_debug(muse_logger,"Malloc called with args ->%d",function->args[0].value.val_u32);
-			func_ret = muse_malloc(function->args[0].value.val_u32,pid);//TODO put the caller_id in func
+			log_debug(muse_logger,"Malloc called with args -> %d",function->args[0].value.val_u32);
+			func_ret = memory_malloc(function->args[0].value.val_u32,pid);//TODO put the caller_id in func
 			break;
 		case FUNCTION_FREE:
 			log_debug(muse_logger,"Free called");

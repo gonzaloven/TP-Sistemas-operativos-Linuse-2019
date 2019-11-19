@@ -4,56 +4,59 @@
 * buscar un programa en la tabla de programas, 
 * y buscar páginas libre
 *
-*
-* @TODO :
-* Por alguna razón, se declararon acá las siguientes funciones: 
-* muse_free,muse_get,muse_cpy,muse_map,muse_sync,muse_unmap
-*
-* CORECCION: se cambiaron a memory_free/get/...
-* que también están por defecto en libmuse. 
 */
 
 #include "main_memory.h"
 
+#define MUSE_LOG_PATH "../logs/muse.log"
+
 frame *main_memory = NULL;
 int curr_page_num = 0;
 
-t_list *pages=NULL;
+t_list *page_list=NULL;
 t_list *program_list = NULL;
+
+t_log *metricas_logger = NULL;
 
 void muse_main_memory_init(int memory_size,int page_size)
 {
+	metricas_logger = log_create(MUSE_LOG_PATH,"METRICAS",true,LOG_LEVEL_TRACE);
+
 	main_memory = (frame *)malloc(memory_size);
-	page *pag = (page*)malloc(memory_size / page_size); //cambiar esto
+	int cant_pags_totales = (memory_size / page_size);
+	page *pag = (page*)malloc(cant_pags_totales); //cambiar esto
 	program_list = list_create();
 
 	void *mem_ptr = main_memory;
 	int i;
 
-	printf("Initializing frames\n");
-	for(i=0;i<memory_size/page_size;i++)
+	log_trace(metricas_logger,"Cantidad Total de paginas:%d ",cant_pags_totales);
+
+	printf("Dividiento la memoria en frames...\n");
+	for(i=0;i<cant_pags_totales;i++)
 	{	
 		main_memory[i].metadata.is_free = true ;
 		main_memory[i].metadata.size = 0;
 		main_memory[i].data = mem_ptr + i*page_size;
 	}
-	i=0;
-	printf("Initializing page table");
-	pages = list_create();
-	for(i=0;i<memory_size/page_size;i++)
+		
+
+	printf("Inicializando tabla de paginas...\n");
+	page_list = list_create();
+	for(i=0;i<cant_pags_totales;i++)
 	{
 		pag->is_present = true;
 		pag->page_num = curr_page_num;
 		pag->fr = &main_memory[i];
 		curr_page_num += i;
-		list_add(pages,pag);
+		list_add(page_list,pag);
 	}
 }
 
 void muse_main_memory_stop()
 {
 	free(main_memory);
-	list_destroy(pages);
+	list_destroy(page_list);
 	list_destroy(program_list);
 }
 
@@ -93,9 +96,9 @@ page *find_free_page()
 {
 	int i=0;
 	page *pag;
-	while(i<list_size(pages))
+	while(i<list_size(page_list))
 	{
-		pag = list_get(pages,i);
+		pag = list_get(page_list,i);
 		if(pag->fr->metadata.is_free)
 		{
 			return pag;
@@ -104,7 +107,7 @@ page *find_free_page()
 	return NULL;
 }
 
-uint32_t muse_malloc(int size,uint32_t pid)
+uint32_t memory_malloc(int size,uint32_t pid)
 {
 	int prog_id;
 	uint32_t seg_id;
@@ -114,10 +117,10 @@ uint32_t muse_malloc(int size,uint32_t pid)
 	segment *seg;
 	program *prog;
 
-	if((prog_id = search_program(pid)) != -1)
+	if((prog_id = search_program(pid)) != -1) //si el programa esta en program list
 	{
 		prog = list_get(program_list,prog_id);
-		if((seg_id = has_segment_with_free_space(prog,size)) != -1 )
+		if((seg_id = has_segment_with_free_space(prog,size)) != -1 ) //si hay espacio en su segmento
 		{
 			seg = list_get(prog->segment_table,seg_id);
 			pag = find_free_page();
@@ -130,16 +133,18 @@ uint32_t muse_malloc(int size,uint32_t pid)
 			list_add(prog->segment_table,pag);
 
 		}
-		else
+		else //mando el programa a otro segmento
 		{
 			seg = (segment *)malloc(sizeof(segment));
 			seg->free_size = size - 32;
 			seg->page_table = list_create();
 			page_id = list_add(seg->page_table,find_free_page());
 			seg_id = list_add(prog->segment_table,seg);
-			//logical_addr
+			logical_address = seg_id * 10 + page_id; //TODO chequear
 		}
-	}else
+	}else /*	si el programa no está en la lista de programas 
+				creamos el programa y creamos un nuevo segmento
+		   */
 	{
 		prog = (program *) malloc(sizeof(program));
 		seg = (segment *)malloc(sizeof(segment));
@@ -152,7 +157,7 @@ uint32_t muse_malloc(int size,uint32_t pid)
 		page_id = list_add(seg->page_table,find_free_page());
 		seg_id = list_add(prog->segment_table,seg);
 		list_add(program_list,prog);
-		logical_address = seg_id * 10 + page_id;
+		logical_address = seg_id * 10 + page_id; //TODO de dónde sale este cálculo
 	}
 	return logical_address;
 }

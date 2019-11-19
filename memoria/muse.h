@@ -26,7 +26,7 @@ uint32_t muse_invoke_function(Function *f,uint32_t pid);
 Starts server,logger and loads configuration. 
 [LOG_LEVEL_TRACE] hh:mm:ss:mmmm PROCESS_NAME/(PID:TID): MESSAGE
 */
-int muse_start_service(ConnectionHandler ch);
+void muse_start_service(ConnectionHandler ch);
 
 /* Stops the server and frees resources */
 void muse_stop_service();
