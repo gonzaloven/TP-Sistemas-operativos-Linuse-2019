@@ -37,5 +37,9 @@
 
 	hilolay_alumnos_configuracion configuracion_hilolay;
 
+	void handle_conection_hilolay(int socket_actual);
+
+	void handle_suse(socket_actual, received_packet);
+
 
 #endif // hilolay_alumnos_h__

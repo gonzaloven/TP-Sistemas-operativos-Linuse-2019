@@ -32,9 +32,8 @@ void conectar_con_suse() {
 }
 
 int suse_create(int master_thread){ //todo testear que los mensajes se manden of
-	realizar_handshake(socket_suse, cop_handshake_hilolay_suse);
+	bool result = realizar_handshake(socket_suse, cop_handshake_hilolay_suse);
 
-	// Envia el tid a SUSE
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
 	int desp = 0;
@@ -43,10 +42,42 @@ int suse_create(int master_thread){ //todo testear que los mensajes se manden of
 	enviar(socket_suse, cop_generico, tamanio_buffer, buffer); //todo el cop generico estara ok?
 	free(buffer);
 	log_info(logger, "Envie el tid a suse. \n");
-	//todo SUSE deberia responderme algo asi como "recibi el hilo principal"?
 
-	return 1; //todo responder correctamente o castear la funcion a void
+	return (int)result; //todo responder correctamente o castear la funcion a void
 
+}
+
+int suse_schedule_next(){ //todo testear
+	int next;
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+	int msg = 1; //este mensaje es solo para preguntarle que thread se va a ejecutar
+
+	serializar_int(buffer, &desp, msg);
+	enviar(socket_suse, cop_next_tid, tamanio_buffer, buffer);
+	free(buffer);
+
+	t_paquete* received_packet = recibir(socket_suse);
+	int desplazamiento = 0;
+
+	if(received_packet->codigo_operacion == cop_next_tid){
+		next = deserializar_int(received_packet->data, &desplazamiento);
+	}
+	else{
+		next = -1;
+		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", cop_next_tid)
+	}
+
+	return next;
+}
+
+void handle_conection_hilolay() {
+	t_paquete* received_packet = recibir(socket_suse);
+	switch(received_packet->codigo_operacion){
+		case cop_next_tid:
+			received_packet->data
+	}
 }
 
 

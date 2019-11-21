@@ -9,6 +9,7 @@
 #include <pthread.h>
 
 int main(void){
+	sprintf("Iniciando suse");
 	char* log_path = "../logs/suse_logs.txt";
 
 	logger = log_create(log_path, "SUSE Logs", 1, 1);
@@ -25,6 +26,7 @@ int main(void){
 	pthread_mutex_init(&mutex_ready_queue, NULL);
 	pthread_mutex_init(&mutex_blocked_queue, NULL);
 
+	iniciar_servidor();
 
 	return EXIT_SUCCESS;
 }
@@ -43,36 +45,6 @@ suse_configuration get_configuracion() {
 	config_destroy(archivo_configuracion);
 	return configuracion_suse;
 }
-
-void handle_conection(int socket_actual) {
-	t_paquete* received_packet = recibir(socket_actual);
-	switch(received_packet->codigo_operacion){
-		case cop_handshake_hilolay_suse:
-			handle_hilolay(socket_actual, received_packet);
-	}
-}
-
-void handle_hilolay(un_socket socket_hilolay, t_paquete* paquete_hilolay) {
-	esperar_handshake(socket_hilolay, paquete_hilolay, cop_handshake_hilolay_suse);
-	log_info(logger, "Realice handshake con hilolay\n");
-	sprintf("el socket es", "%d", socket_hilolay);
-
-	t_paquete* paquete_recibido = recibir(socket_hilolay); // Recibo hilo principal
-	int desplazamiento = 0;
-	int master_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
-
-	t_program * program = generar_programa(socket_hilolay);
-	sprintf("el socket es", "%d", program->PROGRAM_ID);
-	list_add(new_queue, master_tid); //todo ver si en la lista agrego programas o hilos
-	liberar_paquete(paquete_recibido);
-}
-
-t_program * generar_programa(un_socket socket) {
-	t_program * program = malloc(sizeof(t_ESI));
-	program->PROGRAM_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
-	return program;
-}
-
 
 void iniciar_servidor() {
 	// get us a socket and bind it
@@ -120,6 +92,64 @@ void iniciar_servidor() {
 		t_paquete* handshake = recibir(listener);
 		log_info(logger, "Soy SUSE y recibi una nueva conexion . \n");
 		free(handshake);
-		handle_conection(new_connection);
+		handle_conection_suse(new_connection);
 	}
+}
+
+
+void handle_conection_suse(int socket_actual) {
+	t_paquete* received_packet = recibir(socket_actual);
+	switch(received_packet->codigo_operacion){
+		case cop_handshake_hilolay_suse:
+			handle_hilolay(socket_actual, received_packet);
+		break;
+
+		case cop_next_tid:
+			handle_next_tid(socket_actual, received_packet);
+
+	}
+}
+
+void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
+	esperar_handshake(socket_actual, paquete_hilolay, cop_handshake_hilolay_suse);
+	log_info(logger, "Realice handshake con hilolay\n");
+	sprintf("el socket es", "%d", socket_actual);
+
+	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo principal
+	int desplazamiento = 0;
+	int master_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+
+	t_program * program = generar_programa(socket_actual);
+	sprintf("el socket es", "%d", program->PROGRAM_ID);
+	list_add(new_queue, master_tid); //todo ver si en la lista agrego programas o hilos
+	liberar_paquete(paquete_recibido);
+}
+
+t_program * generar_programa(un_socket socket) {
+	t_program * program = malloc(sizeof(t_ESI));
+	program->PROGRAM_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
+	return program;
+}
+
+void handle_next_tid(un_socket socket_actual, received_packet){
+	esperar_handshake(socket_actual, received_packet, cop_next_tid);
+	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo principal
+	int desplazamiento = 0;
+	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
+	liberar_paquete(received_packet);
+
+	int next_tid = get_next_tid();
+
+	// Envio el next tid
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+	enviar(socket_actual, cop_next_tid, tamanio_buffer, buffer);
+	free(buffer);
+}
+
+int get_next_tid(){
+
+	//todo planificar
+
 }

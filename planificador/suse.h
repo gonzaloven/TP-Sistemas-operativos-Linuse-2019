@@ -42,6 +42,10 @@ t_list* blocked_queue;
 
 t_program * generar_programa(int socket_hilolay);
 
+void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay);
+
+
+
 
 
 /*
@@ -51,7 +55,7 @@ t_program * generar_programa(int socket_hilolay);
 */
 void iniciar_servidor();
 
-void handle_conection(int socketActual);
+void handle_conection_suse(int socketActual);
 
 int listener;     // listening socket descriptors
 struct sockaddr_storage remoteaddr; // client address
