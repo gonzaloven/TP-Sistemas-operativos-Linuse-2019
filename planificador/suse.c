@@ -19,15 +19,13 @@ int main(void){
 	log_info(logger, "Archivo de configuracion levantado. \n");
 	
 	new_queue = list_create();
-	ready_queue = list_create();
-	blocked_queue = list_create();
+	ready_queue = list_create(); //Esta va a pasar a ser una por programa que se conecte
+	blocked_queue = list_create(); //Esta va a pasar a ser una por programa que se conecte
 
 	pthread_mutex_init(&mutex_new_queue, NULL);
 	pthread_mutex_init(&mutex_ready_queue, NULL);
 	pthread_mutex_init(&mutex_blocked_queue, NULL);
-
-
-	//Vamos a tener que necesitar una estructura para tener todos los hilos que tengamos con su estado, para saber en que cola buscar un X hilo al momento de por ejemplo hacer suse_close
+	pthread_mutex_init(&mutex_multiprog, NULL);
 
 	iniciar_servidor();
 
@@ -35,7 +33,9 @@ int main(void){
 }
 
 suse_configuration get_configuracion() {
+
 	log_info(logger, "Levantando archivo de configuracion de SUSE \n");
+
 	suse_configuration configuracion_suse;
 	t_config* archivo_configuracion = config_create(SUSE_CONFIG_PATH);
 	
@@ -45,7 +45,10 @@ suse_configuration get_configuracion() {
 	configuracion_suse.SEM_INIT = get_campo_config_array(archivo_configuracion, "SEM_INIT");
 	configuracion_suse.SEM_MAX = get_campo_config_array(archivo_configuracion, "SEM_MAX");
 	configuracion_suse.ALPHA_SJF = get_campo_config_int(archivo_configuracion, "ALPHA_SJF");
+	configuracion_suse.MAX_MULTIPROG = get_campo_config_int(archivo_configuracion,"MAX_MULTIPROG");
+
 	config_destroy(archivo_configuracion);
+
 	return configuracion_suse;
 }
 
@@ -110,14 +113,15 @@ void handle_conection_suse(int socket_actual) { //Aca supongo que en cada case h
 		case cop_next_tid:
 			handle_next_tid(socket_actual, received_packet);
 		break;
-		//case cop_close_tid:
-			//handle_close_tid(socket_actual,received_packet);
-		//break
+		case cop_close_tid:
+			handle_close_tid(socket_actual,received_packet);
+		break;
 
 	}
 }
 
 void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
+
 	esperar_handshake(socket_actual, paquete_hilolay, cop_handshake_hilolay_suse);
 	log_info(logger, "Realice handshake con hilolay\n");
 	sprintf("el socket es", "%d", socket_actual);
@@ -127,8 +131,41 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	int master_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
 	t_program * program = generar_programa(socket_actual);
-	sprintf("el socket es", "%d", program->PROGRAM_ID);
+	sprintf("el socket es", "%d", program->PROGRAM_ID); //El programa solo hay que generarlo cuando es el primer handshake. podria ser algo como lo siguiente.
+
+/*	t_program * program =list_find(configuracion_suse.programs, x => x.PROGRAM_ID == socket_actual); //no se como pasarle una condicion booleana como parametro.
+ *
+	if(program == NULL)
+	{
+		t_program * program = generar_programa(socket_actual);
+		sprintf("el socket es", "%d", program->PROGRAM_ID);
+	}
+	else
+	{
+		t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
+		new_thread->tid = master_tid;
+		new_thread->estado = NEW;
+		list_add(program->ULTS,new_thread);
+		list_add(new_queue,new_thread->tid);
+	}
+
+	free(program);
+*/
 	list_add(new_queue, master_tid); //todo ver si en la lista agrego programas o hilos
+	liberar_paquete(paquete_recibido);
+
+}
+
+void handle_close_tid(un_socket socket_actual, t_paquete* received_package){
+
+	esperar_handshake(socket_actual, received_package, cop_close_tid);
+	log_info(logger, "Realice handshake con hilolay\n");
+	sprintf("el socket es", "%d", socket_actual);
+
+	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo a finalizar
+	int desplazamiento = 0;
+	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+	close_tid(tid);
 	liberar_paquete(paquete_recibido);
 }
 
@@ -160,6 +197,35 @@ int get_next_tid(){
 	//todo planificar
 
 }
-int close_tid(int tid){
+void close_tid(int tid){
 
+		t_program* program = list_find(configuracion_suse->programs, true /*x => x.PROGRAM_ID == socket_actual*/); //pasarle bien la condicion
+
+		t_suse_thread * thread = list_find(program->ULTS,true /*x => x.tid = tid*/); //no se si no falta malloc de thread.
+
+		//IF THREAD IS NULL CREO Q SE TENIAN Q LIBERAR RECURSOS.. Supongo q es desconectar al programa (chau socket) ṕero como no estoy seguro ni se bien como hacerlo no lo hago
+
+		switch(thread->estado){
+
+		case NEW:
+				pthread_mutex_lock(&mutex_new_queue);
+				list_remove(new_queue,true/*x => x.tid == tid*/);
+				pthread_mutex_unlock(&mutex_new_queue);
+
+				pthread_mutex_lock(&mutex_multiprog);
+				configuracion_suse.MAX_MULTIPROG --;
+				pthread_mutex_unlock(&mutex_multiprog);
+
+				//thread->estado = EXIT; O SINO list_remove_and_destroy_by_condition(program->ULTS, x.tid = tid);
+				//creo q no nos hace falta manejar un estado exit, pero bueno pongo las opciones
+				/*LO QUE PODRIAMOS PENSAR PARA NO ANDAR PONIENDO CONDICIONES, ES QUE SI LOS TID SON ENTEROS...
+				 *USARLOS COMO INDICES DENTRO DE LA LISTA, ENTONCES EL THREAD CON TID 5 VA A ESTAR EN LA POSICION 5 DE LA LISTA
+				 *USARLOS Y NO VAN A HACER FALTA ESAS CONDICIOPNES. AVISAME Y LO HAGO*/
+		break;
+
+		//Supongo que la estructura t_program se le va a agregar las dos listas de ready y exec, una vez hecho eso se removeria el thread de ahi.
+		}
+
+		free(program);
+		free(thread);
 }

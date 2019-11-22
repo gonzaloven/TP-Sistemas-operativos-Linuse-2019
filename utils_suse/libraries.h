@@ -67,9 +67,14 @@ enum estados {
 	READY = 0,
 	EXECUTE = 1,
 	BLOCKED = 2,
-	EXIT = 3
+	EXIT = 3,
+	NEW = 4 //creo q no necesario
 };
 
+typedef struct {
+	int tid;
+	int estado;
+} t_suse_thread;
 
 /**	@NAME: conectar_a
  * 	@DESC: Intenta conectarse.
