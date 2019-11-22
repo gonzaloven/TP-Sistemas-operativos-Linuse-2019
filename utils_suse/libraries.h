@@ -40,7 +40,9 @@ enum codigos_de_operacion {
 	cop_handshake_hilolay_suse = 10,
 	cop_handshake_suse_hilolay = 11,
 	cop_next_tid = 12,
-	cop_close_tid = 13
+	cop_close_tid = 13,
+	cop_wait_sem = 14,
+	//todo ver si es necesario un cop distinto para el envio del mensaje y para la respuesta de que el mensaje se recibio ok
 };
 
 typedef int un_socket;
@@ -198,5 +200,7 @@ t_list * copy_list(t_list * lista);
 int array_of_strings_length(char** array);
 
 t_list * list_remove_all_by_condition(t_list * lista, bool(*condicion)(void*)); // Remueve todos los elementos de una determinada condicion y los devuelve
+
+int recibir_int(t_paquete* paquete_recibido);
 
 #endif /* LIBRARIES_H_ */

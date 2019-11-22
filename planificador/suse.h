@@ -49,6 +49,12 @@ t_program * generar_programa(int socket_hilolay);
 
 void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay);
 
+void close_tid(int tid);
+
+void handle_close_tid(socket_actual,received_packet);
+
+void handle_wait_sem(socket_actual, received_packet);
+
 
 
 

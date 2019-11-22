@@ -105,22 +105,26 @@ void iniciar_servidor() {
 void handle_conection_suse(int socket_actual) {
 	//Aca supongo que en cada case habria que crear un hilo de atencion
 	//para atender pedidos concurrentes, un hilo por programa que se conecte
-	t_paquete* received_packet = recibir(socket_actual);
-	switch(received_packet->codigo_operacion){
+	t_paquete* paquete_recibido = recibir(socket_actual);
+	switch(paquete_recibido->codigo_operacion){
 	//todo  hay que generar un case para:
 	//1) primer handshake hilolay-suse cuando envia el hilo main
 	//2) cuando nos pasan un hilo nuevo
 		case cop_handshake_hilolay_suse:
-			handle_hilolay(socket_actual, received_packet);
+			handle_hilolay(socket_actual, paquete_recibido);
 		break;
 		case cop_next_tid:
-			handle_next_tid(socket_actual, received_packet);
+			handle_next_tid(socket_actual, paquete_recibido);
 		break;
 		case cop_close_tid:
-			handle_close_tid(socket_actual,received_packet);
+			handle_close_tid(socket_actual,paquete_recibido);
+		break;
+		case cop_wait_sem:
+			handle_wait_sem(socket_actual, paquete_recibido);
 		break;
 
 	}
+	liberar_paquete(paquete_recibido);
 }
 
 void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
@@ -156,12 +160,11 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 */
 	list_add(new_queue, master_tid); //todo ver si en la lista agrego programas o hilos
 	liberar_paquete(paquete_recibido);
-
 }
 
-void handle_close_tid(un_socket socket_actual, t_paquete* received_package){
+void handle_close_tid(un_socket socket_actual, t_paquete* paquete_close_tid){
 	//Recibo el hilo a cerrar
-	esperar_handshake(socket_actual, received_package, cop_close_tid);
+	esperar_handshake(socket_actual, paquete_close_tid, cop_close_tid);
 	log_info(logger, "Realice handshake con hilolay\n");
 	sprintf("el socket es", "%d", socket_actual);
 
@@ -184,17 +187,17 @@ void handle_close_tid(un_socket socket_actual, t_paquete* received_package){
 }
 
 t_program * generar_programa(un_socket socket) {
-	t_program * program = malloc(sizeof(t_ESI));
+	t_program * program = malloc(sizeof(t_program));
 	program->PROGRAM_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
 	return program;
 }
 
-void handle_next_tid(un_socket socket_actual, received_packet){
-	esperar_handshake(socket_actual, received_packet, cop_next_tid);
+void handle_next_tid(un_socket socket_actual, paquete_next_tid){
+	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
 	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo principal
 	int desplazamiento = 0;
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
-	liberar_paquete(received_packet);
+	liberar_paquete(paquete_recibido);
 
 	int next_tid = get_next_tid();
 
@@ -202,6 +205,7 @@ void handle_next_tid(un_socket socket_actual, received_packet){
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
 	int desp = 0;
+	serializar_int(buffer, &desp, next_tid);
 	enviar(socket_actual, cop_next_tid, tamanio_buffer, buffer);
 	free(buffer);
 }
@@ -242,4 +246,34 @@ void close_tid(int tid){
 
 		free(program);
 		free(thread);
+}
+
+void handle_wait_sem(socket_actual, paquete_wait_sem){
+	//Recibo el semaforo a decremetnar
+	esperar_handshake(socket_actual, paquete_wait_sem, cop_wait_sem);
+	log_info(logger, "Recibiendo el semaforo para decrementar \n");
+
+	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo a finalizar
+	int desplazamiento = 0;
+	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
+	liberar_paquete(paquete_recibido);
+
+	int resultado = decrementar_semaforo(tid, sem);
+
+	//Enviar la confirmacion del semaforo decrementado
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+	serializar_int(buffer, &desp, resultado);
+	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
+	free(buffer);
+
+}
+
+//todo definir esta funcion
+int decrementar_semaforo(int tid, char* sem){
+
+	//que devuelva un 0 si esta ok y un -1 si no
+
 }

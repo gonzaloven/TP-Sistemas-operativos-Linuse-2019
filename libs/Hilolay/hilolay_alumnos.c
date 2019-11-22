@@ -5,15 +5,15 @@
 #include <utils/network.h>
 #include <utils/message.h>
 
+//todo no se si cada vez que esperamos una respuesta hay que fijarse de que cop viene por las dudas
 static struct hilolay_operations hiloops = {
 		.suse_create = &suse_create,
-		/*
 		.suse_schedule_next = &suse_schedule_next,
-		.suse_join = &suse_join,
+		//.suse_join = &suse_join,
 		.suse_close = &suse_close,
 		.suse_wait = &suse_wait,
-		.suse_signal = &suse_signal
-		*/
+		//.suse_signal = &suse_signal
+
 };
 
 int socket_suse = 0;
@@ -43,7 +43,7 @@ int suse_create(int master_thread){ //todo testear que los mensajes se manden of
 	free(buffer);
 	log_info(logger, "Envie el tid a suse. \n");
 
-	return (int)result; //todo responder correctamente o castear la funcion a void
+	return (int)result; //todo responder correctamente
 
 }
 
@@ -69,6 +69,8 @@ int suse_schedule_next(){ //todo testear
 		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", cop_next_tid) //Aca no deberia ser received_packet->codigo_operacion??
 	}
 
+	liberar_paquete(received_packet);
+
 	return next;
 }
 
@@ -83,12 +85,31 @@ int suse_close(int tid){
 
 	//SUSE me devuelve una respuesta indicando si logro cerrarlo o no
 	t_paquete* received_packet = recibir(socket_suse);
-	void * new_buffer = malloc(tamanio_buffer);
 	int desp = 0;
-	int result = deserializar_int(buffer, desp);
-	free(new_buffer);
+	int result = deserializar_int(received_packet->data, &desp);
+	liberar_paquete(received_packet);
+
 	return result;
 }
+
+int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructur agregar hilo + semaforos del mismo
+
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desplazamiento = 0;
+	serializar_int(buffer, &desplazamiento, tid);
+	serializar_valor(sem_name); //todo ver si el sem_name va con & o no
+	enviar(socket_suse, cop_wait_sem, tamanio_buffer, buffer);
+	free(buffer);
+
+	//repuesta de suse que decremento el semaforo ok
+	t_paquete* received_packet = recibir(socket_suse);
+	int desp = 0;
+	int result = deserializar_int(received_packet->data, &desp);
+	liberar_paquete(received_packet);
+	return result;
+}
+
 
 hilolay_alumnos_configuracion get_configuracion_hilolay() {
 	log_info(logger,"Levantando archivo de configuracion de Hilolay \n");

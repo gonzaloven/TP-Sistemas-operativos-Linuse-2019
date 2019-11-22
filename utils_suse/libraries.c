@@ -619,3 +619,10 @@ t_list * list_remove_all_by_condition(t_list * lista, bool(*condicion)(void*)) {
 	}
 	return result;
 }
+
+int recibir_int(t_paquete* paquete_recibido){
+	int desp = 0;
+	int result = deserializar_int(paquete_recibido->data, &desp);
+	liberar_paquete(paquete_recibido);
+	return result;
+}
