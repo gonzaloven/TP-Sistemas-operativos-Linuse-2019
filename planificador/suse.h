@@ -33,6 +33,7 @@ typedef struct t_program
 	int PROGRAM_ID; //esto es el numero de socket
 	t_list * READY_LIST;
 	t_list * EXEC_LIST;
+	bool bloqueado;
 } t_program;
 
 typedef struct t_suse_semaforos{

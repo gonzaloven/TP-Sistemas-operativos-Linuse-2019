@@ -65,6 +65,7 @@ suse_configuration get_configuracion() {
 	configuracion_suse.SEM_MAX = get_campo_config_array(archivo_configuracion, "SEM_MAX");
 	configuracion_suse.ALPHA_SJF = get_campo_config_int(archivo_configuracion, "ALPHA_SJF");
 	configuracion_suse.MAX_MULTIPROG = get_campo_config_int(archivo_configuracion,"MAX_MULTIPROG");
+	configuracion_suse.ACTUAL_MULTIPROG = 0;
 
 	config_destroy(archivo_configuracion);
 
@@ -313,7 +314,9 @@ void handle_wait_sem(socket_actual, paquete_wait_sem){
 	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
 
-	int resultado = decrementar_semaforo(tid, sem);
+	pthread_mutex_lock(&mutex_semaforos);
+	int resultado = decrementar_semaforo(socket_actual,tid, sem);
+	pthread_mutex_unlock(&mutex_semaforos);
 
 	//Enviar la confirmacion del semaforo decrementado
 	int tamanio_buffer = sizeof(int);
@@ -338,9 +341,8 @@ void handle_signal_sem(socket_actual, paquete_signal_sem){
 
 	pthread_mutex_lock(&mutex_semaforos);
 	int resultado = incrementar_semaforo(tid, sem);
-
 	if(resultado != -1){
-		resultado = desbloquear_proceso(socket_actual,sem);
+		resultado = desbloquear_proceso_semaforo(sem);
 	}
 	pthread_mutex_unlock(&mutex_semaforos);
 
@@ -353,7 +355,7 @@ void handle_signal_sem(socket_actual, paquete_signal_sem){
 
 }
 
-int desbloquear_proceso(socket_actual,sem){
+int desbloquear_proceso_semaforo(sem){
 
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, semaforo->NAME = sem);
 
@@ -363,6 +365,7 @@ int desbloquear_proceso(socket_actual,sem){
 
 	t_suse_thread* thread = semaforo->BLOCKED_LIST[0];
 	t_program * program = configuracion_suse.programs[thread->procesoId];
+	program->bloqueado = false;
 
 	pthread_mutex_lock(&mutex_multiprog);
 
@@ -388,16 +391,16 @@ int desbloquear_proceso(socket_actual,sem){
 
 int incrementar_semaforo(uint32_t tid, char* sem){
 
-
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, semaforo->NAME = sem);
 
-
-	if(semaforo == NULL){
+	if(semaforo == NULL)
+	{
 		log_info(logger,"El semaforo no existe\n");
 		return -1;
 	}
 
-	if(semaforo->VALUE == semaforo->MAX){
+	if(semaforo->VALUE == semaforo->MAX)
+	{
 		log_info(logger,"Semaforo al maximo"); //Esto no puede pasar pero bueno, hay que chequearlo
 		return -1;
 	}
@@ -408,10 +411,27 @@ int incrementar_semaforo(uint32_t tid, char* sem){
 
 }
 
-
 //todo definir esta funcion
-int decrementar_semaforo(int tid, char* sem){
+int decrementar_semaforo(int socket_actual,int tid, char* sem){
 
-	//que devuelva un 0 si esta ok y un -1 si no
+	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, semaforo->NAME = sem);
 
+	if(semaforo == NULL){
+			log_info(logger,"El semaforo no existe\n");
+			return -1;
+		}
+	if(semaforo->VALUE <= 0)
+	{
+
+		t_program* program = configuracion_suse.programs[socket_actual];
+		program->bloqueado = true;
+		t_suse_thread* thread = program->ULTS[tid];
+		thread->estado = BLOCKED;
+		list_add(semaforo->BLOCKED_LIST,thread);
+
+	}
+
+	semaforo->VALUE --;
+
+	return 0;
 }
