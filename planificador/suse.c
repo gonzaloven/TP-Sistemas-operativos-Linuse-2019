@@ -17,6 +17,9 @@ int main(void){
 	configuracion_suse = get_configuracion();
 	log_info(logger, "Archivo de configuracion levantado. \n");
 	
+	init_semaforos();
+
+
 	new_queue = list_create();
 	ready_queue = list_create(); //Esta va a pasar a ser una por programa que se conecte
 	blocked_queue = list_create(); //Esta va a pasar a ser una por programa que se conecte
@@ -29,6 +32,23 @@ int main(void){
 	iniciar_servidor();
 
 	return EXIT_SUCCESS;
+}
+
+void init_semaforos(){
+
+	uint32_t cantidad_semaforos = sizeof(configuracion_suse.SEM_ID) / sizeof(configuracion_suse.SEM_ID[0]);
+
+	for(uint32_t i = 0; i < cantidad_semaforos; i++){
+
+			t_suse_semaforos* semaforo = malloc (sizeof(t_suse_semaforos));
+			semaforo->NAME = configuracion_suse.SEM_ID[i];
+			semaforo->INIT = configuracion_suse.SEM_INIT[i];
+			semaforo->MAX = configuracion_suse.SEM_MAX[i];
+
+			list_add(configuracion_suse.semaforos,semaforo);
+			free(semaforo);
+	}
+
 }
 
 suse_configuration get_configuracion() {
@@ -181,8 +201,6 @@ void handle_close_tid(un_socket socket_actual, t_paquete* paquete_close_tid){
 	int resultado= close_tid(tid,socket_actual);
 	liberar_paquete(paquete_recibido);
 
-	//TODO encontrar una forma de saber si pudo cerrar el hilo para responder a hilolay
-
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
 	int desp = 0;
@@ -283,9 +301,9 @@ int close_tid(int tid, int socket_actual){
 void handle_wait_sem(socket_actual, paquete_wait_sem){
 	//Recibo el semaforo a decremetnar
 	esperar_handshake(socket_actual, paquete_wait_sem, cop_wait_sem);
-	log_info(logger, "Recibiendo el semaforo para decrementar \n");
+	log_info(logger, "Recibiendo el semaforo para incrementar \n");
 
-	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo a finalizar
+	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
 	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
@@ -302,6 +320,41 @@ void handle_wait_sem(socket_actual, paquete_wait_sem){
 	free(buffer);
 
 }
+
+void handle_signal_sem(socket_actual, paquete_signal_sem){
+
+	esperar_handshake(socket_actual, paquete_signal_sem, cop_signal_sem);
+	log_info(logger, "Recibiendo el semaforo para decrementar \n");
+
+	t_paquete* paquete_recibido = recibir(socket_actual);
+	int desplazamiento = 0;
+	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
+	liberar_paquete(paquete_recibido);
+
+	int resultado = incrementar_semaforo(tid, sem);
+
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+	serializar_int(buffer, &desp, resultado);
+	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
+	free(buffer);
+
+}
+
+
+int incrementar_semaforo(uint32_t tid, char* sem){
+
+
+
+
+
+
+	return 1;
+
+}
+
 
 //todo definir esta funcion
 int decrementar_semaforo(int tid, char* sem){

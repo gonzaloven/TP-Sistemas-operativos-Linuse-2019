@@ -22,6 +22,7 @@ typedef struct suse_configuration
 	int ALPHA_SJF;
 	int MAX_MULTIPROG;
 	t_list * programs; //Hay que mantener un registro de los programas que tenemos.
+	t_list * semaforos;
 }suse_configuration;
 
 typedef struct t_program
@@ -32,6 +33,14 @@ typedef struct t_program
 	t_list * READY_LIST;
 	t_list * EXEC_LIST;
 } t_program;
+
+typedef struct t_suse_semaforos{
+	char* NAME;
+	uint32_t INIT;
+	uint32_t MAX;
+	t_list * BLOCKED_LIST;
+}t_suse_semaforos;
+
 
 suse_configuration configuracion_suse;
 suse_configuration get_configuracion();

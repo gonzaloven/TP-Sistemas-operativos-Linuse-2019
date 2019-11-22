@@ -42,6 +42,7 @@ enum codigos_de_operacion {
 	cop_next_tid = 12,
 	cop_close_tid = 13,
 	cop_wait_sem = 14,
+	cop_signal_sem = 15
 	//todo ver si es necesario un cop distinto para el envio del mensaje y para la respuesta de que el mensaje se recibio ok
 };
 
