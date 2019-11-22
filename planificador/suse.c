@@ -128,37 +128,43 @@ void handle_conection_suse(int socket_actual) {
 }
 
 void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
+
 	esperar_handshake(socket_actual, paquete_hilolay, cop_handshake_hilolay_suse);
+
 	log_info(logger, "Realice el primer handshake con hilolay\n");
 	sprintf("el socket es", "%d", socket_actual);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
+
 	int desplazamiento = 0;
 	int master_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	t_program * program = generar_programa(socket_actual);
-	sprintf("el socket es", "%d", program->PROGRAM_ID);
 	//El programa solo hay que generarlo cuando es el primer handshake. podria ser algo como lo siguiente.
 
-/*	t_program * program =list_find(configuracion_suse.programs, x => x.PROGRAM_ID == socket_actual); //no se como pasarle una condicion booleana como parametro.
- *
+	t_program * program =list_get(configuracion_suse.programs, socket_actual);
+
 	if(program == NULL)
 	{
 		t_program * program = generar_programa(socket_actual);
+
+		list_add_in_index(configuracion_suse.programs,program,program->PROGRAM_ID);
+
 		sprintf("el socket es", "%d", program->PROGRAM_ID);
 	}
 	else
 	{
 		t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
+
 		new_thread->tid = master_tid;
 		new_thread->estado = NEW;
-		list_add(program->ULTS,new_thread);
+
+		list_add_in_index(program->ULTS,new_thread,new_thread->tid);
 		list_add(new_queue,new_thread->tid);
+		free(new_thread);
 	}
 
 	free(program);
-*/
-	list_add(new_queue, master_tid); //todo ver si en la lista agrego programas o hilos
+
 	liberar_paquete(paquete_recibido);
 }
 
