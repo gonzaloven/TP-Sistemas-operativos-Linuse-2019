@@ -111,6 +111,29 @@ int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructur agrega
 }
 
 
+int suse_signal(int tid, char *sem_name){
+
+		int tamanio_buffer = sizeof(int);
+		void * buffer = malloc(tamanio_buffer);
+		int desplazamiento = 0;
+
+		serializar_int(buffer, &desplazamiento, tid);
+		serializar_valor(sem_name); //todo ver si el sem_name va con & o no
+		enviar(socket_suse, cop_signal_sem, tamanio_buffer, buffer);
+
+		free(buffer);
+
+		t_paquete* received_packet = recibir(socket_suse);
+
+		int desp = 0;
+		int result = deserializar_int(received_packet->data, &desp);
+
+		liberar_paquete(received_packet);
+
+		return result;
+}
+
+
 hilolay_alumnos_configuracion get_configuracion_hilolay() {
 	log_info(logger,"Levantando archivo de configuracion de Hilolay \n");
 	hilolay_alumnos_configuracion configuracion_hilolay;

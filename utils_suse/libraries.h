@@ -65,6 +65,7 @@ enum estados {
 typedef struct {
 	int tid;
 	int estado;
+	int procesoId;
 } t_suse_thread;
 
 /**	@NAME: conectar_a

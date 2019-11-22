@@ -28,6 +28,7 @@ int main(void){
 	pthread_mutex_init(&mutex_ready_queue, NULL);
 	pthread_mutex_init(&mutex_blocked_queue, NULL);
 	pthread_mutex_init(&mutex_multiprog, NULL);
+	pthread_mutex_init(&mutex_semaforos,NULL);
 
 	iniciar_servidor();
 
@@ -44,6 +45,7 @@ void init_semaforos(){
 			semaforo->NAME = configuracion_suse.SEM_ID[i];
 			semaforo->INIT = configuracion_suse.SEM_INIT[i];
 			semaforo->MAX = configuracion_suse.SEM_MAX[i];
+			semaforo->VALUE = configuracion_suse.SEM_INIT[i];
 
 			list_add(configuracion_suse.semaforos,semaforo);
 			free(semaforo);
@@ -177,6 +179,7 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 
 		new_thread->tid = master_tid;
 		new_thread->estado = NEW;
+		new_thread->procesoId = socket_actual;
 
 		list_add_in_index(program->ULTS,new_thread,new_thread->tid);
 		list_add(new_queue,new_thread->tid);
@@ -332,7 +335,13 @@ void handle_signal_sem(socket_actual, paquete_signal_sem){
 	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
 
+	pthread_mutex_lock(&mutex_semaforos);
 	int resultado = incrementar_semaforo(tid, sem);
+
+	if(resultado != -1){
+		resultado = desbloquear_proceso(socket_actual,sem);
+	}
+	pthread_mutex_unlock(&mutex_semaforos);
 
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
@@ -343,15 +352,43 @@ void handle_signal_sem(socket_actual, paquete_signal_sem){
 
 }
 
+int desbloquear_proceso(socket_actual,sem){
+
+	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, semaforo->NAME = sem);
+
+	if(semaforo->BLOCKED_LIST[0] == NULL){
+		return 0; //no hay procesos para desbloquear.
+	}
+
+	pthread_mutex_lock(&mutex_multiprog);
+	//Para terminar esto necesito ver como vamos a guardar los procesos en la lista de blocked del semaforo una vez que se haga el wait.
+	//Seguramente deba ser buscar el hilo a bloquear y meterlo en la lista(en el wait) y dsps aca buscarlo denuevo, cambiarle el estaod y meterlo en la lista que corresponda
+	//(ready del proceso si alcanza el mutliprogramacion y sino en new
+	configuracion_suse.MAX_MULTIPROG ++; //Si alcanza. sino se va a new y no se hace esto.
+	pthread_mutex_unlock(&mutex_multiprog);
+	return 0;
+
+}
 
 int incrementar_semaforo(uint32_t tid, char* sem){
 
 
+	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, semaforo->NAME = sem);
 
 
+	if(semaforo == NULL){
+		log_info(logger,"El semaforo no existe\n");
+		return -1;
+	}
 
+	if(semaforo->VALUE == semaforo->MAX){
+		log_info(logger,"Semaforo al maximo"); //Esto no puede pasar pero bueno, hay que chequearlo
+		return -1;
+	}
 
-	return 1;
+	semaforo->VALUE ++;
+
+	return 0;
 
 }
 

@@ -38,6 +38,7 @@ typedef struct t_suse_semaforos{
 	char* NAME;
 	uint32_t INIT;
 	uint32_t MAX;
+	uint32_t VALUE;
 	t_list * BLOCKED_LIST;
 }t_suse_semaforos;
 
@@ -53,6 +54,8 @@ t_list* ready_queue;
 
 pthread_mutex_t mutex_blocked_queue;
 t_list* blocked_queue;
+
+pthread_mutex_t mutex_semaforos;
 
 pthread_mutex_t mutex_multiprog;
 
