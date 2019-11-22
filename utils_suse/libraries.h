@@ -40,6 +40,7 @@ enum codigos_de_operacion {
 	cop_handshake_hilolay_suse = 10,
 	cop_handshake_suse_hilolay = 11,
 	cop_next_tid = 12,
+	cop_close_tid = 13
 };
 
 typedef int un_socket;

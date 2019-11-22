@@ -26,6 +26,9 @@ int main(void){
 	pthread_mutex_init(&mutex_ready_queue, NULL);
 	pthread_mutex_init(&mutex_blocked_queue, NULL);
 
+
+	//Vamos a tener que necesitar una estructura para tener todos los hilos que tengamos con su estado, para saber en que cola buscar un X hilo al momento de por ejemplo hacer suse_close
+
 	iniciar_servidor();
 
 	return EXIT_SUCCESS;
@@ -97,7 +100,7 @@ void iniciar_servidor() {
 }
 
 
-void handle_conection_suse(int socket_actual) {
+void handle_conection_suse(int socket_actual) { //Aca supongo que en cada case habria que crear un hilo de atencion para atender pedidos concurrentes, un hilo por programa que se conecte
 	t_paquete* received_packet = recibir(socket_actual);
 	switch(received_packet->codigo_operacion){
 		case cop_handshake_hilolay_suse:
@@ -106,6 +109,10 @@ void handle_conection_suse(int socket_actual) {
 
 		case cop_next_tid:
 			handle_next_tid(socket_actual, received_packet);
+		break;
+		//case cop_close_tid:
+			//handle_close_tid(socket_actual,received_packet);
+		//break
 
 	}
 }
@@ -151,5 +158,8 @@ void handle_next_tid(un_socket socket_actual, received_packet){
 int get_next_tid(){
 
 	//todo planificar
+
+}
+int close_tid(int tid){
 
 }
