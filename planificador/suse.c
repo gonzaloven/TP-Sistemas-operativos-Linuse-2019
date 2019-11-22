@@ -21,8 +21,6 @@ int main(void){
 
 
 	new_queue = list_create();
-	ready_queue = list_create(); //Esta va a pasar a ser una por programa que se conecte
-	blocked_queue = list_create(); //Esta va a pasar a ser una por programa que se conecte
 
 	pthread_mutex_init(&mutex_new_queue, NULL);
 	pthread_mutex_init(&mutex_ready_queue, NULL);
@@ -143,6 +141,9 @@ void handle_conection_suse(int socket_actual) {
 		break;
 		case cop_wait_sem:
 			handle_wait_sem(socket_actual, paquete_recibido);
+		break;
+		case cop_signal_sem:
+			handle_signal_sem(socket_actual,paquete_recibido);
 		break;
 
 	}
@@ -360,12 +361,27 @@ int desbloquear_proceso(socket_actual,sem){
 		return 0; //no hay procesos para desbloquear.
 	}
 
+	t_suse_thread* thread = semaforo->BLOCKED_LIST[0];
+	t_program * program = configuracion_suse.programs[thread->procesoId];
+
 	pthread_mutex_lock(&mutex_multiprog);
-	//Para terminar esto necesito ver como vamos a guardar los procesos en la lista de blocked del semaforo una vez que se haga el wait.
-	//Seguramente deba ser buscar el hilo a bloquear y meterlo en la lista(en el wait) y dsps aca buscarlo denuevo, cambiarle el estaod y meterlo en la lista que corresponda
-	//(ready del proceso si alcanza el mutliprogramacion y sino en new
-	configuracion_suse.MAX_MULTIPROG ++; //Si alcanza. sino se va a new y no se hace esto.
+
+	if(configuracion_suse.ACTUAL_MULTIPROG < configuracion_suse.MAX_MULTIPROG){
+
+		thread->estado = 1; //No me reconoce READY. ESTA DUPLICADO EN HILOLAY_INTERNAL. TODO: CAMBIAR LOS ENUMS.
+		list_add(program->READY_LIST,thread);
+		configuracion_suse.ACTUAL_MULTIPROG ++;
+	}
 	pthread_mutex_unlock(&mutex_multiprog);
+
+	thread->estado = NEW;
+
+	pthread_mutex_lock(&mutex_new_queue);
+	list_add(new_queue,thread);
+	pthread_mutex_unlock(&mutex_new_queue);
+
+	list_remove(semaforo->BLOCKED_LIST,0);
+
 	return 0;
 
 }

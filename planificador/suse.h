@@ -23,6 +23,7 @@ typedef struct suse_configuration
 	int MAX_MULTIPROG;
 	t_list * programs; //Hay que mantener un registro de los programas que tenemos.
 	t_list * semaforos;
+	uint32_t ACTUAL_MULTIPROG;
 }suse_configuration;
 
 typedef struct t_program
