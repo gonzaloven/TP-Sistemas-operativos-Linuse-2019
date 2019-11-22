@@ -41,5 +41,7 @@
 
 	void handle_suse(socket_actual, received_packet);
 
+	int suse_close(int tid);
+
 
 #endif // hilolay_alumnos_h__

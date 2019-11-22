@@ -51,24 +51,12 @@ typedef struct {
 	void * data;
 } t_paquete;
 
-typedef struct {
-	int id_ESI;
-	int estado; //Mirar enum estados
-	un_socket socket;
-	int cantidad_instrucciones;
-	char* descripcion_estado;
-	int w;
-	float duracionRafaga;
-	float estimacionUltimaRafaga;
-	bool ejecutado_desde_estimacion;
-} t_ESI;
-
 enum estados {
 	READY = 0,
 	EXECUTE = 1,
 	BLOCKED = 2,
 	EXIT = 3,
-	NEW = 4 //creo q no necesario
+	NEW = 4 //todo ver si es necesario
 };
 
 typedef struct {

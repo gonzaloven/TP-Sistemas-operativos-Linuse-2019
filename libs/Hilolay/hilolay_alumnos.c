@@ -72,14 +72,23 @@ int suse_schedule_next(){ //todo testear
 	return next;
 }
 
-void handle_conection_hilolay() {
-	t_paquete* received_packet = recibir(socket_suse);
-	switch(received_packet->codigo_operacion){
-		case cop_next_tid:
-			received_packet->data
-	}
-}
+int suse_close(int tid){
+	//Envio el hilo a cerrar a SUSE
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desplazamiento = 0;
+	serializar_int(buffer, &desplazamiento, tid);
+	enviar(socket_suse, cop_close_tid, tamanio_buffer, buffer);
+	free(buffer);
 
+	//SUSE me devuelve una respuesta indicando si logro cerrarlo o no
+	t_paquete* received_packet = recibir(socket_suse);
+	void * new_buffer = malloc(tamanio_buffer);
+	int desp = 0;
+	int result = deserializar_int(buffer, desp);
+	free(new_buffer);
+	return result;
+}
 
 hilolay_alumnos_configuracion get_configuracion_hilolay() {
 	log_info(logger,"Levantando archivo de configuracion de Hilolay \n");

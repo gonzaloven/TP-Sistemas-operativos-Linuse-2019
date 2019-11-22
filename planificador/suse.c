@@ -9,7 +9,6 @@
 #include <pthread.h>
 
 int main(void){
-	sprintf("Iniciando suse");
 	char* log_path = "../logs/suse_logs.txt";
 
 	logger = log_create(log_path, "SUSE Logs", 1, 1);
@@ -103,13 +102,17 @@ void iniciar_servidor() {
 }
 
 
-void handle_conection_suse(int socket_actual) { //Aca supongo que en cada case habria que crear un hilo de atencion para atender pedidos concurrentes, un hilo por programa que se conecte
+void handle_conection_suse(int socket_actual) {
+	//Aca supongo que en cada case habria que crear un hilo de atencion
+	//para atender pedidos concurrentes, un hilo por programa que se conecte
 	t_paquete* received_packet = recibir(socket_actual);
 	switch(received_packet->codigo_operacion){
+	//todo  hay que generar un case para:
+	//1) primer handshake hilolay-suse cuando envia el hilo main
+	//2) cuando nos pasan un hilo nuevo
 		case cop_handshake_hilolay_suse:
 			handle_hilolay(socket_actual, received_packet);
 		break;
-
 		case cop_next_tid:
 			handle_next_tid(socket_actual, received_packet);
 		break;
@@ -121,17 +124,17 @@ void handle_conection_suse(int socket_actual) { //Aca supongo que en cada case h
 }
 
 void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
-
 	esperar_handshake(socket_actual, paquete_hilolay, cop_handshake_hilolay_suse);
-	log_info(logger, "Realice handshake con hilolay\n");
+	log_info(logger, "Realice el primer handshake con hilolay\n");
 	sprintf("el socket es", "%d", socket_actual);
 
-	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo principal
+	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
 	int master_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
 	t_program * program = generar_programa(socket_actual);
-	sprintf("el socket es", "%d", program->PROGRAM_ID); //El programa solo hay que generarlo cuando es el primer handshake. podria ser algo como lo siguiente.
+	sprintf("el socket es", "%d", program->PROGRAM_ID);
+	//El programa solo hay que generarlo cuando es el primer handshake. podria ser algo como lo siguiente.
 
 /*	t_program * program =list_find(configuracion_suse.programs, x => x.PROGRAM_ID == socket_actual); //no se como pasarle una condicion booleana como parametro.
  *
@@ -157,7 +160,7 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 }
 
 void handle_close_tid(un_socket socket_actual, t_paquete* received_package){
-
+	//Recibo el hilo a cerrar
 	esperar_handshake(socket_actual, received_package, cop_close_tid);
 	log_info(logger, "Realice handshake con hilolay\n");
 	sprintf("el socket es", "%d", socket_actual);
@@ -167,6 +170,17 @@ void handle_close_tid(un_socket socket_actual, t_paquete* received_package){
 	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 	close_tid(tid);
 	liberar_paquete(paquete_recibido);
+
+	//TODO encontrar una forma de saber si pudo cerrar el hilo para responder a hilolay
+	/*
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+
+	serializar_int(buffer, &desp, msg);
+	enviar(socket_suse, cop_close_tid, tamanio_buffer, buffer);
+	free(buffer);
+	*/
 }
 
 t_program * generar_programa(un_socket socket) {
