@@ -177,19 +177,20 @@ void handle_close_tid(un_socket socket_actual, t_paquete* paquete_close_tid){
 	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo a finalizar
 	int desplazamiento = 0;
 	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
-	close_tid(tid);
+
+	int resultado= close_tid(tid,socket_actual);
 	liberar_paquete(paquete_recibido);
 
 	//TODO encontrar una forma de saber si pudo cerrar el hilo para responder a hilolay
-	/*
+
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
 	int desp = 0;
 
-	serializar_int(buffer, &desp, msg);
+	serializar_int(buffer, &desp, resultado);
 	enviar(socket_suse, cop_close_tid, tamanio_buffer, buffer);
 	free(buffer);
-	*/
+
 }
 
 t_program * generar_programa(un_socket socket) {
@@ -221,13 +222,16 @@ int get_next_tid(){
 	//todo planificar
 
 }
-void close_tid(int tid){
+int close_tid(int tid, int socket_actual){
 
-		t_program* program = list_find(configuracion_suse->programs, true /*x => x.PROGRAM_ID == socket_actual*/); //pasarle bien la condicion
+	     t_program* program = list_get(configuracion_suse->programs, socket_actual);
+	     t_suse_thread* thread = list_get(program->ULTS,tid);
 
-		t_suse_thread * thread = list_find(program->ULTS,true /*x => x.tid = tid*/); //no se si no falta malloc de thread.
-
-		//IF THREAD IS NULL CREO Q SE TENIAN Q LIBERAR RECURSOS.. Supongo q es desconectar al programa (chau socket) ṕero como no estoy seguro ni se bien como hacerlo no lo hago
+	   /*  //IF THREAD IS NULL CREO Q SE TENIAN Q LIBERAR RECURSOS.. Supongo q es desconectar al programa (chau socket) ṕero como no estoy seguro ni se bien como hacerlo no lo hago
+	     if(thread == NULL){
+	    	 int resultado = close(socket_actual);
+	    	 return resultado;
+	     }*/
 
 		switch(thread->estado){
 
@@ -240,18 +244,40 @@ void close_tid(int tid){
 				configuracion_suse.MAX_MULTIPROG --;
 				pthread_mutex_unlock(&mutex_multiprog);
 
-				//thread->estado = EXIT; O SINO list_remove_and_destroy_by_condition(program->ULTS, x.tid = tid);
-				//creo q no nos hace falta manejar un estado exit, pero bueno pongo las opciones
-				/*LO QUE PODRIAMOS PENSAR PARA NO ANDAR PONIENDO CONDICIONES, ES QUE SI LOS TID SON ENTEROS...
-				 *USARLOS COMO INDICES DENTRO DE LA LISTA, ENTONCES EL THREAD CON TID 5 VA A ESTAR EN LA POSICION 5 DE LA LISTA
-				 *USARLOS Y NO VAN A HACER FALTA ESAS CONDICIOPNES. AVISAME Y LO HAGO*/
+				list_remove_and_destroy_element(program->ULTS, tid);
+
 		break;
 
-		//Supongo que la estructura t_program se le va a agregar las dos listas de ready y exec, una vez hecho eso se removeria el thread de ahi.
+		case 1: //NO ME RECONOCE READY
+
+				list_remove(program->READY_LIST,tid);
+
+				pthread_mutex_lock(&mutex_multiprog);
+				configuracion_suse.MAX_MULTIPROG --;
+				pthread_mutex_unlock(&mutex_multiprog);
+
+				list_remove_and_destroy_element(program->ULTS, tid);
+
+		break;
+
+		case EXECUTE:
+
+				list_remove(program->EXEC_LIST,tid);
+
+				pthread_mutex_lock(&mutex_multiprog);
+				configuracion_suse.MAX_MULTIPROG --;
+				pthread_mutex_unlock(&mutex_multiprog);
+
+				list_remove_and_destroy_element(program->ULTS, tid);
+
+		break;
+
 		}
 
 		free(program);
 		free(thread);
+
+		return 1;
 }
 
 void handle_wait_sem(socket_actual, paquete_wait_sem){

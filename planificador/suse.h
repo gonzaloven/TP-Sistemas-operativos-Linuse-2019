@@ -29,6 +29,8 @@ typedef struct t_program
 	t_list * ULTS; //Lista de t_suse_thread
 	//char ** ULTS;
 	int PROGRAM_ID; //esto es el numero de socket
+	t_list * READY_LIST;
+	t_list * EXEC_LIST;
 } t_program;
 
 suse_configuration configuracion_suse;

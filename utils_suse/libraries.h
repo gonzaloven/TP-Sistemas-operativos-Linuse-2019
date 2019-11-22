@@ -54,11 +54,11 @@ typedef struct {
 } t_paquete;
 
 enum estados {
-	READY = 0,
-	EXECUTE = 1,
-	BLOCKED = 2,
-	EXIT = 3,
-	NEW = 4 //todo ver si es necesario
+	READY = 1,
+	EXECUTE = 2,
+	BLOCKED = 3,
+	EXIT = 4,
+	NEW = 5 //todo ver si es necesario
 };
 
 typedef struct {
