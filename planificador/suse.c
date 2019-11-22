@@ -18,19 +18,23 @@ int main(void){
 	log_info(logger, "Archivo de configuracion levantado. \n");
 	
 	new_queue = list_create();
-	ready_queue = list_create();
-	blocked_queue = list_create();
+	ready_queue = list_create(); //Esta va a pasar a ser una por programa que se conecte
+	blocked_queue = list_create(); //Esta va a pasar a ser una por programa que se conecte
 
 	pthread_mutex_init(&mutex_new_queue, NULL);
 	pthread_mutex_init(&mutex_ready_queue, NULL);
 	pthread_mutex_init(&mutex_blocked_queue, NULL);
+	pthread_mutex_init(&mutex_multiprog, NULL);
 
+	iniciar_servidor();
 
 	return EXIT_SUCCESS;
 }
 
 suse_configuration get_configuracion() {
+
 	log_info(logger, "Levantando archivo de configuracion de SUSE \n");
+
 	suse_configuration configuracion_suse;
 	t_config* archivo_configuracion = config_create(SUSE_CONFIG_PATH);
 	
@@ -40,39 +44,12 @@ suse_configuration get_configuracion() {
 	configuracion_suse.SEM_INIT = get_campo_config_array(archivo_configuracion, "SEM_INIT");
 	configuracion_suse.SEM_MAX = get_campo_config_array(archivo_configuracion, "SEM_MAX");
 	configuracion_suse.ALPHA_SJF = get_campo_config_int(archivo_configuracion, "ALPHA_SJF");
+	configuracion_suse.MAX_MULTIPROG = get_campo_config_int(archivo_configuracion,"MAX_MULTIPROG");
+
 	config_destroy(archivo_configuracion);
+
 	return configuracion_suse;
 }
-
-void handle_conection(int socket_actual) {
-	t_paquete* received_packet = recibir(socket_actual);
-	switch(received_packet->codigo_operacion){
-		case cop_handshake_hilolay_suse:
-			handle_hilolay(socket_actual, received_packet);
-	}
-}
-
-void handle_hilolay(un_socket socket_hilolay, t_paquete* paquete_hilolay) {
-	esperar_handshake(socket_hilolay, paquete_hilolay, cop_handshake_hilolay_suse);
-	log_info(logger, "Realice handshake con hilolay\n");
-	sprintf("el socket es", "%d", socket_hilolay);
-
-	t_paquete* paquete_recibido = recibir(socket_hilolay); // Recibo hilo principal
-	int desplazamiento = 0;
-	int master_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
-
-	t_program * program = generar_programa(socket_hilolay);
-	sprintf("el socket es", "%d", program->PROGRAM_ID);
-	list_add(new_queue, master_tid); //todo ver si en la lista agrego programas o hilos
-	liberar_paquete(paquete_recibido);
-}
-
-t_program * generar_programa(un_socket socket) {
-	t_program * program = malloc(sizeof(t_ESI));
-	program->PROGRAM_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
-	return program;
-}
-
 
 void iniciar_servidor() {
 	// get us a socket and bind it
@@ -120,6 +97,183 @@ void iniciar_servidor() {
 		t_paquete* handshake = recibir(listener);
 		log_info(logger, "Soy SUSE y recibi una nueva conexion . \n");
 		free(handshake);
-		handle_conection(new_connection);
+		handle_conection_suse(new_connection);
 	}
+}
+
+
+void handle_conection_suse(int socket_actual) {
+	//Aca supongo que en cada case habria que crear un hilo de atencion
+	//para atender pedidos concurrentes, un hilo por programa que se conecte
+	t_paquete* paquete_recibido = recibir(socket_actual);
+	switch(paquete_recibido->codigo_operacion){
+	//todo  hay que generar un case para:
+	//1) primer handshake hilolay-suse cuando envia el hilo main
+	//2) cuando nos pasan un hilo nuevo
+		case cop_handshake_hilolay_suse:
+			handle_hilolay(socket_actual, paquete_recibido);
+		break;
+		case cop_next_tid:
+			handle_next_tid(socket_actual, paquete_recibido);
+		break;
+		case cop_close_tid:
+			handle_close_tid(socket_actual,paquete_recibido);
+		break;
+		case cop_wait_sem:
+			handle_wait_sem(socket_actual, paquete_recibido);
+		break;
+
+	}
+	liberar_paquete(paquete_recibido);
+}
+
+void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
+	esperar_handshake(socket_actual, paquete_hilolay, cop_handshake_hilolay_suse);
+	log_info(logger, "Realice el primer handshake con hilolay\n");
+	sprintf("el socket es", "%d", socket_actual);
+
+	t_paquete* paquete_recibido = recibir(socket_actual);
+	int desplazamiento = 0;
+	int master_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+
+	t_program * program = generar_programa(socket_actual);
+	sprintf("el socket es", "%d", program->PROGRAM_ID);
+	//El programa solo hay que generarlo cuando es el primer handshake. podria ser algo como lo siguiente.
+
+/*	t_program * program =list_find(configuracion_suse.programs, x => x.PROGRAM_ID == socket_actual); //no se como pasarle una condicion booleana como parametro.
+ *
+	if(program == NULL)
+	{
+		t_program * program = generar_programa(socket_actual);
+		sprintf("el socket es", "%d", program->PROGRAM_ID);
+	}
+	else
+	{
+		t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
+		new_thread->tid = master_tid;
+		new_thread->estado = NEW;
+		list_add(program->ULTS,new_thread);
+		list_add(new_queue,new_thread->tid);
+	}
+
+	free(program);
+*/
+	list_add(new_queue, master_tid); //todo ver si en la lista agrego programas o hilos
+	liberar_paquete(paquete_recibido);
+}
+
+void handle_close_tid(un_socket socket_actual, t_paquete* paquete_close_tid){
+	//Recibo el hilo a cerrar
+	esperar_handshake(socket_actual, paquete_close_tid, cop_close_tid);
+	log_info(logger, "Realice handshake con hilolay\n");
+	sprintf("el socket es", "%d", socket_actual);
+
+	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo a finalizar
+	int desplazamiento = 0;
+	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+	close_tid(tid);
+	liberar_paquete(paquete_recibido);
+
+	//TODO encontrar una forma de saber si pudo cerrar el hilo para responder a hilolay
+	/*
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+
+	serializar_int(buffer, &desp, msg);
+	enviar(socket_suse, cop_close_tid, tamanio_buffer, buffer);
+	free(buffer);
+	*/
+}
+
+t_program * generar_programa(un_socket socket) {
+	t_program * program = malloc(sizeof(t_program));
+	program->PROGRAM_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
+	return program;
+}
+
+void handle_next_tid(un_socket socket_actual, paquete_next_tid){
+	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
+	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo principal
+	int desplazamiento = 0;
+	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
+	liberar_paquete(paquete_recibido);
+
+	int next_tid = get_next_tid();
+
+	// Envio el next tid
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+	serializar_int(buffer, &desp, next_tid);
+	enviar(socket_actual, cop_next_tid, tamanio_buffer, buffer);
+	free(buffer);
+}
+
+int get_next_tid(){
+
+	//todo planificar
+
+}
+void close_tid(int tid){
+
+		t_program* program = list_find(configuracion_suse->programs, true /*x => x.PROGRAM_ID == socket_actual*/); //pasarle bien la condicion
+
+		t_suse_thread * thread = list_find(program->ULTS,true /*x => x.tid = tid*/); //no se si no falta malloc de thread.
+
+		//IF THREAD IS NULL CREO Q SE TENIAN Q LIBERAR RECURSOS.. Supongo q es desconectar al programa (chau socket) ṕero como no estoy seguro ni se bien como hacerlo no lo hago
+
+		switch(thread->estado){
+
+		case NEW:
+				pthread_mutex_lock(&mutex_new_queue);
+				list_remove(new_queue,true/*x => x.tid == tid*/);
+				pthread_mutex_unlock(&mutex_new_queue);
+
+				pthread_mutex_lock(&mutex_multiprog);
+				configuracion_suse.MAX_MULTIPROG --;
+				pthread_mutex_unlock(&mutex_multiprog);
+
+				//thread->estado = EXIT; O SINO list_remove_and_destroy_by_condition(program->ULTS, x.tid = tid);
+				//creo q no nos hace falta manejar un estado exit, pero bueno pongo las opciones
+				/*LO QUE PODRIAMOS PENSAR PARA NO ANDAR PONIENDO CONDICIONES, ES QUE SI LOS TID SON ENTEROS...
+				 *USARLOS COMO INDICES DENTRO DE LA LISTA, ENTONCES EL THREAD CON TID 5 VA A ESTAR EN LA POSICION 5 DE LA LISTA
+				 *USARLOS Y NO VAN A HACER FALTA ESAS CONDICIOPNES. AVISAME Y LO HAGO*/
+		break;
+
+		//Supongo que la estructura t_program se le va a agregar las dos listas de ready y exec, una vez hecho eso se removeria el thread de ahi.
+		}
+
+		free(program);
+		free(thread);
+}
+
+void handle_wait_sem(socket_actual, paquete_wait_sem){
+	//Recibo el semaforo a decremetnar
+	esperar_handshake(socket_actual, paquete_wait_sem, cop_wait_sem);
+	log_info(logger, "Recibiendo el semaforo para decrementar \n");
+
+	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo a finalizar
+	int desplazamiento = 0;
+	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
+	liberar_paquete(paquete_recibido);
+
+	int resultado = decrementar_semaforo(tid, sem);
+
+	//Enviar la confirmacion del semaforo decrementado
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+	serializar_int(buffer, &desp, resultado);
+	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
+	free(buffer);
+
+}
+
+//todo definir esta funcion
+int decrementar_semaforo(int tid, char* sem){
+
+	//que devuelva un 0 si esta ok y un -1 si no
+
 }

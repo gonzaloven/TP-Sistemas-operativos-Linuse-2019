@@ -1,9 +1,9 @@
 TARGET:=libm
 CC:=gcc
 UTILS:= ../utils/
-INCDIR:= -I$(UTILS) -I../libs/libMuse -I../libs/Hilolay
+INCDIR:= -I$(UTILS) -I../libs/libMuse -I../libs/Hilolay -I $(UTILS_SUSE)
 CFLAGS:= -g
-LIB-SRCS:= libmuse-test.c $(UTILS)network.c $(UTILS)message.c 
+LIB-SRCS:= libmuse-test.c $(UTILS)network.c $(UTILS)message.c $(UTILS_SUSE)libraries.c
 LIBS:= -L../libs/bin/ 
 LFLAGS:= -lcommons -lpthread -lmuse
 LIBPATH:=../libs/bin

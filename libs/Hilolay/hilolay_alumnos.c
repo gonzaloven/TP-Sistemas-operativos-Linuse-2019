@@ -5,15 +5,15 @@
 #include <utils/network.h>
 #include <utils/message.h>
 
+//todo no se si cada vez que esperamos una respuesta hay que fijarse de que cop viene por las dudas
 static struct hilolay_operations hiloops = {
 		.suse_create = &suse_create,
-		/*
 		.suse_schedule_next = &suse_schedule_next,
-		.suse_join = &suse_join,
+		//.suse_join = &suse_join,
 		.suse_close = &suse_close,
 		.suse_wait = &suse_wait,
-		.suse_signal = &suse_signal
-		*/
+		//.suse_signal = &suse_signal
+
 };
 
 int socket_suse = 0;
@@ -32,9 +32,8 @@ void conectar_con_suse() {
 }
 
 int suse_create(int master_thread){ //todo testear que los mensajes se manden of
-	realizar_handshake(socket_suse, cop_handshake_hilolay_suse);
+	bool result = realizar_handshake(socket_suse, cop_handshake_hilolay_suse);
 
-	// Envia el tid a SUSE
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
 	int desp = 0;
@@ -43,10 +42,72 @@ int suse_create(int master_thread){ //todo testear que los mensajes se manden of
 	enviar(socket_suse, cop_generico, tamanio_buffer, buffer); //todo el cop generico estara ok?
 	free(buffer);
 	log_info(logger, "Envie el tid a suse. \n");
-	//todo SUSE deberia responderme algo asi como "recibi el hilo principal"?
 
-	return 1; //todo responder correctamente o castear la funcion a void
+	return (int)result; //todo responder correctamente
 
+}
+
+int suse_schedule_next(){ //todo testear
+	int next;
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+	int msg = 1; //este mensaje es solo para preguntarle que thread se va a ejecutar
+
+	serializar_int(buffer, &desp, msg);
+	enviar(socket_suse, cop_next_tid, tamanio_buffer, buffer);
+	free(buffer);
+
+	t_paquete* received_packet = recibir(socket_suse);
+	int desplazamiento = 0;
+
+	if(received_packet->codigo_operacion == cop_next_tid){
+		next = deserializar_int(received_packet->data, &desplazamiento);
+	}
+	else{
+		next = -1;
+		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", cop_next_tid) //Aca no deberia ser received_packet->codigo_operacion??
+	}
+
+	liberar_paquete(received_packet);
+
+	return next;
+}
+
+int suse_close(int tid){
+	//Envio el hilo a cerrar a SUSE
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desplazamiento = 0;
+	serializar_int(buffer, &desplazamiento, tid);
+	enviar(socket_suse, cop_close_tid, tamanio_buffer, buffer);
+	free(buffer);
+
+	//SUSE me devuelve una respuesta indicando si logro cerrarlo o no
+	t_paquete* received_packet = recibir(socket_suse);
+	int desp = 0;
+	int result = deserializar_int(received_packet->data, &desp);
+	liberar_paquete(received_packet);
+
+	return result;
+}
+
+int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructur agregar hilo + semaforos del mismo
+
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desplazamiento = 0;
+	serializar_int(buffer, &desplazamiento, tid);
+	serializar_valor(sem_name); //todo ver si el sem_name va con & o no
+	enviar(socket_suse, cop_wait_sem, tamanio_buffer, buffer);
+	free(buffer);
+
+	//repuesta de suse que decremento el semaforo ok
+	t_paquete* received_packet = recibir(socket_suse);
+	int desp = 0;
+	int result = deserializar_int(received_packet->data, &desp);
+	liberar_paquete(received_packet);
+	return result;
 }
 
 

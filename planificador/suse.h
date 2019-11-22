@@ -20,11 +20,14 @@ typedef struct suse_configuration
 	char ** SEM_INIT;
 	char ** SEM_MAX;
 	int ALPHA_SJF;
+	int MAX_MULTIPROG;
+	t_list * programs; //Hay que mantener un registro de los programas que tenemos.
 }suse_configuration;
 
 typedef struct t_program
 {
-	char ** ULTS;
+	t_list * ULTS; //Lista de t_suse_thread
+	//char ** ULTS;
 	int PROGRAM_ID; //esto es el numero de socket
 } t_program;
 
@@ -40,7 +43,19 @@ t_list* ready_queue;
 pthread_mutex_t mutex_blocked_queue;
 t_list* blocked_queue;
 
+pthread_mutex_t mutex_multiprog;
+
 t_program * generar_programa(int socket_hilolay);
+
+void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay);
+
+void close_tid(int tid);
+
+void handle_close_tid(socket_actual,received_packet);
+
+void handle_wait_sem(socket_actual, received_packet);
+
+
 
 
 
@@ -51,7 +66,7 @@ t_program * generar_programa(int socket_hilolay);
 */
 void iniciar_servidor();
 
-void handle_conection(int socketActual);
+void handle_conection_suse(int socketActual);
 
 int listener;     // listening socket descriptors
 struct sockaddr_storage remoteaddr; // client address
