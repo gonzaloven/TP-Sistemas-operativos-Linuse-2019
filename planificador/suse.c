@@ -19,7 +19,6 @@ int main(void){
 	
 	init_semaforos();
 
-
 	new_queue = list_create();
 
 	pthread_mutex_init(&mutex_new_queue, NULL);
@@ -29,6 +28,16 @@ int main(void){
 	pthread_mutex_init(&mutex_semaforos,NULL);
 
 	iniciar_servidor();
+
+	blocked_queue = list_create();
+	list_destroy(new_queue);
+	list_destroy(blocked_queue);
+
+	free(mutex_new_queue);
+	free(mutex_ready_queue);
+	free(mutex_blocked_queue);
+	free(mutex_multiprog);
+	free(mutex_semaforos);
 
 	return EXIT_SUCCESS;
 }
@@ -118,14 +127,32 @@ void iniciar_servidor() {
 		t_paquete* handshake = recibir(listener);
 		log_info(logger, "Soy SUSE y recibi una nueva conexion . \n");
 		free(handshake);
-		handle_conection_suse(new_connection);
+		//Creo un hilo por programa
+		thread_params = list_add(thread_params, new_connection);
+		nuevo_hilo(programa_conectado_funcion_thread, new_connection);
 	}
 }
 
+pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros) {
+	pthread_t thread = threads[i_thread];
+	int thread_creacion = pthread_create(&thread, NULL, funcion, (void*) parametros);
+	if (thread_creacion != 0) {
+		perror("pthread_create");
+	} else {
+		i_thread++;
+	}
+	return thread;
+}
 
-void handle_conection_suse(int socket_actual) {
-	//Aca supongo que en cada case habria que crear un hilo de atencion
-	//para atender pedidos concurrentes, un hilo por programa que se conecte
+void* programa_conectado_funcion_thread(void* argumentos) {
+	un_socket socket_actual = list_get(argumentos, 0);
+	list_destroy(argumentos);
+	handle_conection_suse(socket_actual);
+	pthread_detach(pthread_self()); //todo verificar si esto esta ok por lo de utn.so
+	return NULL;
+}
+
+void handle_conection_suse(un_socket socket_actual) {
 	t_paquete* paquete_recibido = recibir(socket_actual);
 	switch(paquete_recibido->codigo_operacion){
 	//todo  hay que generar un case para:
@@ -133,6 +160,9 @@ void handle_conection_suse(int socket_actual) {
 	//2) cuando nos pasan un hilo nuevo
 		case cop_handshake_hilolay_suse:
 			handle_hilolay(socket_actual, paquete_recibido);
+		break;
+		case cop_suse_create:
+					handle_suse_create(socket_actual, paquete_recibido);
 		break;
 		case cop_next_tid:
 			handle_next_tid(socket_actual, paquete_recibido);
@@ -163,62 +193,115 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	int desplazamiento = 0;
 	int master_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	//El programa solo hay que generarlo cuando es el primer handshake. podria ser algo como lo siguiente.
+	t_process * program = generar_programa(socket_actual);
 
-	t_program * program =list_get(configuracion_suse.programs, socket_actual);
+	list_add_in_index(configuracion_suse.process,program,program->PROCESS_ID);
 
-	if(program == NULL)
-	{
-		t_program * program = generar_programa(socket_actual);
+	sprintf("el socket es", "%d", program->PROCESS_ID);
 
-		list_add_in_index(configuracion_suse.programs,program,program->PROGRAM_ID);
+	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
 
-		sprintf("el socket es", "%d", program->PROGRAM_ID);
-	}
-	else
-	{
-		t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
+	new_thread->tid = master_tid;
+	new_thread->estado = E_NEW;
+	new_thread->procesoId = socket_actual;
 
-		new_thread->tid = master_tid;
-		new_thread->estado = NEW;
-		new_thread->procesoId = socket_actual;
-
-		list_add_in_index(program->ULTS,new_thread,new_thread->tid);
-		list_add(new_queue,new_thread->tid);
-		free(new_thread);
-	}
-
-	free(program);
+	list_add_in_index(program->ULTS,new_thread,new_thread->tid);
+	list_add(new_queue,new_thread->tid);
 
 	liberar_paquete(paquete_recibido);
 }
 
-void handle_close_tid(un_socket socket_actual, t_paquete* paquete_close_tid){
-	//Recibo el hilo a cerrar
-	esperar_handshake(socket_actual, paquete_close_tid, cop_close_tid);
-	log_info(logger, "Realice handshake con hilolay\n");
+void handle_suse_create(un_socket socket_actual,t_paquete* paquete_hilolay){
+
+	esperar_handshake(socket_actual, paquete_hilolay, cop_suse_create);
+
+	log_info(logger, "Realice el primer handshake con hilolay\n");
 	sprintf("el socket es", "%d", socket_actual);
 
-	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo a finalizar
+	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
-	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+	int new_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	int resultado= close_tid(tid,socket_actual);
+	t_process* program = configuracion_suse[socket_actual];
+
+	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
+
+	new_thread->tid = new_tid;
+	new_thread->estado = E_NEW;
+	new_thread->procesoId = program->PROCESS_ID;
+
+	list_add_in_index(program->ULTS,new_thread,new_thread->tid);
+	list_add(new_queue,new_thread->tid);
+
 	liberar_paquete(paquete_recibido);
-
-	int tamanio_buffer = sizeof(int);
-	void * buffer = malloc(tamanio_buffer);
-	int desp = 0;
-
-	serializar_int(buffer, &desp, resultado);
-	enviar(socket_suse, cop_close_tid, tamanio_buffer, buffer);
-	free(buffer);
-
 }
 
-t_program * generar_programa(un_socket socket) {
-	t_program * program = malloc(sizeof(t_program));
-	program->PROGRAM_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
+int close_tid(int tid, int socket_actual){
+
+	t_process* program = list_get(configuracion_suse->process, socket_actual);
+	t_suse_thread* thread = list_get(program->ULTS,tid);
+
+	     if(thread == NULL){
+
+	    	 list_destroy_and_destroy_elements(program->ULTS);
+	    	 list_remove_and_destroy_element(configuracion_suse->process,program);
+	    	 int resultado = close(socket_actual);
+	    	 return resultado;
+	     }
+
+		switch(thread->estado){
+
+		case E_NEW:
+
+				bool comparador(void* element){
+					return element == tid;
+				}
+
+				pthread_mutex_lock(&mutex_new_queue);
+				list_remove(new_queue,comparador);
+				pthread_mutex_unlock(&mutex_new_queue);
+
+				pthread_mutex_lock(&mutex_multiprog);
+				configuracion_suse.MAX_MULTIPROG --;
+				pthread_mutex_unlock(&mutex_multiprog);
+
+				list_remove_and_destroy_element(program->ULTS, tid);
+
+		break;
+
+		case E_READY:
+
+				list_remove(program->READY_LIST,tid);
+
+				pthread_mutex_lock(&mutex_multiprog);
+				configuracion_suse.MAX_MULTIPROG --;
+				pthread_mutex_unlock(&mutex_multiprog);
+
+				list_remove_and_destroy_element(program->ULTS, tid);
+
+		break;
+
+		case E_EXECUTE:
+
+				list_remove(program->EXEC_LIST,tid);
+
+				pthread_mutex_lock(&mutex_multiprog);
+				configuracion_suse.MAX_MULTIPROG --;
+				pthread_mutex_unlock(&mutex_multiprog);
+
+				list_remove_and_destroy_element(program->ULTS, tid);
+
+		break;
+
+		}
+
+		return 1;
+}
+
+
+t_process * generar_programa(un_socket socket) {
+	t_process * program = malloc(sizeof(t_process));
+	program->PROCESS_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
 	return program;
 }
 
@@ -241,26 +324,36 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 }
 
 int get_next_tid(){
+	//todo que pasa con los programas
+	int tid = planificar_sjf();
 
 	//todo planificar
 
 }
+
 int close_tid(int tid, int socket_actual){
 
-	     t_program* program = list_get(configuracion_suse->programs, socket_actual);
-	     t_suse_thread* thread = list_get(program->ULTS,tid);
+	t_process* program = list_get(configuracion_suse->process, socket_actual);
+	t_suse_thread* thread = list_get(program->ULTS,tid);
 
-	   /*  //IF THREAD IS NULL CREO Q SE TENIAN Q LIBERAR RECURSOS.. Supongo q es desconectar al programa (chau socket) ṕero como no estoy seguro ni se bien como hacerlo no lo hago
 	     if(thread == NULL){
+
+	    	 list_destroy_and_destroy_elements(program->ULTS);
+	    	 list_remove_and_destroy_element(configuracion_suse->process,program);
 	    	 int resultado = close(socket_actual);
 	    	 return resultado;
-	     }*/
+	     }
 
 		switch(thread->estado){
 
-		case NEW:
+		case E_NEW:
+
+				bool comparador(void* element){
+					return element == tid;
+				}
+
 				pthread_mutex_lock(&mutex_new_queue);
-				list_remove(new_queue,true/*x => x.tid == tid*/);
+				list_remove(new_queue,comparador);
 				pthread_mutex_unlock(&mutex_new_queue);
 
 				pthread_mutex_lock(&mutex_multiprog);
@@ -271,7 +364,7 @@ int close_tid(int tid, int socket_actual){
 
 		break;
 
-		case 1: //NO ME RECONOCE READY
+		case E_READY:
 
 				list_remove(program->READY_LIST,tid);
 
@@ -283,7 +376,7 @@ int close_tid(int tid, int socket_actual){
 
 		break;
 
-		case EXECUTE:
+		case E_EXECUTE:
 
 				list_remove(program->EXEC_LIST,tid);
 
@@ -296,9 +389,6 @@ int close_tid(int tid, int socket_actual){
 		break;
 
 		}
-
-		free(program);
-		free(thread);
 
 		return 1;
 }
@@ -357,27 +447,29 @@ void handle_signal_sem(socket_actual, paquete_signal_sem){
 
 int desbloquear_proceso_semaforo(sem){
 
-	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, semaforo->NAME = sem);
+	bool comparador(t_suse_semaforos* semaforo){
+		return semaforo->NAME == sem;
+	}
+	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, comparador);
 
 	if(semaforo->BLOCKED_LIST[0] == NULL){
-		return 0; //no hay procesos para desbloquear.
+		return 0;
 	}
 
 	t_suse_thread* thread = semaforo->BLOCKED_LIST[0];
-	t_program * program = configuracion_suse.programs[thread->procesoId];
-	program->bloqueado = false;
+	t_process * program = configuracion_suse.process[thread->procesoId];
 
 	pthread_mutex_lock(&mutex_multiprog);
 
 	if(configuracion_suse.ACTUAL_MULTIPROG < configuracion_suse.MAX_MULTIPROG){
 
-		thread->estado = 1; //No me reconoce READY. ESTA DUPLICADO EN HILOLAY_INTERNAL. TODO: CAMBIAR LOS ENUMS.
+		thread->estado = E_READY;
 		list_add(program->READY_LIST,thread);
 		configuracion_suse.ACTUAL_MULTIPROG ++;
 	}
 	pthread_mutex_unlock(&mutex_multiprog);
 
-	thread->estado = NEW;
+	thread->estado = E_NEW;
 
 	pthread_mutex_lock(&mutex_new_queue);
 	list_add(new_queue,thread);
@@ -391,7 +483,10 @@ int desbloquear_proceso_semaforo(sem){
 
 int incrementar_semaforo(uint32_t tid, char* sem){
 
-	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, semaforo->NAME = sem);
+	bool comparador(t_suse_semaforos* semaforo){
+		return semaforo->NAME == sem;
+	}
+	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, comparador);
 
 	if(semaforo == NULL)
 	{
@@ -411,10 +506,12 @@ int incrementar_semaforo(uint32_t tid, char* sem){
 
 }
 
-//todo definir esta funcion
 int decrementar_semaforo(int socket_actual,int tid, char* sem){
 
-	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, semaforo->NAME = sem);
+	bool comparador(t_suse_semaforos* semaforo){
+		return semaforo->NAME == sem;
+	}
+	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, comparador);
 
 	if(semaforo == NULL){
 			log_info(logger,"El semaforo no existe\n");
@@ -423,12 +520,14 @@ int decrementar_semaforo(int socket_actual,int tid, char* sem){
 	if(semaforo->VALUE <= 0)
 	{
 
-		t_program* program = configuracion_suse.programs[socket_actual];
-		//todo sacar estados de programa, solo existe o no
-		program->bloqueado = true;
+		t_process* program = configuracion_suse.process[socket_actual];
+
 		t_suse_thread* thread = program->ULTS[tid];
-		thread->estado = BLOCKED;
+
+		thread->estado = E_BLOCKED;
+
 		list_add(semaforo->BLOCKED_LIST,thread);
+
 
 	}
 

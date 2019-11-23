@@ -26,23 +26,15 @@
 	 */
 	void hilolay_init(void);
 
-	/**
-	 * TODO
-	 */
+
 	int hilolay_create(hilolay_t *thread, const hilolay_attr_t *attr, void *(*start_routine)(void *), void *arg);
 
-	/**
-	 * TODO
-	 */
+
 	int hilolay_yield(void);
 
-	/**
-	 * TODO
-	 */
+
 	int hilolay_join(hilolay_t *thread);
 
-	/**
-	 * TODO
-	 */
+
 	int hilolay_get_tid(void);
 #endif // hilolay_h__
