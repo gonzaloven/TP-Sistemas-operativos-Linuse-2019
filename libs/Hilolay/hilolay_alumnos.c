@@ -12,7 +12,7 @@ static struct hilolay_operations hiloops = {
 		//.suse_join = &suse_join,
 		.suse_close = &suse_close,
 		.suse_wait = &suse_wait,
-		//.suse_signal = &suse_signal
+		.suse_signal = &suse_signal
 
 };
 

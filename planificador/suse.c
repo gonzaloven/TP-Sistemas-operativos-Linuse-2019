@@ -424,6 +424,7 @@ int decrementar_semaforo(int socket_actual,int tid, char* sem){
 	{
 
 		t_program* program = configuracion_suse.programs[socket_actual];
+		//todo sacar estados de programa, solo existe o no
 		program->bloqueado = true;
 		t_suse_thread* thread = program->ULTS[tid];
 		thread->estado = BLOCKED;

@@ -21,16 +21,15 @@ typedef struct suse_configuration
 	char ** SEM_MAX;
 	int ALPHA_SJF;
 	int MAX_MULTIPROG;
-	t_list * programs; //Hay que mantener un registro de los programas que tenemos.
+	t_list * process; //Hay que mantener un registro de los programas que tenemos.
 	t_list * semaforos;
 	uint32_t ACTUAL_MULTIPROG;
 }suse_configuration;
 
-typedef struct t_program
+typedef struct t_process
 {
 	t_list * ULTS; //Lista de t_suse_thread
-	//char ** ULTS;
-	int PROGRAM_ID; //esto es el numero de socket
+	int PROCESS_ID; //esto es el numero de socket
 	t_list * READY_LIST;
 	t_list * EXEC_LIST;
 	bool bloqueado;
