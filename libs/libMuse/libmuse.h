@@ -72,9 +72,15 @@ int muse_cpy(uint32_t dst, void* src, int n);
 * @param flags
 *          MAP_PRIVATE     Solo un proceso/hilo puede mappear el archivo.
 *          MAP_SHARED      El segmento asociado al archivo es compartido.
-* @return Retorna la posición de memoria de MUSE mappeada.
+* @return Retorna la posición de memoria de MUSE mappeada. Si hay error, retorna el valor
+* MAP_FAILED (that is, (void *) -1). 
 * @note: Si `length` sobrepasa el tamaño del archivo, toda extensión deberá estar llena de "\0".
 * @note: muse_free no libera la memoria mappeada. @see muse_unmap
+* @example	
+	uint32_t map = muse_map("hola.txt", filesize, MAP_PRIVATE);		
+	opens the "hola.txt" file in RDONLY mode
+	map is a position _mapped_ of pages of a given 'filesize' of the "hola.txt" file  
+	muse_map basically is just putting the hola.txt file in memory 
 */
 uint32_t muse_map(char *path, size_t length, int flags);
 

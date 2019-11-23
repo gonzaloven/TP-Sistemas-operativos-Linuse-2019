@@ -147,10 +147,30 @@ int muse_cpy(uint32_t dst, void* src, int n)
 */
 uint32_t muse_map(char *path, size_t length, int flags)
 {
-   	int file_descriptor = open(path, O_RDONLY);
-   	void* map = mmap(NULL, length, PROT_NONE, flags, file_descriptor, 0);
-   	printf(map, length);   
-	return *(int*) map;
+	Function function;
+	Arg arg[3];	//argumento
+	char *s = (char *)path;
+
+	arg[0].type = VAR_CHAR_PTR;
+	arg[0].size = sizeof(uint32_t);
+	arg[0].value.val_u32 = *length;
+
+	arg[1].type = VAR_SIZE_T;
+	arg[1].size = sizeof(size_t);
+	arg[1].value.val_u32 = length;
+
+	arg[2].type = VAR_UINT32;
+	arg[2].size = sizeof(uint32_t);
+	arg[2].value.val_u32 = flags;
+
+	function.type = FUNCTION_MAP;
+	function.num_args = 3;
+	function.args[0] = arg[0];
+	function.args[1] = arg[1];
+	function.args[2] = arg[2];
+
+	int result = call(&function);
+	return result;
 }
 
 int muse_sync(uint32_t addr, size_t len)
@@ -159,19 +179,19 @@ int muse_sync(uint32_t addr, size_t len)
 	return result;
 }
 
-/*
-	@Return
-	On success, munmap() returns 0, on failure -1,
-	and errno is set (probably to EINVAL).
-*/
 int muse_unmap(uint32_t dir)
 {
-	void *dir2 = &dir;
-	int unmap_result = munmap(dir2, 1 << 10); //TODO: ¿¿ 1 << 10 ??
-  	if (unmap_result == 0 ) {
-		printf("Could not unmap");
-		//log_error(muse_logger,"Could not unmap");
-		return -1;
-	}
+	Function function;
+	Arg arg;
+
+	arg.type = VAR_UINT32;
+	arg.size = sizeof(uint32_t);
+	arg.value.val_u32 = dir;
+
+	function.type = FUNCTION_UNMAP;
+	function.num_args = 1;
+	function.args[0] = arg;	
+
+	call(&function);
 	return 0;
 }
