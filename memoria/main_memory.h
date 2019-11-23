@@ -9,8 +9,9 @@
 #include <commons/collections/list.h>
 #include <commons/log.h>
 
+#define MUSE_LOG_PATH "../logs/muse.log"
 
-/* Estructura ppal: nos dice para cada pid su numero de tabla de segmento*/
+/* Estructura ppal de cada programa: nos dice para cada pid su numero de tabla de segmento*/
 typedef struct program_s
 {
 	uint16_t pid;
@@ -30,7 +31,7 @@ typedef struct frame_s
 	void *data;
 }frame;
 
-/*De cada pagina sabemos si está presente, su numero y a que frame apunta */
+/*Estructura de una pagina: sabemos si está presente, su numero y a que frame apunta */
 typedef struct page_s
 {
 	bool is_present; //sirve para páginas compartidas

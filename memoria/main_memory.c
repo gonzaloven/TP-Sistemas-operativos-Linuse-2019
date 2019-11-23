@@ -1,14 +1,12 @@
 /*
+* main_memory.c
 * Estructura administrativa de la memoria,
 * Permite inizializar memoria, liberarla, 
 * buscar un programa en la tabla de programas, 
 * y buscar páginas libre
-*
 */
 
 #include "main_memory.h"
-
-#define MUSE_LOG_PATH "../logs/muse.log"
 
 frame *main_memory = NULL;
 int curr_page_num = 0;
@@ -38,8 +36,7 @@ void muse_main_memory_init(int memory_size,int page_size)
 		main_memory[i].metadata.is_free = true ;
 		main_memory[i].metadata.size = 0;
 		main_memory[i].data = mem_ptr + i*page_size;
-	}
-		
+	}		
 
 	printf("Inicializando tabla de paginas...\n");
 	page_list = list_create();

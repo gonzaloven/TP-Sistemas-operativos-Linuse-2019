@@ -10,6 +10,13 @@
 #include <sys/stat.h>
 #include <commons/config.h>
 
+#include <stdlib.h>
+
+#define LIBMUSE_CONFIG_PATH "../../configs/libmuse.config"
+
+t_config *config;
+
+int master_socket = 0;
 
 /**
 * Inicializa la biblioteca de MUSE.
@@ -83,7 +90,6 @@ int muse_sync(uint32_t addr, size_t len);
 /**
 * Borra el mappeo a un archivo hecho por muse_map.
 * @param dir Dirección a memoria mappeada.
-* @param
 * @note Esto implicará que todas las futuras utilizaciones de direcciones basadas en `dir` serán accesos inválidos.
 * @note Solo se deberá cerrar el archivo mappeado una vez que todos los hilos hayan liberado la misma cantidad de muse_unmap que muse_map.
 * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
@@ -91,9 +97,11 @@ int muse_sync(uint32_t addr, size_t len);
 int muse_unmap(uint32_t dir);
 
 
-/* Agregadas x los pibes */
+/* Funciones agregadas x nosotros */
 
-/* call es el serializador, hay varios funciones prehechas que se pueden usar
+/** 
+* call es el serializador, hay varios funciones prehechas que se pueden usar
+@param function la funcion a llamar (dah)
 */ 
 int call(Function *function);
 

@@ -1,11 +1,4 @@
 #include "libmuse.h"
-#include <stdlib.h>
-
-#define LIBMUSE_CONFIG_PATH "../../configs/libmuse.config"
-
-t_config *config;
-
-int master_socket = 0;
 
 int muse_init(int id)
 {

@@ -3,7 +3,8 @@
         "muse.h": "c",
         "libmuse.h": "c",
         "server.h": "c",
-        "basic.h": "c"
+        "basic.h": "c",
+        "main_memory.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

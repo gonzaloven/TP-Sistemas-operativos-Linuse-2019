@@ -1,3 +1,10 @@
+/*
+ * De la manera en como está implementado, muse.c lo que hace es levantar el servidor central,
+ * levanta los loggers y el archivo de configuración, se queda escuchando y esperando a los
+ * clientes y dependiendo que funciones le manden, muse se encargará de llamar a dichas funciones,
+ * toda la lógica de estas funciones está en main_memory.c  
+ */
+
 #include "muse.h"
 
 t_log *muse_logger = NULL;
