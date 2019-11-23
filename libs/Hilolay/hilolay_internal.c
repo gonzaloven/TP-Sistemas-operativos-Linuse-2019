@@ -5,8 +5,6 @@
 #include "hilolay.h"
 
 
-// TODO: Check what happens when a thrad is closed
-
 /* Writes administrative info of a TCB */
 void set_tcb(struct TCB* tcb, int id, enum State state) {
     tcb->state = state;

@@ -3,12 +3,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "network.h"
 #include <commons/log.h>
 #include <commons/config.h>
 #include <signal.h>
 #include <utils_suse/libraries.h>
 #include <semaphore.h>
+#include <pthread.h>
 
 #define SUSE_CONFIG_PATH "../configs/planificador.config"
 
@@ -21,15 +21,47 @@ typedef struct suse_configuration
 	char ** SEM_MAX;
 	int ALPHA_SJF;
 	int MAX_MULTIPROG;
-	t_list * programs; //Hay que mantener un registro de los programas que tenemos.
+	t_list * process;
+	t_list * semaforos;
+	uint32_t ACTUAL_MULTIPROG;
 }suse_configuration;
 
-typedef struct t_program
+enum estados {
+	E_READY = 1,
+	E_EXECUTE = 2,
+	E_BLOCKED = 3,
+	E_EXIT = 4,
+	E_NEW = 5 //todo ver si es necesario
+};
+
+typedef struct {
+	int tid;
+	int estado;
+	int procesoId;
+	float duracionRafaga;
+	float estimacionUltimaRafaga;
+	bool ejecutado_desde_estimacion;
+} t_suse_thread;
+
+typedef struct t_process
 {
 	t_list * ULTS; //Lista de t_suse_thread
-	//char ** ULTS;
-	int PROGRAM_ID; //esto es el numero de socket
-} t_program;
+	int PROCESS_ID; //esto es el numero de socket
+	t_list * READY_LIST;
+	t_list * EXEC_LIST;
+	bool bloqueado;
+} t_process;
+
+typedef struct t_suse_semaforos{
+	char* NAME;
+	uint32_t INIT;
+	uint32_t MAX;
+	uint32_t VALUE;
+	t_list * BLOCKED_LIST;
+}t_suse_semaforos;
+
+
+
 
 suse_configuration configuracion_suse;
 suse_configuration get_configuracion();
@@ -43,9 +75,15 @@ t_list* ready_queue;
 pthread_mutex_t mutex_blocked_queue;
 t_list* blocked_queue;
 
+pthread_mutex_t mutex_semaforos;
+
 pthread_mutex_t mutex_multiprog;
 
-t_program * generar_programa(int socket_hilolay);
+sem_t sem_ULTs_listos;
+
+t_list* exit_queue;
+
+t_process * generar_programa(int socket_hilolay);
 
 void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay);
 
@@ -55,7 +93,14 @@ void handle_close_tid(socket_actual,received_packet);
 
 void handle_wait_sem(socket_actual, received_packet);
 
+int i_thread = 0;
+pthread_t threads[20];
 
+pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros);
+
+t_list* thread_params;
+
+void* programa_conectado_funcion_thread(void* argumentos);
 
 
 

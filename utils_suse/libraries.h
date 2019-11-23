@@ -42,6 +42,8 @@ enum codigos_de_operacion {
 	cop_next_tid = 12,
 	cop_close_tid = 13,
 	cop_wait_sem = 14,
+	cop_signal_sem = 15,
+	cop_suse_create = 16
 	//todo ver si es necesario un cop distinto para el envio del mensaje y para la respuesta de que el mensaje se recibio ok
 };
 
@@ -53,18 +55,6 @@ typedef struct {
 	void * data;
 } t_paquete;
 
-enum estados {
-	READY = 0,
-	EXECUTE = 1,
-	BLOCKED = 2,
-	EXIT = 3,
-	NEW = 4 //todo ver si es necesario
-};
-
-typedef struct {
-	int tid;
-	int estado;
-} t_suse_thread;
 
 /**	@NAME: conectar_a
  * 	@DESC: Intenta conectarse.
