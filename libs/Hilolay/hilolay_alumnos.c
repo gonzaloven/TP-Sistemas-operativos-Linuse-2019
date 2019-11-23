@@ -16,22 +16,28 @@ static struct hilolay_operations hiloops = {
 
 };
 
-int socket_suse = 0;
+int socket_suse = 0; //todo verificar si hay que conectarse aca en la global o basta con hacerlo en la funcion
 int master_thread = 0;
 
 void hilolay_init(void){
 	init_internal(&hiloops);
 	conectar_con_suse();
-	//todo el orden importa?
 }
 
 void conectar_con_suse() {
 	socket_suse = conectar_a(configuracion_hilolay.SUSE_IP ,configuracion_hilolay.SUSE_PORT);
+
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+
+	serializar_int(buffer, &desp, 0);
+	enviar(socket_suse,cop_suse_create, tamanio_buffer, buffer);
 	log_info(logger, "Me conecte con SUSE. \n");
-	//TODO ver si con esto basta o tengo que mandar un mensaje
+
 }
 
-int suse_create(int master_thread){ //todo testear que los mensajes se manden of
+int suse_create(int master_thread){
 	bool result = realizar_handshake(socket_suse, cop_handshake_hilolay_suse);
 
 	int tamanio_buffer = sizeof(int);

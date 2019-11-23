@@ -20,6 +20,11 @@ int main(void){
 	init_semaforos();
 
 	new_queue = list_create();
+	blocked_queue = list_create();
+	ready_queue = list_create();
+	exit_queue = list_create(); //todo ver si es necesario
+
+	sem_init(&sem_ULTs_listos, 0, 0);
 
 	pthread_mutex_init(&mutex_new_queue, NULL);
 	pthread_mutex_init(&mutex_ready_queue, NULL);
@@ -29,9 +34,10 @@ int main(void){
 
 	iniciar_servidor();
 
-	blocked_queue = list_create();
 	list_destroy(new_queue);
 	list_destroy(blocked_queue);
+	list_destroy(ready_queue);
+	list_destroy(exit_queue);
 
 	free(mutex_new_queue);
 	free(mutex_ready_queue);
@@ -155,14 +161,11 @@ void* programa_conectado_funcion_thread(void* argumentos) {
 void handle_conection_suse(un_socket socket_actual) {
 	t_paquete* paquete_recibido = recibir(socket_actual);
 	switch(paquete_recibido->codigo_operacion){
-	//todo  hay que generar un case para:
-	//1) primer handshake hilolay-suse cuando envia el hilo main
-	//2) cuando nos pasan un hilo nuevo
 		case cop_handshake_hilolay_suse:
 			handle_hilolay(socket_actual, paquete_recibido);
 		break;
 		case cop_suse_create:
-					handle_suse_create(socket_actual, paquete_recibido);
+			handle_suse_create(socket_actual, paquete_recibido);
 		break;
 		case cop_next_tid:
 			handle_next_tid(socket_actual, paquete_recibido);
@@ -215,12 +218,14 @@ void handle_suse_create(un_socket socket_actual,t_paquete* paquete_hilolay){
 
 	esperar_handshake(socket_actual, paquete_hilolay, cop_suse_create);
 
-	log_info(logger, "Realice el primer handshake con hilolay\n");
+	log_info(logger, "Esperando hilo de suse_create \n");
 	sprintf("el socket es", "%d", socket_actual);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
 	int new_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+
+	log_info(logger, "Recibi el hilo", "%d", new_tid);
 
 	t_process* program = configuracion_suse[socket_actual];
 
@@ -298,7 +303,6 @@ int close_tid(int tid, int socket_actual){
 		return 1;
 }
 
-
 t_process * generar_programa(un_socket socket) {
 	t_process * program = malloc(sizeof(t_process));
 	program->PROCESS_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
@@ -312,7 +316,8 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
 
-	int next_tid = get_next_tid();
+	log_info(logger, "Iniciando planificacion...\n")
+	int next_tid = obtener_proximo_ejecutar(); //Inicia planificacion
 
 	// Envio el next tid
 	int tamanio_buffer = sizeof(int);
@@ -323,13 +328,53 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 	free(buffer);
 }
 
-int get_next_tid(){
-	//todo que pasa con los programas
-	int tid = planificar_sjf();
-
-	//todo planificar
-
+int obtener_proximo_ejecutar(){
+	sem_wait(&sem_ULTs_listos); // Espero a que haya ULTs listos
+	pthread_mutex_lock(&mutex_ready_queue);
+	int next_tid = list_get(ready_queue, 0);
+	pthread_mutex_unlock(&mutex_ready_queue);
+	return next_tid;
 }
+
+void ordenar_cola_listos() {
+	estimar_ULTs_listos();
+	ordenar_por_sjf();
+}
+
+void ordenar_por_sjf(){
+	list_sort(ready_queue, funcion_SJF);
+}
+
+void estimarRafaga(t_suse_thread * ULT){
+	int rafaga_anterior = ULT->duracionRafaga; //Duracion de la rafaga anterior
+	float estimacion_anterior = ULT->estimacionUltimaRafaga; // Estimacion anterior
+	float porcentaje_alfa = ((float) configuracion_suse.ALPHA_SJF) / 100;
+	float estimacion = porcentaje_alfa * rafaga_anterior + (1 - porcentaje_alfa) * estimacion_anterior;
+	ULT->estimacionUltimaRafaga = estimacion;
+}
+
+bool funcion_SJF(void* thread1, void* thread2) {
+	t_suse_thread * ULT1 = (t_suse_thread *) thread1;
+	t_suse_thread * ULT2 = (t_suse_thread *) thread2;
+	if (ULT1->estimacionUltimaRafaga == ULT2->estimacionUltimaRafaga) {
+		return funcion_FIFO(ULT1, ULT2); //todo funcion_fifo
+	}
+	return ULT1->estimacionUltimaRafaga < ULT2->estimacionUltimaRafaga;
+}
+
+void estimar_ULTs_listos() {
+	void estimar(void * item_ULT) {
+		t_suse_thread * ULT = (t_suse_thread *) item_ULT;
+		if (ULT->ejecutado_desde_estimacion) {
+			ULT->ejecutado_desde_estimacion = false;
+			estimarRafaga(ULT);
+		}
+	}
+	pthread_mutex_lock(&mutex_ready_queue);
+	list_iterate(ready_queue, estimar);
+	pthread_mutex_unlock(&mutex_ready_queue);
+}
+
 
 int close_tid(int tid, int socket_actual){
 
@@ -432,7 +477,7 @@ void handle_signal_sem(socket_actual, paquete_signal_sem){
 	pthread_mutex_lock(&mutex_semaforos);
 	int resultado = incrementar_semaforo(tid, sem);
 	if(resultado != -1){
-		resultado = desbloquear_proceso_semaforo(sem);
+		resultado = desbloquear_proceso_semaforo(sem); //todo esto no serian hilos en vez de procesos?
 	}
 	pthread_mutex_unlock(&mutex_semaforos);
 

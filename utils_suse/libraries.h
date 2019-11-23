@@ -55,19 +55,6 @@ typedef struct {
 	void * data;
 } t_paquete;
 
-enum estados {
-	E_READY = 1,
-	E_EXECUTE = 2,
-	E_BLOCKED = 3,
-	E_EXIT = 4,
-	E_NEW = 5 //todo ver si es necesario
-};
-
-typedef struct {
-	int tid;
-	int estado;
-	int procesoId;
-} t_suse_thread;
 
 /**	@NAME: conectar_a
  * 	@DESC: Intenta conectarse.

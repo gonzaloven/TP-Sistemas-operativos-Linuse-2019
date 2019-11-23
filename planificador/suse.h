@@ -21,10 +21,27 @@ typedef struct suse_configuration
 	char ** SEM_MAX;
 	int ALPHA_SJF;
 	int MAX_MULTIPROG;
-	t_list * process; //Hay que mantener un registro de los programas que tenemos.
+	t_list * process;
 	t_list * semaforos;
 	uint32_t ACTUAL_MULTIPROG;
 }suse_configuration;
+
+enum estados {
+	E_READY = 1,
+	E_EXECUTE = 2,
+	E_BLOCKED = 3,
+	E_EXIT = 4,
+	E_NEW = 5 //todo ver si es necesario
+};
+
+typedef struct {
+	int tid;
+	int estado;
+	int procesoId;
+	float duracionRafaga;
+	float estimacionUltimaRafaga;
+	bool ejecutado_desde_estimacion;
+} t_suse_thread;
 
 typedef struct t_process
 {
@@ -44,6 +61,8 @@ typedef struct t_suse_semaforos{
 }t_suse_semaforos;
 
 
+
+
 suse_configuration configuracion_suse;
 suse_configuration get_configuracion();
 
@@ -59,6 +78,10 @@ t_list* blocked_queue;
 pthread_mutex_t mutex_semaforos;
 
 pthread_mutex_t mutex_multiprog;
+
+sem_t sem_ULTs_listos;
+
+t_list* exit_queue;
 
 t_process * generar_programa(int socket_hilolay);
 
