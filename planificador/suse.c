@@ -214,10 +214,19 @@ void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
 
 int join(un_socket socket, int tid){
 
+	bool buscador(t_suse_thread* thread){
+		return thread->tid == tid;
+	}
+
 	t_process* program = configuracion_suse.process[socket];
 
 	t_suse_thread* thread_executing = program->EXEC_THREAD;
-	t_suse_thread* thread_joined = program->ULTS[tid];
+	t_suse_thread* thread_joined = list_find(program->ULTS,buscador);
+
+	if(thread_joined == NULL)
+	{
+		return 0;
+	}
 
 	thread_executing->estado = E_BLOCKED;
 
@@ -288,18 +297,24 @@ void handle_suse_create(un_socket socket_actual,t_paquete* paquete_hilolay){
 
 int close_tid(int tid, int socket_actual){
 
-	t_process* program = list_get(configuracion_suse->process, socket_actual);
-	t_suse_thread* thread = list_get(program->ULTS,tid);
+		t_process* program = list_get(configuracion_suse->process, socket_actual);
+		t_suse_thread* thread = list_get(program->ULTS,tid);
 
-	     if(thread == NULL){
+	    if(thread == NULL)
+	    {
 
 	    	 list_destroy_and_destroy_elements(program->ULTS);
 	    	 list_remove_and_destroy_element(configuracion_suse->process,program);
 	    	 int resultado = close(socket_actual);
 	    	 return resultado;
-	     }
+	    }
 
-		switch(thread->estado){
+	    if(!list_is_empty(thread->joinedBy))
+	    {
+	    	desjoinear(program,thread);
+	    }
+
+		switch(thread->estado){ //TODO: Agregar case BLOCKED
 
 		case E_NEW:
 
@@ -307,13 +322,14 @@ int close_tid(int tid, int socket_actual){
 					return element == tid;
 				}
 
+				if()
 				pthread_mutex_lock(&mutex_new_queue);
 				list_remove(new_queue,comparador);
 				pthread_mutex_unlock(&mutex_new_queue);
 
-				pthread_mutex_lock(&mutex_multiprog);
+				/*pthread_mutex_lock(&mutex_multiprog);
 				configuracion_suse.MAX_MULTIPROG --;
-				pthread_mutex_unlock(&mutex_multiprog);
+				pthread_mutex_unlock(&mutex_multiprog);*/
 
 				list_remove_and_destroy_element(program->ULTS, tid);
 
@@ -335,6 +351,7 @@ int close_tid(int tid, int socket_actual){
 
 				//list_remove(program->EXEC_LIST,tid);
 				program->EXEC_THREAD = NULL;
+
 				pthread_mutex_lock(&mutex_multiprog);
 				configuracion_suse.MAX_MULTIPROG --;
 				pthread_mutex_unlock(&mutex_multiprog);
@@ -347,6 +364,24 @@ int close_tid(int tid, int socket_actual){
 
 		return 1;
 }
+
+
+void desjoinear(t_process* program, t_suse_thread* thread_joineado)
+{
+
+/*	int size = list_size(thread_joineado->joinedBy);
+
+	for(int i = 0; i < size; i++)
+	{
+
+	}
+
+*/
+
+
+}
+
+
 
 t_process * generar_programa(un_socket socket) {
 	t_process * program = malloc(sizeof(t_process));
