@@ -194,4 +194,28 @@ t_list * list_remove_all_by_condition(t_list * lista, bool(*condicion)(void*)); 
 
 int recibir_int(t_paquete* paquete_recibido);
 
+void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket);
+
+void ejecucion_a_listo(t_suse_thread* thread,un_socket socket);
+
+void eliminar_ULT_cola_actual(t_suse_thread *ULT, t_process* process);
+
+void remover_ULT_nuevo(t_suse_thread* ULT);
+
+void remover_ULT_bloqueado(t_suse_thread* thread);
+
+void remover_ULT_exec(t_process* process);
+
+bool validar_grado_multiprogramacion();
+
+void nuevo_a_listo(t_suse_thread* ULT, int process_id);
+
+void remover_ULT_listo(t_suse_thread* thread,t_process* process);
+
+void bloqueado_a_listo(t_suse_thread* thread,t_process* program);
+
+void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket);
+
+void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semaforos* semaforo);
+
 #endif /* LIBRARIES_H_ */

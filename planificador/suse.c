@@ -158,7 +158,9 @@ void* programa_conectado_funcion_thread(void* argumentos) {
 }
 
 void handle_conection_suse(un_socket socket_actual) {
+
 	t_paquete* paquete_recibido = recibir(socket_actual);
+
 	switch(paquete_recibido->codigo_operacion){
 		case cop_handshake_hilolay_suse:
 			handle_hilolay(socket_actual, paquete_recibido);
@@ -212,6 +214,33 @@ void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
 	liberar_paquete(paquete);
 }
 
+void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
+{
+
+	esperar_handshake(socket, paquete_recibido, cop_close_tid);
+
+	log_info(logger, "Realice el primer handshake con hilolay\n");
+	sprintf("el socket es", "%d", socket);
+
+	t_paquete* paquete = recibir(socket);
+
+	int desplazamiento = 0;
+	int tid = deserializar_int(paquete->data, &desplazamiento);
+
+	int resultado = close_tid(tid,socket);
+
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+
+	serializar_int(buffer, &desp, resultado);
+	enviar(socket, cop_wait_sem, tamanio_buffer, buffer);
+
+	free(buffer);
+	liberar_paquete(paquete);
+
+}
+
 int join(un_socket socket, int tid){
 
 	bool buscador(t_suse_thread* thread){
@@ -261,25 +290,19 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 
 	new_thread->tid = master_tid;
 	new_thread->procesoId = socket_actual;
-
-	if(validar_grado_multiprogramacion()){
-		nuevo_a_listo(new_thread, socket_actual);
-	}
-	else{
-		//dejar en cola de new
-		new_thread->estado = E_NEW;
-		list_add(new_queue, new_thread->tid); //todo cada vez que agregamos a la cola de new metemos un mutex??
-	}
-
+	new_thread->estado = E_NEW;
 
 	list_add_in_index(program->ULTS,new_thread,new_thread->tid);
+	list_add(new_queue, new_thread);
 
+	pthread_mutex_lock(&mutex_multiprog);
+
+	if(validar_grado_multiprogramacion()){
+		nuevo_a_ejecucion(new_thread, socket_actual);
+	}
+	pthread_mutex_unlock(&mutex_multiprog);
 
 	liberar_paquete(paquete_recibido);
-}
-
-bool validar_grado_multiprogramacion(){
-	return (configuracion_suse.ACTUAL_MULTIPROG + 1) <= (configuracion_suse.MAX_MULTIPROG);
 }
 
 void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
@@ -311,6 +334,7 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
 }
 
 int close_tid(int tid, int socket_actual){
+
 	t_process* program = list_get(configuracion_suse->process, socket_actual);
 	t_suse_thread* thread = list_get(program->ULTS,tid);
 
@@ -334,12 +358,10 @@ int close_tid(int tid, int socket_actual){
 				bool comparador(t_suse_thread* element){
 					return element->tid == tid && element->procesoId ==socket_actual;
 				}
+
 				pthread_mutex_lock(&mutex_new_queue);
 				list_remove(new_queue,comparador);
 				pthread_mutex_unlock(&mutex_new_queue);
-
-
-
 		break;
 
 		case E_BLOCKED:
@@ -365,8 +387,6 @@ int close_tid(int tid, int socket_actual){
 			list_remove(program->READY_LIST,comparador);
 
 			pthread_mutex_unlock(&mutex_multiprog);
-
-
 		break;
 
 		case E_EXECUTE:
@@ -376,17 +396,15 @@ int close_tid(int tid, int socket_actual){
 				pthread_mutex_lock(&mutex_multiprog);
 				configuracion_suse.MAX_MULTIPROG --;
 				pthread_mutex_unlock(&mutex_multiprog);
-
-
-
 		break;
 	}
 
-	list_remove_and_destroy_element(program->ULTS, tid);
+	list_add(exit_queue,thread);
+
+	//list_remove_and_destroy_element(program->ULTS, tid);
 
 	return 1;
 }
-
 
 void desjoinear(t_process* program, t_suse_thread* thread_joineado)
 {
@@ -395,7 +413,7 @@ void desjoinear(t_process* program, t_suse_thread* thread_joineado)
 
 	for(int i = 0; i < size; i++)
 	{
-		dejoinear_hilo(thread_joineado,thread_joineado->joinedBy[i]);
+		desjoinear_hilo(thread_joineado,thread_joineado->joinedBy[i]);
 	}
 
 }
@@ -419,7 +437,7 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 
 			t_process* program = list_get(configuracion_suse.process[pid]);
 
-			list_add(program->READY_LIST,thread_joiner);
+			list_add(program->READY_LIST,thread_joiner->tid);
 			configuracion_suse.ACTUAL_MULTIPROG ++;
 
 		}
@@ -470,34 +488,6 @@ int obtener_proximo_ejecutar(){
 	pthread_mutex_unlock(&mutex_ready_queue);
 	return next_tid;
 }
-//todo falta desarrollar
-void nuevo_a_listo(t_suse_thread* ULT, int process_id){
-	//todo ver de extraer esta logica
-	//Encuentro el programa
-	t_process* program = list_get(configuracion_suse->process, process_id);
-
-	//No entiendo si hace falta encontrar el hilo, si se lo paso por parametro con *
-	t_suse_thread* thread = list_get(program->ULTS, ULT->tid);
-
-	if (validar_grado_multiprogramacion()){
-		list_add(program->READY_LIST, ULT); //todo validar que la lista de ready de un programa tenga suse_threads adentro
-		ULT->estado = E_READY;
-		eliminar_ULT_cola_actual(ULT, program);
-
-	}
-}
-//todo falta desarrollar
-void eliminar_ULT_cola_actual(t_suse_thread *ULT, t_process* process) {
-	// Lo saco de la cola actual en la que se encuentra
-	t_process* program = list_get(configuracion_suse->process, process->PROCESS_ID);
-	t_suse_thread* thread = list_get(program->ULTS, ULT->tid);
-	if (thread->estado == E_READY) {
-		remover_ULT_listo(ULT);
-	}else if (thread->estado == E_NEW_){
-		list_remove_and_destroy_element(new_queue, ULT); //todo validar que la cola de new tenga suse_threads adentro
-	}
-}
-
 
 void ordenar_cola_listos() {
 	estimar_ULTs_listos();
@@ -579,7 +569,7 @@ void handle_signal_sem(socket_actual, paquete_signal_sem){
 	pthread_mutex_lock(&mutex_semaforos);
 	int resultado = incrementar_semaforo(tid, sem);
 	if(resultado != -1){
-		resultado = desbloquear_proceso_semaforo(sem); //todo esto no serian hilos en vez de procesos?
+		resultado = desbloquear_hilos_semaforo(sem); //todo esto no serian hilos en vez de procesos?
 	}
 	pthread_mutex_unlock(&mutex_semaforos);
 
@@ -592,7 +582,7 @@ void handle_signal_sem(socket_actual, paquete_signal_sem){
 
 }
 
-int desbloquear_proceso_semaforo(sem){
+int desbloquear_hilos_semaforo(sem){
 
 	bool comparador(t_suse_semaforos* semaforo){
 		return semaforo->NAME == sem;
@@ -606,26 +596,11 @@ int desbloquear_proceso_semaforo(sem){
 	t_suse_thread* thread = semaforo->BLOCKED_LIST[0];
 	t_process * program = configuracion_suse.process[thread->procesoId];
 
-	pthread_mutex_lock(&mutex_multiprog);
-
-	if(configuracion_suse.ACTUAL_MULTIPROG < configuracion_suse.MAX_MULTIPROG){
-
-		thread->estado = E_READY;
-		list_add(program->READY_LIST,thread);
-		configuracion_suse.ACTUAL_MULTIPROG ++;
-	}
-	pthread_mutex_unlock(&mutex_multiprog);
-
-	thread->estado = E_NEW;
-
-	pthread_mutex_lock(&mutex_new_queue);
-	list_add(new_queue,thread);
-	pthread_mutex_unlock(&mutex_new_queue);
+	bloqueado_a_listo(thread,program);
 
 	list_remove(semaforo->BLOCKED_LIST,0);
 
 	return 0;
-
 }
 
 int incrementar_semaforo(uint32_t tid, char* sem){
@@ -658,6 +633,7 @@ int decrementar_semaforo(int socket_actual,int tid, char* sem){
 	bool comparador(t_suse_semaforos* semaforo){
 		return semaforo->NAME == sem;
 	}
+
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, comparador);
 
 	if(semaforo == NULL){
@@ -667,15 +643,7 @@ int decrementar_semaforo(int socket_actual,int tid, char* sem){
 	if(semaforo->VALUE <= 0)
 	{
 
-		t_process* program = configuracion_suse.process[socket_actual];
-
-		t_suse_thread* thread = program->ULTS[tid];
-
-		thread->estado = E_BLOCKED;
-
-		list_add(semaforo->BLOCKED_LIST,thread);
-		list_add(blocked_queue,thread);
-
+		ejecucion_a_bloqueado_por_semaforo(tid,socket_actual,semaforo);
 
 	}
 
