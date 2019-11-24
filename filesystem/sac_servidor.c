@@ -303,7 +303,7 @@ Function sac_server_getattr(char* path){
 
 	bool esArchivo = tablaDeNodos[nodoBuscadoPosicion].state == 1;
 
-	modo = esArchivo == 1 ? (S_IFREG | 0777) : (S_IFDIR | 0755);
+	modo = esArchivo == 1 ? (S_IFREG | 0777) : (S_IFDIR | 0777);
 	nlink_t = 1;
 	total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
 
@@ -499,11 +499,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	fileName = listaSpliteada[dimListaSpliteada - 1];
 
 	while(tablaDeNodos[currNode].state != 0 && currNode < MAX_NUMBER_OF_FILES){
-		if(!strcmp(fileName, tablaDeNodos[currNode].fname)){
-			return EEXIST;
-		}else{
-			currNode++;
-		}
+		currNode++;
 	}
 
 	if (currNode >= MAX_NUMBER_OF_FILES) 
@@ -517,7 +513,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	timestamp = (uint64_t) tiempoAhora;
 
 	if(dimListaSpliteada > 1){
-		parentDirPath = listaSpliteada[dimListaSpliteada - 2];
+		parentDirPath = dirname(strdup(path));
 		nodoPadre = determine_nodo(parentDirPath, inicioTablaDeNodos());
 	}
 

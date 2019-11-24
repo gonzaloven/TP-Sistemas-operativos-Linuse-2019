@@ -82,17 +82,25 @@ int determine_nodo(char *path, int inicioTablaDeNodos){
 
 	for(i=0 ; i<dimListaSpliteada; i++){
 
+		if(i == 0){
+			filenameBuscado = listaSpliteada[0];
+			nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, 0) + inicioTablaDeNodos;
+			continue;
+		}
+
 		filenameBuscado = listaSpliteada[i];
 
 		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, nodoUltimoPadre);
 
 		if(nodoUltimoPadre == -1){
 			return -1;
+		}else{
+			nodoUltimoPadre += inicioTablaDeNodos;
 		}
 	}
 
 	free(listaSpliteada);
-	return nodoUltimoPadre;
+	return nodoUltimoPadre - inicioTablaDeNodos;
 }
 
 int tamano_malloc_list(t_list* lista){
