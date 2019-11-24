@@ -21,7 +21,7 @@ int main(void){
 
 	new_queue = list_create();
 	blocked_queue = list_create();
-	ready_queue = list_create();
+	ready_queue = list_create(); // TODO: No se necesita, no es global
 	exit_queue = list_create(); //todo ver si es necesario
 
 	sem_init(&sem_ULTs_listos, 0, 0);
@@ -36,7 +36,7 @@ int main(void){
 
 	list_destroy(new_queue);
 	list_destroy(blocked_queue);
-	list_destroy(ready_queue);
+	list_destroy(ready_queue); //TODO: No se necesita. no es global.
 	list_destroy(exit_queue);
 
 	free(mutex_new_queue);
@@ -135,7 +135,7 @@ void iniciar_servidor() {
 		free(handshake);
 		//Creo un hilo por programa
 		thread_params = list_add(thread_params, new_connection);
-		nuevo_hilo(programa_conectado_funcion_thread, new_connection);
+		nuevo_hilo(programa_conectado_funcion_thread, new_connection); //TODO: No habria que pasarle thread_params en vez del socket?
 	}
 }
 
@@ -179,9 +179,54 @@ void handle_conection_suse(un_socket socket_actual) {
 		case cop_signal_sem:
 			handle_signal_sem(socket_actual,paquete_recibido);
 		break;
+		case cop_suse_join:
+			handle_suse_join(socket_actual,paquete_recibido);
+		break;
 
 	}
 	liberar_paquete(paquete_recibido);
+}
+
+void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
+
+	esperar_handshake(socket_actual, paquete_recibido, cop_suse_join);
+
+	log_info(logger, "Realice el primer handshake con hilolay\n");
+	sprintf("el socket es", "%d", socket_actual);
+
+	t_paquete* paquete = recibir(socket_actual);
+
+	int desplazamiento = 0;
+	int tid = deserializar_int(paquete->data, &desplazamiento);
+
+	int resultado = join(socket_actual,tid);
+
+	int tamanio_buffer = sizeof(int);
+	void * buffer = malloc(tamanio_buffer);
+	int desp = 0;
+
+	serializar_int(buffer, &desp, resultado);
+	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
+
+	free(buffer);
+	liberar_paquete(paquete);
+}
+
+int join(un_socket socket, int tid){
+
+	t_process* program = configuracion_suse.process[socket];
+
+	t_suse_thread* thread_executing = program->EXEC_THREAD;
+	t_suse_thread* thread_joined = program->ULTS[tid];
+
+	thread_executing->estado = E_BLOCKED;
+
+	list_add(thread_executing->joinTo,thread_joined);
+	list_add(thread_joined->joinedBy,thread_executing);
+	list_add(blocked_queue,thread_executing);
+
+	return 0;
+
 }
 
 void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
@@ -288,8 +333,8 @@ int close_tid(int tid, int socket_actual){
 
 		case E_EXECUTE:
 
-				list_remove(program->EXEC_LIST,tid);
-
+				//list_remove(program->EXEC_LIST,tid);
+				program->EXEC_THREAD = NULL;
 				pthread_mutex_lock(&mutex_multiprog);
 				configuracion_suse.MAX_MULTIPROG --;
 				pthread_mutex_unlock(&mutex_multiprog);
@@ -316,7 +361,7 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
 
-	log_info(logger, "Iniciando planificacion...\n")
+	log_info(logger, "Iniciando planificacion...\n");
 	int next_tid = obtener_proximo_ejecutar(); //Inicia planificacion
 
 	// Envio el next tid
@@ -375,7 +420,7 @@ void estimar_ULTs_listos() {
 	pthread_mutex_unlock(&mutex_ready_queue);
 }
 
-
+/*
 int close_tid(int tid, int socket_actual){
 
 	t_process* program = list_get(configuracion_suse->process, socket_actual);
@@ -437,7 +482,7 @@ int close_tid(int tid, int socket_actual){
 
 		return 1;
 }
-
+*/
 void handle_wait_sem(socket_actual, paquete_wait_sem){
 	//Recibo el semaforo a decremetnar
 	esperar_handshake(socket_actual, paquete_wait_sem, cop_wait_sem);
@@ -572,6 +617,7 @@ int decrementar_semaforo(int socket_actual,int tid, char* sem){
 		thread->estado = E_BLOCKED;
 
 		list_add(semaforo->BLOCKED_LIST,thread);
+		list_add(blocked_queue,thread);
 
 
 	}

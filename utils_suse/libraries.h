@@ -43,7 +43,8 @@ enum codigos_de_operacion {
 	cop_close_tid = 13,
 	cop_wait_sem = 14,
 	cop_signal_sem = 15,
-	cop_suse_create = 16
+	cop_suse_create = 16,
+	cop_suse_join = 17
 	//todo ver si es necesario un cop distinto para el envio del mensaje y para la respuesta de que el mensaje se recibio ok
 };
 

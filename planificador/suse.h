@@ -41,6 +41,8 @@ typedef struct {
 	float duracionRafaga;
 	float estimacionUltimaRafaga;
 	bool ejecutado_desde_estimacion;
+	t_list* joinedBy;
+	t_list* joinTo;
 } t_suse_thread;
 
 typedef struct t_process
@@ -48,7 +50,7 @@ typedef struct t_process
 	t_list * ULTS; //Lista de t_suse_thread
 	int PROCESS_ID; //esto es el numero de socket
 	t_list * READY_LIST;
-	t_list * EXEC_LIST;
+	t_suse_thread * EXEC_THREAD;
 	bool bloqueado;
 } t_process;
 
