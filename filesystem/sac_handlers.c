@@ -43,18 +43,15 @@ int esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre){
 }
 
 int buscar_nodo_por_nombre(char *filenameBuscado, ptrGBloque nodoPadre){
-	int resultado = -1;
+	int i;
 
-	for(int i=0; i< MAX_NUMBER_OF_FILES; i++){
-		if(!esElNodoBuscado(i, filenameBuscado, nodoPadre)){
-			i++;
-		}else{
-			resultado = i;
-			break;
-		}
+	for(i=0; i< MAX_NUMBER_OF_FILES && !esElNodoBuscado(i, filenameBuscado, nodoPadre); i++);
+
+	if(i == MAX_NUMBER_OF_FILES){
+		return -1;
 	}
 
-	return resultado;
+	return i;
 }
 
 int largoListaString(char** lista){
