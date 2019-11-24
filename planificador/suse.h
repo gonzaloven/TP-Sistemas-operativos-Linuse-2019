@@ -63,8 +63,6 @@ typedef struct t_suse_semaforos{
 }t_suse_semaforos;
 
 
-
-
 suse_configuration configuracion_suse;
 suse_configuration get_configuracion();
 
@@ -84,6 +82,8 @@ pthread_mutex_t mutex_multiprog;
 sem_t sem_ULTs_listos;
 
 t_list* exit_queue;
+
+bool validar_grado_multiprogramacion();
 
 t_process * generar_programa(int socket_hilolay);
 
