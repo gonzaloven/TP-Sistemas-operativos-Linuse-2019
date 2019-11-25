@@ -160,7 +160,7 @@ int function_arg_decode(void *buffer,size_t buffer_size,Arg *arg)
 			cursor += arg->size;
 			break;
 		case VAR_CHAR_PTR:
-			arg->value.val_charptr = malloc(arg->size);
+			arg->value.val_charptr = malloc(arg->size); //Aca tambien hay memory leaks
 			memcpy(arg->value.val_charptr,cursor,arg->size);
 			cursor += arg->size;
 			break;
@@ -204,7 +204,7 @@ int message_function_encode(Message *msg,void *buffer,size_t buffer_size)
 
 int message_function_decode(void *buffer,size_t buffer_size,Message *result)
 {
-	Function *f= malloc(sizeof(uint8_t)*2 + sizeof(Arg)*10); //OJO CON LOS TAMAÑOS
+	Function *f= malloc(sizeof(uint8_t)*2 + sizeof(Arg)*10); //OJO CON LOS TAMAÑOS //Aca tambien hay memory leaks aparentemente
 	int nargs;
 	f->type = 0;
 	f->num_args = 0;

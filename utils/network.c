@@ -137,6 +137,7 @@ ssize_t send_message(int socket_fd,Message *msg)
 {
 	size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
 	char buffer[buffer_size];
+	memset(buffer, 0, buffer_size);
 	message_encode(msg,buffer,buffer_size);
 	return send_packet(socket_fd,buffer,buffer_size);
 	

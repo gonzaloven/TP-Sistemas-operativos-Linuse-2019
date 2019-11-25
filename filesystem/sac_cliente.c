@@ -22,7 +22,7 @@ int send_path(FuncType func_type, const char *path){
 
 	f.args[0].type = VAR_CHAR_PTR;
 	f.args[0].size = strlen(path) + 1;
-	f.args[0].value.val_charptr = malloc(f.args[0].size);
+	f.args[0].value.val_charptr = malloc(f.args[0].size); //Aca hay memory leaks segun Valgrind
 	memcpy(f.args[0].value.val_charptr, path, f.args[0].size);
 
 	f.type = func_type;

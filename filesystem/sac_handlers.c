@@ -77,10 +77,10 @@ int determine_nodo(char *path){
 	if(dimListaSpliteada == 1){
 		filenameBuscado = listaSpliteada[0];
 		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, 0);
-
 		free(listaSpliteada[0]);
+		listaSpliteada[0] = NULL;
 		free(listaSpliteada);
-
+		listaSpliteada = NULL;
 		return nodoUltimoPadre;
 	}
 
@@ -97,6 +97,8 @@ int determine_nodo(char *path){
 		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, nodoUltimoPadre);
 
 		if(nodoUltimoPadre == -1){
+			free(listaSpliteada);
+			listaSpliteada = NULL;
 			return -1;
 		}else{
 			nodoUltimoPadre += bloqueInicioTablaDeNodos;
@@ -107,6 +109,7 @@ int determine_nodo(char *path){
 		free(listaSpliteada[y]);
 
 	free(listaSpliteada);
+	listaSpliteada = NULL;
 	return nodoUltimoPadre - bloqueInicioTablaDeNodos;
 }
 
@@ -117,7 +120,7 @@ int tamano_malloc_list(t_list* lista){
 		nombre = (char*)list_get(lista, i);
 		tamano+= strlen((char*)list_get(lista, i)) + 1;
 	}
-
+ //Aca tambien hay memory leaks
 	return tamano;
 }
 
