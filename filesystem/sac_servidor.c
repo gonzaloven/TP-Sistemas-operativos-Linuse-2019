@@ -27,7 +27,7 @@ fuse_configuration* load_configuration(char *path)
 		exit(-1);
 	}
 
-	fc->path_archivo = malloc(strlen(config_get_string_value(config,"PATH_ARCHIVO")) + 1);
+	fc->path_archivo = malloc(strlen(config_get_string_value(config,"PATH_ARCHIVO")) + 1); //aca hay memory leaks
 
 	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
 	fc->disk_size = config_get_int_value(config,"DISK_SIZE");
@@ -312,7 +312,7 @@ Function sac_server_readdir (char* path) {
 		fsend.num_args = 1;
 		fsend.args[0].type = VAR_CHAR_PTR;
 		fsend.args[0].size = 1;
-		fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
+		fsend.args[0].value.val_charptr = malloc(fsend.args[0].size); //Aca hay memory leaks
 		memcpy(fsend.args[0].value.val_charptr, stringVacia, fsend.args[0].size);
 
 		list_destroy(listaDeArchivos);
