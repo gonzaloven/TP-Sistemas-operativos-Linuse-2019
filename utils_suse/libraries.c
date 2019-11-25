@@ -1,10 +1,24 @@
 #include "libraries.h"
 
+
+pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros)
+{
+	pthread_t thread = threads[i_thread];
+	int thread_creacion = pthread_create(&thread, NULL, funcion, (void*) parametros);
+	if (thread_creacion != 0) {
+		perror("pthread_create");
+	} else {
+		i_thread++;
+	}
+	return thread;
+}
+
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 {
 	t_process* program = configuracion_suse[socket];
 
 	eliminar_ULT_cola_actual(thread,program);
+
 	thread->estado = E_EXECUTE;
 	program->EXEC_THREAD = thread->tid;
 	configuracion_suse.ACTUAL_MULTIPROG ++;
@@ -23,6 +37,7 @@ void ejecucion_a_listo(t_suse_thread* thread,un_socket socket)
 
 void bloqueado_a_listo(t_suse_thread* thread,t_process* program)
 {
+	eliminar_ULT_cola_actual(thread,program);
 	thread->estado = E_READY;
 	list_add(program->READY_LIST,thread->tid);
 

@@ -132,24 +132,15 @@ void iniciar_servidor() {
 		t_paquete* handshake = recibir(listener);
 		log_info(logger, "Soy SUSE y recibi una nueva conexion . \n");
 		free(handshake);
-		//Creo un hilo por programa
+		//Creo un hilo por processa
 		thread_params = list_add(thread_params, new_connection);
-		nuevo_hilo(programa_conectado_funcion_thread, new_connection); //TODO: No habria que pasarle thread_params en vez del socket?
+		nuevo_hilo(processa_conectado_funcion_thread, new_connection); //TODO: No habria que pasarle thread_params en vez del socket?
 	}
 }
 
-pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros) {
-	pthread_t thread = threads[i_thread];
-	int thread_creacion = pthread_create(&thread, NULL, funcion, (void*) parametros);
-	if (thread_creacion != 0) {
-		perror("pthread_create");
-	} else {
-		i_thread++;
-	}
-	return thread;
-}
 
-void* programa_conectado_funcion_thread(void* argumentos) {
+
+void* processa_conectado_funcion_thread(void* argumentos) { //TODO: porque es puntero a void y no solo void??
 	un_socket socket_actual = list_get(argumentos, 0);
 	list_destroy(argumentos);
 	handle_conection_suse(socket_actual);
@@ -247,21 +238,19 @@ int join(un_socket socket, int tid){
 		return thread->tid == tid;
 	}
 
-	t_process* program = configuracion_suse.process[socket];
-
-	t_suse_thread* thread_executing = program->EXEC_THREAD;
-	t_suse_thread* thread_joined = list_find(program->ULTS,buscador);
+	t_process* process = configuracion_suse.process[socket];
+	t_suse_thread* thread_executing = list_get(process->ULTS,process->EXEC_THREAD);
+	t_suse_thread* thread_joined = list_find(process->ULTS,buscador);
 
 	if(thread_joined == NULL)
 	{
 		return 0;
 	}
 
-	thread_executing->estado = E_BLOCKED;
-
 	list_add(thread_executing->joinTo,thread_joined);
 	list_add(thread_joined->joinedBy,thread_executing);
-	list_add(blocked_queue,thread_executing);
+
+	ejecucion_a_bloqueado(thread_executing,socket);
 
 	return 0;
 
@@ -276,23 +265,23 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	t_paquete* paquete_recibido = recibir(socket_actual);
 
 	int desplazamiento = 0;
-	int master_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+	int main_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	//Genero el programa
-	t_process * program = generar_programa(socket_actual);
+	//Genero el processa
+	t_process * process = generar_processa(socket_actual);
 
-	list_add_in_index(configuracion_suse.process,program,program->PROCESS_ID);
+	list_add_in_index(configuracion_suse.process,process,process->PROCESS_ID);
 
-	sprintf("el socket es", "%d", program->PROCESS_ID);
+	sprintf("el socket es", "%d", process->PROCESS_ID);
 
 	//Creo el main thread
 	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
 
-	new_thread->tid = master_tid;
+	new_thread->tid = main_tid;
 	new_thread->procesoId = socket_actual;
 	new_thread->estado = E_NEW;
 
-	list_add_in_index(program->ULTS,new_thread,new_thread->tid);
+	list_add_in_index(process->ULTS,new_thread,new_thread->tid);
 	list_add(new_queue, new_thread);
 
 	pthread_mutex_lock(&mutex_multiprog);
@@ -309,63 +298,71 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
 
 	//Obtengo el hilo
 	esperar_handshake(socket_actual, paquete_hilolay, cop_suse_create);
-
 	log_info(logger, "Esperando hilo de suse_create \n");
 	sprintf("el socket es", "%d", socket_actual);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
+
 	int desplazamiento = 0;
 	int new_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
 	log_info(logger, "Recibi el hilo", "%d", new_tid);
 
-	t_process* program = configuracion_suse[socket_actual];
-
+	t_process* process = configuracion_suse[socket_actual];
 	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
 
 	new_thread->tid = new_tid;
 	new_thread->estado = E_NEW;
-	new_thread->procesoId = program->PROCESS_ID;
+	new_thread->procesoId = process->PROCESS_ID;
 
-	list_add_in_index(program->ULTS,new_thread,new_thread->tid);
+	list_add_in_index(process->ULTS,new_thread,new_thread->tid);
 	list_add(new_queue,new_thread->tid);
+
+	pthread_mutex_lock(&mutex_multiprog);
+
+	if(validar_grado_multiprogramacion())
+	{
+		nuevo_a_listo(new_thread,process->PROCESS_ID);
+	}
+
+	pthread_mutex_unlock(&mutex_multiprog);
 
 	liberar_paquete(paquete_recibido);
 }
 
 int close_tid(int tid, int socket_actual){
 
-	t_process* program = list_get(configuracion_suse->process, socket_actual);
-	t_suse_thread* thread = list_get(program->ULTS,tid);
+	t_process* process = list_get(configuracion_suse->process, socket_actual);
+	t_suse_thread* thread = list_get(process->ULTS,tid);
 
 	if(thread == NULL)
 	{
 
-		 list_destroy_and_destroy_elements(program->ULTS);
-		 list_remove_and_destroy_element(configuracion_suse->process,program);
+		 list_destroy_and_destroy_elements(process->ULTS);
+		 list_remove_and_destroy_element(configuracion_suse->process,process);
 		 int resultado = close(socket_actual);
 		 return resultado;
 	}
 
 	if(!list_is_empty(thread->joinedBy))
 	{
-		desjoinear(program,thread);
+		desjoinear(process,thread);
 	}
 
 	switch(thread->estado){
 		case E_NEW:
 
-				bool comparador(t_suse_thread* element){
+				bool comparador_new(t_suse_thread* element){
 					return element->tid == tid && element->procesoId ==socket_actual;
 				}
 
 				pthread_mutex_lock(&mutex_new_queue);
-				list_remove(new_queue,comparador);
+				list_remove(new_queue,comparador_new);
 				pthread_mutex_unlock(&mutex_new_queue);
 		break;
 
 		case E_BLOCKED:
-			bool comparador(t_suse_thread* element)
+			bool comparador_blocked(t_suse_thread* element)
 			{
 				return element->tid == tid && element->procesoId ==socket_actual;
 			}
@@ -373,7 +370,7 @@ int close_tid(int tid, int socket_actual){
 			pthread_mutex_lock(&mutex_multiprog);
 
 			configuracion_suse.MAX_MULTIPROG --;
-			list_remove(blocked_queue,comparador);
+			list_remove(blocked_queue,comparador_blocked);
 
 			pthread_mutex_unlock(&mutex_multiprog);
 			pthread_mutex_unlock(&mutex_blocked_queue);
@@ -381,19 +378,22 @@ int close_tid(int tid, int socket_actual){
 
 		case E_READY:
 
+			bool comparador_ready(int tid){
+				return tid == thread->tid;
+			}
+
 			pthread_mutex_lock(&mutex_multiprog);
 
 			configuracion_suse.MAX_MULTIPROG --;
-			list_remove(program->READY_LIST,comparador);
+			list_remove(process->READY_LIST,comparador_ready);
 
 			pthread_mutex_unlock(&mutex_multiprog);
 		break;
 
 		case E_EXECUTE:
 
-				program->EXEC_THREAD = NULL;
-
 				pthread_mutex_lock(&mutex_multiprog);
+				process->EXEC_THREAD = NULL;
 				configuracion_suse.MAX_MULTIPROG --;
 				pthread_mutex_unlock(&mutex_multiprog);
 		break;
@@ -401,12 +401,10 @@ int close_tid(int tid, int socket_actual){
 
 	list_add(exit_queue,thread);
 
-	//list_remove_and_destroy_element(program->ULTS, tid);
-
 	return 1;
 }
 
-void desjoinear(t_process* program, t_suse_thread* thread_joineado)
+void desjoinear(t_process* process, t_suse_thread* thread_joineado)
 {
 
 	int size = list_size(thread_joineado->joinedBy);
@@ -430,16 +428,13 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 	{
 		pthread_mutex_lock(&mutex_multiprog);
 
-		if(configuracion_suse.ACTUAL_MULTIPROG < configuracion_suse.MAX_MULTIPROG)
+		if(validar_grado_multiprogramacion())
 		{
 			int pid = thread_joiner->procesoId;
-			thread_joiner->estado = E_READY;
+			t_process* process = list_get(configuracion_suse.process[pid]);
 
-			t_process* program = list_get(configuracion_suse.process[pid]);
-
-			list_add(program->READY_LIST,thread_joiner->tid);
+			bloqueado_a_listo(thread_joiner,process);
 			configuracion_suse.ACTUAL_MULTIPROG ++;
-
 		}
 		else
 		{
@@ -456,10 +451,10 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 }
 
 
-t_process * generar_programa(un_socket socket) {
-	t_process * program = malloc(sizeof(t_process));
-	program->PROCESS_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
-	return program;
+t_process * generar_processa(un_socket socket) {
+	t_process * process = malloc(sizeof(t_process));
+	process->PROCESS_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
+	return process;
 }
 
 void handle_next_tid(un_socket socket_actual, paquete_next_tid){
@@ -494,7 +489,7 @@ void ordenar_cola_listos() {
 	ordenar_por_sjf();
 }
 
-//todo esta es la cola del programa no es global
+//todo esta es la cola del processa no es global
 void ordenar_por_sjf(){
 	list_sort(ready_queue, funcion_SJF);
 }
@@ -594,9 +589,9 @@ int desbloquear_hilos_semaforo(sem){
 	}
 
 	t_suse_thread* thread = semaforo->BLOCKED_LIST[0];
-	t_process * program = configuracion_suse.process[thread->procesoId];
+	t_process * process = configuracion_suse.process[thread->procesoId];
 
-	bloqueado_a_listo(thread,program);
+	bloqueado_a_listo(thread,process);
 
 	list_remove(semaforo->BLOCKED_LIST,0);
 
@@ -628,10 +623,10 @@ int incrementar_semaforo(uint32_t tid, char* sem){
 
 }
 
-int decrementar_semaforo(int socket_actual,int tid, char* sem){
+int decrementar_semaforo(int socket_actual,int tid, char* sem_name){
 
 	bool comparador(t_suse_semaforos* semaforo){
-		return semaforo->NAME == sem;
+		return semaforo->NAME == sem_name;
 	}
 
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, comparador);

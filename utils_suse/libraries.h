@@ -218,4 +218,8 @@ void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket);
 
 void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semaforos* semaforo);
 
+pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros);
+
+bool validar_grado_multiprogramacion();
+
 #endif /* LIBRARIES_H_ */
