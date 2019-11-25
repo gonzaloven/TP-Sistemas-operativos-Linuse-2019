@@ -11,19 +11,28 @@
 
 #define MUSE_LOG_PATH "../logs/muse.log"
 
-/* Estructura ppal de cada programa: nos dice para cada pid su numero de tabla de segmento*/
+/**
+ * @struct program_s   
+ * @brief Estructura ppal de cada programa 
+ * tiene como variables su pid y su lista de tabla de segmentos
+ */
 typedef struct program_s
 {
 	uint16_t pid;
 	t_list *segment_table;
 }program;
 
-/* Estructura de Metadata, una por cada segmento */
+/**
+ * @struct HeapMetadata
+ * @brief Estructura de Metadata, una por cada segmento y una por cada frame
+ * tiene como variables uint32_t size y bool is_free
+ */
 typedef struct HeapMetadata 
 {
-	uint32_t size;
+	uint32_t size; 
 	bool is_free;
 }heap_metadata;
+
 
 typedef struct frame_s
 {
@@ -45,7 +54,7 @@ typedef struct page_s
  */
 typedef struct segment_s
 {
-	//segment_lock;
+	bool is_heap; //(1 is common_segment, 0 is mmap)
 	uint16_t free_size;
 	uint32_t *base;
 	uint32_t *limit;
@@ -53,7 +62,7 @@ typedef struct segment_s
 }segment;
 
 /**
- * @param Salen del archivo config
+ * @param memory_size y @param page_size salen del archivo config
  */
 void muse_main_memory_init(int memory_size, int page_size);
 
@@ -66,12 +75,13 @@ void muse_main_memory_stop();
 int search_program(uint32_t pid);
 
 /**
- * @return -1 if no hay espacio libre, else devuelve la base para el tamaño pedido
+ * @return -1 si no hay espacio libre, sino devuelve la base para el tamaño pedido
  */
-int has_segment_with_free_space(program *prog, int size);
+int segment_with_free_space(program *prog, int size);
 
 /**
- * @return NULL if error, page if OK 
+ * En realidad un busca un *frame libre*, pero devuelve la página que apunta a ese frame
+ * @return NULL if error, page if OK
  */
 page *find_free_page();
 
@@ -97,12 +107,45 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid);
 */
 uint32_t memory_get(void *dst, uint32_t src, size_t n, uint32_t pid);
 
+/**
+* Copia una cantidad `n` de bytes desde una posición de memoria local a una `dst` en MUSE.
+* @param dst Posición de memoria de MUSE con tamaño suficiente para almacenar `n` bytes.
+* @param src Posición de memoria local de donde leer los `n` bytes.
+* @param n Cantidad de bytes a copiar.
+* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+*/
 uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid);
 
+/**
+* Devuelve un puntero a una posición mappeada de páginas por una cantidad `length` de bytes el archivo del `path` dado.
+* @param path Path a un archivo en el FileSystem de MUSE a mappear.
+* @param length Cantidad de bytes de memoria a usar para mappear el archivo.
+* @param flags
+*          MAP_PRIVATE     Solo un proceso/hilo puede mappear el archivo.
+*          MAP_SHARED      El segmento asociado al archivo es compartido.
+* @return Retorna la posición de memoria de MUSE mappeada. Si hay error, retorna el valor
+* MAP_FAILED (that is, (void *) -1). 
+* @note: Si `length` sobrepasa el tamaño del archivo, toda extensión deberá estar llena de "\0".
+* @note: muse_free no libera la memoria mappeada. @see muse_unmap
+*/
 uint32_t memory_map(char *path, size_t length, int flags, uint32_t pid);
 
+/**
+* Descarga una cantidad `len` de bytes y lo escribe en el archivo en el FileSystem.
+* @param addr Dirección a memoria mappeada.
+* @param len Cantidad de bytes a escribir.
+* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+* @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
+*/
 uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid);
 
+/**
+* Borra el mappeo a un archivo hecho por muse_map.
+* @param dir Dirección a memoria mappeada.
+* @note Esto implicará que todas las futuras utilizaciones de direcciones basadas en `dir` serán accesos inválidos.
+* @note Solo se deberá cerrar el archivo mappeado una vez que todos los hilos hayan liberado la misma cantidad de muse_unmap que muse_map.
+* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+*/
 int memory_unmap(uint32_t dir, uint32_t pid);
 
 uint32_t muse_add_segment_to_program(program *p, int segm_size, uint32_t pid);

@@ -64,7 +64,6 @@ int muse_get(void* dst, uint32_t src, size_t n);
 */
 int muse_cpy(uint32_t dst, void* src, int n);
 
-
 /**
 * Devuelve un puntero a una posición mappeada de páginas por una cantidad `length` de bytes el archivo del `path` dado.
 * @param path Path a un archivo en el FileSystem de MUSE a mappear.
@@ -90,6 +89,11 @@ uint32_t muse_map(char *path, size_t length, int flags);
 * @param len Cantidad de bytes a escribir.
 * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
 * @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
+* @example	
+	remember we got uint32_t map = muse_map("hola.txt", filesize, MAP_PRIVATE);		
+	so let's imagine we do the following:
+		muse_sync(map, 200)
+	so we're basicly just writing 200 bytes of "nothing" to map	
 */
 int muse_sync(uint32_t addr, size_t len);
 
@@ -102,12 +106,11 @@ int muse_sync(uint32_t addr, size_t len);
 */
 int muse_unmap(uint32_t dir);
 
-
 /* Funciones agregadas x nosotros */
 
 /** 
 * call es el serializador, hay varios funciones prehechas que se pueden usar
-@param function la funcion a llamar (dah)
+* @param function la funcion a llamar (dah)
 */ 
 int call(Function *function);
 

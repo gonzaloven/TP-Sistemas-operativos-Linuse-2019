@@ -132,19 +132,6 @@ int muse_cpy(uint32_t dst, void* src, int n)
 	return result;
 }
 
-
-/*
-	Ejemplo de uso
-	uint32_t map = muse_map("hola.txt", filesize, MAP_PRIVATE);		
-	opens the "hola.txt" file in RDONLY mode
-	map is a position _mapped_ of pages of a given 'filesize' of the "hola.txt" file  
-	muse_map basically is just putting the hola.txt file in memory 
-
-	@Return
-	On success, mmap() returns a pointer to the mapped area. On error,
-	the value MAP_FAILED (that is, (void *) -1) is returned, and errno
-	is set appropriately.
-*/
 uint32_t muse_map(char *path, size_t length, int flags)
 {
 	Function function;
@@ -169,13 +156,29 @@ uint32_t muse_map(char *path, size_t length, int flags)
 	function.args[1] = arg[1];
 	function.args[2] = arg[2];
 
-	int result = call(&function);
+	uint32_t result = call(&function);
 	return result;
 }
 
 int muse_sync(uint32_t addr, size_t len)
 {
-	int result=0;
+	Function function;
+	Arg arg[2];	//argumento
+
+	arg[0].type = VAR_UINT32;
+	arg[0].size = sizeof(uint32_t);
+	arg[0].value.val_u32 = addr;
+
+	arg[1].type = VAR_SIZE_T;
+	arg[1].size = sizeof(size_t);
+	arg[1].value.val_u32 = len;
+
+	function.type = FUNCTION_SYNC;
+	function.num_args = 2;
+	function.args[0] = arg[0];
+	function.args[1] = arg[1];
+
+	int result = call(&function);
 	return result;
 }
 
@@ -192,6 +195,6 @@ int muse_unmap(uint32_t dir)
 	function.num_args = 1;
 	function.args[0] = arg;	
 
-	call(&function);
-	return 0;
+	int result = call(&function);
+	return result;
 }

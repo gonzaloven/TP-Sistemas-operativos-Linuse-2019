@@ -55,9 +55,9 @@ void* handler(void *args)
 			memset(buffer,'\0',1024);
 		}
 	}	
+
 	log_debug(muse_logger,"The client in socket: %d was disconnected!",socket);
 	close(socket);
-	return (void*)NULL;
 }
 
 muse_configuration *load_configuration(char *path)
@@ -102,14 +102,12 @@ void message_handler(Message *m,int socket)
 			break;
 	}
 	return;
-
 }
 
 
 /*
 function vendria a ser la funcion que libmuse quiere ejecutar, 
 pid es el process_id de libmuse
-
 */
 uint32_t muse_invoke_function(Function *function,uint32_t pid) 
 {
