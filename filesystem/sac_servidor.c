@@ -577,32 +577,6 @@ Function sac_server_mkdir (char* path){
 
 }
 
-
-int borrar_directorio (char* path){
-	/*int currNode = 0;
-	//int nodoPadre = determine_nodo(path, inicioTablaDeNodos());
-
-	GFile *nodoPadre = tablaDeNodos + nodoPosicion;
-	borrar_archivo(nodoPadre, nodoPosicion);
-
-	while(currNode < MAX_NUMBER_OF_FILES){
-		if(tablaDeNodos[currNode].state != 0)
-		{
-			if(tablaDeNodos[currNode].parent_dir_block == nodoPosicion)
-			{
-				GFile *nodoABorrar = tablaDeNodos + currNode;
-				if(tablaDeNodos[currNode].state == 1){
-					borrar_archivo(nodoABorrar, currNode);
-				}else{
-					borrar_directorio(currNode);
-				}
-			}
-		}
-		currNode++;
-	}*/
-	return 0;
-}
-
 void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
 	int tamanioMaximoDireccionablePorPuntero = (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE);
@@ -621,8 +595,8 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
 		bitarray_clean_bit(bitmap, bloqueDePunterosPosicion);
 	}
-
-	ptrGBloque ultimoBloquePunterosDirectos = tablaDeNodos[nodoABorrarPosicion].indirect_blocks_array[tamanioMaximoDireccionablePorPuntero + 1];
+	//////////////////////////////////Esto de abajo creo que esta mal, podria ponerle el valor que le quedo a i y listo en la posicion de ind. blocks array
+	ptrGBloque ultimoBloquePunterosDirectos = tablaDeNodos[nodoABorrarPosicion].indirect_blocks_array[(tamanio / tamanioMaximoDireccionablePorPuntero) + 1];
 
 	punterosBloquesDatos *bloqueDePunterosDatosFaltantes = (punterosBloquesDatos *) (disco + ultimoBloquePunterosDirectos);
 
@@ -631,16 +605,20 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
 		bitarray_clean_bit(bitmap, bloqueDeDatosPosicion);
 	}
+	msync(disco, diskSize, MS_SYNC);
 }
 
-int borrar_archivo(char* path){
-	int nodoABorrarPosicion = determine_nodo(path, inicioTablaDeNodos());
+int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){
 
 	if(nodoABorrarPosicion == -1){
 		return -1;
 	}
 
-	GFile *nodoABorrar = tablaDeNodos + nodoABorrarPosicion;
+	if(tablaDeNodos[nodoABorrarPosicion].state == 2){
+		nodoABorrar->state = 0;
+		nodoABorrar->file_size = 0;
+		return 0;
+	}
 
 	if(tablaDeNodos[nodoABorrarPosicion].file_size != 0){
 		borrar_contenido(nodoABorrarPosicion, tablaDeNodos[nodoABorrarPosicion].file_size);
@@ -649,15 +627,45 @@ int borrar_archivo(char* path){
 	nodoABorrar->state = 0;
 	nodoABorrar->file_size = 0;
 
+	msync(disco, diskSize, MS_SYNC);
+	return 0;
+}
+
+int borrar_directorio (GFile* nodoABorrar, int nodoABorrarPosicion){
+	int currNode = 0;
+
+	borrar_archivo(nodoABorrar, nodoABorrarPosicion);
+
+	while(currNode < MAX_NUMBER_OF_FILES){
+		if(tablaDeNodos[currNode].state != 0)
+		{
+			if(tablaDeNodos[currNode].parent_dir_block == (nodoABorrarPosicion + 2))
+			{
+				GFile *nodoABorrar = tablaDeNodos + currNode;
+				if(tablaDeNodos[currNode].state == 1){
+					borrar_archivo(nodoABorrar, currNode);
+				}else{
+					borrar_directorio(nodoABorrar, currNode);
+				}
+			}
+		}
+		currNode++;
+	}
 	return 0;
 }
 
 Function sac_server_unlink (char* path){
-	int respuesta = borrar_archivo(path);
+	int nodoABorrarPosicion = determine_nodo(path, inicioTablaDeNodos());
+	GFile *nodoABorrar = tablaDeNodos + nodoABorrarPosicion;
+
+	int respuesta = borrar_archivo(nodoABorrar, nodoABorrarPosicion);
 	return enviar_respuesta_basica(respuesta, FUNCTION_RTA_UNLINK);
 }
 
 Function sac_server_rmdir (char* path){
-	int respuesta = borrar_directorio(path);
+	int nodoABorrarPosicion = determine_nodo(path, inicioTablaDeNodos());
+	GFile *nodoABorrar = tablaDeNodos + nodoABorrarPosicion;
+
+	int respuesta = borrar_directorio(nodoABorrar, nodoABorrarPosicion);
 	return enviar_respuesta_basica(respuesta, FUNCTION_RTA_RMDIR);
 }
