@@ -28,6 +28,7 @@
 #define GFILEBYTABLE 1024
 #define BITMAP_START_BLOCK 1
 #define BITMAP_SIZE_BLOCKS 1
+#define PUNTEROS_A_BLOQUES_DATOS 1024
 
 //NO DEJAR ASI
 #define SAC_CONFIG_PATH2 "../configs/filesystem.config"
@@ -71,6 +72,10 @@ typedef struct sac_server_gfile{
 	uint64_t modify_date;
 	ptrGBloque indirect_blocks_array[BLKINDIRECT];
 }__attribute__((packed)) GFile;
+
+typedef struct punteros_bloques_datos{
+	ptrGBloque punteros_a_bloques[PUNTEROS_A_BLOQUES_DATOS];
+}__attribute__((packed)) punterosBloquesDatos;
 
 GBlock *disco;
 GFile *tablaDeNodos;

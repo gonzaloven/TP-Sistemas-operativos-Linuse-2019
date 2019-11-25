@@ -50,6 +50,14 @@ int inicioTablaDeNodos(){
 	return tamanioHeader + tamanioBitmapBloque;
 }
 
+int inicioBloquesDeDatos(){
+	return inicioTablaDeNodos() + MAX_NUMBER_OF_FILES;
+}
+
+/*int finBloquesDeDatos(){
+	return inicioBloquesDeDatos + ;
+}*/
+
 void configurar_server(){
 	int fileDescriptor = 0;
 	diskSize = fuse_config->disk_size;
@@ -494,6 +502,8 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	int dimListaSpliteada;
 	char **listaSpliteada;
 
+	///////////////////////////////////////FALTA VALIDAR QUE NO PUEDA HABER MAS DE UN NODO CON EL MISMO NOMBRE Y CON EL MISMO PADRE A LA VEZ
+
 	listaSpliteada = string_split(path, "/");
 	dimListaSpliteada = largoListaString(listaSpliteada);
 	fileName = listaSpliteada[dimListaSpliteada - 1];
@@ -536,8 +546,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	return 0;
 }
 
-Function sac_server_mknod (char* path){
-	int respuesta = crear_nuevo_nodo(path, 1);
+Function enviar_respuesta_basica(int respuesta, FuncType tipoFuncion){
 	Message msg;
 	Function fsend;
 	Arg arg[1];
@@ -546,7 +555,7 @@ Function sac_server_mknod (char* path){
 		arg[0].type = VAR_UINT32;
 		arg[0].size = sizeof(uint32_t);
 		arg[0].value.val_u32 = 0;
-		fsend.type = FUNCTION_RTA_MKNOD;
+		fsend.type = tipoFuncion;
 	}else{
 		return retornar_error(fsend);
 	}
@@ -555,33 +564,23 @@ Function sac_server_mknod (char* path){
 	fsend.args[0] = arg[0];
 
 	return fsend;
+}
+
+Function sac_server_mknod (char* path){
+	int respuesta = crear_nuevo_nodo(path, 1);
+	return enviar_respuesta_basica(respuesta, FUNCTION_RTA_MKNOD);
 }
 
 Function sac_server_mkdir (char* path){
 	int respuesta = crear_nuevo_nodo(path, 2);
+	return enviar_respuesta_basica(respuesta, FUNCTION_RTA_MKDIR);
 
-	Message msg;
-	Function fsend;
-	Arg arg[1];
-
-	if(respuesta == 0){
-		arg[0].type = VAR_UINT32;
-		arg[0].size = sizeof(uint32_t);
-		arg[0].value.val_u32 = 0;
-		fsend.type = FUNCTION_RTA_MKDIR;
-	}else{
-		return retornar_error(fsend);
-	}
-
-	fsend.num_args = 1;
-	fsend.args[0] = arg[0];
-
-	return fsend;
 }
 
-void borrar_directorio (int nodoPosicion){
-	/*
-	int currNode = 0;
+
+int borrar_directorio (char* path){
+	/*int currNode = 0;
+	//int nodoPadre = determine_nodo(path, inicioTablaDeNodos());
 
 	GFile *nodoPadre = tablaDeNodos + nodoPosicion;
 	borrar_archivo(nodoPadre, nodoPosicion);
@@ -600,37 +599,65 @@ void borrar_directorio (int nodoPosicion){
 			}
 		}
 		currNode++;
-	}
-	*/
+	}*/
+	return 0;
 }
 
-void borrar_archivo(GFile* nodo, int nodoPosicion){
-	/*
-	nodo->state = 0;
+void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
-	aca tengo que hacer el borrado de todos los bloques de datos que tenga el archivo
-	*/
+	int tamanioMaximoDireccionablePorPuntero = (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE);
+
+	for(int i = 0; i < tamanio / tamanioMaximoDireccionablePorPuntero; i++){
+		ptrGBloque bloqueDePunterosPosicion = tablaDeNodos[nodoABorrarPosicion].indirect_blocks_array[i];
+
+		punterosBloquesDatos *bloqueDePunterosDatos = (punterosBloquesDatos *) (disco + bloqueDePunterosPosicion);
+
+		for(int j=0; i<PUNTEROS_A_BLOQUES_DATOS; j++){
+
+			ptrGBloque bloqueDeDatosPosicion = bloqueDePunterosDatos->punteros_a_bloques[j];
+
+			bitarray_clean_bit(bitmap, bloqueDeDatosPosicion);
+		}
+
+		bitarray_clean_bit(bitmap, bloqueDePunterosPosicion);
+	}
+
+	ptrGBloque ultimoBloquePunterosDirectos = tablaDeNodos[nodoABorrarPosicion].indirect_blocks_array[tamanioMaximoDireccionablePorPuntero + 1];
+
+	punterosBloquesDatos *bloqueDePunterosDatosFaltantes = (punterosBloquesDatos *) (disco + ultimoBloquePunterosDirectos);
+
+	for(int i = 0; i < (tamanio % tamanioMaximoDireccionablePorPuntero) / BLOQUE_SIZE; i++){
+		ptrGBloque bloqueDeDatosPosicion = bloqueDePunterosDatosFaltantes->punteros_a_bloques[i];
+
+		bitarray_clean_bit(bitmap, bloqueDeDatosPosicion);
+	}
+}
+
+int borrar_archivo(char* path){
+	int nodoABorrarPosicion = determine_nodo(path, inicioTablaDeNodos());
+
+	if(nodoABorrarPosicion == -1){
+		return -1;
+	}
+
+	GFile *nodoABorrar = tablaDeNodos + nodoABorrarPosicion;
+
+	if(tablaDeNodos[nodoABorrarPosicion].file_size != 0){
+		borrar_contenido(nodoABorrarPosicion, tablaDeNodos[nodoABorrarPosicion].file_size);
+	}
+
+	nodoABorrar->state = 0;
+	nodoABorrar->file_size = 0;
+
+	return 0;
 }
 
 Function sac_server_unlink (char* path){
-	/*
-	int nodoPath =
-	//tengo que validar si no existe el nodo para ese path
-	GFile* nodoABorrar = tablaDeNodos + nodoPath;
-
-	borrar_archivo(nodoABorrar, nodoPath);
-	*/
-	Function f;
-	return f;
+	int respuesta = borrar_archivo(path);
+	return enviar_respuesta_basica(respuesta, FUNCTION_RTA_UNLINK);
 }
 
 Function sac_server_rmdir (char* path){
-	/*
-	int nodoPadre = determine_nodo(path, inicioTablaDeNodos());
-	//validar que no sea el directorio raiz
-
-	borrar_directorio(nodoPadre);
-	*/
-	Function f;
-	return f;
+	int respuesta = borrar_directorio(path);
+	return enviar_respuesta_basica(respuesta, FUNCTION_RTA_RMDIR);
 }

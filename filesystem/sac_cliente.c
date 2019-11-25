@@ -299,9 +299,11 @@ static int sac_unlink(const char* path){
 
 	int respuesta = fresp->args[0].value.val_u32;
 
+	//Aca deberia agarrar el valor de bytes borrados, ponerlo en un log y mostrarlo. Finalmente retornar 0 si borro >=0 bytes, si es -1 error
+
 	free(msg.data);
 
-	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
+	return respuesta; //Devuelve 0 si todo bien, -1 si todo mal
 }
 
 static int sac_mkdir(const char* path, mode_t mode){
