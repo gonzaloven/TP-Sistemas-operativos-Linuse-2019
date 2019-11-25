@@ -80,6 +80,8 @@ typedef struct punteros_bloques_datos{
 GBlock *disco;
 GFile *tablaDeNodos;
 t_bitarray* bitmap;
+size_t diskSize;
+int bloqueInicioTablaDeNodos;
 
 // memory mapping data definition
 struct sac_server_header *header_start;
@@ -145,7 +147,7 @@ int split_path(const char* path, char** super_path, char** name);
  */
 int lastchar(const char* str, char chr);
 
-int inicioTablaDeNodos();
+void inicioTablaDeNodos();
 
 /*
  Starts server,creates a logger and loads configuration
