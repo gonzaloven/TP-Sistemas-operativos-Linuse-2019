@@ -2,16 +2,16 @@
 
 int send_call(Function *f)
 {
-	Message msg;
+	Message* msg = malloc(sizeof(Message));
 	MessageHeader header;
 
 	create_message_header(&header,MESSAGE_CALL,1,sizeof(Function));
-	create_function_message(&msg,&header,f);
+	create_function_message(msg,&header,f);
 
-	int resultado = send_message(serverSocket,&msg);
+	int resultado = send_message(serverSocket,msg);
 
-	//free(msg->data);
-	//free(msg);
+	free(msg);
+	msg = NULL;
 
 	return resultado;
 
@@ -30,7 +30,8 @@ int send_path(FuncType func_type, const char *path){
 
 	int resultado = send_call(&f);
 
-	//free(f.args[0].value.val_charptr);
+	free(f.args[0].value.val_charptr);
+	f.args[0].value.val_charptr = NULL;
 
 	return resultado;
 }
@@ -51,11 +52,16 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 	if(f->type == FUNCTION_RTA_GETATTR_NODORAIZ){
 		stbuf->st_mode = f->args[0].value.val_u32;
 		stbuf->st_nlink = f->args[1].value.val_u32;
-		free(f);
+
+		free(msg.data);
+		msg.data = NULL;
+
 		return EXIT_SUCCESS;
 	}
 
 	if(f->type != FUNCTION_RTA_GETATTR){
+		free(msg.data);
+		msg.data = NULL;
 		return -ENOENT;
 	}
 	
@@ -63,7 +69,8 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 	stbuf->st_nlink = f->args[1].value.val_u32;
 	stbuf->st_size = f->args[2].value.val_u32;
 
-	free(f);
+	free(msg.data);
+	msg.data = NULL;
 
 	return EXIT_SUCCESS;
 }
@@ -86,6 +93,8 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 	Function* f = msg.data;
 
 	if(f->type != FUNCTION_RTA_READDIR){
+		free(msg.data);
+		msg.data = NULL;
 		return -ENOENT;
 	}
 
@@ -98,6 +107,9 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 	if (f->args[0].value.val_charptr[0] == '\0')
 	{
+		free(f->args[0].value.val_charptr);
+		f->args[0].value.val_charptr = NULL;
+		free(msg.data);
 		return 0;
 	}
 
@@ -108,10 +120,16 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 		filename = listaSpliteada[i];
 		filler(buf, filename, NULL, 0);
+		free(listaSpliteada[i]);
+		listaSpliteada[i] = NULL;
 	}
 
 	free(listaSpliteada);
+	listaSpliteada = NULL;
 	free(f->args[0].value.val_charptr);
+	f->args[0].value.val_charptr = NULL;
+	free(msg.data);
+	msg.data = NULL;
 
 	return EXIT_SUCCESS;
 }
@@ -131,12 +149,15 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 	Function* f = msg.data;
 
 	if(f->type != FUNCTION_RTA_OPEN){
+		free(msg.data);
+		msg.data = NULL;
 		return -EACCES;
 	}
 
 	int respuesta = f->args[0].value.val_u32;
 
 	free(msg.data);
+	msg.data = NULL;
 
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
@@ -153,12 +174,15 @@ static int sac_opendir(const char *path, struct fuse_file_info *fi){
 	Function* f = msg.data;
 
 	if(f->type != FUNCTION_RTA_OPENDIR){
+		free(msg.data);
+		msg.data = NULL;
 		return -EACCES;
 	}
 
 	int respuesta = f->args[0].value.val_u32;
 
 	free(msg.data);
+	msg.data = NULL;
 
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }
@@ -197,6 +221,8 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	Function* freceive = msg.data;
 
 	if(freceive->type != FUNCTION_RTA_READ){
+		free(msg.data);
+		msg.data = NULL;
 		return -ENOENT;
 	}
 
@@ -205,7 +231,9 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	memcpy(buf, freceive->args[0].value.val_charptr, tamanioLectura);
 
 	free(freceive->args[0].value.val_charptr);
+	freceive->args[0].value.val_charptr = NULL;
 	free(freceive);
+	freceive = NULL;
   
   	return tamanioLectura;
 }
@@ -222,12 +250,15 @@ static int sac_mknod(const char* path, mode_t mode, dev_t rdev){
 	Function* f = msg.data;
 
 	if(f->type != FUNCTION_RTA_MKNOD){
+		free(msg.data);
+		msg.data = NULL;
 		return -1;
 	}
 
 	int respuesta = f->args[0].value.val_u32;
 
 	free(msg.data);
+	msg.data = NULL;
 
 	return respuesta;
 }
@@ -271,12 +302,15 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	Function* fresp = msg.data;
 
 	if(fresp->type != FUNCTION_RTA_WRITE){
+		free(msg.data);
+		msg.data = NULL;
 		return -ENOENT;
 	}
 
 	int bytesEscritos = fresp->args[0].value.val_u32;
 
 	free(msg.data);
+	msg.data = NULL;
 
 	return bytesEscritos; // podria verificar que sean los mismos que los pedidos o sino error
 }
@@ -294,6 +328,8 @@ static int sac_unlink(const char* path){
 	Function* fresp = msg.data;
 
 	if(fresp->type != FUNCTION_RTA_UNLINK){
+		free(msg.data);
+		msg.data = NULL;
 		return -ENOENT;
 	}
 
@@ -302,6 +338,7 @@ static int sac_unlink(const char* path){
 	//Aca deberia agarrar el valor de bytes borrados, ponerlo en un log y mostrarlo. Finalmente retornar 0 si borro >=0 bytes, si es -1 error
 
 	free(msg.data);
+	msg.data = NULL;
 
 	return respuesta; //Devuelve 0 si todo bien, -1 si todo mal
 }
@@ -318,12 +355,15 @@ static int sac_mkdir(const char* path, mode_t mode){
 	Function* fresp = msg.data;
 
 	if(fresp->type != FUNCTION_RTA_MKDIR){
+		free(msg.data);
+		msg.data = NULL;
 		return -1;
 	}
 
 	int respuesta = fresp->args[0].value.val_u32;
 
-	//free(msg.data);
+	free(msg.data);
+	msg.data = NULL;
 
 	return respuesta;
 }
@@ -340,12 +380,15 @@ static int sac_rmdir(const char* path){
 	Function* fresp = msg.data;
 
 	if(fresp->type != FUNCTION_RTA_RMDIR){
+		free(msg.data);
+		msg.data = NULL;
 		return -ENOENT;
 	}
 
 	int respuesta = fresp->args[0].value.val_u32;
 
 	free(msg.data);
+	msg.data = NULL;
 
 	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
 }

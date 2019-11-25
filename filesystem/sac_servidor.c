@@ -100,6 +100,7 @@ void fuse_start_service(ConnectionHandler ch)
 	configurar_server();
 	//fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
 	server_start(fuse_config->listen_port,ch);
+	free(fuse_config->path_archivo);
 }
 
 void message_handler(Message *m,int sock)
@@ -112,11 +113,10 @@ void message_handler(Message *m,int sock)
 		case MESSAGE_CALL:
 			frespuesta = fuse_invoke_function((Function *)m->data);
 			log_trace(fuse_logger,"Generando respuesta...");
-			//message_free_data(m->data);
 			create_message_header(&head,MESSAGE_CALL,1,sizeof(Function));
 			create_function_message(&msg,&head,&frespuesta);
 			send_message(sock,&msg);
-			//message_free_data(msg.data);
+			liberarMemoria(&frespuesta);
 			break;
 		default:
 			log_error(fuse_logger,"Undefined message");
@@ -147,6 +147,7 @@ void* handler(void *args)
 	}	
 	log_debug(fuse_logger,"El cliente se desconecto!");
 	close(sock);
+	free(msg.data);
 	return (void*)NULL;
 }
 
@@ -332,9 +333,8 @@ Function sac_server_readdir (char* path) {
 	fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
 	memcpy(fsend.args[0].value.val_charptr, listaNombres, fsend.args[0].size);
 
-	//list_destroy(listaDeArchivos);
-	//free(listaNombres);
-	// free(fsend.args[0].value.val_charptr);
+	list_destroy(listaDeArchivos);
+	free(listaNombres);
 
 	return fsend;
 }
@@ -364,4 +364,14 @@ Function sac_server_rmdir (char* path){
 
 	int respuesta = borrar_directorio(nodoABorrar, nodoABorrarPosicion);
 	return enviar_respuesta_basica(respuesta, FUNCTION_RTA_RMDIR);
+}
+
+void liberarMemoria(Function* f){
+	switch(f->type){
+		case FUNCTION_RTA_READDIR:
+			free(f->args[0].value.val_charptr);
+			break;
+		default:
+			break;
+	}
 }

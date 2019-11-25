@@ -198,10 +198,11 @@ int message_function_encode(Message *msg,void *buffer,size_t buffer_size)
 		 function_arg_encode(f->args[nargs],cursor,buffer_size);
 		cursor += sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);	
 	}
+
 	return cursor - buffer;
 }
 
-int message_function_decode(void *buffer,size_t buffer_size,Message *result) // ACA ESTOY 2
+int message_function_decode(void *buffer,size_t buffer_size,Message *result)
 {
 	Function *f= malloc(sizeof(uint8_t)*2 + sizeof(Arg)*10); //OJO CON LOS TAMAÑOS
 	int nargs;
@@ -253,9 +254,9 @@ int create_message_header(MessageHeader *header,uint8_t message_type,uint16_t ca
 int create_function_message(Message *msg,MessageHeader *header,Function *f)
 {
 	msg->header = *header;
-	msg->data = malloc(sizeof(*f));
+	//msg->data = malloc(sizeof(*f)); creo que esto esta mal porque alloca memory y despues apunta a f, perdiendo la direccion.
 	msg->data = (void *)(f);
-	return 0; 
+	return 0;
 }
 
 int message_alloc_data(Message *msg,unsigned int size)

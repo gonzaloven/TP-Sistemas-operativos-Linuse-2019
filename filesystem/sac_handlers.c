@@ -77,6 +77,10 @@ int determine_nodo(char *path){
 	if(dimListaSpliteada == 1){
 		filenameBuscado = listaSpliteada[0];
 		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, 0);
+
+		free(listaSpliteada[0]);
+		free(listaSpliteada);
+
 		return nodoUltimoPadre;
 	}
 
@@ -98,6 +102,9 @@ int determine_nodo(char *path){
 			nodoUltimoPadre += bloqueInicioTablaDeNodos;
 		}
 	}
+
+	for(int y=0; y<dimListaSpliteada; y++) // libero cada integrante de la matriz
+		free(listaSpliteada[y]);
 
 	free(listaSpliteada);
 	return nodoUltimoPadre - bloqueInicioTablaDeNodos;
@@ -259,6 +266,10 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 
 	if (currNode >= MAX_NUMBER_OF_FILES)
 	{
+		for(int y=0; y<dimListaSpliteada; y++) // libero cada integrante de la matriz
+			free(listaSpliteada[y]);
+
+		free(listaSpliteada);
 		return EDQUOT;
 	}
 
@@ -288,6 +299,12 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	nodoVacio->modify_date = timestamp;
 
 	msync(disco, diskSize, MS_SYNC);
+
+	for(int y=0; y<dimListaSpliteada; y++) // libero cada integrante de la matriz
+		free(listaSpliteada[y]);
+
+	free(listaSpliteada);
+	free(path);
 	return 0;
 }
 

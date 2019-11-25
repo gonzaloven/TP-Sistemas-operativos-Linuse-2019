@@ -149,6 +149,8 @@ int lastchar(const char* str, char chr);
 
 void inicioTablaDeNodos();
 
+void liberarMemoria(Function* f);
+
 /*
  Starts server,creates a logger and loads configuration
 int sac_start_service(ConnectionHandler ch);
