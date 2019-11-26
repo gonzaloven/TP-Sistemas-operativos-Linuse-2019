@@ -26,19 +26,20 @@ void hilolay_init(void){
 
 void conectar_con_suse() {
 	socket_suse = conectar_a(configuracion_hilolay.SUSE_IP ,configuracion_hilolay.SUSE_PORT);
+	log_info(logger, "Me conecte con SUSE. \n");
 
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
 	int desp = 0;
 
 	serializar_int(buffer, &desp, 0);
-	enviar(socket_suse,cop_suse_create, tamanio_buffer, buffer);
-	log_info(logger, "Me conecte con SUSE. \n");
+	enviar(socket_suse, cop_handshake_hilolay_suse, tamanio_buffer, buffer);
+	log_info(logger, "Envie un mensaje (0) a SUSE. \n");
 
 }
 
 int suse_create(int master_thread){
-	bool result = realizar_handshake(socket_suse, cop_handshake_hilolay_suse);
+	bool result = realizar_handshake(socket_suse, cop_suse_create);
 
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
@@ -72,7 +73,7 @@ int suse_schedule_next(){ //todo testear
 	}
 	else{
 		next = -1;
-		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", cop_next_tid) //Aca no deberia ser received_packet->codigo_operacion??
+		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", received_packet->codigo_operacion)
 	}
 
 	liberar_paquete(received_packet);

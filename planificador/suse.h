@@ -41,6 +41,8 @@ typedef struct {
 	float duracionRafaga;
 	float estimacionUltimaRafaga;
 	bool ejecutado_desde_estimacion;
+	t_list* joinedBy;
+	t_list* joinTo;
 } t_suse_thread;
 
 typedef struct t_process
@@ -48,8 +50,7 @@ typedef struct t_process
 	t_list * ULTS; //Lista de t_suse_thread
 	int PROCESS_ID; //esto es el numero de socket
 	t_list * READY_LIST;
-	t_list * EXEC_LIST;
-	bool bloqueado;
+	uint32_t EXEC_THREAD;
 } t_process;
 
 typedef struct t_suse_semaforos{
@@ -61,16 +62,14 @@ typedef struct t_suse_semaforos{
 }t_suse_semaforos;
 
 
-
-
 suse_configuration configuracion_suse;
 suse_configuration get_configuracion();
 
+t_suse_thread* ULT_ejecutando = NULL; // Es un unico ULT a la vez
+t_suse_thread* ultimo_ULT_ejecutado = NULL;
+
 pthread_mutex_t mutex_new_queue;
 t_list* new_queue;
-
-pthread_mutex_t mutex_ready_queue;
-t_list* ready_queue;
 
 pthread_mutex_t mutex_blocked_queue;
 t_list* blocked_queue;
@@ -79,9 +78,14 @@ pthread_mutex_t mutex_semaforos;
 
 pthread_mutex_t mutex_multiprog;
 
+pthread_mutex_t mutex_lista_de_process;
+t_list* lista_de_process; //todo esto serviria para ordenar fifo los programas, ver
+
 sem_t sem_ULTs_listos;
 
 t_list* exit_queue;
+
+bool validar_grado_multiprogramacion();
 
 t_process * generar_programa(int socket_hilolay);
 
@@ -100,7 +104,17 @@ pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros);
 
 t_list* thread_params;
 
-void* programa_conectado_funcion_thread(void* argumentos);
+void* process_conectado_funcion_thread(void* argumentos);
+
+int obtener_proximo_ejecutar(t_process* process);
+
+void ordenar_cola_listos(t_list* ready_list);
+
+void estimar_ULTs_listos(t_list* ready_list);
+
+void estimar_rafaga(t_suse_thread * ULT);
+
+
 
 
 

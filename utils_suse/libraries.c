@@ -1,6 +1,164 @@
 #include "libraries.h"
 
 
+pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros)
+{
+	pthread_t thread = threads[i_thread];
+	int thread_creacion = pthread_create(&thread, NULL, funcion, (void*) parametros);
+	if (thread_creacion != 0) {
+		perror("pthread_create");
+	} else {
+		i_thread++;
+	}
+	return thread;
+}
+
+void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
+	t_process* process = configuracion_suse[socket];
+	eliminar_ULT_cola_actual(thread,process);
+	thread->estado = E_EXECUTE;
+	thread->ejecutado_desde_estimacion = true;
+	ULT_ejecutando = thread;
+}
+
+void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
+{
+	t_process* program = configuracion_suse[socket];
+
+	eliminar_ULT_cola_actual(thread,program);
+
+	thread->estado = E_EXECUTE;
+	program->EXEC_THREAD = thread->tid;
+	configuracion_suse.ACTUAL_MULTIPROG ++;
+
+}
+
+void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
+{
+	t_process* program = configuracion_suse[socket];
+
+	eliminar_ULT_cola_actual(thread,program);
+	thread->estado = E_READY;
+	list_add(program->READY_LIST,thread->tid);
+
+}
+
+void bloqueado_a_listo(t_suse_thread* thread,t_process* program)
+{
+	eliminar_ULT_cola_actual(thread,program);
+	thread->estado = E_READY;
+	list_add(program->READY_LIST,thread->tid);
+
+}
+
+
+void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket)
+{
+	t_process* program = configuracion_suse[socket];
+
+	eliminar_ULT_cola_actual(thread,program);
+	thread->estado = E_BLOCKED;
+	list_add(blocked_queue,thread);
+
+}
+
+void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semaforos* semaforo)
+{
+
+	t_process* program = configuracion_suse.process[socket];
+
+	t_suse_thread* thread = program->ULTS[tid];
+
+	eliminar_ULT_cola_actual(thread,program);
+
+	thread->estado = E_BLOCKED;
+
+	list_add(semaforo->BLOCKED_LIST,thread);
+	list_add(blocked_queue,thread);
+}
+
+void eliminar_ULT_cola_actual(t_suse_thread *ULT, t_process* process)
+{
+	// Lo saco de la cola actual en la que se encuentra
+
+	switch(ULT->estado)
+	{
+
+	case E_READY:
+		remover_ULT_listo(ULT,process);
+	break;
+	case E_NEW:
+		remover_ULT_nuevo(ULT);
+	break;
+	case E_EXECUTE:
+		remover_ULT_exec(process);
+	break;
+	case E_BLOCKED:
+		remover_ULT_bloqueado(ULT);
+	break;
+
+	}
+}
+
+void remover_ULT_nuevo(t_suse_thread* ULT)
+{
+	bool comparador(t_suse_thread* thread){
+		return thread->tid == ULT->tid && thread->procesoId == ULT->procesoId;
+	}
+	list_remove_by_condition(new_queue, comparador);
+}
+
+void remover_ULT_bloqueado(t_suse_thread* thread)
+{
+	bool comparador(t_suse_thread* th){
+		return th->tid == thread->tid && th->procesoId == thread->procesoId;
+	}
+
+	list_remove_by_condition(blocked_queue,comparador);
+
+}
+void remover_ULT_exec(t_process* process)
+{
+	process->EXEC_THREAD = NULL;
+
+}
+
+bool validar_grado_multiprogramacion()
+{
+
+	bool result = (configuracion_suse.ACTUAL_MULTIPROG + 1) <= (configuracion_suse.MAX_MULTIPROG);
+
+	return result;
+}
+
+void nuevo_a_listo(t_suse_thread* ULT, int process_id)
+{
+	//todo ver de extraer esta logica
+	//Encuentro el programa
+	t_process* program = list_get(configuracion_suse->process, process_id);
+
+	//Saco el validar grado de mult. pq esta funcion ya esta adentro del mutex que valida antes. Imposible q cambie con el mutex.
+
+	list_add(program->READY_LIST, ULT->tid); //todo validar que la lista de ready de un programa tenga suse_threads adentro
+
+	eliminar_ULT_cola_actual(ULT, program);
+	ULT->estado = E_READY;
+	configuracion_suse.ACTUAL_MULTIPROG ++;
+
+}
+
+void remover_ULT_listo(t_suse_thread* thread,t_process* process)
+{
+
+	bool comparador(int tid){
+		return tid == thread->tid;
+	}
+
+	list_remove_by_condition(process->READY_LIST,comparador); //Remuevo por tid.
+
+}
+
+/*-----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 void imprimir(char* filename){
 	FILE *fptr = NULL;
 

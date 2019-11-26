@@ -43,7 +43,8 @@ enum codigos_de_operacion {
 	cop_close_tid = 13,
 	cop_wait_sem = 14,
 	cop_signal_sem = 15,
-	cop_suse_create = 16
+	cop_suse_create = 16,
+	cop_suse_join = 17
 	//todo ver si es necesario un cop distinto para el envio del mensaje y para la respuesta de que el mensaje se recibio ok
 };
 
@@ -192,5 +193,33 @@ int array_of_strings_length(char** array);
 t_list * list_remove_all_by_condition(t_list * lista, bool(*condicion)(void*)); // Remueve todos los elementos de una determinada condicion y los devuelve
 
 int recibir_int(t_paquete* paquete_recibido);
+
+void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket);
+
+void ejecucion_a_listo(t_suse_thread* thread,un_socket socket);
+
+void eliminar_ULT_cola_actual(t_suse_thread *ULT, t_process* process);
+
+void remover_ULT_nuevo(t_suse_thread* ULT);
+
+void remover_ULT_bloqueado(t_suse_thread* thread);
+
+void remover_ULT_exec(t_process* process);
+
+bool validar_grado_multiprogramacion();
+
+void nuevo_a_listo(t_suse_thread* ULT, int process_id);
+
+void remover_ULT_listo(t_suse_thread* thread,t_process* process);
+
+void bloqueado_a_listo(t_suse_thread* thread,t_process* program);
+
+void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket);
+
+void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semaforos* semaforo);
+
+pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros);
+
+bool validar_grado_multiprogramacion();
 
 #endif /* LIBRARIES_H_ */
