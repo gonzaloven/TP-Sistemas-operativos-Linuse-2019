@@ -7,6 +7,7 @@ pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros)
 	int thread_creacion = pthread_create(&thread, NULL, funcion, (void*) parametros);
 	if (thread_creacion != 0) {
 		perror("pthread_create");
+		log_info(logger, "Error al crear el hilo para ejecucion del proceso\n");
 	} else {
 		i_thread++;
 	}
@@ -14,7 +15,8 @@ pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros)
 }
 
 void ejecutando_a_exit(t_suse_thread* thread, un_socket socket){
-
+	//todo
+	log_info(logger, "El tid %d paso de execute a exit\n", thread->tid);
 
 }
 
@@ -25,6 +27,7 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 	thread->ejecutado_desde_estimacion = true;
 	//todo aca tendria que validar que si hay un hilo ya ejecutando, tengo que ponerlo en otra cola
 	process->EXEC_THREAD = thread;
+	log_info(logger, "El tid %d paso de ready a execute\n", thread->tid);
 }
 
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
@@ -37,6 +40,7 @@ void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 	program->EXEC_THREAD = thread->tid;
 	configuracion_suse.ACTUAL_MULTIPROG ++;
 
+	log_info(logger, "El thread %d paso de new a execute \n", thread->tid);
 }
 
 void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
@@ -47,6 +51,7 @@ void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
 	thread->estado = E_READY;
 	process->EXEC_THREAD = NULL;
 	list_add(process->READY_LIST,thread->tid);
+	log_info(logger, "El thread %d paso de execute a ready \n", thread->tid);
 
 }
 
@@ -55,6 +60,7 @@ void bloqueado_a_listo(t_suse_thread* thread,t_process* program)
 	eliminar_ULT_cola_actual(thread,program);
 	thread->estado = E_READY;
 	list_add(program->READY_LIST,thread->tid);
+	log_info(logger, "El thread %d paso de blocked a ready \n", thread->tid);
 }
 
 
@@ -66,6 +72,7 @@ void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket)
 	thread->estado = E_BLOCKED;
 	process->EXEC_THREAD = NULL;
 	list_add(blocked_queue,thread);
+	log_info(logger, "El thread %d paso de execute a blocked \n", thread->tid);
 
 }
 
@@ -82,6 +89,7 @@ void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semafo
 
 	list_add(semaforo->BLOCKED_LIST,thread);
 	list_add(blocked_queue,thread);
+	log_info(logger, "El thread %d paso de execute a blocked por semaforo %s \n", thread->tid, semaforo->NAME);
 }
 
 void eliminar_ULT_cola_actual(t_suse_thread *ULT, t_process* process)
@@ -147,6 +155,8 @@ void nuevo_a_listo(t_suse_thread* ULT, int process_id)
 	eliminar_ULT_cola_actual(ULT, program);
 	ULT->estado = E_READY;
 	configuracion_suse.ACTUAL_MULTIPROG ++;
+
+	log_info(logger, "El thread %d del programa %d esta en ready", ULT->tid, process_id);
 
 }
 

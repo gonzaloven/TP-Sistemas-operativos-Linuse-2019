@@ -21,7 +21,7 @@ int main(void){
 
 	new_queue = list_create();
 	blocked_queue = list_create();
-	exit_queue = list_create(); //todo ver si es necesario
+	exit_queue = list_create();
 
 	sem_init(&sem_ULTs_listos, 0, 0);
 
@@ -46,6 +46,7 @@ int main(void){
 }
 
 void init_semaforos(){
+	log_info(logger, "Inicializando semaforos \n")
 
 	uint32_t cantidad_semaforos = sizeof(configuracion_suse.SEM_ID) / sizeof(configuracion_suse.SEM_ID[0]);
 
@@ -130,6 +131,7 @@ void iniciar_servidor() {
 		log_info(logger, "Soy SUSE y recibi una nueva conexion del socket %d. \n", new_connection);
 		free(handshake);
 		//Creo un hilo por programa que se conecta
+		log_info(logger, "Creando process con id... %d. \n", new_connection);
 		thread_params = list_add(thread_params, new_connection);
 		nuevo_hilo(process_conectado_funcion_thread, thread_params);
 	}
@@ -249,21 +251,21 @@ int join(un_socket socket, int tid){
 }
 
 void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
+	log_info(logger, "Esperando primer handshake de hilolay...\n");
 	esperar_handshake(socket_actual, paquete_hilolay, cop_handshake_hilolay_suse);
 
-	log_info(logger, "Realice el primer handshake con hilolay\n");
+	log_info(logger, "Realice el primer handshake con hilolay.\n");
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 
 	int desplazamiento = 0;
 	int main_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	//Genero el process
+
 	t_process * process = generar_process(socket_actual);
+	log_info(logger, "El  programa que se conecto es el de ID %d \n", process->PROCESS_ID);
 
 	list_add_in_index(configuracion_suse.process,process,process->PROCESS_ID);
-
-	sprintf("el socket es", "%d", process->PROCESS_ID);
 
 	//Creo el main thread
 	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
@@ -275,8 +277,11 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	list_add_in_index(process->ULTS,new_thread,new_thread->tid);
 	list_add(new_queue, new_thread);
 
+	log_info(logger, "El main thread tiene id %d \n", new_thread->tid);
+
 	pthread_mutex_lock(&mutex_multiprog);
 
+	log_info(logger, "El grado de multiprogramacion es %d, validando...", configuracion_suse.ACTUAL_MULTIPROG);
 	if(validar_grado_multiprogramacion()){
 		nuevo_a_ejecucion(new_thread, socket_actual);
 	}
@@ -286,13 +291,14 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 }
 
 void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
+	log_info(logger, "Esperando handshake de suse_create...\n");
 
 	//Obtengo el hilo
 	esperar_handshake(socket_actual, paquete_hilolay, cop_suse_create);
-	log_info(logger, "Esperando hilo de suse_create \n");
-	sprintf("el socket es", "%d", socket_actual);
+	log_info(logger, "Realice handshake en suse_create \n");
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
+	log_info(logger, "El programa que se conecto es el de ID %d \n", socket_actual);
 
 	int desplazamiento = 0;
 	int new_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
@@ -311,8 +317,8 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
 	list_add_in_index(process->ULTS,new_thread,new_thread->tid);
 	list_add(new_queue,new_thread->tid);
 
+	log_info(logger, "El grado de multiprogramacion es %d, validando...", configuracion_suse.ACTUAL_MULTIPROG);
 	pthread_mutex_lock(&mutex_multiprog);
-
 	if(validar_grado_multiprogramacion())
 	{
 		nuevo_a_listo(new_thread,process->PROCESS_ID);
@@ -460,14 +466,17 @@ t_process* process_por_id(int process_id){
 }
 
 void handle_next_tid(un_socket socket_actual, paquete_next_tid){
+	log_info(logger, "Esperando handshake de suse_schedule_next...\n");
 	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
+	log_info(logger, "Realice el handhsake de suse_schedule_next");
+
 	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo principal
 	int desplazamiento = 0;
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
 
 	t_process* process = process_por_id(socket_actual);
-	log_info(logger, "Iniciando planificacion...\n");
+	log_info(logger, "Iniciando planificacion de programa %d...\n",process->PROCESS_ID);
 	int next_tid = obtener_proximo_ejecutar(process); //Inicia planificacion
 
 	// Envio el next tid
@@ -483,10 +492,12 @@ int obtener_proximo_ejecutar(t_process* process){
 	if (process->EXEC_THREAD != NULL) {
 			return process->EXEC_THREAD->tid;
 	}
+	log_info(logger, "Ordenando cola de listos...");
 	ordenar_cola_listos(process->READY_LIST);
 
 	t_suse_thread next_ULT = list_get(process->READY_LIST, 0);
 	int next_tid = next_ULT.tid;
+	log_info(logger, "El proximo a ejecutar es %d", next_tid);
 
 	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
 
@@ -501,7 +512,8 @@ void ordenar_cola_listos(t_list* ready_list) {
 }
 
 void estimar_ULTs_listos(t_list* ready_list) {
-	void estimar(void * item_ULT) { //todo espero un int para encontrar el hilo
+	log_info(logger, "Estimando ULTs...");
+	void estimar(void * item_ULT) {
 		t_suse_thread * ULT = (t_suse_thread *) item_ULT;
 		if (ULT->ejecutado_desde_estimacion) {
 			ULT->ejecutado_desde_estimacion = false;
@@ -520,6 +532,7 @@ void estimar_rafaga(t_suse_thread * ULT){
 }
 
 void ordenar_por_sjf(t_list* ready_list){
+	log_info(logger, "Ordenando por SJF...");
 	list_sort(ready_list, funcion_SJF);
 }
 
