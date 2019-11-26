@@ -11,6 +11,7 @@ Function fuse_invoke_function(Function *f);
 void fuse_stop_service()
 {
 	log_info(fuse_logger,"SIGINT recibida. Servidor desconectado!");
+	free(fuse_config->path_archivo);
 	free(fuse_config);
 	log_destroy(fuse_logger);
 	server_stop();
@@ -100,7 +101,6 @@ void fuse_start_service(ConnectionHandler ch)
 	configurar_server();
 	//fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
 	server_start(fuse_config->listen_port,ch);
-	free(fuse_config->path_archivo);
 }
 
 void message_handler(Message *m,int sock)
@@ -116,14 +116,18 @@ void message_handler(Message *m,int sock)
 			create_message_header(&head,MESSAGE_CALL,1,sizeof(Function));
 			create_function_message(&msg,&head,&frespuesta);
 			send_message(sock,&msg);
+
 			liberarMemoria(&frespuesta);
+
+			liberarMemoria((Function *)m->data);
+			free(m->data);
+			m->data = NULL;
+
 			break;
 		default:
 			log_error(fuse_logger,"Undefined message");
 			break;
 	}
-	return;
-
 }
 
 void* handler(void *args)
@@ -144,10 +148,14 @@ void* handler(void *args)
 			message_handler(&msg,sock);
 			memset(buffer,'\0',1024);
 		}
+		else{
+			liberarMemoria((Function *)&msg);
+			free(msg.data);
+			msg.data = NULL;
+		}
 	}	
 	log_debug(fuse_logger,"El cliente se desconecto!");
 	close(sock);
-	free(msg.data);
 	return (void*)NULL;
 }
 
@@ -411,8 +419,29 @@ Function sac_server_rmdir (char* path){
 
 void liberarMemoria(Function* f){
 	switch(f->type){
+		case FUNCTION_GETATTR:
+		case FUNCTION_READDIR:
+		case FUNCTION_OPEN:
+		case FUNCTION_OPENDIR:
+		case FUNCTION_MKNOD:
+		case FUNCTION_UNLINK:
+		case FUNCTION_MKDIR:
+		case FUNCTION_RMDIR:
+		case FUNCTION_RTA_READ:
 		case FUNCTION_RTA_READDIR:
 			free(f->args[0].value.val_charptr);
+			f->args[0].value.val_charptr = NULL;
+			break;
+		case FUNCTION_READ:
+			free(f->args[2].value.val_charptr);
+			f->args[2].value.val_charptr = NULL;
+			break;
+		case FUNCTION_WRITE:
+			free(f->args[0].value.val_charptr);
+			f->args[0].value.val_charptr = NULL;
+			break;
+			free(f->args[1].value.val_charptr);
+			f->args[1].value.val_charptr = NULL;
 			break;
 		default:
 			break;

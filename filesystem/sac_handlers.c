@@ -97,6 +97,11 @@ int determine_nodo(char *path){
 		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, nodoUltimoPadre);
 
 		if(nodoUltimoPadre == -1){
+			for(int y=0; y <= i; y++){
+				free(listaSpliteada[y]);
+				listaSpliteada[y] = NULL;
+			}
+
 			free(listaSpliteada);
 			listaSpliteada = NULL;
 			return -1;
@@ -105,8 +110,11 @@ int determine_nodo(char *path){
 		}
 	}
 
-	for(int y=0; y<dimListaSpliteada; y++) // libero cada integrante de la matriz
-		free(listaSpliteada[y]);
+	for(int y=0; y<dimListaSpliteada; y++){
+		free(listaSpliteada[y]); // libero cada integrante de la matriz
+		listaSpliteada[y] = NULL;
+	}
+
 
 	free(listaSpliteada);
 	listaSpliteada = NULL;
@@ -282,8 +290,10 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	timestamp = (uint64_t) tiempoAhora;
 
 	if(dimListaSpliteada > 1){
-		parentDirPath = dirname(strdup(path));
+		char* pathduplicado = strdup(path);
+		parentDirPath = dirname(pathduplicado);
 		nodoPadre = determine_nodo(parentDirPath);
+		free(pathduplicado);
 	}
 
 	GFile *nodoVacio = tablaDeNodos + currNode;
@@ -307,7 +317,6 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 		free(listaSpliteada[y]);
 
 	free(listaSpliteada);
-	free(path);
 	return 0;
 }
 
@@ -446,7 +455,7 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 	return respuesta;
 }
 
-int escribir_archivo (char* buffer, char *path, size_t size, uint32_t offset){
+/*int escribir_archivo (char* buffer, char *path, size_t size, uint32_t offset){
 	//log_trace(logger, "Writing: Path: %s - Size: %d - Offset %d", path, size, offset);
 
 	int nodoDelArchivo = determine_nodo(path);
@@ -475,7 +484,7 @@ int escribir_archivo (char* buffer, char *path, size_t size, uint32_t offset){
 		// Actualiza los valores de espacio restante en bloque.
 		space_in_block = BLOCKSIZE - (file_size % BLOCKSIZE);
 		if (space_in_block == BLOCKSIZE) (space_in_block = 0); // Porque significa que el bloque esta lleno.
-		if (file_size == 0) space_in_block = BLOCKSIZE; /* Significa que el archivo esta recien creado y ya tiene un bloque de datos asignado */
+		if (file_size == 0) space_in_block = BLOCKSIZE;  Significa que el archivo esta recien creado y ya tiene un bloque de datos asignado
 
 		// Si el offset es mayor que el tamanio del archivo mas el resto del bloque libre, significa que hay que pedir un bloque nuevo
 		// file_size == 0 indica que es un archivo que recien se comienza a escribir, por lo que tiene un tratamiento distinto (ya tiene un bloque de datos asignado).
@@ -520,12 +529,12 @@ int escribir_archivo (char* buffer, char *path, size_t size, uint32_t offset){
 			off += BLOCKSIZE;
 			tam -= BLOCKSIZE;
 			offset_in_block = 0;
-		} else if (tam <= space_in_block){ /*Hay lugar suficiente en ese bloque para escribir el resto del archivo */
+		} else if (tam <= space_in_block){ Hay lugar suficiente en ese bloque para escribir el resto del archivo
 			memcpy(data_block + offset_in_block, buf, tam);
 			if (node->file_size <= off) file_size = node->file_size += tam;
 			else if (node->file_size <= (off + tam)) file_size = node->file_size += (off + tam - node->file_size);
 			tam = 0;
-		} else { /* Como no hay lugar suficiente, llena el bloque y vuelve a buscar uno nuevo */
+		} else {  Como no hay lugar suficiente, llena el bloque y vuelve a buscar uno nuevo
 			memcpy(data_block + offset_in_block, buf, space_in_block);
 			file_size = node->file_size += space_in_block;
 			buf += space_in_block;
@@ -547,4 +556,4 @@ int escribir_archivo (char* buffer, char *path, size_t size, uint32_t offset){
 			log_trace(logger, "Terminada escritura.");
 	return res;
 
-}
+}*/
