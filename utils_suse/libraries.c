@@ -13,6 +13,14 @@ pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros)
 	return thread;
 }
 
+void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
+	t_process* process = configuracion_suse[socket];
+	eliminar_ULT_cola_actual(thread,process);
+	thread->estado = E_EXECUTE;
+	thread->ejecutado_desde_estimacion = true;
+	ULT_ejecutando = thread;
+}
+
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 {
 	t_process* program = configuracion_suse[socket];
@@ -25,7 +33,7 @@ void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 
 }
 
-void ejecucion_a_listo(t_suse_thread* thread,un_socket socket)
+void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
 {
 	t_process* program = configuracion_suse[socket];
 

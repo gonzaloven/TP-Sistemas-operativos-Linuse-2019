@@ -308,6 +308,8 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
 	new_thread->tid = new_tid;
 	new_thread->estado = E_NEW;
 	new_thread->procesoId = process->PROCESS_ID;
+	new_thread->duracionRafaga = 0;
+	new_thread->ejecutado_desde_estimacion = false;
 
 	list_add_in_index(process->ULTS,new_thread,new_thread->tid);
 	list_add(new_queue,new_thread->tid);
@@ -482,47 +484,68 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 }
 
 int obtener_proximo_ejecutar(t_process* process){
+	if (ULT_ejecutando != NULL) {
+			return ULT_ejecutando;
+		}
 	ordenar_cola_listos(process->READY_LIST);
-	int next_tid = list_get(process->READY_LIST, 0);
+
+	t_suse_thread next_ULT = list_get(process->READY_LIST, 0);
+	int next_tid = next_ULT.tid;
+
+	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
+
+	actualizarRafaga(next_ULT);
+	ultimo_ULT_ejecutado = ULT_ejecutando;
 	return next_tid;
 }
 
 void ordenar_cola_listos(t_list* ready_list) {
 	estimar_ULTs_listos(ready_list);
-	ordenar_por_sjf();
+	ordenar_por_sjf(ready_list);
 }
 
 void estimar_ULTs_listos(t_list* ready_list) {
-	void estimar(void * item_ULT) {
+	void estimar(void * item_ULT) { //todo espero un int para encontrar el hilo
 		t_suse_thread * ULT = (t_suse_thread *) item_ULT;
 		if (ULT->ejecutado_desde_estimacion) {
 			ULT->ejecutado_desde_estimacion = false;
-			estimarRafaga(ULT);
+			estimar_rafaga(ULT);
 		}
 	}
 	list_iterate(ready_list, estimar);
 }
 
-void estimarRafaga(t_suse_thread * ULT){
+void estimar_rafaga(t_suse_thread * ULT){
 	int rafaga_anterior = ULT->duracionRafaga; //Duracion de la rafaga anterior
 	float estimacion_anterior = ULT->estimacionUltimaRafaga; // Estimacion anterior
-	float porcentaje_alfa = ((float) configuracion_suse.ALPHA_SJF) / 100;
-	float estimacion = porcentaje_alfa * rafaga_anterior + (1 - porcentaje_alfa) * estimacion_anterior;
+	//todo ver si el tipo de dato esta ok
+	float estimacion = configuracion_suse.ALPHA_SJF * rafaga_anterior + (1 - configuracion_suse.ALPHA_SJF) * estimacion_anterior;
 	ULT->estimacionUltimaRafaga = estimacion;
 }
 
-//todo esta es la cola del process no es global
-void ordenar_por_sjf(){
-	list_sort(ready_queue, funcion_SJF);
+void ordenar_por_sjf(t_list* ready_list){
+	list_sort(ready_list, funcion_SJF);
 }
 
 bool funcion_SJF(void* thread1, void* thread2) {
 	t_suse_thread * ULT1 = (t_suse_thread *) thread1;
 	t_suse_thread * ULT2 = (t_suse_thread *) thread2;
+	int process_id = ULT1->procesoId;
+
+	t_process* process = process_por_id(process_id);
+
 	if (ULT1->estimacionUltimaRafaga == ULT2->estimacionUltimaRafaga) {
-		return funcion_FIFO(ULT1, ULT2); //todo funcion_fifo
+		return list_get(process->ULTS, 0); //todo ver como obtener el primer elemento no vacio de la lista
 	}
 	return ULT1->estimacionUltimaRafaga < ULT2->estimacionUltimaRafaga;
+}
+
+void actualizarRafaga(t_suse_thread * ULT) {
+	if(ULT == ultimo_ULT_ejecutado){
+		ULT->duracionRafaga++;
+	}else{
+		ULT->duracionRafaga = 1; //todo esto quizas deberia ser 0
+	}
 }
 
 

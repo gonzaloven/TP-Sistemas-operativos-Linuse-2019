@@ -65,6 +65,9 @@ typedef struct t_suse_semaforos{
 suse_configuration configuracion_suse;
 suse_configuration get_configuracion();
 
+t_suse_thread* ULT_ejecutando = NULL; // Es un unico ULT a la vez
+t_suse_thread* ultimo_ULT_ejecutado = NULL;
+
 pthread_mutex_t mutex_new_queue;
 t_list* new_queue;
 
@@ -104,6 +107,15 @@ t_list* thread_params;
 void* process_conectado_funcion_thread(void* argumentos);
 
 int obtener_proximo_ejecutar(t_process* process);
+
+void ordenar_cola_listos(t_list* ready_list);
+
+void estimar_ULTs_listos(t_list* ready_list);
+
+void estimar_rafaga(t_suse_thread * ULT);
+
+
+
 
 
 /*
