@@ -26,20 +26,18 @@ int main(void){
 	sem_init(&sem_ULTs_listos, 0, 0);
 
 	pthread_mutex_init(&mutex_new_queue, NULL);
-	pthread_mutex_init(&mutex_ready_queue, NULL);
 	pthread_mutex_init(&mutex_blocked_queue, NULL);
 	pthread_mutex_init(&mutex_multiprog, NULL);
 	pthread_mutex_init(&mutex_semaforos,NULL);
+	pthread_mutex_init(&mutex_lista_de_process, NULL)
 
 	iniciar_servidor();
 
 	list_destroy(new_queue);
 	list_destroy(blocked_queue);
-	list_destroy(ready_queue); //TODO: No se necesita. no es global.
 	list_destroy(exit_queue);
 
 	free(mutex_new_queue);
-	free(mutex_ready_queue);
 	free(mutex_blocked_queue);
 	free(mutex_multiprog);
 	free(mutex_semaforos);
@@ -60,7 +58,6 @@ void init_semaforos(){
 			semaforo->VALUE = configuracion_suse.SEM_INIT[i];
 
 			list_add(configuracion_suse.semaforos,semaforo);
-			free(semaforo);
 	}
 
 }
@@ -130,17 +127,15 @@ void iniciar_servidor() {
 	while(1){
 		int new_connection = aceptar_conexion(listener);
 		t_paquete* handshake = recibir(listener);
-		log_info(logger, "Soy SUSE y recibi una nueva conexion . \n");
+		log_info(logger, "Soy SUSE y recibi una nueva conexion del socket %d. \n", new_connection);
 		free(handshake);
-		//Creo un hilo por processa
+		//Creo un hilo por programa que se conecta
 		thread_params = list_add(thread_params, new_connection);
-		nuevo_hilo(processa_conectado_funcion_thread, new_connection); //TODO: No habria que pasarle thread_params en vez del socket?
+		nuevo_hilo(process_conectado_funcion_thread, thread_params);
 	}
 }
 
-
-
-void* processa_conectado_funcion_thread(void* argumentos) { //TODO: porque es puntero a void y no solo void??
+void* process_conectado_funcion_thread(void* argumentos) {
 	un_socket socket_actual = list_get(argumentos, 0);
 	list_destroy(argumentos);
 	handle_conection_suse(socket_actual);
@@ -163,7 +158,7 @@ void handle_conection_suse(un_socket socket_actual) {
 			handle_next_tid(socket_actual, paquete_recibido);
 		break;
 		case cop_close_tid:
-			handle_close_tid(socket_actual,paquete_recibido);
+			handle_close_tid(socket_actual, paquete_recibido);
 			//todo falta la funcion handle_close_tid, solo esta el close del hilo
 		break;
 		case cop_wait_sem:
@@ -260,15 +255,14 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	esperar_handshake(socket_actual, paquete_hilolay, cop_handshake_hilolay_suse);
 
 	log_info(logger, "Realice el primer handshake con hilolay\n");
-	sprintf("el socket es", "%d", socket_actual);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 
 	int desplazamiento = 0;
 	int main_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	//Genero el processa
-	t_process * process = generar_processa(socket_actual);
+	//Genero el process
+	t_process * process = generar_process(socket_actual);
 
 	list_add_in_index(configuracion_suse.process,process,process->PROCESS_ID);
 
@@ -451,10 +445,20 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 }
 
 
-t_process * generar_processa(un_socket socket) {
+t_process * generar_process(un_socket socket) {
 	t_process * process = malloc(sizeof(t_process));
 	process->PROCESS_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
 	return process;
+}
+
+t_process* process_por_id(int process_id){
+	bool encontrar_process(void* process){
+		return ((t_process*)process)->PROCESS_ID == process_id;
+	}
+	pthread_mutex_lock(&mutex_lista_de_process);
+	t_process* result = list_find(lista_de_process, encontrar_process);
+	pthread_mutex_unlock(&mutex_lista_de_process);
+	return result;
 }
 
 void handle_next_tid(un_socket socket_actual, paquete_next_tid){
@@ -464,8 +468,9 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
 
+	t_process* process = process_por_id(socket_actual);
 	log_info(logger, "Iniciando planificacion...\n");
-	int next_tid = obtener_proximo_ejecutar(); //Inicia planificacion
+	int next_tid = obtener_proximo_ejecutar(process); //Inicia planificacion
 
 	// Envio el next tid
 	int tamanio_buffer = sizeof(int);
@@ -476,22 +481,26 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 	free(buffer);
 }
 
-int obtener_proximo_ejecutar(){
-	sem_wait(&sem_ULTs_listos); // Espero a que haya ULTs listos
-	pthread_mutex_lock(&mutex_ready_queue);
-	int next_tid = list_get(ready_queue, 0);
-	pthread_mutex_unlock(&mutex_ready_queue);
+int obtener_proximo_ejecutar(t_process* process){
+	ordenar_cola_listos(process->READY_LIST);
+	int next_tid = list_get(process->READY_LIST, 0);
 	return next_tid;
 }
 
-void ordenar_cola_listos() {
-	estimar_ULTs_listos();
+void ordenar_cola_listos(t_list* ready_list) {
+	estimar_ULTs_listos(ready_list);
 	ordenar_por_sjf();
 }
 
-//todo esta es la cola del processa no es global
-void ordenar_por_sjf(){
-	list_sort(ready_queue, funcion_SJF);
+void estimar_ULTs_listos(t_list* ready_list) {
+	void estimar(void * item_ULT) {
+		t_suse_thread * ULT = (t_suse_thread *) item_ULT;
+		if (ULT->ejecutado_desde_estimacion) {
+			ULT->ejecutado_desde_estimacion = false;
+			estimarRafaga(ULT);
+		}
+	}
+	list_iterate(ready_list, estimar);
 }
 
 void estimarRafaga(t_suse_thread * ULT){
@@ -502,6 +511,11 @@ void estimarRafaga(t_suse_thread * ULT){
 	ULT->estimacionUltimaRafaga = estimacion;
 }
 
+//todo esta es la cola del process no es global
+void ordenar_por_sjf(){
+	list_sort(ready_queue, funcion_SJF);
+}
+
 bool funcion_SJF(void* thread1, void* thread2) {
 	t_suse_thread * ULT1 = (t_suse_thread *) thread1;
 	t_suse_thread * ULT2 = (t_suse_thread *) thread2;
@@ -509,19 +523,6 @@ bool funcion_SJF(void* thread1, void* thread2) {
 		return funcion_FIFO(ULT1, ULT2); //todo funcion_fifo
 	}
 	return ULT1->estimacionUltimaRafaga < ULT2->estimacionUltimaRafaga;
-}
-
-void estimar_ULTs_listos() {
-	void estimar(void * item_ULT) {
-		t_suse_thread * ULT = (t_suse_thread *) item_ULT;
-		if (ULT->ejecutado_desde_estimacion) {
-			ULT->ejecutado_desde_estimacion = false;
-			estimarRafaga(ULT);
-		}
-	}
-	pthread_mutex_lock(&mutex_ready_queue);
-	list_iterate(ready_queue, estimar);
-	pthread_mutex_unlock(&mutex_ready_queue);
 }
 
 

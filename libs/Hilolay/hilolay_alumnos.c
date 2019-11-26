@@ -73,7 +73,7 @@ int suse_schedule_next(){ //todo testear
 	}
 	else{
 		next = -1;
-		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", cop_next_tid) //Aca no deberia ser received_packet->codigo_operacion??
+		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", received_packet->codigo_operacion)
 	}
 
 	liberar_paquete(received_packet);

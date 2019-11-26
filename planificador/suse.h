@@ -68,15 +68,15 @@ suse_configuration get_configuracion();
 pthread_mutex_t mutex_new_queue;
 t_list* new_queue;
 
-pthread_mutex_t mutex_ready_queue;
-t_list* ready_queue;
-
 pthread_mutex_t mutex_blocked_queue;
 t_list* blocked_queue;
 
 pthread_mutex_t mutex_semaforos;
 
 pthread_mutex_t mutex_multiprog;
+
+pthread_mutex_t mutex_lista_de_process;
+t_list* lista_de_process; //todo esto serviria para ordenar fifo los programas, ver
 
 sem_t sem_ULTs_listos;
 
@@ -101,8 +101,9 @@ pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros);
 
 t_list* thread_params;
 
-void* programa_conectado_funcion_thread(void* argumentos);
+void* process_conectado_funcion_thread(void* argumentos);
 
+int obtener_proximo_ejecutar(t_process* process);
 
 
 /*
