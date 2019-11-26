@@ -159,7 +159,6 @@ void handle_conection_suse(un_socket socket_actual) {
 		break;
 		case cop_close_tid:
 			handle_close_tid(socket_actual, paquete_recibido);
-			//todo falta la funcion handle_close_tid, solo esta el close del hilo
 		break;
 		case cop_wait_sem:
 			handle_wait_sem(socket_actual, paquete_recibido);
@@ -202,7 +201,6 @@ void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
 
 void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
 {
-
 	esperar_handshake(socket, paquete_recibido, cop_close_tid);
 
 	log_info(logger, "Realice el primer handshake con hilolay\n");
@@ -224,7 +222,6 @@ void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
 
 	free(buffer);
 	liberar_paquete(paquete);
-
 }
 
 int join(un_socket socket, int tid){
@@ -387,7 +384,6 @@ int close_tid(int tid, int socket_actual){
 		break;
 
 		case E_EXECUTE:
-
 				pthread_mutex_lock(&mutex_multiprog);
 				process->EXEC_THREAD = NULL;
 				configuracion_suse.MAX_MULTIPROG --;
@@ -484,9 +480,9 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 }
 
 int obtener_proximo_ejecutar(t_process* process){
-	if (ULT_ejecutando != NULL) {
-			return ULT_ejecutando;
-		}
+	if (process->EXEC_THREAD != NULL) {
+			return process->EXEC_THREAD->tid;
+	}
 	ordenar_cola_listos(process->READY_LIST);
 
 	t_suse_thread next_ULT = list_get(process->READY_LIST, 0);
@@ -495,7 +491,7 @@ int obtener_proximo_ejecutar(t_process* process){
 	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
 
 	actualizarRafaga(next_ULT);
-	ultimo_ULT_ejecutado = ULT_ejecutando;
+	process->LAST_EXEC = next_ULT;
 	return next_tid;
 }
 
@@ -541,7 +537,8 @@ bool funcion_SJF(void* thread1, void* thread2) {
 }
 
 void actualizarRafaga(t_suse_thread * ULT) {
-	if(ULT == ultimo_ULT_ejecutado){
+	t_process* process = process_por_id(ULT->procesoId);
+	if(ULT == process->LAST_EXEC){
 		ULT->duracionRafaga++;
 	}else{
 		ULT->duracionRafaga = 1; //todo esto quizas deberia ser 0

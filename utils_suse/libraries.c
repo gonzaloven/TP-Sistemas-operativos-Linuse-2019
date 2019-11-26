@@ -13,12 +13,18 @@ pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros)
 	return thread;
 }
 
+void ejecutando_a_exit(t_suse_thread* thread, un_socket socket){
+
+
+}
+
 void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
-	t_process* process = configuracion_suse[socket];
+	t_process* process = process_por_id(socket)
 	eliminar_ULT_cola_actual(thread,process);
 	thread->estado = E_EXECUTE;
 	thread->ejecutado_desde_estimacion = true;
-	ULT_ejecutando = thread;
+	//todo aca tendria que validar que si hay un hilo ya ejecutando, tengo que ponerlo en otra cola
+	process->EXEC_THREAD = thread;
 }
 
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
@@ -35,11 +41,12 @@ void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 
 void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
 {
-	t_process* program = configuracion_suse[socket];
+	t_process* process = configuracion_suse[socket];
 
-	eliminar_ULT_cola_actual(thread,program);
+	eliminar_ULT_cola_actual(thread,process);
 	thread->estado = E_READY;
-	list_add(program->READY_LIST,thread->tid);
+	process->EXEC_THREAD = NULL;
+	list_add(process->READY_LIST,thread->tid);
 
 }
 
@@ -48,16 +55,16 @@ void bloqueado_a_listo(t_suse_thread* thread,t_process* program)
 	eliminar_ULT_cola_actual(thread,program);
 	thread->estado = E_READY;
 	list_add(program->READY_LIST,thread->tid);
-
 }
 
 
 void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket)
 {
-	t_process* program = configuracion_suse[socket];
+	t_process* process = configuracion_suse[socket];
 
-	eliminar_ULT_cola_actual(thread,program);
+	eliminar_ULT_cola_actual(thread,process);
 	thread->estado = E_BLOCKED;
+	process->EXEC_THREAD = NULL;
 	list_add(blocked_queue,thread);
 
 }
@@ -133,13 +140,9 @@ bool validar_grado_multiprogramacion()
 
 void nuevo_a_listo(t_suse_thread* ULT, int process_id)
 {
-	//todo ver de extraer esta logica
-	//Encuentro el programa
 	t_process* program = list_get(configuracion_suse->process, process_id);
 
-	//Saco el validar grado de mult. pq esta funcion ya esta adentro del mutex que valida antes. Imposible q cambie con el mutex.
-
-	list_add(program->READY_LIST, ULT->tid); //todo validar que la lista de ready de un programa tenga suse_threads adentro
+	list_add(program->READY_LIST, ULT->tid);
 
 	eliminar_ULT_cola_actual(ULT, program);
 	ULT->estado = E_READY;
