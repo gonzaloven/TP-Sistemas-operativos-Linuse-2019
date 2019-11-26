@@ -1,4 +1,5 @@
-#include "hilolay_alumnos.h"
+#include "../Hilolay/hilolay_alumnos.h"
+
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>

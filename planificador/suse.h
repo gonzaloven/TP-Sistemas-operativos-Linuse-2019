@@ -50,7 +50,8 @@ typedef struct t_process
 	t_list * ULTS; //Lista de t_suse_thread
 	int PROCESS_ID; //esto es el numero de socket
 	t_list * READY_LIST;
-	uint32_t EXEC_THREAD;
+	t_suse_thread* EXEC_THREAD;
+	t_suse_thread* LAST_EXEC;
 } t_process;
 
 typedef struct t_suse_semaforos{

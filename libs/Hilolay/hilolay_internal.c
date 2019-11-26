@@ -1,8 +1,9 @@
-#include "hilolay_internal.h"
+#include "../Hilolay/hilolay_internal.h"
 
 #include <stdio.h>
-#include "hilolay_alumnos.h"
-#include "hilolay.h"
+
+#include "../Hilolay/hilolay.h"
+#include "../Hilolay/hilolay_alumnos.h"
 
 
 /* Writes administrative info of a TCB */
