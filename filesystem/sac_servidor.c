@@ -169,8 +169,8 @@ Function fuse_invoke_function(Function *f)
 			func_ret = sac_server_open(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_READ:
-			log_debug(fuse_logger,"Read llamado with args -> arg[0] %d  arg[1] %d arg[2] %d", f->args[0].value.val_charptr, f->args[1].value.val_sizet, f->args[2].value.val_u32);
-			func_ret = sac_server_read(f->args[0].value.val_charptr, f->args[1].value.val_sizet, f->args[2].value.val_u32);
+			log_debug(fuse_logger,"Read llamado with -> Path: %s  Size: %d Offset: %d", f->args[2].value.val_charptr, f->args[0].value.val_sizet, f->args[1].value.val_u32);
+			func_ret = sac_server_read(f->args[2].value.val_charptr, f->args[0].value.val_sizet, f->args[1].value.val_u32);
 			break;
 		case FUNCTION_OPENDIR:
 			log_debug(fuse_logger,"Opendir llamado");
@@ -219,12 +219,6 @@ Function sac_server_open(char* path){
 
 Function sac_server_opendir(char* path){
 	return validarSiExiste(path, FUNCTION_RTA_OPENDIR);
-}
-
-Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
-	//TODO
-	Function f;
-	return f;
 }
 
 Function sac_server_getattr(char* path){
@@ -286,7 +280,56 @@ Function sac_server_getattr(char* path){
 	return fsend;
 }
 
+/*void leer_primer_puntero_completo(int nodo, size_t size, uint32_t offset){
+	int punteroInicial = ceil(offset / (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) - 1;
+	int punteroABloqueInicial = ceil((offset % (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) / BLOQUE_SIZE) - 1;
+	int byteDelBloqueInicial = ((offset % (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) % BLOQUE_SIZE) - 1;
+
+	ptrGBloque bloqueDePunterosPosicionInicial = tablaDeNodos[nodo].indirect_blocks_array[punteroInicial];
+	punterosBloquesDatos *bloqueDePunterosDatosInicial = (punterosBloquesDatos *) (disco + bloqueDePunterosPosicionInicial);
+
+	for(int i = punteroABloqueInicial; i < PUNTEROS_A_BLOQUES_DATOS; i++){
+
+		ptrGBloque bloqueDeDatosPosicionInicial = bloqueDePunterosDatosInicial->punteros_a_bloques[i];
+
+		GBlock *bloque = (GBlock *) (disco + bloqueDeDatosPosicionInicial);
+
+		for(int i = byteDelBloqueInicial; i < )
+	}
+}*/
+
+/*int leer_archivo(int nodo, size_t size, uint32_t offset){
+
+	int punteroFinal = ceil((offset + size) / (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) - 1;
+	int punteroABloqueFinal = ceil(((offset + size) % (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) / BLOQUE_SIZE) - 1;
+	int byteDelBloqueFinal = (((offset + size) % (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) % BLOQUE_SIZE) - 1;
+
+	//validar que el tamanio no sea mas grande que lo que tiene el archivo
+
+}*/
+
 Function sac_server_read(char* path, size_t size, uint32_t offset){
+	Message msg;
+	Function fsend;
+	int sizeRespuesta;
+
+	char* buffer[size];
+	memset(buffer, 0, size);
+
+	sizeRespuesta = leer_archivo(*buffer, path, size, offset);
+
+	fsend.type = FUNCTION_RTA_READ;
+	fsend.num_args = 1;
+	fsend.args[0].type = VAR_CHAR_PTR;
+	fsend.args[0].size = sizeRespuesta;
+	fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
+	memcpy(fsend.args[0].value.val_charptr, buffer, fsend.args[0].size);
+
+	return fsend;
+}
+
+Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
+	//TODO
 	Function f;
 	return f;
 }

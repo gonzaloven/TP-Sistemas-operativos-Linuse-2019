@@ -361,3 +361,190 @@ Function validarSiExiste(char* path, FuncType tipoFuncion){
 
 	return fsend;
 }
+
+int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
+	//log_info(logger, "Reading: Path: %s - Size: %d - Offset %d",path, size, offset);
+	unsigned int nodoDelArchivo, bloque_punteros, num_bloque_datos;
+	unsigned int bloque_a_buscar;
+	struct sac_server_gfile *node;
+	ptrGBloque *pointer_block;
+	char *data_block;
+	size_t tamanio = size;
+	int respuesta;
+
+	nodoDelArchivo = determine_nodo(path);
+
+	node = tablaDeNodos + nodoDelArchivo;
+
+	//pthread_rwlock_rdlock(&rwlock); //Toma un lock de lectura.
+	//log_lock_trace(logger, "Read: Toma lock lectura. Cantidad de lectores: %d", rwlock.__data.__nr_readers);
+
+	if(node->file_size <= offset){
+		//log_error(logger, "Se intenta leer un offset mayor o igual que el tamanio de archivo. Se retorna size 0. File: %s, Size: %d", path, node->file_size);
+		// TODO enviar error al cliente
+		respuesta = 0;
+		goto finalizar;
+	} else if (node->file_size <= (offset + size)){
+		//tamanio = size = ((node->file_size) - (offset));
+		// TODO enviar error al cliente
+		//log_error(logger, "Se intenta leer una posicion mayor o igual que el tamanio de archivo. Se retornaran %d bytes. File: %s, Size: %d", size, path, node->file_size);
+		respuesta = 0;
+		goto finalizar;
+	}
+
+	for (bloque_punteros = 0; bloque_punteros < BLKINDIRECT; bloque_punteros++){
+
+		// Chequea el offset y lo acomoda para leer lo que realmente necesita
+		if (offset > BLOQUE_SIZE * 1024){
+			offset -= (BLOQUE_SIZE * 1024);
+			continue;
+		}
+
+		bloque_a_buscar = (node->indirect_blocks_array)[bloque_punteros];	// Ubica el nodo de punteros a nodos de datos, es relativo al nodo 0: Header.
+		bloque_a_buscar -= (1 + (bloqueInicioTablaDeNodos - 1) + MAX_NUMBER_OF_FILES);	// Acomoda el nodo de punteros a nodos de datos, es relativo al bloque de datos.
+		pointer_block =(ptrGBloque *) &(data_block_start[bloque_a_buscar]);		// Apunta al nodo antes ubicado. Lo utiliza para saber de donde leer los datos.
+		// Recorre el bloque de punteros correspondiente.
+		for (num_bloque_datos = 0; num_bloque_datos < 1024; num_bloque_datos++){
+		// Chequea el offset y lo acomoda para leer lo que realmente necesita
+			if (offset >= BLOQUE_SIZE){
+				offset -= BLOQUE_SIZE;
+				continue;
+			}
+
+			bloque_a_buscar = pointer_block[num_bloque_datos]; 	// Ubica el nodo de datos correspondiente. Relativo al nodo 0: Header.
+			bloque_a_buscar -= (1 + (bloqueInicioTablaDeNodos - 1) + MAX_NUMBER_OF_FILES);	// Acomoda el nodo, haciendolo relativo al bloque de datos.
+			data_block = (char *) &(data_block_start[bloque_a_buscar]);
+
+			// Corre el offset hasta donde sea necesario para poder leer lo que quiere.
+			if (offset > 0){
+				data_block += offset;
+				offset = 0;
+			}
+
+			if (tamanio < BLOQUE_SIZE){
+				memcpy(buffer, data_block, tamanio);
+				buffer = &(buffer[tamanio]);
+				tamanio = 0;
+				break;
+			} else {
+				memcpy(buffer, data_block, BLOQUE_SIZE);
+				tamanio -= BLOQUE_SIZE;
+				buffer = &(buffer[BLOQUE_SIZE]);
+				if (tamanio == 0) break;
+			}
+
+		}
+
+		if (tamanio == 0) break;
+	}
+	respuesta = size;
+
+	finalizar:
+	//pthread_rwlock_unlock(&rwlock); //Devuelve el lock de lectura.
+	//log_lock_trace(logger, "Read: Libera lock lectura. Cantidad de lectores: %d", rwlock.__data.__nr_readers);
+	//log_trace(logger, "Terminada lectura.");
+	return respuesta;
+}
+
+int escribir_archivo (char* buffer, char *path, size_t size, uint32_t offset){
+	//log_trace(logger, "Writing: Path: %s - Size: %d - Offset %d", path, size, offset);
+
+	int nodoDelArchivo = determine_nodo(path);
+	int nodo_libre_nuevo;
+	struct grasa_file_t *node;
+	char *data_block;
+	size_t tam = size, file_size, space_in_block, offset_in_block = offset % BLOCKSIZE;
+	off_t off = offset;
+	int *n_pointer_block = malloc(sizeof(int)), *n_data_block = malloc(sizeof(int));
+	ptrGBloque *pointer_block;
+	int res = size;
+
+	// Ubica el nodo correspondiente al archivo
+	node = tablaDeNodos + nodoDelArchivo;
+
+	if ((file_size + size) >= THELARGESTFILE) return -EFBIG;
+
+	// Toma un lock de escritura.
+			log_lock_trace(logger, "Write: Pide lock escritura. Escribiendo: %d. En cola: %d.", rwlock.__data.__writer, rwlock.__data.__nr_writers_queued);
+	pthread_rwlock_wrlock(&rwlock);
+			log_lock_trace(logger, "Write: Recibe lock escritura.");
+
+	// Guarda tantas veces como sea necesario, consigue nodos y actualiza el archivo.
+	while (tam != 0){
+
+		// Actualiza los valores de espacio restante en bloque.
+		space_in_block = BLOCKSIZE - (file_size % BLOCKSIZE);
+		if (space_in_block == BLOCKSIZE) (space_in_block = 0); // Porque significa que el bloque esta lleno.
+		if (file_size == 0) space_in_block = BLOCKSIZE; /* Significa que el archivo esta recien creado y ya tiene un bloque de datos asignado */
+
+		// Si el offset es mayor que el tamanio del archivo mas el resto del bloque libre, significa que hay que pedir un bloque nuevo
+		// file_size == 0 indica que es un archivo que recien se comienza a escribir, por lo que tiene un tratamiento distinto (ya tiene un bloque de datos asignado).
+		if ((off >= (file_size + space_in_block)) & (file_size != 0)){
+
+			// Si no hay espacio en el disco, retorna error.
+			if (bitmap_free_blocks == 0) return -ENOSPC;
+
+			// Obtiene un bloque libre para escribir.
+			new_free_node = get_node();
+			if (new_free_node < 0) goto finalizar;
+
+			// Agrega el nodo al archivo.
+			res = add_node(node, new_free_node);
+			if (res != 0) goto finalizar;
+
+			// Lo relativiza al data block.
+			new_free_node -= (GHEADERBLOCKS + NODE_TABLE_SIZE + BITMAP_BLOCK_SIZE);
+			data_block = (char*) &(data_block_start[new_free_node]);
+
+			// Actualiza el espacio libre en bloque.
+			space_in_block = BLOCKSIZE;
+
+		} else {
+			// Ubica a que nodo le corresponderia guardar el dato
+			set_position(n_pointer_block, n_data_block, file_size, off);
+
+			//Ubica el nodo a escribir.
+			*n_pointer_block = node->blk_indirect[*n_pointer_block];
+			*n_pointer_block -= (GHEADERBLOCKS + NODE_TABLE_SIZE + BITMAP_BLOCK_SIZE);
+			pointer_block = (ptrGBloque*) &(data_block_start[*n_pointer_block]);
+			*n_data_block = pointer_block[*n_data_block];
+			*n_data_block -= (GHEADERBLOCKS + NODE_TABLE_SIZE + BITMAP_BLOCK_SIZE);
+			data_block = (char*) &(data_block_start[*n_data_block]);
+		}
+
+		// Escribe en ese bloque de datos.
+		if (tam >= BLOCKSIZE){
+			memcpy(data_block, buf, BLOCKSIZE);
+			if ((node->file_size) <= (off)) file_size = node->file_size += BLOCKSIZE;
+			buf += BLOCKSIZE;
+			off += BLOCKSIZE;
+			tam -= BLOCKSIZE;
+			offset_in_block = 0;
+		} else if (tam <= space_in_block){ /*Hay lugar suficiente en ese bloque para escribir el resto del archivo */
+			memcpy(data_block + offset_in_block, buf, tam);
+			if (node->file_size <= off) file_size = node->file_size += tam;
+			else if (node->file_size <= (off + tam)) file_size = node->file_size += (off + tam - node->file_size);
+			tam = 0;
+		} else { /* Como no hay lugar suficiente, llena el bloque y vuelve a buscar uno nuevo */
+			memcpy(data_block + offset_in_block, buf, space_in_block);
+			file_size = node->file_size += space_in_block;
+			buf += space_in_block;
+			off += space_in_block;
+			tam -= space_in_block;
+			offset_in_block = 0;
+		}
+
+	}
+
+	node->m_date= time(NULL);
+
+	res = size;
+
+	finalizar:
+	// Devuelve el lock de escritura.
+	pthread_rwlock_unlock(&rwlock);
+			log_lock_trace(logger, "Write: Devuelve lock escritura. En cola: %d", rwlock.__data.__nr_writers_queued);
+			log_trace(logger, "Terminada escritura.");
+	return res;
+
+}

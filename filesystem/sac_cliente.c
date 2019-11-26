@@ -194,21 +194,21 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	
 	Function fsend;
 
+	fsend.args[0].type = VAR_SIZE_T;
+	fsend.args[0].size = sizeof(size_t);
+	fsend.args[0].value.val_sizet = size;
+
+	fsend.args[1].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	fsend.args[1].size = sizeof(uint32_t);
+	fsend.args[1].value.val_u32 = offset;
+
+	fsend.args[2].type = VAR_CHAR_PTR;
+	fsend.args[2].size = strlen(path) + 1;
+	fsend.args[2].value.val_charptr = malloc(fsend.args[2].size);
+	memcpy(fsend.args[2].value.val_charptr, path, fsend.args[2].size);
+
 	fsend.type = FUNCTION_READ;
 	fsend.num_args = 3;
-
-	fsend.args[0].type = VAR_CHAR_PTR;
-	fsend.args[0].size = strlen(path) + 1;
-	fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
-	memcpy(fsend.args[0].value.val_charptr, path, fsend.args[0].size);
-
-	fsend.args[1].type = VAR_SIZE_T;
-	fsend.args[1].size = sizeof(size_t);
-	fsend.args[1].value.val_sizet = size;
-
-	fsend.args[2].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
-	fsend.args[2].size = sizeof(uint32_t);
-	fsend.args[2].value.val_u32 = offset;
 
 	if(send_call(&fsend) == -1){
 		return EXIT_FAILURE;
@@ -227,6 +227,15 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	}
 
 	int tamanioLectura = freceive->args[0].size;
+
+	if(tamanioLectura == 0){
+		free(freceive->args[0].value.val_charptr);
+		freceive->args[0].value.val_charptr = NULL;
+		free(freceive);
+		freceive = NULL;
+
+		return tamanioLectura;
+	}
 
 	memcpy(buf, freceive->args[0].value.val_charptr, tamanioLectura);
 
