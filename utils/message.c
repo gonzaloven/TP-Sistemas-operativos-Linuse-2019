@@ -195,8 +195,9 @@ int message_function_encode(Message *msg,void *buffer,size_t buffer_size)
 	
 	for(nargs=0;nargs < f->num_args;nargs++)
 	{
-		 function_arg_encode(f->args[nargs],cursor,buffer_size);
-		cursor += sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);	
+		cursor += function_arg_encode(f->args[nargs],cursor,buffer_size);
+
+		//cursor += sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);
 	}
 
 	return cursor - buffer;
@@ -228,8 +229,8 @@ int message_function_decode(void *buffer,size_t buffer_size,Message *result)
 
 	for(nargs = 0;nargs < f->num_args;nargs++)
 	{
-		function_arg_decode(cursor,buffer_size,&f->args[nargs]);	
-		cursor += sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);	
+		cursor += function_arg_decode(cursor,buffer_size,&f->args[nargs]);
+		//cursor += sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);
 	}
 	result->data = (void *)f;
 	return cursor - buffer;

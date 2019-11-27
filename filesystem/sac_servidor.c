@@ -199,8 +199,8 @@ Function fuse_invoke_function(Function *f)
 			func_ret = sac_server_mknod(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_WRITE:
-			log_debug(fuse_logger,"Write llamado with -> Path: %s Pide Escribir: %s Size: %d Offset: %d", f->args[3].value.val_charptr, f->args[1].value.val_charptr, f->args[0].value.val_sizet, f->args[2].value.val_u32);
-			func_ret = sac_server_write(f->args[3].value.val_charptr, f->args[1].value.val_charptr, f->args[0].value.val_sizet, f->args[2].value.val_u32);
+			log_debug(fuse_logger,"Write llamado with -> Path: %s Pide Escribir: %s Size: %d Offset: %d", f->args[1].value.val_charptr, f->args[2].value.val_charptr, f->args[2].size, f->args[0].value.val_u32);
+			func_ret = sac_server_write(f->args[1].value.val_charptr, f->args[2].value.val_charptr, f->args[2].size, f->args[0].value.val_u32);
 			break;
 		case FUNCTION_UNLINK:
 			log_debug(fuse_logger,"Unlink llamado");
