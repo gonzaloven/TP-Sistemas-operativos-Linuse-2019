@@ -287,7 +287,7 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	memcpy(f.args[3].value.val_charptr, path, f.args[3].size);
 
 	f.args[1].type = VAR_CHAR_PTR;
-	f.args[1].size = strlen(buf) + 1;
+	f.args[1].size = size;
 	f.args[1].value.val_charptr = malloc(f.args[1].size);
 	memcpy(f.args[1].value.val_charptr, buf, f.args[1].size);
 

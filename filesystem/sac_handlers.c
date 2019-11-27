@@ -402,8 +402,8 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 		//tamanio = size = ((node->file_size) - (offset));
 		// TODO enviar error al cliente
 		//log_error(logger, "Se intenta leer una posicion mayor o igual que el tamanio de archivo. Se retornaran %d bytes. File: %s, Size: %d", size, path, node->file_size);
-		respuesta = 0;
-		goto finalizar;
+		size = node->file_size - offset;
+		tamanio = size;
 	}
 
 	for (bloque_punteros = 0; bloque_punteros < BLKINDIRECT; bloque_punteros++){
@@ -414,9 +414,9 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 			continue;
 		}
 
-		bloque_a_buscar = (node->indirect_blocks_array)[bloque_punteros];	// Ubica el nodo de punteros a nodos de datos, es relativo al nodo 0: Header.
-		bloque_a_buscar -= (1 + (bloqueInicioTablaDeNodos - 1) + MAX_NUMBER_OF_FILES);	// Acomoda el nodo de punteros a nodos de datos, es relativo al bloque de datos.
-		pointer_block =(ptrGBloque *) &(data_block_start[bloque_a_buscar]);		// Apunta al nodo antes ubicado. Lo utiliza para saber de donde leer los datos.
+		bloque_a_buscar = node->indirect_blocks_array[bloque_punteros];	// Ubica el nodo de punteros a nodos de datos, es relativo al nodo 0: Header.
+		punterosBloquesDatos *bloqueDePunterosDatos = (punterosBloquesDatos *) (disco + bloque_a_buscar); // Acomoda el nodo de punteros a nodos de datos, es relativo al bloque de datos.
+		ptrGBloque bloqueDeDatos = bloqueDePunterosDatos->punteros_a_bloques[bloque_a_buscar];// Apunta al nodo antes ubicado. Lo utiliza para saber de donde leer los datos.
 		// Recorre el bloque de punteros correspondiente.
 		for (num_bloque_datos = 0; num_bloque_datos < 1024; num_bloque_datos++){
 		// Chequea el offset y lo acomoda para leer lo que realmente necesita
@@ -425,9 +425,8 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 				continue;
 			}
 
-			bloque_a_buscar = pointer_block[num_bloque_datos]; 	// Ubica el nodo de datos correspondiente. Relativo al nodo 0: Header.
-			bloque_a_buscar -= (1 + (bloqueInicioTablaDeNodos - 1) + MAX_NUMBER_OF_FILES);	// Acomoda el nodo, haciendolo relativo al bloque de datos.
-			data_block = (char *) &(data_block_start[bloque_a_buscar]);
+			bloque_a_buscar = bloqueDePunterosDatos->punteros_a_bloques[num_bloque_datos]; 	// Ubica el nodo de datos correspondiente. Relativo al nodo 0: Header.
+			data_block = (char *) (disco + bloque_a_buscar)->bytes; // Acomoda el nodo, haciendolo relativo al bloque de datos.
 
 			// Corre el offset hasta donde sea necesario para poder leer lo que quiere.
 			if (offset > 0){
@@ -590,7 +589,7 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 
 		// Si el offset es mayor que el tamanio del archivo mas el resto del bloque libre, significa que hay que pedir un bloque nuevo
 		// file_size == 0 indica que es un archivo que recien se comienza a escribir, por lo que tiene un tratamiento distinto (ya tiene un bloque de datos asignado).
-		if ((off >= (file_size + space_in_block)) || (file_size == 0)){
+		if ((off >= (file_size + space_in_block)) & (file_size != 0)){
 
 			// Si no hay espacio en el disco, retorna error.
 			if (cantidad_bloques_libres() == 0) return -ENOSPC;
@@ -604,8 +603,7 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 			if (respuesta != 0) goto finalizar;
 
 			// Lo relativiza al data block.
-			nodo_libre_nuevo -= bloqueInicioBloquesDeDatos;
-			data_block = (char*) bloquesDeDatos[nodo_libre_nuevo].bytes;
+			data_block = (char *) (disco + nodo_libre_nuevo)->bytes;
 
 			// Actualiza el espacio libre en bloque.
 			space_in_block = BLOQUE_SIZE;
@@ -616,11 +614,9 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 
 			//Ubica el nodo a escribir.
 			*n_pointer_block = node->indirect_blocks_array[*n_pointer_block];
-			*n_pointer_block -= bloqueInicioBloquesDeDatos;
-			pointer_block = (ptrGBloque*) &(bloquesDeDatos[*n_pointer_block]);
-			*n_data_block = pointer_block[*n_data_block];
-			*n_data_block -= bloqueInicioBloquesDeDatos;
-			data_block = (char*) bloquesDeDatos[*n_data_block].bytes;
+			punterosBloquesDatos *bloqueDePunterosDatos = (punterosBloquesDatos *) (disco + *n_pointer_block);
+			ptrGBloque bloqueDeDatos = bloqueDePunterosDatos->punteros_a_bloques[*n_data_block];
+			data_block = (char *) (disco + bloqueDeDatos)->bytes;
 		}
 
 		// Escribe en ese bloque de datos.

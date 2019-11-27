@@ -331,10 +331,10 @@ Function sac_server_read(char* path, size_t size, uint32_t offset){
 	Function fsend;
 	int sizeRespuesta;
 
-	char* buffer[size];
+	char buffer[size];
 	memset(buffer, 0, size);
 
-	sizeRespuesta = leer_archivo(*buffer, path, size, offset);
+	sizeRespuesta = leer_archivo(buffer, path, size, offset);
 
 	fsend.type = FUNCTION_RTA_READ;
 	fsend.num_args = 1;
