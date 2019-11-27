@@ -97,6 +97,11 @@ int determine_nodo(char *path){
 		nodoUltimoPadre = buscar_nodo_por_nombre(filenameBuscado, nodoUltimoPadre);
 
 		if(nodoUltimoPadre == -1){
+			for(int y=0; y <= i; y++){
+				free(listaSpliteada[y]);
+				listaSpliteada[y] = NULL;
+			}
+
 			free(listaSpliteada);
 			listaSpliteada = NULL;
 			return -1;
@@ -105,8 +110,11 @@ int determine_nodo(char *path){
 		}
 	}
 
-	for(int y=0; y<dimListaSpliteada; y++) // libero cada integrante de la matriz
-		free(listaSpliteada[y]);
+	for(int y=0; y<dimListaSpliteada; y++){
+		free(listaSpliteada[y]); // libero cada integrante de la matriz
+		listaSpliteada[y] = NULL;
+	}
+
 
 	free(listaSpliteada);
 	listaSpliteada = NULL;
@@ -277,8 +285,10 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	}
 
 	if(dimListaSpliteada > 1){
-		parentDirPath = dirname(strdup(path));
+		char* pathduplicado = strdup(path);
+		parentDirPath = dirname(pathduplicado);
 		nodoPadre = determine_nodo(parentDirPath);
+		free(pathduplicado);
 	}
 
 	GFile *nodoVacio = tablaDeNodos + currNode;
@@ -312,7 +322,6 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 		free(listaSpliteada[y]);
 
 	free(listaSpliteada);
-	free(path);
 	return 0;
 }
 
