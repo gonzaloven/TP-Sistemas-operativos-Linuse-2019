@@ -11,78 +11,46 @@
 frame *main_memory = NULL;
 
 t_list *program_list = NULL;
-t_list *page_list = NULL;
 t_list *segment_list = NULL;
 t_log *metricas_logger = NULL;
 
 int PAGE_SIZE = 0;
+int TOTAL_FRAME_NUM = 0;
 
 void muse_main_memory_init(int memory_size, int page_size)
 {
 	int i;
-	int cant_frames_totales;
-	int cant_pags_totales;
 	int curr_page_num;	
 	void *mem_ptr = main_memory;	
 	
 	PAGE_SIZE = page_size;
 	main_memory = (frame *) malloc(memory_size); // aka UPCM
-	cant_frames_totales = (memory_size / page_size);
-	cant_pags_totales = (memory_size / page_size);	//TODO Esto estaría mal	
+	TOTAL_FRAME_NUM = (memory_size / PAGE_SIZE);	
 
 	program_list = list_create();
-	page_list = list_create();
 	segment_list = list_create();
 
 	metricas_logger = log_create(MUSE_LOG_PATH, "METRICAS", true, LOG_LEVEL_TRACE);
 
 	printf("Dividiento la memoria en frames...\n");
-	for(i=0; i<cant_frames_totales; i++)
+	for(i=0; i < TOTAL_FRAME_NUM; i++)
 	{	
 		main_memory[i].metadata.is_free = true ;
 		main_memory[i].metadata.size = 0;
-		main_memory[i].data = mem_ptr + i*page_size; 
-		// supongamos que la main_memory[0] apunta a la posicion 0 en memoria
-		// y que los frames son de 32 bytes
+		main_memory[i].data = mem_ptr + i*PAGE_SIZE; 
+		// supongamos que los frames son de 32 bytes
 		// main_memory[0].data va a ser igual a 0 + 0 * 32 = 0
 		// main_memory[1].data va a ser igual a 0 + 1 * 32 = 32
 		//osea data vendría a ser la base de los frames
 	}		
 
-	printf("Inicializando tabla de paginas...\n");
-	page *pag = (page *) malloc(page_size); //cant_pags_totales se cambió por page_size
-	
-	for(curr_page_num=0; curr_page_num < cant_pags_totales; curr_page_num++)
-	{
-		/*	Se modificó xq según lo que había hecho el otro flaco:
-
-		pag->is_present = true;
-		pag->page_num = curr_page_num;
-		pag->fr = &main_memory[i];
-		curr_page_num += i;
-		list_add(page_list, pag);
-
-		La página 0 apunta al frame &main_memory[0], la próxima página será:
-		La página 1 apunta al frame &main_memory[1], la próxima página será:
-		La página 2 apunta al frame &main_memory[2], la próxima página será:
-		La página 4 apunta al frame &main_memory[3], la próxima página será:
-		La página 7 apunta al frame &main_memory[4], ???
-		*/
-
-		pag->is_present = true;
-		pag->page_num = curr_page_num;
-		pag->fr = &main_memory[curr_page_num];		
-		list_add(page_list, pag);
-	}
-
 	log_trace(metricas_logger, "Cantidad Total de Memoria:%d ", memory_size);
-	log_trace(metricas_logger, "Cantidad Total de Frames:%d ", cant_frames_totales);
+	number_of_free_frames();	
 }
 
 void muse_main_memory_stop()
 {
 	free(main_memory);
-	list_destroy(page_list);
 	list_destroy(program_list);
 	list_destroy(segment_list);
 }
@@ -100,16 +68,39 @@ int search_program(uint32_t pid)
 	return -1;
 }
 
-page *find_free_page()
-{
-	int i=0;
-	int page_list_size = list_size(page_list)
-	page *pag;
-	while(i < page_list_size)
-	{
-		pag = list_get(page_list, i);
-		if(pag->fr->metadata.is_free) {return pag;}
+void number_of_free_frames(){
+	int memoria_libre = TOTAL_FRAME_NUM * PAGE_SIZE; //al principio arranca siendo = memory_size
+	int frames_libres = 0;
+
+	for(i=0; i < TOTAL_FRAME_NUM; i++)
+	{	
+		frames_libres += (main_memory[i].metadata.is_free == true);
+		memoria_libre -= main_memory[i].metadata.size; 
 	}
+
+	log_trace(metricas_logger, "Cantidad de Memoria libre:%d ", memoria_libre);
+	log_trace(metricas_logger, "Cantidad Total de Frames:%d ", TOTAL_FRAME_NUM);	
+	log_trace(metricas_logger, "Cantidad de Frames libres:%d ", frames_libres);
+
+	//return frames_libres;
+}
+
+page *find_free_frame()
+{
+	int curr_frame_num;
+
+	page *pag = (page *) malloc(PAGE_SIZE); 
+
+	for(curr_frame_num=0; curr_frame_num < TOTAL_FRAME_NUM; curr_frame_num++)
+	{	
+		if (main_memory[i].metadata.is_free == true){
+			pag->is_present = true;
+			pag->page_num = curr_frame_num;
+			pag->fr = &main_memory[curr_frame_num];	
+			return pag;
+		}
+	}
+	printf("Loco, nos quedamos sin frames libres");
 	return NULL;
 }
 
