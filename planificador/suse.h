@@ -26,43 +26,6 @@ typedef struct suse_configuration
 	uint32_t ACTUAL_MULTIPROG;
 }suse_configuration;
 
-enum estados {
-	E_READY = 1,
-	E_EXECUTE = 2,
-	E_BLOCKED = 3,
-	E_EXIT = 4,
-	E_NEW = 5 //todo ver si es necesario
-};
-
-typedef struct {
-	int tid;
-	int estado;
-	int procesoId;
-	float duracionRafaga;
-	float estimacionUltimaRafaga;
-	bool ejecutado_desde_estimacion;
-	t_list* joinedBy;
-	t_list* joinTo;
-} t_suse_thread;
-
-typedef struct t_process
-{
-	t_list * ULTS; //Lista de t_suse_thread
-	int PROCESS_ID; //esto es el numero de socket
-	t_list * READY_LIST;
-	t_suse_thread* EXEC_THREAD;
-	t_suse_thread* LAST_EXEC;
-} t_process;
-
-typedef struct t_suse_semaforos{
-	char* NAME;
-	uint32_t INIT;
-	uint32_t MAX;
-	uint32_t VALUE;
-	t_list * BLOCKED_LIST;
-}t_suse_semaforos;
-
-
 suse_configuration configuracion_suse;
 suse_configuration get_configuracion();
 
@@ -86,8 +49,6 @@ t_list* lista_de_process; //todo esto serviria para ordenar fifo los programas, 
 sem_t sem_ULTs_listos;
 
 t_list* exit_queue;
-
-bool validar_grado_multiprogramacion();
 
 t_process * generar_programa(int socket_hilolay);
 

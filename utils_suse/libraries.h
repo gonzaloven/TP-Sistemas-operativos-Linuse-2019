@@ -56,6 +56,43 @@ typedef struct {
 	void * data;
 } t_paquete;
 
+enum estados {
+	E_READY = 1,
+	E_EXECUTE = 2,
+	E_BLOCKED = 3,
+	E_EXIT = 4,
+	E_NEW = 5 //todo ver si es necesario
+};
+
+typedef struct t_suse_thread{
+	int tid;
+	int estado;
+	int procesoId;
+	float duracionRafaga;
+	float estimacionUltimaRafaga;
+	bool ejecutado_desde_estimacion;
+	t_list* joinedBy;
+	t_list* joinTo;
+} t_suse_thread;
+
+typedef struct t_process
+{
+	t_list * ULTS; //Lista de t_suse_thread
+	int PROCESS_ID; //esto es el numero de socket
+	t_list * READY_LIST;
+	t_suse_thread* EXEC_THREAD;
+	t_suse_thread* LAST_EXEC;
+} t_process;
+
+typedef struct t_suse_semaforos{
+	char* NAME;
+	uint32_t INIT;
+	uint32_t MAX;
+	uint32_t VALUE;
+	t_list * BLOCKED_LIST;
+}t_suse_semaforos;
+
+
 
 /**	@NAME: conectar_a
  * 	@DESC: Intenta conectarse.

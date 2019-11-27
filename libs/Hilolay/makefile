@@ -1,10 +1,11 @@
 CC:= gcc
 TARGET:= libhilolay.so
 UTILS:= ../../utils/
-INCDIR:= -I$(UTILS)
-CFLAGS:= -g -c -fpic
-SRCS:= hilolay_alumnos.c $(UTILS)network.c $(UTILS)message.c $(UTILS)semaphore.c
-LIBFLAGS:= -shared -o
+UTILS_SUSE:=../../utils_suse/
+INCDIR:= -I$(UTILS) -I$(UTILS_SUSE)
+CFLAGS:= -g -c -fpic 
+SRCS:= hilolay_alumnos.c $(UTILS_SUSE)libraries.c
+LIBFLAGS:= -shared -o -lcommons
 OBJS:= hilolay.o
 
 #all

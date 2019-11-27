@@ -1,29 +1,17 @@
 #include "hilolay_alumnos.h"
+#include "libraries.h"
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#include <utils/network.h>
-#include <utils/message.h>
+#include <stdbool.h>
 
 //todo no se si cada vez que esperamos una respuesta hay que fijarse de que cop viene por las dudas
-static struct hilolay_operations hiloops = {
-		.suse_create = &suse_create,
-		.suse_schedule_next = &suse_schedule_next,
-		//.suse_join = &suse_join, //todo hacer el join desde hilolay
-		.suse_close = &suse_close,
-		.suse_wait = &suse_wait,
-		.suse_signal = &suse_signal
-
-};
 
 int socket_suse = 0; //todo verificar si hay que conectarse aca en la global o basta con hacerlo en la funcion
 int master_thread = 0;
 
-void hilolay_init(void){
-	log_info(logger, "Ejecutando hilolay_init... \n");
-	init_internal(&hiloops);
-	conectar_con_suse();
-}
+char* log_path = "../logs/hilolay_alumnos_logs.txt";
+logger = log_create(log_path, "Hilolay Alumnos Logs", 1, 1);
 
 void conectar_con_suse() {
 	socket_suse = conectar_a(configuracion_hilolay.SUSE_IP ,configuracion_hilolay.SUSE_PORT);
@@ -36,12 +24,12 @@ void conectar_con_suse() {
 	serializar_int(buffer, &desp, 0);
 	enviar(socket_suse, cop_handshake_hilolay_suse, tamanio_buffer, buffer);
 	log_info(logger, "Envie un mensaje (0) a SUSE. \n");
-
 }
 
 int suse_create(int master_thread){
 	log_info(logger, "Ejecutando suse_create... \n");
 	bool result = realizar_handshake(socket_suse, cop_suse_create);
+
 
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
@@ -79,7 +67,7 @@ int suse_schedule_next(){ //todo testear
 	}
 	else{
 		next = -1;
-		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", received_packet->codigo_operacion)
+		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", received_packet->codigo_operacion);
 	}
 
 	liberar_paquete(received_packet);
@@ -132,7 +120,8 @@ int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructur agrega
 	serializar_valor(sem_name); //todo ver si el sem_name va con & o no
 	enviar(socket_suse, cop_wait_sem, tamanio_buffer, buffer);¿
 	free(buffer);
-	log_info(logger, "Enviando a hacer un wait del sem %s del thread %d. \n", sem_name, tid);
+	log_info(logger, "Enviando a hacer un wait del sem %s", sem_name);
+	log_info(logger, "del thread %i. \n", tid);
 
 	//repuesta de suse que decremento el semaforo ok
 	t_paquete* received_packet = recibir(socket_suse);
@@ -177,4 +166,19 @@ hilolay_alumnos_configuracion get_configuracion_hilolay() {
 	return configuracion_hilolay;
 }
 
+static struct hilolay_operations hiloops = {
+		.suse_create = &suse_create,
+		.suse_schedule_next = &suse_schedule_next,
+		.suse_join = &suse_join,
+		.suse_close = &suse_close,
+		.suse_wait = &suse_wait,
+		.suse_signal = &suse_signal
+
+};
+
+void hilolay_init(void){
+	log_info(logger, "Ejecutando hilolay_init... \n");
+	init_internal(&hiloops);
+	conectar_con_suse();
+}
 
