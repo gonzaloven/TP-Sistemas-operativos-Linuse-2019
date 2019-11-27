@@ -187,7 +187,7 @@ Function fuse_invoke_function(Function *f)
 			break;
 		case FUNCTION_READ:
 			log_debug(fuse_logger,"Read llamado with -> Path: %s  Size: %d Offset: %d", f->args[2].value.val_charptr, f->args[0].value.val_sizet, f->args[1].value.val_u32);
-			func_ret = sac_server_read(f->args[2].value.val_charptr, f->args[0].value.val_sizet, f->args[1].value.val_u32);
+			func_ret = sac_server_read(f->args[1].value.val_charptr, f->args[1].size, f->args[0].value.val_u32);
 			break;
 		case FUNCTION_OPENDIR:
 			log_debug(fuse_logger,"Opendir llamado");
@@ -448,19 +448,19 @@ void liberarMemoria(Function* f){
 		case FUNCTION_RMDIR:
 		case FUNCTION_RTA_READ:
 		case FUNCTION_RTA_READDIR:
+		case FUNCTION_RTA_WRITE:
 			free(f->args[0].value.val_charptr);
 			f->args[0].value.val_charptr = NULL;
 			break;
 		case FUNCTION_READ:
-			free(f->args[2].value.val_charptr);
-			f->args[2].value.val_charptr = NULL;
-			break;
-		case FUNCTION_WRITE:
-			free(f->args[0].value.val_charptr);
-			f->args[0].value.val_charptr = NULL;
-			break;
 			free(f->args[1].value.val_charptr);
 			f->args[1].value.val_charptr = NULL;
+			break;
+		case FUNCTION_WRITE:
+			free(f->args[1].value.val_charptr);
+			f->args[1].value.val_charptr = NULL;
+			free(f->args[2].value.val_charptr);
+			f->args[2].value.val_charptr = NULL;
 			break;
 		default:
 			break;
