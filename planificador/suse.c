@@ -518,16 +518,29 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 
 int obtener_proximo_ejecutar(t_process* process){
 	log_info(logger, "Ordenando cola de listos...");
+
+	clock_t aux = clock(); //pasado a float, segundos. Es el momento en que termina de ejcutar
+
+	t_suse_thread* exec_actual = process->EXEC_THREAD;
+
+	float aux2 = exec_actual->duracionRafaga;
+
+	exec_actual->duracionRafaga = aux2 - aux; //La diferencia entre cuando empezo y termino es lo q duro la rafaga.
+
 	ordenar_cola_listos(process->READY_LIST);
 
-	t_suse_thread next_ULT = list_get(process->READY_LIST, 0); // TODO: Si no funciona hacemos una bool que haga return thread = null; va a retornar el primero q haya
-	int next_tid = next_ULT.tid;
+	t_suse_thread *next_ULT = list_get(process->READY_LIST, 0); // TODO: Si no funciona hacemos una bool que haga return thread != null; va a retornar el primero q haya
+	int next_tid = next_ULT->tid;
 	log_info(logger, "El proximo a ejecutar es %d", next_tid);
 
 	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
 
-	actualizarRafaga(next_ULT);
-	process->LAST_EXEC = next_ULT;
+	//actualizarRafaga(next_ULT);
+
+	process->LAST_EXEC = next_ULT; //Esto para que sirve??
+
+	next_ULT->duracionRafaga = aux; //Le pongo el momento de inicio de la rafaga.
+
 	return next_tid;
 }
 
@@ -578,24 +591,24 @@ bool funcion_SJF(t_suse_thread* ULT1, t_suse_thread* ULT2) {
 	return ULT1->estimacionUltimaRafaga < ULT2->estimacionUltimaRafaga;
 }
 
-void actualizarRafaga(t_suse_thread * ULT) {
-
-	bool comparador(t_process* program)
-	{
-		return program->PROCESS_ID == ULT->procesoId;
-	}
-
-	t_process* process = list_find(lista_de_process,comparador);
-
-	if(ULT == process->LAST_EXEC)// TODO: Chequear si esa igualacion entre dos punteros funciona o hacemos una funcion de igualar los dos tid;
-	{
-		ULT->duracionRafaga++;
-	}
-	else
-	{
-		ULT->duracionRafaga = 1; //todo esto quizas deberia ser 0
-	}
-}
+//void actualizarRafaga(t_suse_thread * ULT) {
+//
+//	bool comparador(t_process* program)
+//	{
+//		return program->PROCESS_ID == ULT->procesoId;
+//	}
+//
+//	t_process* process = list_find(lista_de_process,comparador);
+//
+//	if(ULT == process->LAST_EXEC)// TODO: Chequear si esa igualacion entre dos punteros funciona o hacemos una funcion de igualar los dos tid;
+//	{
+//		ULT->duracionRafaga++;
+//	}
+//	else
+//	{
+//		ULT->duracionRafaga = 1; //todo esto quizas deberia ser 0
+//	}
+//}
 
 
 void handle_wait_sem(socket_actual, paquete_wait_sem){
@@ -818,9 +831,16 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 {
-	t_process* program = configuracion_suse[socket];
+	bool buscador(t_process* process)
+	{
+		return process->PROCESS_ID == socket;
+	}
+
+	t_process* program = list_get(configuracion_suse.process,buscador);
 
 	eliminar_ULT_cola_actual(thread,program);
+
+	thread->duracionRafaga = clock(); //Pasado a int, segundos.
 
 	thread->estado = E_EXECUTE;
 	program->EXEC_THREAD = thread->tid;
