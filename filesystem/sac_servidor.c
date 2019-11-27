@@ -72,12 +72,10 @@ void configurar_server(){
 
 	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
 
-	int valor0 = bitarray_test_bit(bitmap, 1025);
-	int valor = bitarray_test_bit(bitmap, 1026);
-	int valor2 = bitarray_test_bit(bitmap, 1027);
-	printf("%d \n", valor0);
-	printf("%d \n", valor);
-	printf("%d \n", valor2);
+//	for(int i=1024; i<bitarray_get_max_bit(bitmap); i++){
+//		int valor0 = bitarray_test_bit(bitmap, i);
+//		printf("%d", valor0);
+//	}
 
 	tablaDeNodos = (GFile*) (disco + bloqueInicioTablaDeNodos);
 	bloquesDeDatos = disco + bloqueInicioBloquesDeDatos;
@@ -89,10 +87,11 @@ void configurar_server(){
 	//es para monitorear los archivos que hay en el filesystem, solo para testing
 	for(int i=0; i<100; i++){
 
-		printf("Nodo:%d Bloque:%d Estado:%d Nombre:%s Bloque padre:%d\n",
+		printf("Nodo:%d Bloque:%d Estado:%d Size: %d Nombre:%s Bloque padre:%d\n",
 						i,
 						bloqueInicioTablaDeNodos + i,
 						tablaDeNodos[i].state,
+						tablaDeNodos[i].file_size,
 						tablaDeNodos[i].fname,
 						tablaDeNodos[i].parent_dir_block);
 		printf("------------------------------------------------------------\n");

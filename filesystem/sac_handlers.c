@@ -473,6 +473,7 @@ int get_bloque_vacio(){
 	}
 
 	bitarray_set_bit(bitmap, bitActual);
+	msync(disco, diskSize, MS_SYNC);
 	return bitActual;
 }
 
@@ -542,6 +543,7 @@ int agregar_nodo(GFile *file_data, int numeroNodo){
 
 	// Hace que dicho puntero, en la posicion ya obtenida, apunte al nodo indicado.
 	nodo_punteros->punteros_a_bloques[position] = numeroNodo;
+	msync(disco, diskSize, MS_SYNC);
 
 	return 0;
 
