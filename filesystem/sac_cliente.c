@@ -194,27 +194,26 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	
 	Function fsend;
 
-	fsend.args[0].type = VAR_SIZE_T;
-	fsend.args[0].size = sizeof(size_t);
-	fsend.args[0].value.val_sizet = size;
+	fsend.args[0].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	fsend.args[0].size = sizeof(uint32_t);
+	fsend.args[0].value.val_u32 = offset;
 
-	fsend.args[1].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
-	fsend.args[1].size = sizeof(uint32_t);
-	fsend.args[1].value.val_u32 = offset;
-
-	fsend.args[2].type = VAR_CHAR_PTR;
-	fsend.args[2].size = strlen(path) + 1;
-	fsend.args[2].value.val_charptr = malloc(fsend.args[2].size);
-	memcpy(fsend.args[2].value.val_charptr, path, fsend.args[2].size);
+	fsend.args[1].type = VAR_CHAR_PTR;
+	fsend.args[1].size = strlen(path) + 1;
+	fsend.args[1].value.val_charptr = malloc(fsend.args[1].size);
+	memcpy(fsend.args[1].value.val_charptr, path, fsend.args[1].size);
 
 	fsend.type = FUNCTION_READ;
-	fsend.num_args = 3;
+	fsend.num_args = 2;
 
 	if(send_call(&fsend) == -1){
+		free(fsend.args[1].value.val_charptr);
+		fsend.args[1].value.val_charptr = NULL;
 		return EXIT_FAILURE;
 	}
 
-	//free(fsend.args[0].value.val_charptr);
+	free(fsend.args[1].value.val_charptr);
+	fsend.args[1].value.val_charptr = NULL;
 
 	receive_message(serverSocket,&msg);
 
@@ -300,11 +299,17 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	f.args[0].value.val_u32 = offset;
 
 	if(send_call(&f) == -1){
+		free(f.args[1].value.val_charptr);
+		f.args[1].value.val_charptr = NULL;
+		free(f.args[2].value.val_charptr);
+		f.args[2].value.val_charptr = NULL;
 		return EXIT_FAILURE;
 	}
 
-	//free(f.args[1].value.val_charptr);
-	//free(f.args[0].value.val_charptr);
+	free(f.args[1].value.val_charptr);
+	f.args[1].value.val_charptr = NULL;
+	free(f.args[2].value.val_charptr);
+	f.args[2].value.val_charptr = NULL;
 
 	receive_message(serverSocket,&msg);
 
