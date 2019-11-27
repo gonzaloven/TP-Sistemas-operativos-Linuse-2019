@@ -10,8 +10,8 @@
 		int (*suse_schedule_next) (void);
 		int (*suse_join) (int);
 		int (*suse_close) (int);
-		// suse_wait
-		// suse_signal
+		int (*suse_wait) (int);
+		int (*suse_signal) (int);
 	} hilolay_operations;
 
 	hilolay_operations *main_ops;
@@ -20,7 +20,7 @@
 
 	typedef struct hilolay_alumno_configuracion {
 		char* SUSE_IP;
-		int SUSE_PORT;
+		char* SUSE_PORT; //Era int, lo paso a char* como lo pide la funcion de conectar_a
 	} hilolay_alumnos_configuracion;
 
 	//Inicializa la libreria Hilolay, se conecta con SUSE.

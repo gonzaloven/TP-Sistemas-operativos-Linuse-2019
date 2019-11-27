@@ -11,9 +11,9 @@ int socket_suse = 0; //todo verificar si hay que conectarse aca en la global o b
 int master_thread = 0;
 
 char* log_path = "../logs/hilolay_alumnos_logs.txt";
-logger = log_create(log_path, "Hilolay Alumnos Logs", 1, 1);
+t_log* logger = log_create(log_path, "Hilolay Alumnos Logs", 1, 1);
 
-void conectar_con_suse() {
+void conectar_con_suse() { //TODO: Che aca no se llama a get_configuracion jamas...
 	socket_suse = conectar_a(configuracion_hilolay.SUSE_IP ,configuracion_hilolay.SUSE_PORT);
 	log_info(logger, "Me conecte con SUSE por el socket %d. \n", socket_suse);
 
@@ -118,7 +118,7 @@ int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructur agrega
 	int desplazamiento = 0;
 	serializar_int(buffer, &desplazamiento, tid);
 	serializar_valor(sem_name); //todo ver si el sem_name va con & o no
-	enviar(socket_suse, cop_wait_sem, tamanio_buffer, buffer);¿
+	enviar(socket_suse, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
 	log_info(logger, "Enviando a hacer un wait del sem %s", sem_name);
 	log_info(logger, "del thread %i. \n", tid);
@@ -160,7 +160,7 @@ hilolay_alumnos_configuracion get_configuracion_hilolay() {
 	hilolay_alumnos_configuracion configuracion_hilolay;
 	t_config*  archivo_configuracion = config_create(HILOLAY_ALUMNO_CONFIG_PATH);
 	configuracion_hilolay.SUSE_IP = copy_string(get_campo_config_string(archivo_configuracion, "SUSE_IP"));
-	configuracion_hilolay.SUSE_PORT = get_campo_config_int(archivo_configuracion, "SUSE_PORT");
+	configuracion_hilolay.SUSE_PORT = copy_string(get_campo_config_string(archivo_configuracion, "SUSE_PORT"));
 
 	config_destroy(archivo_configuracion);
 	return configuracion_hilolay;
