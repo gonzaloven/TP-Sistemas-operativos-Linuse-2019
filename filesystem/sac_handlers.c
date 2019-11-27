@@ -148,9 +148,10 @@ void lista_a_string(t_list* lista, char** string){
 
 void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
+	int i = 0;
 	int tamanioMaximoDireccionablePorPuntero = (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE);
 
-	for(int i = 0; i < tamanio / tamanioMaximoDireccionablePorPuntero; i++){
+	for(i = 0; i < tamanio / tamanioMaximoDireccionablePorPuntero; i++){
 		ptrGBloque bloqueDePunterosPosicion = tablaDeNodos[nodoABorrarPosicion].indirect_blocks_array[i];
 
 		punterosBloquesDatos *bloqueDePunterosDatos = (punterosBloquesDatos *) (disco + bloqueDePunterosPosicion);
@@ -160,21 +161,26 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 			ptrGBloque bloqueDeDatosPosicion = bloqueDePunterosDatos->punteros_a_bloques[j];
 
 			bitarray_clean_bit(bitmap, bloqueDeDatosPosicion);
+			bitarray_test_bit(bitmap, bloqueDeDatosPosicion);
+			msync(disco, diskSize, MS_SYNC);
 		}
 
 		bitarray_clean_bit(bitmap, bloqueDePunterosPosicion);
+		bitarray_test_bit(bitmap, bloqueDePunterosPosicion);
+		msync(disco, diskSize, MS_SYNC);
 	}
 	//////////////////////////////////Esto de abajo creo que esta mal, podria ponerle el valor que le quedo a i y listo en la posicion de ind. blocks array
-	ptrGBloque ultimoBloquePunterosDirectos = tablaDeNodos[nodoABorrarPosicion].indirect_blocks_array[(tamanio / tamanioMaximoDireccionablePorPuntero) + 1];
+	ptrGBloque ultimoBloquePunterosDirectos = tablaDeNodos[nodoABorrarPosicion].indirect_blocks_array[i];
 
 	punterosBloquesDatos *bloqueDePunterosDatosFaltantes = (punterosBloquesDatos *) (disco + ultimoBloquePunterosDirectos);
 
-	for(int i = 0; i < (tamanio % tamanioMaximoDireccionablePorPuntero) / BLOQUE_SIZE; i++){
-		ptrGBloque bloqueDeDatosPosicion = bloqueDePunterosDatosFaltantes->punteros_a_bloques[i];
+	for(int j = 0; j < (tamanio % tamanioMaximoDireccionablePorPuntero) / BLOQUE_SIZE; j++){
+		ptrGBloque bloque = bloqueDePunterosDatosFaltantes->punteros_a_bloques[j];
 
-		bitarray_clean_bit(bitmap, bloqueDeDatosPosicion);
+		bitarray_clean_bit(bitmap, bloque);
+		bitarray_test_bit(bitmap, bloque);
+		msync(disco, diskSize, MS_SYNC);
 	}
-	msync(disco, diskSize, MS_SYNC);
 }
 
 int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){

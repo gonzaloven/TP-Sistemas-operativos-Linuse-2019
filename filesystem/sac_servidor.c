@@ -354,8 +354,8 @@ Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
 
 	fsend.type = FUNCTION_RTA_WRITE;
 	fsend.num_args = 1;
-	fsend.args[0].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
-	fsend.args[0].size = sizeof(uint32_t);
+	fsend.args[0].type = VAR_UINT32;
+	fsend.args[0].size = size;
 	fsend.args[0].value.val_u32 = respuesta;
 
 	return fsend;
