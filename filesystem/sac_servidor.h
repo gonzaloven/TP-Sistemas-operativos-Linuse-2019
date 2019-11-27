@@ -79,9 +79,11 @@ typedef struct punteros_bloques_datos{
 
 GBlock *disco;
 GFile *tablaDeNodos;
+GBlock *bloquesDeDatos;
 t_bitarray* bitmap;
 size_t diskSize;
 int bloqueInicioTablaDeNodos;
+int bloqueInicioBloquesDeDatos;
 
 // memory mapping data definition
 struct sac_server_header *header_start;

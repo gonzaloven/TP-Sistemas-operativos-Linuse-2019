@@ -281,23 +281,23 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	f.type = FUNCTION_WRITE;
 	f.num_args = 4;
 
-	f.args[0].type = VAR_CHAR_PTR;
-	f.args[0].size = strlen(path) + 1;
-	f.args[0].value.val_charptr = malloc(f.args[0].size);
-	memcpy(f.args[0].value.val_charptr, path, f.args[0].size);
+	f.args[3].type = VAR_CHAR_PTR;
+	f.args[3].size = strlen(path) + 1;
+	f.args[3].value.val_charptr = malloc(f.args[3].size);
+	memcpy(f.args[3].value.val_charptr, path, f.args[3].size);
 
 	f.args[1].type = VAR_CHAR_PTR;
 	f.args[1].size = strlen(buf) + 1;
 	f.args[1].value.val_charptr = malloc(f.args[1].size);
 	memcpy(f.args[1].value.val_charptr, buf, f.args[1].size);
 
-	f.args[2].type = VAR_SIZE_T;
-	f.args[2].size = sizeof(size_t);
-	f.args[2].value.val_sizet = size;
+	f.args[0].type = VAR_SIZE_T;
+	f.args[0].size = sizeof(size_t);
+	f.args[0].value.val_sizet = size;
 
-	f.args[3].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
-	f.args[3].size = sizeof(uint32_t);
-	f.args[3].value.val_u32 = offset;
+	f.args[2].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	f.args[2].size = sizeof(uint32_t);
+	f.args[2].value.val_u32 = offset;
 
 	if(send_call(&f) == -1){
 		return EXIT_FAILURE;

@@ -13,6 +13,7 @@ void fuse_stop_service()
 	log_info(fuse_logger,"SIGINT recibida. Servidor desconectado!");
 	free(fuse_config);
 	log_destroy(fuse_logger);
+	bitarray_destroy(bitmap);
 	server_stop();
 }
 
@@ -49,8 +50,8 @@ void inicioTablaDeNodos(){
 	bloqueInicioTablaDeNodos = tamanioHeader + tamanioBitmapBloque;
 }
 
-int inicioBloquesDeDatos(){
-	return bloqueInicioTablaDeNodos + MAX_NUMBER_OF_FILES;
+void inicioBloquesDeDatos(){
+	bloqueInicioBloquesDeDatos = bloqueInicioTablaDeNodos + MAX_NUMBER_OF_FILES + 1;
 }
 
 /*int finBloquesDeDatos(){
@@ -66,8 +67,19 @@ void configurar_server(){
 	disco = (GBlock*) mmap(NULL, diskSize, PROT_READ|PROT_WRITE, MAP_SHARED,fileDescriptor,0);
 
 	inicioTablaDeNodos();
+	inicioBloquesDeDatos();
+
+	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
+
+	int valor0 = bitarray_test_bit(bitmap, 1025);
+	int valor = bitarray_test_bit(bitmap, 1026);
+	int valor2 = bitarray_test_bit(bitmap, 1027);
+	printf("%d \n", valor0);
+	printf("%d \n", valor);
+	printf("%d \n", valor2);
 
 	tablaDeNodos = (GFile*) (disco + bloqueInicioTablaDeNodos);
+	bloquesDeDatos = disco + bloqueInicioBloquesDeDatos;
 
 	printf("\033[0;34m");
 	printf("-----------Contenido de la tabla de nodos-----------\n");
@@ -89,8 +101,6 @@ void configurar_server(){
 	printf("\033[0;34m");
 	printf("-----------Fin tabla de nodos-----------\n");
 	printf("\033[0m");
-
-	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
 }
 
 void fuse_start_service(ConnectionHandler ch)
@@ -181,8 +191,8 @@ Function fuse_invoke_function(Function *f)
 			func_ret = sac_server_mknod(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_WRITE:
-			log_debug(fuse_logger,"Write llamado");
-			func_ret = sac_server_write(f->args[0].value.val_charptr, f->args[1].value.val_charptr, f->args[2].value.val_sizet, f->args[3].value.val_u32);
+			log_debug(fuse_logger,"Write llamado with -> Path: %s Pide Escribir: %s Size: %d Offset: %d", f->args[3].value.val_charptr, f->args[1].value.val_charptr, f->args[0].value.val_sizet, f->args[2].value.val_u32);
+			func_ret = sac_server_write(f->args[3].value.val_charptr, f->args[1].value.val_charptr, f->args[0].value.val_sizet, f->args[2].value.val_u32);
 			break;
 		case FUNCTION_UNLINK:
 			log_debug(fuse_logger,"Unlink llamado");
@@ -329,9 +339,19 @@ Function sac_server_read(char* path, size_t size, uint32_t offset){
 }
 
 Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
-	//TODO
-	Function f;
-	return f;
+	Message msg;
+	Function fsend;
+	int respuesta;
+
+	respuesta = escribir_archivo(buf, path, size, offset);
+
+	fsend.type = FUNCTION_RTA_WRITE;
+	fsend.num_args = 1;
+	fsend.args[0].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	fsend.args[0].size = sizeof(uint32_t);
+	fsend.args[0].value.val_u32 = respuesta;
+
+	return fsend;
 }
 
 Function sac_server_readdir (char* path) {

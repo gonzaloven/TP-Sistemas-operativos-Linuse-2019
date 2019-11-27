@@ -276,11 +276,6 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 		return EDQUOT;
 	}
 
-	time_t tiempoAhora;
-	uint64_t timestamp;
-	tiempoAhora = time(0);
-	timestamp = (uint64_t) tiempoAhora;
-
 	if(dimListaSpliteada > 1){
 		parentDirPath = dirname(strdup(path));
 		nodoPadre = determine_nodo(parentDirPath);
@@ -298,8 +293,18 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	}
 
 	nodoVacio->state = tipoDeArchivo;
-	nodoVacio->create_date = timestamp;
-	nodoVacio->modify_date = timestamp;
+	nodoVacio->create_date = time(NULL);
+	nodoVacio->modify_date = time(NULL);
+
+	if(tipoDeArchivo == 1){
+		int nuevo_nodo_vacio = get_bloque_vacio();
+
+		agregar_nodo(nodoVacio, nuevo_nodo_vacio);
+
+		GBlock *bloqueDeDatos = disco + nuevo_nodo_vacio;
+
+		memset(bloqueDeDatos->bytes, 0, BLOQUE_SIZE);
+	}
 
 	msync(disco, diskSize, MS_SYNC);
 
@@ -366,7 +371,7 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 	//log_info(logger, "Reading: Path: %s - Size: %d - Offset %d",path, size, offset);
 	unsigned int nodoDelArchivo, bloque_punteros, num_bloque_datos;
 	unsigned int bloque_a_buscar;
-	struct sac_server_gfile *node;
+	GFile *node;
 	ptrGBloque *pointer_block;
 	char *data_block;
 	size_t tamanio = size;
@@ -446,89 +451,186 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 	return respuesta;
 }
 
-int escribir_archivo (char* buffer, char *path, size_t size, uint32_t offset){
+int get_bloque_vacio(){
+	//IMPORTANTE METER SEMAFOROS ACA, ESTA TOCANDO UN RECURSO COMPARTIDO
+	int bitActual = bloqueInicioBloquesDeDatos - 1;
+	int bitsTotales = bitarray_get_max_bit(bitmap);
+
+	while(bitarray_test_bit(bitmap, bitActual) != 0 && bitActual < bitsTotales){
+			bitActual++;
+	}
+
+	if(bitActual == bitsTotales){
+		return -1;
+	}
+
+	bitarray_set_bit(bitmap, bitActual);
+	return bitActual;
+}
+
+int cantidad_bloques_libres(){
+	//IMPORTANTE METER SEMAFOROS ACA, ESTA TOCANDO UN RECURSO COMPARTIDO
+	int contador = 0;
+	int bitInicial = bloqueInicioBloquesDeDatos - 1;
+	int bitsTotales = bitarray_get_max_bit(bitmap);
+
+	for(int i = bitInicial; i < bitsTotales; i++){
+		if(bitarray_test_bit(bitmap, i) == 0){
+			contador++;
+		}
+	}
+
+	return contador;
+
+}
+
+int setear_posicion (int *pointer_block, int *data_block, size_t size, off_t offset){
+	div_t divi;
+	divi = div(offset, (BLOQUE_SIZE*PUNTEROS_A_BLOQUES_DATOS));
+	*pointer_block = divi.quot;
+	*data_block = divi.rem / BLOQUE_SIZE;
+	return 0;
+}
+
+int agregar_nodo(GFile *file_data, int numeroNodo){
+	int node_pointer_number, position;
+	size_t tam = file_data->file_size;
+	int new_pointer_block;
+	punterosBloquesDatos* nodo_punteros;
+
+	// Ubica el ultimo nodo escrito y se posiciona en el mismo.
+	setear_posicion(&node_pointer_number, &position, 0, tam);
+
+	if((node_pointer_number == BLKINDIRECT-1) & (position == PUNTEROS_A_BLOQUES_DATOS-1)) return -ENOSPC;
+
+	// Si es el primer nodo del archivo y esta escrito, debe escribir el segundo.
+	// Se sabe que el primer nodo del archivo esta escrito siempre que el primer puntero a bloque punteros del nodo sea distinto de 0 (file_data->blk_indirect[0] != 0)
+	// ya que se le otorga esa marca (=0) al escribir el archivo, para indicar que es un archivo nuevo.
+	if ((file_data->indirect_blocks_array[node_pointer_number] != 0)){
+		if (position == 1024) {
+			position = 0;
+			node_pointer_number++;
+		}
+	}
+	// Si es el ultimo nodo en el bloque de punteros, pasa al siguiente
+	if (position == 0){
+		new_pointer_block = get_bloque_vacio();
+		if(new_pointer_block < 0) return new_pointer_block; /* Si sucede que sea menor a 0, contendra el codigo de error */
+
+		GBlock *bloqueDeDatos = disco + new_pointer_block;
+
+		memset(bloqueDeDatos->bytes, 0, BLOQUE_SIZE);
+
+		file_data->indirect_blocks_array[node_pointer_number] = new_pointer_block;
+		// Cuando crea un bloque, settea al siguente como 0, dejando una marca.
+		file_data->indirect_blocks_array[node_pointer_number + 1] = 0;
+	} else {
+		new_pointer_block = file_data->indirect_blocks_array[node_pointer_number]; //Se usa como auxiliar para encontrar el numero del bloque de punteros
+	}
+
+	// Ubica el nodo de punteros
+	nodo_punteros = (punterosBloquesDatos *) (disco + new_pointer_block);
+
+
+	// Hace que dicho puntero, en la posicion ya obtenida, apunte al nodo indicado.
+	nodo_punteros->punteros_a_bloques[position] = numeroNodo;
+
+	return 0;
+
+}
+
+int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 	//log_trace(logger, "Writing: Path: %s - Size: %d - Offset %d", path, size, offset);
 
 	int nodoDelArchivo = determine_nodo(path);
 	int nodo_libre_nuevo;
-	struct grasa_file_t *node;
+	GFile *node;
 	char *data_block;
-	size_t tam = size, file_size, space_in_block, offset_in_block = offset % BLOCKSIZE;
+	size_t tam = size, file_size, space_in_block, offset_in_block = offset % BLOQUE_SIZE;
 	off_t off = offset;
 	int *n_pointer_block = malloc(sizeof(int)), *n_data_block = malloc(sizeof(int));
 	ptrGBloque *pointer_block;
-	int res = size;
+	int respuesta = size;
+
+	unsigned long tamanio_maximo_teorico = (unsigned long) BLKINDIRECT * (unsigned long) PUNTEROS_A_BLOQUES_DATOS * (unsigned long) BLOQUE_SIZE;
 
 	// Ubica el nodo correspondiente al archivo
 	node = tablaDeNodos + nodoDelArchivo;
+	file_size = node->file_size;
 
-	if ((file_size + size) >= THELARGESTFILE) return -EFBIG;
+	uint32_t tamanioMaximoTeorico = tamanio_maximo_teorico;
+
+	if ((file_size + size) >= tamanioMaximoTeorico){
+		free(n_pointer_block);
+		free(n_data_block);
+		return -EFBIG;
+	}
 
 	// Toma un lock de escritura.
-			log_lock_trace(logger, "Write: Pide lock escritura. Escribiendo: %d. En cola: %d.", rwlock.__data.__writer, rwlock.__data.__nr_writers_queued);
-	pthread_rwlock_wrlock(&rwlock);
-			log_lock_trace(logger, "Write: Recibe lock escritura.");
+	//log_lock_trace(logger, "Write: Pide lock escritura. Escribiendo: %d. En cola: %d.", rwlock.__data.__writer, rwlock.__data.__nr_writers_queued);
+	//pthread_rwlock_wrlock(&rwlock);
+	//log_lock_trace(logger, "Write: Recibe lock escritura.");
 
 	// Guarda tantas veces como sea necesario, consigue nodos y actualiza el archivo.
 	while (tam != 0){
 
 		// Actualiza los valores de espacio restante en bloque.
-		space_in_block = BLOCKSIZE - (file_size % BLOCKSIZE);
-		if (space_in_block == BLOCKSIZE) (space_in_block = 0); // Porque significa que el bloque esta lleno.
-		if (file_size == 0) space_in_block = BLOCKSIZE; /* Significa que el archivo esta recien creado y ya tiene un bloque de datos asignado */
+		space_in_block = BLOQUE_SIZE - (file_size % BLOQUE_SIZE);
+		if (space_in_block == BLOQUE_SIZE) (space_in_block = 0); // Porque significa que el bloque esta lleno.
+		if (file_size == 0) space_in_block = BLOQUE_SIZE; /* Significa que el archivo esta recien creado y ya tiene un bloque de datos asignado */
 
 		// Si el offset es mayor que el tamanio del archivo mas el resto del bloque libre, significa que hay que pedir un bloque nuevo
 		// file_size == 0 indica que es un archivo que recien se comienza a escribir, por lo que tiene un tratamiento distinto (ya tiene un bloque de datos asignado).
-		if ((off >= (file_size + space_in_block)) & (file_size != 0)){
+		if ((off >= (file_size + space_in_block)) || (file_size == 0)){
 
 			// Si no hay espacio en el disco, retorna error.
-			if (bitmap_free_blocks == 0) return -ENOSPC;
+			if (cantidad_bloques_libres() == 0) return -ENOSPC;
 
 			// Obtiene un bloque libre para escribir.
-			new_free_node = get_node();
-			if (new_free_node < 0) goto finalizar;
+			nodo_libre_nuevo = get_bloque_vacio();
+			if (nodo_libre_nuevo < 0) goto finalizar;
 
 			// Agrega el nodo al archivo.
-			res = add_node(node, new_free_node);
-			if (res != 0) goto finalizar;
+			respuesta = agregar_nodo(node, nodo_libre_nuevo);
+			if (respuesta != 0) goto finalizar;
 
 			// Lo relativiza al data block.
-			new_free_node -= (GHEADERBLOCKS + NODE_TABLE_SIZE + BITMAP_BLOCK_SIZE);
-			data_block = (char*) &(data_block_start[new_free_node]);
+			nodo_libre_nuevo -= bloqueInicioBloquesDeDatos;
+			data_block = (char*) bloquesDeDatos[nodo_libre_nuevo].bytes;
 
 			// Actualiza el espacio libre en bloque.
-			space_in_block = BLOCKSIZE;
+			space_in_block = BLOQUE_SIZE;
 
 		} else {
 			// Ubica a que nodo le corresponderia guardar el dato
-			set_position(n_pointer_block, n_data_block, file_size, off);
+			setear_posicion(n_pointer_block, n_data_block, file_size, off);
 
 			//Ubica el nodo a escribir.
-			*n_pointer_block = node->blk_indirect[*n_pointer_block];
-			*n_pointer_block -= (GHEADERBLOCKS + NODE_TABLE_SIZE + BITMAP_BLOCK_SIZE);
-			pointer_block = (ptrGBloque*) &(data_block_start[*n_pointer_block]);
+			*n_pointer_block = node->indirect_blocks_array[*n_pointer_block];
+			*n_pointer_block -= bloqueInicioBloquesDeDatos;
+			pointer_block = (ptrGBloque*) &(bloquesDeDatos[*n_pointer_block]);
 			*n_data_block = pointer_block[*n_data_block];
-			*n_data_block -= (GHEADERBLOCKS + NODE_TABLE_SIZE + BITMAP_BLOCK_SIZE);
-			data_block = (char*) &(data_block_start[*n_data_block]);
+			*n_data_block -= bloqueInicioBloquesDeDatos;
+			data_block = (char*) bloquesDeDatos[*n_data_block].bytes;
 		}
 
 		// Escribe en ese bloque de datos.
-		if (tam >= BLOCKSIZE){
-			memcpy(data_block, buf, BLOCKSIZE);
-			if ((node->file_size) <= (off)) file_size = node->file_size += BLOCKSIZE;
-			buf += BLOCKSIZE;
-			off += BLOCKSIZE;
-			tam -= BLOCKSIZE;
+		if (tam >= BLOQUE_SIZE){
+			memcpy(data_block, buffer, BLOQUE_SIZE);
+			if ((node->file_size) <= (off)) file_size = node->file_size += BLOQUE_SIZE;
+			buffer += BLOQUE_SIZE;
+			off += BLOQUE_SIZE;
+			tam -= BLOQUE_SIZE;
 			offset_in_block = 0;
 		} else if (tam <= space_in_block){ /*Hay lugar suficiente en ese bloque para escribir el resto del archivo */
-			memcpy(data_block + offset_in_block, buf, tam);
+			memcpy(data_block + offset_in_block, buffer, tam);
 			if (node->file_size <= off) file_size = node->file_size += tam;
 			else if (node->file_size <= (off + tam)) file_size = node->file_size += (off + tam - node->file_size);
 			tam = 0;
 		} else { /* Como no hay lugar suficiente, llena el bloque y vuelve a buscar uno nuevo */
-			memcpy(data_block + offset_in_block, buf, space_in_block);
+			memcpy(data_block + offset_in_block, buffer, space_in_block);
 			file_size = node->file_size += space_in_block;
-			buf += space_in_block;
+			buffer += space_in_block;
 			off += space_in_block;
 			tam -= space_in_block;
 			offset_in_block = 0;
@@ -536,15 +638,18 @@ int escribir_archivo (char* buffer, char *path, size_t size, uint32_t offset){
 
 	}
 
-	node->m_date= time(NULL);
+	node->modify_date= time(NULL);
 
-	res = size;
+	respuesta = size;
 
 	finalizar:
 	// Devuelve el lock de escritura.
-	pthread_rwlock_unlock(&rwlock);
-			log_lock_trace(logger, "Write: Devuelve lock escritura. En cola: %d", rwlock.__data.__nr_writers_queued);
-			log_trace(logger, "Terminada escritura.");
-	return res;
+	//pthread_rwlock_unlock(&rwlock);
+	//log_lock_trace(logger, "Write: Devuelve lock escritura. En cola: %d", rwlock.__data.__nr_writers_queued);
+	//log_trace(logger, "Terminada escritura.");
+
+	msync(disco, diskSize, MS_SYNC);
+
+	return respuesta;
 
 }
