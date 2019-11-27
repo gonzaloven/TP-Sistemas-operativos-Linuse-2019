@@ -105,6 +105,24 @@ int suse_close(int tid){
 	return result;
 }
 
+int suse_join(int tid)
+{
+	int tamanio_buffer = sizeof(int);
+		void * buffer = malloc(tamanio_buffer);
+		int desplazamiento = 0;
+		serializar_int(buffer, &desplazamiento, tid);
+		enviar(socket_suse, cop_suse_join, tamanio_buffer, buffer);
+		free(buffer);
+
+		t_paquete* received_packet = recibir(socket_suse);
+		int desp = 0;
+		int result = deserializar_int(received_packet->data, &desp);
+		liberar_paquete(received_packet);
+
+		return result;
+}
+
+
 int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructur agregar hilo + semaforos del mismo
 
 	int tamanio_buffer = sizeof(int);

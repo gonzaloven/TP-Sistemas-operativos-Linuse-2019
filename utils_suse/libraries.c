@@ -14,18 +14,97 @@ pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros)
 	return thread;
 }
 
-void ejecutando_a_exit(t_suse_thread* thread, un_socket socket){
-	//todo
+void ejecucion_a_exit(t_suse_thread* thread, un_socket socket)
+{
+
+	bool buscador(t_process* program)
+		{
+			return program->PROCESS_ID == socket;
+		}
+
+	t_process* process = list_find(lista_de_process,buscador);
+
+	remover_ULT_exec(process);
+	thread->estado = E_EXIT;
+	pthread_mutex_lock(&mutex_exit_queue);
+	list_add(exit_queue,thread);
+	pthread_mutex_unlock(&mutex_exit_queue);
+
 	log_info(logger, "El tid %d paso de execute a exit\n", thread->tid);
+}
+
+void bloqueado_a_exit(t_suse_thread* thread,un_socket socket)
+{
+	bool buscador(t_process* program)
+			{
+				return program->PROCESS_ID == socket;
+			}
+
+	t_process* process = list_find(lista_de_process,buscador);
+
+	eliminar_ULT_cola_actual(thread,process);
+	thread->estado = E_EXIT;
+	pthread_mutex_lock(&mutex_exit_queue);
+	list_add(exit_queue,thread);
+	pthread_mutex_unlock(&mutex_exit_queue);
+
+	log_info(logger, "El tid %d paso de bloqueado a exit\n", thread->tid);
+}
+
+void listo_a_exit(t_suse_thread* thread,un_socket socket)
+{
+	bool buscador(t_process* program){
+		return program->PROCESS_ID == socket;
+	}
+
+	t_process* process = list_find(lista_de_process,buscador);
+
+	eliminar_ULT_cola_actual(thread,process);
+	thread->estado = E_EXIT;
+	pthread_mutex_lock(&mutex_exit_queue);
+	list_add(exit_queue,thread);
+	pthread_mutex_unlock(&mutex_exit_queue);
+
+	log_info(logger, "El tid %d paso de ready a exit\n", thread->tid);
+}
+
+
+void nuevo_a_exit(t_suse_thread* thread,un_socket socket_actual)
+{
+	bool buscador(t_process* program)
+		{
+			return program->PROCESS_ID == socket;
+		}
+
+	t_process* process = list_find(lista_de_process,buscador);
+
+	eliminar_ULT_cola_actual(thread,process);
+
+	thread->estado = E_EXIT;
+	pthread_mutex_lock(&mutex_exit_queue);
+	list_add(exit_queue,thread);
+	pthread_mutex_unlock(&mutex_exit_queue);
+	log_info(logger, "El tid %d paso de new a exit\n", thread->tid);
 
 }
 
 void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
-	t_process* process = process_por_id(socket)
+
+
+	bool buscador(t_process* program)
+	{
+		return program->PROCESS_ID == socket;
+	}
+
+	t_process* process = list_find(lista_de_process,buscador);
+
 	eliminar_ULT_cola_actual(thread,process);
 	thread->estado = E_EXECUTE;
 	thread->ejecutado_desde_estimacion = true;
-	//todo aca tendria que validar que si hay un hilo ya ejecutando, tengo que ponerlo en otra cola
+
+	eliminar_ULT_cola_actual(process->EXEC_THREAD);
+	ejecucion_a_listo(process->EXEC_THREAD,socket);
+
 	process->EXEC_THREAD = thread;
 	log_info(logger, "El tid %d paso de ready a execute\n", thread->tid);
 }
@@ -47,7 +126,7 @@ void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
 {
 	t_process* process = configuracion_suse[socket];
 
-	eliminar_ULT_cola_actual(thread,process);
+	remover_ULT_exec(process);
 	thread->estado = E_READY;
 	process->EXEC_THREAD = NULL;
 	list_add(process->READY_LIST,thread->tid);
@@ -68,33 +147,48 @@ void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket)
 {
 	t_process* process = configuracion_suse[socket];
 
-	eliminar_ULT_cola_actual(thread,process);
+	remover_ULT_exec(process);
 	thread->estado = E_BLOCKED;
 	process->EXEC_THREAD = NULL;
+	pthread_mutex_lock(&mutex_blocked_queue);
 	list_add(blocked_queue,thread);
+	pthread_mutex_unlock(&mutex_blocked_queue);
 	log_info(logger, "El thread %d paso de execute a blocked \n", thread->tid);
-
 }
 
 void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semaforos* semaforo)
 {
+	bool comparador(t_process* process)
+	{
+		return process->PROCESS_ID == socket;
+	}
 
-	t_process* program = configuracion_suse.process[socket];
+	bool comparadorThread(t_suse_thread* th)
+	{
+		return th->tid == tid;
+	}
 
-	t_suse_thread* thread = program->ULTS[tid];
+	t_process* program = list_find(configuracion_suse.process,comparador);
 
-	eliminar_ULT_cola_actual(thread,program);
+	t_suse_thread* thread = list_find(program->ULTS,comparadorThread);
+
+	remover_ULT_exec(program);
 
 	thread->estado = E_BLOCKED;
 
+	pthread_mutex_lock(&mutex_semaforos);
 	list_add(semaforo->BLOCKED_LIST,thread);
+	pthread_mutex_unlock(&mutex_semaforos);
+
+	pthread_mutex_lock(&mutex_blocked_queue);
 	list_add(blocked_queue,thread);
+	pthread_mutex_unlock(&mutex_blocked_queue);
+
 	log_info(logger, "El thread %d paso de execute a blocked por semaforo %s \n", thread->tid, semaforo->NAME);
 }
 
 void eliminar_ULT_cola_actual(t_suse_thread *ULT, t_process* process)
 {
-	// Lo saco de la cola actual en la que se encuentra
 
 	switch(ULT->estado)
 	{
@@ -120,7 +214,9 @@ void remover_ULT_nuevo(t_suse_thread* ULT)
 	bool comparador(t_suse_thread* thread){
 		return thread->tid == ULT->tid && thread->procesoId == ULT->procesoId;
 	}
+	pthread_mutex_lock(&mutex_new_queue);
 	list_remove_by_condition(new_queue, comparador);
+	pthread_mutex_unlock(&mutex_new_queue);
 }
 
 void remover_ULT_bloqueado(t_suse_thread* thread)
@@ -129,7 +225,9 @@ void remover_ULT_bloqueado(t_suse_thread* thread)
 		return th->tid == thread->tid && th->procesoId == thread->procesoId;
 	}
 
+	pthread_mutex_lock(&mutex_blocked_queue);
 	list_remove_by_condition(blocked_queue,comparador);
+	pthread_mutex_unlock(&mutex_blocked_queue);
 
 }
 void remover_ULT_exec(t_process* process)
@@ -148,7 +246,12 @@ bool validar_grado_multiprogramacion()
 
 void nuevo_a_listo(t_suse_thread* ULT, int process_id)
 {
-	t_process* program = list_get(configuracion_suse->process, process_id);
+	bool comparador(t_process* process)
+	{
+		return process->PROCESS_ID == process_id;
+	}
+
+	t_process* program = list_find(configuracion_suse->process, comparador);
 
 	list_add(program->READY_LIST, ULT->tid);
 

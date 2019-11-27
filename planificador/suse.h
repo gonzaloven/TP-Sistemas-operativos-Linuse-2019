@@ -75,6 +75,7 @@ t_list* new_queue;
 pthread_mutex_t mutex_blocked_queue;
 t_list* blocked_queue;
 
+pthread_mutex_t mutex_exit_queue;
 pthread_mutex_t mutex_semaforos;
 
 pthread_mutex_t mutex_multiprog;
