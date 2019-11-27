@@ -27,9 +27,10 @@ int main(void){
 
 	pthread_mutex_init(&mutex_new_queue, NULL);
 	pthread_mutex_init(&mutex_blocked_queue, NULL);
+	pthread_mutex_init(&mutex_exit_queue,NULL);
 	pthread_mutex_init(&mutex_multiprog, NULL);
 	pthread_mutex_init(&mutex_semaforos,NULL);
-	pthread_mutex_init(&mutex_lista_de_process, NULL)
+	pthread_mutex_init(&mutex_lista_de_process, NULL);
 
 	iniciar_servidor();
 
@@ -261,7 +262,7 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	//Genero el process
 	t_process * process = generar_process(socket_actual);
 
-	list_add_in_index(configuracion_suse.process,process,process->PROCESS_ID);
+	list_add(configuracion_suse.process,process);
 
 	sprintf("el socket es", "%d", process->PROCESS_ID);
 
@@ -272,7 +273,7 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	new_thread->procesoId = socket_actual;
 	new_thread->estado = E_NEW;
 
-	list_add_in_index(process->ULTS,new_thread,new_thread->tid);
+	list_add(process->ULTS,new_thread);
 	list_add(new_queue, new_thread);
 
 	pthread_mutex_lock(&mutex_multiprog);
@@ -299,7 +300,13 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
 
 	log_info(logger, "Recibi el hilo", "%d", new_tid);
 
-	t_process* process = configuracion_suse[socket_actual];
+	bool find_process_by_id(t_process* process) //TODO: Extraer a utils!!!!!!!!!!!!!!!!!!!!!!!!!
+	{
+		return process->PROCESS_ID == socket_actual;
+	}
+
+	t_process* process = list_find(configuracion_suse.process,find_process_by_id);
+
 	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
 
 	new_thread->tid = new_tid;
@@ -308,8 +315,8 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
 	new_thread->duracionRafaga = 0;
 	new_thread->ejecutado_desde_estimacion = false;
 
-	list_add_in_index(process->ULTS,new_thread,new_thread->tid);
-	list_add(new_queue,new_thread->tid);
+	list_add(process->ULTS,new_thread);
+	list_add(new_queue,new_thread);
 
 	pthread_mutex_lock(&mutex_multiprog);
 
@@ -325,8 +332,17 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
 
 int close_tid(int tid, int socket_actual){
 
-	t_process* process = list_get(configuracion_suse->process, socket_actual);
-	t_suse_thread* thread = list_get(process->ULTS,tid);
+	bool find_process_by_id(t_process* process) //TODO: Extraer a utils!!!!!!!!!!!!!!!!!!!!!!!!!
+	{
+		return process->PROCESS_ID == socket_actual;
+	}
+	bool find_thread_by_tid(t_suse_thread* thread) //Extraer a utils!!!!!!!!!!!!!!!!!!!!
+	{
+		return thread->tid == tid;
+	}
+
+	t_process* process = list_find(configuracion_suse->process,find_process_by_id);
+	t_suse_thread* thread = list_find(process->ULTS,find_thread_by_tid);
 
 	if(thread == NULL)
 	{
@@ -350,7 +366,7 @@ int close_tid(int tid, int socket_actual){
 				}
 
 				pthread_mutex_lock(&mutex_new_queue);
-				list_remove(new_queue,comparador_new);
+				nuevo_a_exit(thread,socket_actual);
 				pthread_mutex_unlock(&mutex_new_queue);
 		break;
 
@@ -363,7 +379,7 @@ int close_tid(int tid, int socket_actual){
 			pthread_mutex_lock(&mutex_multiprog);
 
 			configuracion_suse.MAX_MULTIPROG --;
-			list_remove(blocked_queue,comparador_blocked);
+			bloqueado_a_exit(thread,socket_actual);
 
 			pthread_mutex_unlock(&mutex_multiprog);
 			pthread_mutex_unlock(&mutex_blocked_queue);
@@ -371,14 +387,14 @@ int close_tid(int tid, int socket_actual){
 
 		case E_READY:
 
-			bool comparador_ready(int tid){
-				return tid == thread->tid;
+			bool comparador_ready(t_suse_thread* th){
+				return th->tid == thread->tid;
 			}
 
 			pthread_mutex_lock(&mutex_multiprog);
 
 			configuracion_suse.MAX_MULTIPROG --;
-			list_remove(process->READY_LIST,comparador_ready);
+			listo_a_exit(thread,socket_actual);
 
 			pthread_mutex_unlock(&mutex_multiprog);
 		break;
@@ -386,12 +402,11 @@ int close_tid(int tid, int socket_actual){
 		case E_EXECUTE:
 				pthread_mutex_lock(&mutex_multiprog);
 				process->EXEC_THREAD = NULL;
+				ejecucion_a_exit(thread,socket_actual);
 				configuracion_suse.MAX_MULTIPROG --;
 				pthread_mutex_unlock(&mutex_multiprog);
 		break;
 	}
-
-	list_add(exit_queue,thread);
 
 	return 1;
 }
@@ -423,7 +438,13 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 		if(validar_grado_multiprogramacion())
 		{
 			int pid = thread_joiner->procesoId;
-			t_process* process = list_get(configuracion_suse.process[pid]);
+
+			bool buscador(t_process* p)
+			{
+				return p->PROCESS_ID == pid;
+			}
+
+			t_process* process = list_find(configuracion_suse.process,buscador);
 
 			bloqueado_a_listo(thread_joiner,process);
 			configuracion_suse.ACTUAL_MULTIPROG ++;
@@ -449,15 +470,15 @@ t_process * generar_process(un_socket socket) {
 	return process;
 }
 
-t_process* process_por_id(int process_id){
-	bool encontrar_process(void* process){
-		return ((t_process*)process)->PROCESS_ID == process_id;
-	}
-	pthread_mutex_lock(&mutex_lista_de_process);
-	t_process* result = list_find(lista_de_process, encontrar_process);
-	pthread_mutex_unlock(&mutex_lista_de_process);
-	return result;
-}
+//t_process* process_por_id(int process_id){
+//	bool encontrar_process(void* process){
+//		return ((t_process*)process)->PROCESS_ID == process_id;
+//	}
+//	pthread_mutex_lock(&mutex_lista_de_process);
+//	t_process* result = list_find(lista_de_process, encontrar_process);
+//	pthread_mutex_unlock(&mutex_lista_de_process);
+//	return result;
+//}
 
 void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
@@ -466,7 +487,13 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
 
-	t_process* process = process_por_id(socket_actual);
+	bool comparador(t_process* p)
+	{
+		return p->PROCESS_ID == socket_actual;
+	}
+
+	t_process* process = list_find(lista_de_process,comparador);
+
 	log_info(logger, "Iniciando planificacion...\n");
 	int next_tid = obtener_proximo_ejecutar(process); //Inicia planificacion
 
@@ -480,12 +507,10 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 }
 
 int obtener_proximo_ejecutar(t_process* process){
-	if (process->EXEC_THREAD != NULL) {
-			return process->EXEC_THREAD->tid;
-	}
+
 	ordenar_cola_listos(process->READY_LIST);
 
-	t_suse_thread next_ULT = list_get(process->READY_LIST, 0);
+	t_suse_thread next_ULT = list_get(process->READY_LIST, 0); // TODO: Si no funciona hacemos una bool que haga return thread = null; va a retornar el primero q haya
 	int next_tid = next_ULT.tid;
 
 	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
@@ -501,8 +526,7 @@ void ordenar_cola_listos(t_list* ready_list) {
 }
 
 void estimar_ULTs_listos(t_list* ready_list) {
-	void estimar(void * item_ULT) { //todo espero un int para encontrar el hilo
-		t_suse_thread * ULT = (t_suse_thread *) item_ULT;
+	void estimar(t_suse_thread* ULT) { //todo espero un int para encontrar el hilo
 		if (ULT->ejecutado_desde_estimacion) {
 			ULT->ejecutado_desde_estimacion = false;
 			estimar_rafaga(ULT);
@@ -523,24 +547,38 @@ void ordenar_por_sjf(t_list* ready_list){
 	list_sort(ready_list, funcion_SJF);
 }
 
-bool funcion_SJF(void* thread1, void* thread2) {
-	t_suse_thread * ULT1 = (t_suse_thread *) thread1;
-	t_suse_thread * ULT2 = (t_suse_thread *) thread2;
+bool funcion_SJF(t_suse_thread* ULT1, t_suse_thread* ULT2) {
+
 	int process_id = ULT1->procesoId;
 
-	t_process* process = process_por_id(process_id);
+	bool comparador(t_process* p)
+	{
+		return p->PROCESS_ID == process_id;
+	}
+
+	t_process* process = list_find(lista_de_process,comparador);
 
 	if (ULT1->estimacionUltimaRafaga == ULT2->estimacionUltimaRafaga) {
-		return list_get(process->ULTS, 0); //todo ver como obtener el primer elemento no vacio de la lista
+		return list_get(process->ULTS, 0); //todo ver como obtener el primer elemento no vacio de la lista // Si no funciona hacemos una bool que haga return thread = null; va a retornar el primero q haya
 	}
 	return ULT1->estimacionUltimaRafaga < ULT2->estimacionUltimaRafaga;
 }
 
 void actualizarRafaga(t_suse_thread * ULT) {
-	t_process* process = process_por_id(ULT->procesoId);
-	if(ULT == process->LAST_EXEC){
+
+	bool comparador(t_process* program)
+	{
+		return program->PROCESS_ID == ULT->procesoId;
+	}
+
+	t_process* process = list_find(lista_de_process,comparador);
+
+	if(ULT == process->LAST_EXEC)// TODO: Chequear si esa igualacion entre dos punteros funciona o hacemos una funcion de igualar los dos tid;
+	{
 		ULT->duracionRafaga++;
-	}else{
+	}
+	else
+	{
 		ULT->duracionRafaga = 1; //todo esto quizas deberia ser 0
 	}
 }

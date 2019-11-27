@@ -29,6 +29,8 @@
 	//Obtiene el numero de socket de conexion con SUSE
 	int get_socket_actual();
 
+	int suse_join(int tid);
+
 	//Conexion con suse
 	void conectar_con_suse();
 
