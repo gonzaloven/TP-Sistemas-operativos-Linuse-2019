@@ -7,7 +7,7 @@ int tamDataFunction(Function f){
 	tamano+= sizeof(uint8_t);
 	for(int y=0; y < f.num_args; y++){
 		tamano+= sizeof(uint8_t);
-		tamano+= sizeof(uint16_t);
+		tamano+= sizeof(uint32_t);
 		tamano+= f.args[y].size;
 	}
 	return tamano;

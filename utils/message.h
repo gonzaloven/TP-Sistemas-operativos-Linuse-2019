@@ -54,7 +54,7 @@ typedef union{
 typedef struct Arg_s
 {
 	VarType type;
-	uint16_t size;
+	uint32_t size;
 	VarValue value;
 }Arg;
 
@@ -69,7 +69,7 @@ typedef struct MessageHeader_s
 {
 	uint8_t message_type;
 	uint16_t caller_id;
-	uint16_t data_size;
+	uint32_t data_size;
 }MessageHeader;
 
 /* Main message structure for message passing. */
@@ -90,7 +90,7 @@ typedef enum{
  * do so. 
  * @param header: pointer to the message header
  * @param message_type: the type of message will contain*/
-int create_message_header(MessageHeader *header,uint8_t message_type,uint16_t caller_id,uint16_t data_size);
+int create_message_header(MessageHeader *header,uint8_t message_type,uint16_t caller_id,uint32_t data_size);
 int create_function_message(Message *msg,MessageHeader *header,Function *f);
 int create_response_message(Message *msg,MessageHeader *header,uint32_t response);
 

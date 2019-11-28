@@ -4,7 +4,7 @@
 
 int message_function_return_encode(Message *msg,void *buffer,size_t buffer_size)
 {
-	int min_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
+	int min_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t) + msg->header.data_size;
 	if(buffer_size < min_size) return -1;
 
 	void *cursor = buffer;
@@ -33,8 +33,8 @@ int header_encode(MessageHeader *header,void *buffer,size_t buffer_size)
 	memcpy(cursor,&(header->caller_id),sizeof(uint16_t));
 	cursor += sizeof(uint16_t);
 
-	memcpy(cursor,&(header->data_size),sizeof(uint16_t));
-	cursor += sizeof(uint16_t);
+	memcpy(cursor,&(header->data_size),sizeof(uint32_t));
+	cursor += sizeof(uint32_t);
 
 	return cursor - buffer;
 }
@@ -50,8 +50,8 @@ int header_decode(void *buffer,size_t buffer_size,MessageHeader *result)
 	memcpy(&result->caller_id,cursor,sizeof(uint16_t));
 	cursor += sizeof(uint16_t);
 
-	memcpy(&result->data_size,cursor,sizeof(uint16_t));
-	cursor += sizeof(uint16_t);
+	memcpy(&result->data_size,cursor,sizeof(uint32_t));
+	cursor += sizeof(uint32_t);
 
 	return cursor - buffer;
 }
@@ -59,7 +59,7 @@ int header_decode(void *buffer,size_t buffer_size,MessageHeader *result)
 int message_encode(Message *msg,void *buffer,size_t buffer_size)
 {
 	int result = 0;
-	size_t min_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
+	size_t min_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t) + msg->header.data_size;
 	if(buffer_size < min_size) return -1;
 
 	void *cursor = buffer;
@@ -118,8 +118,8 @@ int function_arg_encode(Arg arg,void *buffer,size_t buffer_size)
 	memcpy(cursor,&arg.type,sizeof(uint8_t));
 	cursor += sizeof(uint8_t);
 
-	memcpy(cursor,&arg.size,sizeof(uint16_t));
-	cursor += sizeof(uint16_t);
+	memcpy(cursor,&arg.size,sizeof(uint32_t));
+	cursor += sizeof(uint32_t);
 
 	switch(arg.type)
 	{
@@ -149,8 +149,8 @@ int function_arg_decode(void *buffer,size_t buffer_size,Arg *arg)
 	memcpy(&arg->type,cursor,sizeof(uint8_t));
 	cursor += sizeof(uint8_t);
 	
-	memcpy(&arg->size,cursor,sizeof(uint16_t));
-	cursor += sizeof(uint16_t);
+	memcpy(&arg->size,cursor,sizeof(uint32_t));
+	cursor += sizeof(uint32_t);
 
 
 	switch(arg->type)
@@ -181,7 +181,7 @@ int function_arg_decode(void *buffer,size_t buffer_size,Arg *arg)
 
 int message_function_encode(Message *msg,void *buffer,size_t buffer_size)
 {
-	int min_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
+	int min_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t) + msg->header.data_size;
 	if(buffer_size < min_size) return -1;
 
 	Function *f = (Function *)msg->data;
@@ -242,7 +242,7 @@ int create_response_message(Message *msg,MessageHeader *header,uint32_t response
 	*data = response;
 	return 0;
 }
-int create_message_header(MessageHeader *header,uint8_t message_type,uint16_t caller_id,uint16_t data_size)
+int create_message_header(MessageHeader *header,uint8_t message_type,uint16_t caller_id,uint32_t data_size)
 {
 	header->message_type = message_type;
 	header->caller_id = caller_id;
