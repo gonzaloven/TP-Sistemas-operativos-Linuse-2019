@@ -86,13 +86,8 @@ int bloqueInicioTablaDeNodos;
 int bloqueInicioBloquesDeDatos;
 int cantidadDeBloquesBitmap;
 
-// memory mapping data definition
-struct sac_server_header *header_start;
-struct sac_server_gfile *node_table_start, *data_block_start, *bitmap_start;
-
-//semaphore that will be used to write:
-pthread_rwlock_t rwlock;
-t_log *logger;
+t_log *fuse_logger;
+fuse_configuration *fuse_config;
 
 // Use this structure to store the descriptor number in which the disk was opened
 int discDescriptor;

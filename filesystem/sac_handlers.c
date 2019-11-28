@@ -121,6 +121,7 @@ int determine_nodo(char *path){
 
 			free(listaSpliteada);
 			listaSpliteada = NULL;
+			log_error(fuse_logger, "El Path ingresado no corresponde con un nodo existente.");
 			return -1;
 		}else{
 			nodoUltimoPadre += bloqueInicioTablaDeNodos;
@@ -209,6 +210,8 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 	bitarray_clean_bit(bitmap, ultimoBloquePunterosDirectos);
 	//pthread_mutex_unlock(&s_bitmap);
 
+	log_info(fuse_logger, "Archivo -> Nodo: %d | Contenido borrado correctamente.", nodoABorrarPosicion);
+
 	msync(disco, diskSize, MS_SYNC);
 }
 
@@ -222,6 +225,8 @@ int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){
 	if(tablaDeNodos[nodoABorrarPosicion].state == 2){
 		nodoABorrar->state = 0;
 		nodoABorrar->file_size = 0;
+
+		log_info(fuse_logger, "Directorio -> Nodo: %d | borrado correctamente.", nodoABorrarPosicion);
 		return 0;
 	}
 
@@ -232,6 +237,8 @@ int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){
 	nodoABorrar->state = 0;
 	nodoABorrar->file_size = 0;
 	//pthread_mutex_unlock(&s_tablaDeNodos);
+
+	log_info(fuse_logger, "Archivo -> Nodo: %d | borrado correctamente.", nodoABorrarPosicion);
 
 	msync(disco, diskSize, MS_SYNC);
 	return 0;
@@ -315,6 +322,8 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 
 	if (currNode >= MAX_NUMBER_OF_FILES)
 	{
+		log_error(fuse_logger, "Tabla de nodos llena, no hay lugar disponible para un nuevo nodo.");
+
 		for(int y=0; y<dimListaSpliteada; y++) // libero cada integrante de la matriz
 			free(listaSpliteada[y]);
 
@@ -359,6 +368,8 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 		//pthread_mutex_unlock(&s_tablaDeBloquesDeDatos);
 	}
 
+	log_info(fuse_logger, "Nodo creado en -> Path: %s, Estado: %d, Nombre: %s", parentDirPath, tipoDeArchivo, fileName);
+
 	msync(disco, diskSize, MS_SYNC);
 
 	for(int y=0; y<dimListaSpliteada; y++) // libero cada integrante de la matriz
@@ -389,6 +400,7 @@ Function validarSiExiste(char* path, FuncType tipoFuncion){
 	Arg arg[1];
 
 	if(!strcmp(path, "/")){
+		log_info(fuse_logger, "Nodo raiz encontrado.");
 		arg[0].type = VAR_UINT32;
 		arg[0].size = sizeof(uint32_t);
 		arg[0].value.val_u32 = 0;
@@ -407,6 +419,7 @@ Function validarSiExiste(char* path, FuncType tipoFuncion){
 		arg[0].value.val_u32 = -ENOENT;
 		fsend.type = -1;
 	}else{
+		log_info(fuse_logger, "Nodo encontrado -> Posicion: %d.", nodoBuscado);
 		arg[0].type = VAR_UINT32;
 		arg[0].size = sizeof(uint32_t);
 		arg[0].value.val_u32 = 0;
@@ -512,11 +525,14 @@ int get_bloque_vacio(){
 	}
 
 	if(bitActual == bitsTotales){
+		log_error(fuse_logger, "No hay bloques de datos disponibles.");
 		return -1;
 	}
 
 	bitarray_set_bit(bitmap, bitActual);
 	//pthread_mutex_unlock(&s_bitmap);
+
+	log_debug(fuse_logger, "Bloque vacio disponible en posicion: %d.", bitActual + 1);
 
 	msync(disco, diskSize, MS_SYNC);
 	return bitActual;
@@ -708,7 +724,6 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 	finalizar:
 	// Devuelve el lock de escritura.
 	//pthread_mutex_unlock(&s_tablaDeNodos);
-	//log_trace(logger, "Terminada escritura.");
 
 	msync(disco, diskSize, MS_SYNC);
 
