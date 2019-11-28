@@ -1,5 +1,17 @@
 #include "sac_handlers.h"
 
+int tamDataFunction(Function f){
+	int tamano = 0;
+	tamano+= sizeof(uint8_t);
+	tamano+= sizeof(uint8_t);
+	for(int y=0; y < f.num_args; y++){
+		tamano+= sizeof(uint8_t);
+		tamano+= sizeof(uint16_t);
+		tamano+= f.args[y].size;
+	}
+	return tamano;
+}
+
 char **splitPath(char *path, int *size){
     char *tmp;
     char **splitted = NULL;

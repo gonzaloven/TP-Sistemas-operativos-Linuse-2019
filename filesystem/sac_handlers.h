@@ -7,6 +7,8 @@
 #include <commons/string.h>
 #include <math.h>
 
+int tamDataFunction(Function f);
+
 char **splitPath(char *path, int *size);
 
 int esElNodoBuscado(int nodo, char* filename, ptrGBloque nodoPadre);

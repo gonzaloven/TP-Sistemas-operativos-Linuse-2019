@@ -5,7 +5,7 @@ int send_call(Function *f)
 	Message* msg = malloc(sizeof(Message));
 	MessageHeader header;
 
-	create_message_header(&header,MESSAGE_CALL,1,sizeof(Function));
+	create_message_header(&header,MESSAGE_CALL,1,sizeof(char) * tamDataFunction(*f));
 	create_function_message(msg,&header,f);
 
 	int resultado = send_message(serverSocket,msg);

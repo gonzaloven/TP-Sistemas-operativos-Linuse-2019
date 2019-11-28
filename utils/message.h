@@ -97,7 +97,7 @@ int create_response_message(Message *msg,MessageHeader *header,uint32_t response
 /* Deserializes a message a stores it in result*/
 int message_decode(void *buffer,size_t buf_size,Message *result);
 int header_decode(void *buffer,size_t buf_size,MessageHeader *result);
-int message_function_decode(void *buffer,size_t buf_size,Message *result); 
+int message_function_decode(void *buffer,size_t buf_size,Message *result);
 int function_arg_decode(void *buffer,size_t buff_size,Arg *arg);
 
 /* Serializes a message and stores it in a buffer stream */

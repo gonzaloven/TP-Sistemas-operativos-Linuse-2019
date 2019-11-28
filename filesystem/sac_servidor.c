@@ -114,7 +114,7 @@ void message_handler(Message *m,int sock)
 		case MESSAGE_CALL:
 			frespuesta = fuse_invoke_function((Function *)m->data);
 			log_trace(fuse_logger,"Generando respuesta...");
-			create_message_header(&head,MESSAGE_CALL,1,sizeof(Function));
+			create_message_header(&head,MESSAGE_CALL,1,sizeof(char)  * tamDataFunction(frespuesta));
 			create_function_message(&msg,&head,&frespuesta);
 			send_message(sock,&msg);
 

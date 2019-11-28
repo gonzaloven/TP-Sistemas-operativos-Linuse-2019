@@ -123,7 +123,7 @@ ssize_t receive_packet(int socket,void *buffer,size_t buffer_size)
 	unsigned int recv_bytes = recv(socket,cursor,header_size,MSG_WAITALL);
 
 	header_decode(cursor,buffer_size,&header);
-	cursor += recv_bytes;	
+	cursor += recv_bytes;
 	recv_bytes += recv(socket,cursor,header.data_size,MSG_WAITALL);
 	return recv_bytes;
 }
