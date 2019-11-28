@@ -428,6 +428,7 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 	char *data_block;
 	size_t tamanio = size;
 	int respuesta;
+	void* cursor = buffer;
 
 	nodoDelArchivo = determine_nodo(path);
 
@@ -478,14 +479,14 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 			}
 
 			if (tamanio < BLOQUE_SIZE){
-				memcpy(buffer, data_block, tamanio);
-				buffer = &(buffer[tamanio]);
+				memcpy(cursor, data_block, tamanio);
+				cursor += tamanio;
 				tamanio = 0;
 				break;
 			} else {
-				memcpy(buffer, data_block, BLOQUE_SIZE);
+				memcpy(cursor, data_block, BLOQUE_SIZE);
 				tamanio -= BLOQUE_SIZE;
-				buffer = &(buffer[BLOQUE_SIZE]);
+				cursor += BLOQUE_SIZE;
 				if (tamanio == 0) break;
 			}
 
