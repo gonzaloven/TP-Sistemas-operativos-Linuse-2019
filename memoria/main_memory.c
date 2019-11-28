@@ -164,7 +164,10 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		seg->free_size -= size;
 		list_add(prog->segment_table, pag);
 	}
-	/* TODO: else si puedo agrandar un segmento lo agrando */
+	/* TODO: 
+	else if (puedo agrandar un segmento)
+		 lo agrando 
+	*/
 
 	else 	//si no hay espacio en su último segmento, le creo uno
 	{

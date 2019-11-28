@@ -84,8 +84,8 @@ int search_program(uint32_t pid);
 int segment_with_free_space(program *prog, int size);
 
 /**
- * En realidad un busca un *frame libre*, pero devuelve la página que apunta a ese frame
- * @return NULL if error, page if OK
+ * Se busca un frame libre, y devuelve la página que apunta a ese frame
+ * @return NULL if nos quedamos sin frames, page if OK
  */
 page *find_free_frame();
 
@@ -151,7 +151,5 @@ uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid);
 * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
 */
 int memory_unmap(uint32_t dir, uint32_t pid);
-
-uint32_t muse_add_segment_to_program(program *p, int segm_size, uint32_t pid);
 
 #endif
