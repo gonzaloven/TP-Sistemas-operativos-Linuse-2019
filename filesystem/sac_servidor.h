@@ -41,6 +41,7 @@ typedef struct sac_configuration_s{
 typedef struct fuse_configuration_s
 {
 	int listen_port;
+	char* ip_cliente;
 	uint32_t disk_size;
 	char *path_archivo;
 }fuse_configuration;

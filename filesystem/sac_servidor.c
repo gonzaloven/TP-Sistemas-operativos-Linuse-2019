@@ -109,11 +109,12 @@ void message_handler(Message *m,int sock)
 	switch(m->header.message_type)
 	{
 		case MESSAGE_CALL:
+			log_trace(fuse_logger,"Enviando respuesta...");
 			frespuesta = fuse_invoke_function((Function *)m->data);
-			log_trace(fuse_logger,"Generando respuesta...");
 			create_message_header(&head,MESSAGE_CALL,1,sizeof(char)  * tamDataFunction(frespuesta));
 			create_function_message(&msg,&head,&frespuesta);
 			send_message(sock,&msg);
+			log_trace(fuse_logger,"Respuesta enviada");
 
 			liberarMemoria(&frespuesta);
 
@@ -209,15 +210,6 @@ Function fuse_invoke_function(Function *f)
 	}
 	return func_ret;
 
-}
-
-int main(int argc,char *argv[])
-{
-	signal(SIGINT,fuse_stop_service);
-
-	fuse_start_service(handler);
-
-	return 0;
 }
 
 Function sac_server_open(char* path){
@@ -434,4 +426,13 @@ void liberarMemoria(Function* f){
 		default:
 			break;
 	}
+}
+
+int main(int argc,char *argv[])
+{
+	signal(SIGINT,fuse_stop_service);
+
+	fuse_start_service(handler);
+
+	return 0;
 }
