@@ -6,6 +6,7 @@
 #include "sac_servidor.h"
 #include <commons/string.h>
 #include <math.h>
+#include <pthread.h>
 
 int tamDataFunction(Function f);
 

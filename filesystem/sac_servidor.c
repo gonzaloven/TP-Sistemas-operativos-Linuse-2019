@@ -289,34 +289,6 @@ Function sac_server_getattr(char* path){
 	return fsend;
 }
 
-/*void leer_primer_puntero_completo(int nodo, size_t size, uint32_t offset){
-	int punteroInicial = ceil(offset / (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) - 1;
-	int punteroABloqueInicial = ceil((offset % (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) / BLOQUE_SIZE) - 1;
-	int byteDelBloqueInicial = ((offset % (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) % BLOQUE_SIZE) - 1;
-
-	ptrGBloque bloqueDePunterosPosicionInicial = tablaDeNodos[nodo].indirect_blocks_array[punteroInicial];
-	punterosBloquesDatos *bloqueDePunterosDatosInicial = (punterosBloquesDatos *) (disco + bloqueDePunterosPosicionInicial);
-
-	for(int i = punteroABloqueInicial; i < PUNTEROS_A_BLOQUES_DATOS; i++){
-
-		ptrGBloque bloqueDeDatosPosicionInicial = bloqueDePunterosDatosInicial->punteros_a_bloques[i];
-
-		GBlock *bloque = (GBlock *) (disco + bloqueDeDatosPosicionInicial);
-
-		for(int i = byteDelBloqueInicial; i < )
-	}
-}*/
-
-/*int leer_archivo(int nodo, size_t size, uint32_t offset){
-
-	int punteroFinal = ceil((offset + size) / (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) - 1;
-	int punteroABloqueFinal = ceil(((offset + size) % (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) / BLOQUE_SIZE) - 1;
-	int byteDelBloqueFinal = (((offset + size) % (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE)) % BLOQUE_SIZE) - 1;
-
-	//validar que el tamanio no sea mas grande que lo que tiene el archivo
-
-}*/
-
 Function sac_server_read(char* path, size_t size, uint32_t offset){
 	Message msg;
 	Function fsend;
@@ -382,9 +354,6 @@ Function sac_server_readdir (char* path) {
 
 		return fsend;
 	}
-
-	//Trate de sacar factor comun y delegar este cacho de codigo que se repite
-	//Pero me tira warnings y no logre hacerlo, rarisimo
 
 	lista_a_string(listaDeArchivos, &listaNombres);
 
