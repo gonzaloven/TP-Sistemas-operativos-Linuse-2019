@@ -177,16 +177,16 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
 			ptrGBloque bloqueDeDatosPosicion = bloqueDePunterosDatos->punteros_a_bloques[j];
 
-			pthread_mutex_lock(&s_bitmap);
+			//pthread_mutex_lock(&s_bitmap);
 			bitarray_clean_bit(bitmap, bloqueDeDatosPosicion);
-			pthread_mutex_unlock(&s_bitmap);
+			//pthread_mutex_unlock(&s_bitmap);
 
 			msync(disco, diskSize, MS_SYNC);
 		}
 
-		pthread_mutex_lock(&s_bitmap);
+		//pthread_mutex_lock(&s_bitmap);
 		bitarray_clean_bit(bitmap, bloqueDePunterosPosicion);
-		pthread_mutex_unlock(&s_bitmap);
+		//pthread_mutex_unlock(&s_bitmap);
 
 		msync(disco, diskSize, MS_SYNC);
 	}
@@ -198,16 +198,16 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 	for(int j = 0; j < ceil((float) (tamanio % tamanioMaximoDireccionablePorPuntero) / BLOQUE_SIZE); j++){
 		ptrGBloque bloque = bloqueDePunterosDatosFaltantes->punteros_a_bloques[j];
 
-		pthread_mutex_lock(&s_bitmap);
+		//pthread_mutex_lock(&s_bitmap);
 		bitarray_clean_bit(bitmap, bloque);
-		pthread_mutex_unlock(&s_bitmap);
+		//pthread_mutex_unlock(&s_bitmap);
 
 		msync(disco, diskSize, MS_SYNC);
 	}
 
-	pthread_mutex_lock(&s_bitmap);
+	//pthread_mutex_lock(&s_bitmap);
 	bitarray_clean_bit(bitmap, ultimoBloquePunterosDirectos);
-	pthread_mutex_unlock(&s_bitmap);
+	//pthread_mutex_unlock(&s_bitmap);
 
 	msync(disco, diskSize, MS_SYNC);
 }
@@ -218,7 +218,7 @@ int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){
 		return -1;
 	}
 
-	pthread_mutex_lock(&s_tablaDeNodos);
+	//pthread_mutex_lock(&s_tablaDeNodos);
 	if(tablaDeNodos[nodoABorrarPosicion].state == 2){
 		nodoABorrar->state = 0;
 		nodoABorrar->file_size = 0;
@@ -231,7 +231,7 @@ int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){
 
 	nodoABorrar->state = 0;
 	nodoABorrar->file_size = 0;
-	pthread_mutex_unlock(&s_tablaDeNodos);
+	//pthread_mutex_unlock(&s_tablaDeNodos);
 
 	msync(disco, diskSize, MS_SYNC);
 	return 0;
@@ -308,7 +308,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	dimListaSpliteada = largoListaString(listaSpliteada);
 	fileName = listaSpliteada[dimListaSpliteada - 1];
 
-	pthread_mutex_lock(&s_tablaDeNodos);
+	//pthread_mutex_lock(&s_tablaDeNodos);
 	while(tablaDeNodos[currNode].state != 0 && currNode < MAX_NUMBER_OF_FILES){
 		currNode++;
 	}
@@ -321,7 +321,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 		free(listaSpliteada);
 		return EDQUOT;
 	}
-	pthread_mutex_unlock(&s_tablaDeNodos);
+	//pthread_mutex_unlock(&s_tablaDeNodos);
 
 	if(dimListaSpliteada > 1){
 		char* pathduplicado = strdup(path);
@@ -332,7 +332,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 
 	GFile *nodoVacio = tablaDeNodos + currNode;
 
-	pthread_mutex_lock(&s_tablaDeNodos);
+	//pthread_mutex_lock(&s_tablaDeNodos);
 	strcpy((char*) nodoVacio->fname, fileName);
 	nodoVacio->file_size = 0;
 
@@ -345,18 +345,18 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	nodoVacio->state = tipoDeArchivo;
 	nodoVacio->create_date = time(NULL);
 	nodoVacio->modify_date = time(NULL);
-	pthread_mutex_unlock(&s_tablaDeNodos);
+	//pthread_mutex_unlock(&s_tablaDeNodos);
 
 	if(tipoDeArchivo == 1){
 		int nuevo_nodo_vacio = get_bloque_vacio();
 
 		agregar_nodo(nodoVacio, nuevo_nodo_vacio);
 
-		pthread_mutex_lock(&s_tablaDeBloquesDeDatos);
+		//pthread_mutex_lock(&s_tablaDeBloquesDeDatos);
 		GBlock *bloqueDeDatos = disco + nuevo_nodo_vacio;
 
 		memset(bloqueDeDatos->bytes, 0, BLOQUE_SIZE);
-		pthread_mutex_unlock(&s_tablaDeBloquesDeDatos);
+		//pthread_mutex_unlock(&s_tablaDeBloquesDeDatos);
 	}
 
 	msync(disco, diskSize, MS_SYNC);
@@ -501,7 +501,7 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 }
 
 int get_bloque_vacio(){
-	pthread_mutex_lock(&s_bitmap);
+	//pthread_mutex_lock(&s_bitmap);
 
 	int bitActual = bloqueInicioBloquesDeDatos - 1;
 	int bitsTotales = bitarray_get_max_bit(bitmap);
@@ -515,14 +515,14 @@ int get_bloque_vacio(){
 	}
 
 	bitarray_set_bit(bitmap, bitActual);
-	pthread_mutex_unlock(&s_bitmap);
+	//pthread_mutex_unlock(&s_bitmap);
 
 	msync(disco, diskSize, MS_SYNC);
 	return bitActual;
 }
 
 int cantidad_bloques_libres(){
-	pthread_mutex_lock(&s_bitmap);
+	//pthread_mutex_lock(&s_bitmap);
 	int contador = 0;
 	int bitInicial = bloqueInicioBloquesDeDatos - 1;
 	int bitsTotales = bitarray_get_max_bit(bitmap);
@@ -532,7 +532,7 @@ int cantidad_bloques_libres(){
 			contador++;
 		}
 	}
-	pthread_mutex_unlock(&s_bitmap);
+	//pthread_mutex_unlock(&s_bitmap);
 
 	return contador;
 
@@ -634,7 +634,7 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 	//pthread_rwlock_wrlock(&rwlock);
 	//log_lock_trace(logger, "Write: Recibe lock escritura.");
 
-	pthread_mutex_lock(&s_tablaDeNodos);
+	//pthread_mutex_lock(&s_tablaDeNodos);
 
 	// Guarda tantas veces como sea necesario, consigue nodos y actualiza el archivo.
 	while (tam != 0){
@@ -706,7 +706,7 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 
 	finalizar:
 	// Devuelve el lock de escritura.
-	pthread_mutex_unlock(&s_tablaDeNodos);
+	//pthread_mutex_unlock(&s_tablaDeNodos);
 	//log_trace(logger, "Terminada escritura.");
 
 	msync(disco, diskSize, MS_SYNC);
