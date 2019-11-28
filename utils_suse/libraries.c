@@ -1,5 +1,10 @@
 #include "libraries.h"
 
+//////////////////////Funciones SUSE//////////////////////
+
+
+//////////////////////FIN funciones SUSE//////////////////
+
 void imprimir(char* filename){
 	FILE *fptr = NULL;
 

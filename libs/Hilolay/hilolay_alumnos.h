@@ -2,9 +2,6 @@
 	#define hilolay_alumnos_h__
 	#define HILOLAY_ALUMNO_CONFIG_PATH "../configs/hilolay_alumnos.config"
 
-	/**
-	 * TODO: Interface for alumnos (what they should implement in orde to make this work)
-	 */
 	typedef struct hilolay_operations {
 		int (*suse_create) (int);
 		int (*suse_schedule_next) (void);

@@ -1,5 +1,5 @@
 #include "hilolay_alumnos.h"
-#include "libraries.h"
+#include <utils_suse/libraries.h>
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -13,7 +13,7 @@ int master_thread = 0;
 char* log_path = "../logs/hilolay_alumnos_logs.txt";
 t_log* logger = log_create(log_path, "Hilolay Alumnos Logs", 1, 1);
 
-void conectar_con_suse() { //TODO: Che aca no se llama a get_configuracion jamas...
+void conectar_con_suse() {
 	socket_suse = conectar_a(configuracion_hilolay.SUSE_IP ,configuracion_hilolay.SUSE_PORT);
 	log_info(logger, "Me conecte con SUSE por el socket %d. \n", socket_suse);
 
@@ -36,7 +36,7 @@ int suse_create(int master_thread){
 	int desp = 0;
 
 	serializar_int(buffer, &desp, master_thread);
-	enviar(socket_suse, cop_generico, tamanio_buffer, buffer); //todo esto no se si diferencia el main thread
+	enviar(socket_suse, cop_generico, tamanio_buffer, buffer);
 	free(buffer);
 	log_info(logger, "Envie el tid %d a suse. \n");
 	log_info(logger, "La respuesta de suse_create es %d \n", (int)result);
@@ -111,7 +111,7 @@ int suse_join(int tid)
 }
 
 
-int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructur agregar hilo + semaforos del mismo
+int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructura agregar hilo + semaforos del mismo
 
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);

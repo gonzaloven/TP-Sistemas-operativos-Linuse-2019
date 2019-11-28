@@ -30,7 +30,7 @@ int main(void){
 	pthread_mutex_init(&mutex_exit_queue,NULL);
 	pthread_mutex_init(&mutex_multiprog, NULL);
 	pthread_mutex_init(&mutex_semaforos,NULL);
-	pthread_mutex_init(&mutex_lista_de_process, NULL);
+	pthread_mutex_init(&mutex_process_list, NULL);
 
 	iniciar_servidor();
 
@@ -266,7 +266,7 @@ void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	t_process * process = generar_process(socket_actual);
 	log_info(logger, "El  programa que se conecto es el de ID %d \n", process->PROCESS_ID);
 
-	list_add(configuracion_suse.process,process);
+	list_add(configuracion_suse.process, process);
 
 	//Creo el main thread
 	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
@@ -311,7 +311,9 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
 		return process->PROCESS_ID == socket_actual;
 	}
 
-	t_process* process = list_find(configuracion_suse.process,find_process_by_id);
+	pthread_mutex_lock(&mutex_process_list);
+	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
+	pthread_mutex_unlock(&mutex_process_list);
 
 	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
 
@@ -343,6 +345,7 @@ int close_tid(int tid, int socket_actual){
 	{
 		return process->PROCESS_ID == socket_actual;
 	}
+
 	bool find_thread_by_tid(t_suse_thread* thread) //Extraer a utils!!!!!!!!!!!!!!!!!!!!
 	{
 		return thread->tid == tid;
@@ -502,7 +505,7 @@ void handle_next_tid(un_socket socket_actual, paquete_next_tid){
 		return p->PROCESS_ID == socket_actual;
 	}
 
-	t_process* process = list_find(lista_de_process, comparador);
+	t_process* process = list_find(configuracion_suse.process, comparador);
 
 	log_info(logger, "Iniciando planificacion de programa %d...\n",process->PROCESS_ID);
 	int next_tid = obtener_proximo_ejecutar(process); //Inicia planificacion
@@ -583,7 +586,10 @@ bool funcion_SJF(t_suse_thread* ULT1, t_suse_thread* ULT2) {
 		return p->PROCESS_ID == process_id;
 	}
 
-	t_process* process = list_find(lista_de_process,comparador);
+	pthread_mutex_lock(&mutex_process_list);
+	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
+	pthread_mutex_unlock(&mutex_process_list);
+
 
 	if (ULT1->estimacionUltimaRafaga == ULT2->estimacionUltimaRafaga) {
 		return list_get(process->ULTS, 0); //todo ver como obtener el primer elemento no vacio de la lista // Si no funciona hacemos una bool que haga return thread = null; va a retornar el primero q haya
@@ -600,13 +606,9 @@ bool funcion_SJF(t_suse_thread* ULT1, t_suse_thread* ULT2) {
 //
 //	t_process* process = list_find(lista_de_process,comparador);
 //
-//	if(ULT == process->LAST_EXEC)// TODO: Chequear si esa igualacion entre dos punteros funciona o hacemos una funcion de igualar los dos tid;
+//	if(ULT == process->LAST_EXEC)
 //	{
 //		ULT->duracionRafaga++;
-//	}
-//	else
-//	{
-//		ULT->duracionRafaga = 1; //todo esto quizas deberia ser 0
 //	}
 //}
 
@@ -650,7 +652,7 @@ void handle_signal_sem(socket_actual, paquete_signal_sem){
 	pthread_mutex_lock(&mutex_semaforos);
 	int resultado = incrementar_semaforo(tid, sem);
 	if(resultado != -1){
-		resultado = desbloquear_hilos_semaforo(sem); //todo esto no serian hilos en vez de procesos?
+		resultado = desbloquear_hilos_semaforo(sem);
 	}
 	pthread_mutex_unlock(&mutex_semaforos);
 
@@ -742,7 +744,9 @@ void ejecucion_a_exit(t_suse_thread* thread, un_socket socket)
 			return program->PROCESS_ID == socket;
 		}
 
-	t_process* process = list_find(lista_de_process,buscador);
+	pthread_mutex_lock(&mutex_process_list);
+	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
+	pthread_mutex_unlock(&mutex_process_list);
 
 	remover_ULT_exec(process);
 	thread->estado = E_EXIT;
@@ -760,7 +764,9 @@ void bloqueado_a_exit(t_suse_thread* thread,un_socket socket)
 				return program->PROCESS_ID == socket;
 			}
 
-	t_process* process = list_find(lista_de_process,buscador);
+	pthread_mutex_lock(&mutex_process_list);
+	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
+	pthread_mutex_unlock(&mutex_process_list);
 
 	eliminar_ULT_cola_actual(thread,process);
 	thread->estado = E_EXIT;
@@ -777,7 +783,9 @@ void listo_a_exit(t_suse_thread* thread,un_socket socket)
 		return program->PROCESS_ID == socket;
 	}
 
-	t_process* process = list_find(lista_de_process,buscador);
+	pthread_mutex_lock(&mutex_process_list);
+	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
+	pthread_mutex_unlock(&mutex_process_list);
 
 	eliminar_ULT_cola_actual(thread,process);
 	thread->estado = E_EXIT;
@@ -796,7 +804,9 @@ void nuevo_a_exit(t_suse_thread* thread,un_socket socket_actual)
 			return program->PROCESS_ID == socket;
 		}
 
-	t_process* process = list_find(lista_de_process,buscador);
+	pthread_mutex_lock(&mutex_process_list);
+	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
+	pthread_mutex_unlock(&mutex_process_list);
 
 	eliminar_ULT_cola_actual(thread,process);
 
@@ -816,7 +826,9 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 		return program->PROCESS_ID == socket;
 	}
 
-	t_process* process = list_find(lista_de_process,buscador);
+	pthread_mutex_lock(&mutex_process_list);
+	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
+	pthread_mutex_unlock(&mutex_process_list);
 
 	eliminar_ULT_cola_actual(thread,process);
 	thread->estado = E_EXECUTE;

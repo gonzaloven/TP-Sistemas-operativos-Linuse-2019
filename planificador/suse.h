@@ -29,9 +29,6 @@ typedef struct suse_configuration
 suse_configuration configuracion_suse;
 suse_configuration get_configuracion();
 
-t_suse_thread* ULT_ejecutando = NULL; // Es un unico ULT a la vez
-t_suse_thread* ultimo_ULT_ejecutado = NULL;
-
 pthread_mutex_t mutex_new_queue;
 t_list* new_queue;
 
@@ -43,8 +40,7 @@ pthread_mutex_t mutex_semaforos;
 
 pthread_mutex_t mutex_multiprog;
 
-pthread_mutex_t mutex_lista_de_process;
-t_list* lista_de_process; //todo esto serviria para ordenar fifo los programas, ver
+pthread_mutex_t mutex_process_list;
 
 sem_t sem_ULTs_listos;
 
