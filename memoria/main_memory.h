@@ -29,7 +29,7 @@ typedef struct program_s
  */
 typedef struct HeapMetadata 
 {
-	uint32_t size; 
+	uint32_t free_size; 
 	bool is_free;
 }heap_metadata;
 
@@ -68,6 +68,10 @@ void muse_main_memory_init(int memory_size, int page_size);
 
 void muse_main_memory_stop();
 
+int number_of_free_frames();
+
+void metricas_por_socket_conectado(uint32_t pid);
+
 /**
  * Busca el process_id en program_list
  * @return -1 if no está, else devuelve el nro de programa en program_list
@@ -83,7 +87,7 @@ int segment_with_free_space(program *prog, int size);
  * En realidad un busca un *frame libre*, pero devuelve la página que apunta a ese frame
  * @return NULL if error, page if OK
  */
-page *find_free_page();
+page *find_free_frame();
 
 /** Allocates memory in UCM
  * @param size size of the memory to allocate 

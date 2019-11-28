@@ -28,7 +28,7 @@ void muse_start_service(ConnectionHandler ch)
 
 void muse_stop_service()
 {
-	log_info(muse_logger,"SIGINT received.Shuting down!");	
+	log_info(muse_logger,"SIGINT received. Shuting down!");	
 	free(muse_config);
 	log_destroy(muse_logger);
 	server_stop();
@@ -89,7 +89,7 @@ void message_handler(Message *m,int socket)
 	{
 		case MESSAGE_CALL:
 			res = muse_invoke_function((Function *)m->data,m->header.caller_id);
-			log_trace(muse_logger,"Call received!");
+			//log_trace(muse_logger,"Call received!");
 			message_free_data(m);
 			
 			create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));

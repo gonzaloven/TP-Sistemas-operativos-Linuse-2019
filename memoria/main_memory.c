@@ -7,15 +7,20 @@
 */
 
 #include "main_memory.h"
+#include <fcntl.h> //for open() funct
+#include <sys/mman.h> //for mmap() & munmap()
+#include <sys/stat.h>
 
 frame *main_memory = NULL;
 
 t_list *program_list = NULL;
 t_list *segment_list = NULL;
 t_log *metricas_logger = NULL;
+t_log *debug_logger = NULL;
 
 int PAGE_SIZE = 0;
 int TOTAL_FRAME_NUM = 0;
+int METADATA_SIZE = 0;
 
 void muse_main_memory_init(int memory_size, int page_size)
 {
@@ -25,26 +30,30 @@ void muse_main_memory_init(int memory_size, int page_size)
 	
 	PAGE_SIZE = page_size;
 	main_memory = (frame *) malloc(memory_size); // aka UPCM
-	TOTAL_FRAME_NUM = (memory_size / PAGE_SIZE);	
+	TOTAL_FRAME_NUM = (memory_size / PAGE_SIZE);
+	METADATA_SIZE = sizeof(main_memory[0].metadata);		
 
 	program_list = list_create();
 	segment_list = list_create();
 
+	debug_logger = log_create(MUSE_LOG_PATH,"DEBUG", true,LOG_LEVEL_TRACE);
 	metricas_logger = log_create(MUSE_LOG_PATH, "METRICAS", true, LOG_LEVEL_TRACE);
 
 	printf("Dividiento la memoria en frames...\n");
 	for(i=0; i < TOTAL_FRAME_NUM; i++)
 	{	
 		main_memory[i].metadata.is_free = true ;
-		main_memory[i].metadata.size = 0;
-		main_memory[i].data = mem_ptr + i*PAGE_SIZE; 
+		main_memory[i].metadata.free_size = PAGE_SIZE;
+		main_memory[i].data = mem_ptr + i * PAGE_SIZE; 
 		// supongamos que los frames son de 32 bytes
 		// main_memory[0].data va a ser igual a 0 + 0 * 32 = 0
 		// main_memory[1].data va a ser igual a 0 + 1 * 32 = 32
 		//osea data vendría a ser la base de los frames
-	}		
+	}
 
-	log_trace(metricas_logger, "Cantidad Total de Memoria:%d ", memory_size);
+	log_trace(metricas_logger, "Tamaño de pagina = tamaño de frame: %d", PAGE_SIZE);
+	log_trace(metricas_logger, "Tamaño de metadata: %d", METADATA_SIZE);	
+	log_trace(metricas_logger, "Cantidad Total de Memoria:%d", memory_size);
 	number_of_free_frames();	
 }
 
@@ -68,21 +77,21 @@ int search_program(uint32_t pid)
 	return -1;
 }
 
-void number_of_free_frames(){
-	int memoria_libre = TOTAL_FRAME_NUM * PAGE_SIZE; //al principio arranca siendo = memory_size
+int number_of_free_frames(){
+	int memoria_libre = 0; 
 	int frames_libres = 0;
+	int i;
 
 	for(i=0; i < TOTAL_FRAME_NUM; i++)
 	{	
 		frames_libres += (main_memory[i].metadata.is_free == true);
-		memoria_libre -= main_memory[i].metadata.size; 
+		memoria_libre += main_memory[i].metadata.free_size; 
 	}
 
-	log_trace(metricas_logger, "Cantidad de Memoria libre:%d ", memoria_libre);
-	log_trace(metricas_logger, "Cantidad Total de Frames:%d ", TOTAL_FRAME_NUM);	
-	log_trace(metricas_logger, "Cantidad de Frames libres:%d ", frames_libres);
+	log_trace(metricas_logger, "Cantidad de Memoria libre:%d ", memoria_libre);	
+	log_trace(metricas_logger, "Cantidad de Frames libres:%d / %d ", frames_libres, TOTAL_FRAME_NUM);
 
-	//return frames_libres;
+	return frames_libres;
 }
 
 page *find_free_frame()
@@ -93,15 +102,28 @@ page *find_free_frame()
 
 	for(curr_frame_num=0; curr_frame_num < TOTAL_FRAME_NUM; curr_frame_num++)
 	{	
-		if (main_memory[i].metadata.is_free == true){
+		if (main_memory[curr_frame_num].metadata.is_free == true){
+			main_memory[curr_frame_num].metadata.is_free = false;
 			pag->is_present = true;
-			pag->page_num = curr_frame_num;
+			pag->page_num = 0;
 			pag->fr = &main_memory[curr_frame_num];	
 			return pag;
 		}
 	}
 	printf("Loco, nos quedamos sin frames libres");
 	return NULL;
+}
+
+void metricas_por_socket_conectado(uint32_t pid){
+	int prog_id = search_program(pid);
+	program *prog = list_get(program_list, prog_id);
+
+	int cantidad_de_segmentos_asignados = list_size(prog->segment_table);
+	int cantidad_de_segmentos_totales = list_size(segment_list);
+
+	log_trace(metricas_logger, "pid: %d tiene asignados %d segmentos de %d en sistema", 
+			prog_id, cantidad_de_segmentos_asignados, cantidad_de_segmentos_totales);
+	number_of_free_frames();
 }
 
 uint32_t memory_malloc(int size, uint32_t pid)
@@ -115,58 +137,56 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	program *prog;
 	int total_size;
 	int total_pages_needed;
-
+	
 	total_pages_needed = (size / PAGE_SIZE) + ((size % PAGE_SIZE) != 0); // ceil( size / PAGE_SIZE )
 	total_size = total_pages_needed * PAGE_SIZE;
+
+	log_debug(debug_logger, "Se necesitan %d bytes que serian %d paginas ", total_size, total_pages_needed);
 
 	if((prog_id = search_program(pid)) == -1)
 	{
 		//si el programa no está en la lista de programas	
-		//lo creamos en memoria y creamos un nuevo segmento
+		//agregamos el programa a la lista de programas y le creamos un nuevo segmento
 
 		prog = (program *) malloc(sizeof(program));
-		seg = (segment *) malloc(sizeof(segment));
-
-		//OLD: seg->free_size = size - 32;
-
+		
 		prog->pid = pid;
 		prog->segment_table = list_create();
-		
-		seg->free_size = total_size;
-		seg->page_table = list_create();
-		
-		seg_id = list_add(prog->segment_table, seg);
-		page_id = list_add(seg->page_table, find_free_page());
-		
-		list_add(program_list, prog);
 
-		logical_address = seg_id * 10 + page_id; //TODO de dónde sale este cálculo
+		list_add(program_list, prog);
 		
-	}else /*	si el programa está en la lista de programas */		
-	{  	
-		prog = list_get(program_list, prog_id);
-		if((seg_id = segment_with_free_space(prog, size)) != -1 ) //si hay espacio en su segmento
-		{
-			seg = list_get(prog->segment_table, seg_id);	//seg = segmento con espacio
-			pag = find_free_page();
-			if(pag == NULL)
-			{
-				printf("All pages have been used!\n");
-				return 0;
-			}
-			seg->free_size -= 32;
-			list_add(prog->segment_table, pag);
-		}
-		else //si no hay espacio en su segmento mando el programa a otro segmento
-		{
-			seg = (segment *) malloc(sizeof(segment));
-			seg->free_size = size - 32;
-			seg->page_table = list_create();
-			page_id = list_add(seg->page_table, find_free_page());
-			seg_id = list_add(prog->segment_table, seg);
-			logical_address = seg_id * 10 + page_id; //TODO chequear
-		}
 	}	  	
+	prog = list_get(program_list, prog_id);
+	if((seg_id = segment_with_free_space(prog, size)) != -1 ) 
+		//si hay espacio en su segmento, malloqueo ahí
+	{
+		seg = list_get(prog->segment_table, seg_id);	//seg = segmento con espacio		
+		seg->free_size -= size;
+		list_add(prog->segment_table, pag);
+	}
+	/* TODO: else si puedo agrandar un segmento lo agrando */
+
+	else 	//si no hay espacio en su último segmento, le creo uno
+	{
+		seg = (segment *) malloc(sizeof(segment));
+		seg->free_size -= total_size;
+		seg->page_table = list_create();
+		seg->is_heap = true;
+		
+		//vamos a pedir todas las paginas que necesitemos
+		for(int i=0 ; i < total_pages_needed ; i++ )
+		{
+			pag = find_free_frame();
+			list_add(seg->page_table, pag);
+		}
+
+		page_id = list_add(seg->page_table, find_free_frame());
+		list_add(prog->segment_table, seg);	
+		seg_id = list_add(segment_list, seg);	
+	}
+	
+	metricas_por_socket_conectado(pid);
+	logical_address = seg_id * 10 + page_id; //TODO ??	  	
 	return logical_address;
 }
 

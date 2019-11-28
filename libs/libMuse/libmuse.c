@@ -1,5 +1,7 @@
 #include "libmuse.h"
 
+int master_socket;
+
 int muse_init(int id)
 {
 	config = config_create(LIBMUSE_CONFIG_PATH);
@@ -140,7 +142,7 @@ uint32_t muse_map(char *path, size_t length, int flags)
 
 	arg[0].type = VAR_CHAR_PTR;
 	arg[0].size = sizeof(uint32_t);
-	arg[0].value.val_u32 = *length;
+	arg[0].value.val_u32 = *s;
 
 	arg[1].type = VAR_SIZE_T;
 	arg[1].size = sizeof(size_t);

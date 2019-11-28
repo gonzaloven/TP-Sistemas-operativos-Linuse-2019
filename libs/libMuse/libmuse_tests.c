@@ -4,7 +4,7 @@
 int main(int argc,char *argv[])
 {
 	int pid1 = getpid();
-	if (muse_init(50) == 0)
+	if (muse_init(pid1) == 0)
 		printf("Libmuse with proccess_id = %d initialized!\n",pid1);
 
 
@@ -22,6 +22,14 @@ int main(int argc,char *argv[])
 	printf("Se libero la direccion logica %d\n",dir);
 
 	muse_close();
+
+	int pid2 = getpid();
+	if (muse_init(pid2) == 0)
+		printf("Libmuse with proccess_id = %d initialized!\n",pid2);
+	
+	int dir4 = muse_alloc(2000);
+	printf("La direccion de los 2000 byes reservados es %d\n",dir4);
+	
 
 	return 0;
 }

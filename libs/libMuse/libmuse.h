@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "network.h"
-#include <fcntl.h> //for open() funct
-#include <sys/mman.h> //for mmap() & munmap()
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <commons/config.h>
@@ -15,8 +13,6 @@
 #define LIBMUSE_CONFIG_PATH "../../configs/libmuse.config"
 
 t_config *config;
-
-int master_socket = 0;
 
 /**
 * Inicializa la biblioteca de MUSE.
