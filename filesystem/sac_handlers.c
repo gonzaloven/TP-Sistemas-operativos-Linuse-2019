@@ -194,10 +194,10 @@ int renombrar_archivo(int nodoBuscadoPosicion, char* path, char* nuevoPath){
 
 	int existenciaDeOtro = validar_si_ya_existe_otro(nuevoPath, fileName);
 
-	if(respuesta != 0){
+	if(existenciaDeOtro != 0){
 		free(pathDuplicadoDenuevo);
 		free(pathDuplicado);
-		return respuesta;
+		return existenciaDeOtro;
 	}
 
 	int nodoNuevoPadre = determine_nodo(parentDirNuevoPath);
