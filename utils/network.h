@@ -60,6 +60,10 @@ ssize_t send_message(int socket_fd,Message *msg);
  * */
 ssize_t receive_message(int socket_fd,Message *msg);
 
+ssize_t receive_message_var(int socket_fd, Message* msg);
+
+ssize_t receive_packet_var(int socket,void **bufferReal);
+
 
 
 #endif 

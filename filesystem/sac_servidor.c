@@ -135,24 +135,25 @@ void* handler(void *args)
 {
 	ConnectionArgs *conna = (ConnectionArgs *)args;
 	Message msg;
-	char buffer[1024];
+	void* buffer;
 	int n=0;
 	int sock = conna->client_fd;
 	struct sockaddr_in client_address = conna->client_addr;
 
 	printf("Un cliente se ha conectado!\n");
 
-	while((n=receive_packet(sock,buffer,1024)) > 0)
+	while((n=receive_packet_var(sock,&buffer)) > 0)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
 			message_handler(&msg,sock);
-			memset(buffer,'\0',1024);
+			free(buffer);
 		}
 		else{
 			liberarMemoria((Function *)&msg);
 			free(msg.data);
 			msg.data = NULL;
+			free(buffer);
 		}
 	}	
 	log_debug(fuse_logger,"El cliente se desconecto!");
@@ -319,7 +320,7 @@ Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
 	fsend.type = FUNCTION_RTA_WRITE;
 	fsend.num_args = 1;
 	fsend.args[0].type = VAR_UINT32;
-	fsend.args[0].size = size;
+	fsend.args[0].size = sizeof(uint32_t);
 	fsend.args[0].value.val_u32 = respuesta;
 
 	return fsend;

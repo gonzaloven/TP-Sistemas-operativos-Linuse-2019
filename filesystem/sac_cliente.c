@@ -219,7 +219,7 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	free(fsend.args[1].value.val_charptr);
 	fsend.args[1].value.val_charptr = NULL;
 
-	receive_message(serverSocket,&msg);
+	receive_message_var(serverSocket,&msg); // esto cambie
 
 	Function* freceive = msg.data;
 
@@ -315,7 +315,7 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	free(f.args[2].value.val_charptr);
 	f.args[2].value.val_charptr = NULL;
 
-	receive_message(serverSocket,&msg);
+	receive_message_var(serverSocket,&msg);
 
 	Function* fresp = msg.data;
 

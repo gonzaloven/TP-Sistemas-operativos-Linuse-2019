@@ -571,30 +571,30 @@ int agregar_nodo(GFile *file_data, int numeroNodo){
 		new_pointer_block = get_bloque_vacio();
 		if(new_pointer_block < 0) return new_pointer_block; /* Si sucede que sea menor a 0, contendra el codigo de error */
 
-		pthread_mutex_lock(&s_tablaDeBloquesDeDatos);
+		//pthread_mutex_lock(&s_tablaDeBloquesDeDatos);
 		GBlock *bloqueDeDatos = disco + new_pointer_block;
 
 		memset(bloqueDeDatos->bytes, 0, BLOQUE_SIZE);
-		pthread_mutex_unlock(&s_tablaDeBloquesDeDatos);
+		//pthread_mutex_unlock(&s_tablaDeBloquesDeDatos);
 
-		pthread_mutex_lock(&s_tablaDeNodos);
+		//pthread_mutex_lock(&s_tablaDeNodos);
 		file_data->indirect_blocks_array[node_pointer_number] = new_pointer_block;
 		// Cuando crea un bloque, settea al siguente como 0, dejando una marca.
 		file_data->indirect_blocks_array[node_pointer_number + 1] = 0;
-		pthread_mutex_unlock(&s_tablaDeNodos);
+		//pthread_mutex_unlock(&s_tablaDeNodos);
 
 	} else {
 		new_pointer_block = file_data->indirect_blocks_array[node_pointer_number]; //Se usa como auxiliar para encontrar el numero del bloque de punteros
 	}
 
-	pthread_mutex_lock(&s_tablaDeNodos);
+	//pthread_mutex_lock(&s_tablaDeNodos);
 	// Ubica el nodo de punteros
 	nodo_punteros = (punterosBloquesDatos *) (disco + new_pointer_block);
 
 
 	// Hace que dicho puntero, en la posicion ya obtenida, apunte al nodo indicado.
 	nodo_punteros->punteros_a_bloques[position] = numeroNodo;
-	pthread_mutex_unlock(&s_tablaDeNodos);
+	//pthread_mutex_unlock(&s_tablaDeNodos);
 
 	msync(disco, diskSize, MS_SYNC);
 
