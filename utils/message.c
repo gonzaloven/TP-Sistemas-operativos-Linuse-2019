@@ -160,7 +160,7 @@ int function_arg_decode(void *buffer,size_t buffer_size,Arg *arg)
 			cursor += arg->size;
 			break;
 		case VAR_CHAR_PTR:
-			arg->value.val_charptr = malloc(arg->size); //Aca tambien hay memory leaks
+			arg->value.val_charptr = malloc(arg->size);
 			memcpy(arg->value.val_charptr,cursor,arg->size);
 			cursor += arg->size;
 			break;

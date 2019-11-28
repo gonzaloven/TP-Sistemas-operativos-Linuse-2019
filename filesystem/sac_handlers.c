@@ -179,6 +179,8 @@ int validar_si_ya_existe_otro(char* path, char* fileName){
 			}
 		}
 	}
+
+	free(pathduplicado);
 	return 0;
 }
 
@@ -822,7 +824,11 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 		if ((off >= (file_size + space_in_block)) & (file_size != 0)){
 
 			// Si no hay espacio en el disco, retorna error.
-			if (cantidad_bloques_libres() == 0) return -ENOSPC;
+			if (cantidad_bloques_libres() == 0){
+				free(n_pointer_block);
+				free(n_data_block);
+				return -ENOSPC;
+			}
 
 			// Obtiene un bloque libre para escribir.
 			nodo_libre_nuevo = get_bloque_vacio();
@@ -880,6 +886,9 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 	finalizar:
 
 	msync(disco, diskSize, MS_SYNC);
+
+	free(n_pointer_block);
+	free(n_data_block);
 
 	return respuesta;
 

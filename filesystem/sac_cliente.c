@@ -624,7 +624,7 @@ fuse_configuration* load_configuration(char *path)
 		exit(-1);
 	}
 
-	fc->ip_cliente = malloc(strlen(config_get_string_value(config,"IP_CLIENTE")));
+	fc->ip_cliente = malloc(strlen(config_get_string_value(config,"IP_CLIENTE"))+ 1);
 
 	strcpy(fc->ip_cliente,config_get_string_value(config,"IP_CLIENTE"));
 	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
@@ -657,6 +657,7 @@ int main(int argc, char *argv[]){
 
 	log_info(logger,"SIGINT recibida. Cliente desconectado!");
 	log_destroy(logger);
+	free(fuse_config);
 
 	return 0;
 }

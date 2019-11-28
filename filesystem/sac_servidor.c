@@ -155,6 +155,7 @@ void* handler(void *args)
 		}
 	}	
 	log_debug(fuse_logger,"El cliente se desconecto!");
+	free(buffer);
 	close(sock);
 	return (void*)NULL;
 }
@@ -441,6 +442,7 @@ void liberarMemoria(Function* f){
 			f->args[0].value.val_charptr = NULL;
 			break;
 		case FUNCTION_READ:
+		case FUNCTION_TRUNCATE:
 			free(f->args[1].value.val_charptr);
 			f->args[1].value.val_charptr = NULL;
 			break;
@@ -449,6 +451,12 @@ void liberarMemoria(Function* f){
 			f->args[1].value.val_charptr = NULL;
 			free(f->args[2].value.val_charptr);
 			f->args[2].value.val_charptr = NULL;
+			break;
+		case FUNCTION_RENAME:
+			free(f->args[0].value.val_charptr);
+			f->args[0].value.val_charptr = NULL;
+			free(f->args[1].value.val_charptr);
+			f->args[1].value.val_charptr = NULL;
 			break;
 		default:
 			break;
