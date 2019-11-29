@@ -11,11 +11,12 @@
 #include "libraries.h"
 
 t_log* logger;
+char * suse_config_path = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config";
 
 int main(void){
-	char* log_path = "../logs/suse_logs.txt";
-
-	logger = log_create(log_path, "SUSE Logs", 1, 1);
+	char* log_file;
+	log_file = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
+	logger = log_create(log_file, "SUSE logs", 1, 1);
 	log_info(logger, "Inicializando SUSE. \n");
 
 	configuracion_suse = get_configuracion();
@@ -53,17 +54,21 @@ int main(void){
 void init_semaforos(){
 	log_info(logger, "Inicializando semaforos \n");
 
-	uint32_t cantidad_semaforos = sizeof(configuracion_suse.SEM_ID) / sizeof(configuracion_suse.SEM_ID[0]);
+	uint32_t cantidad_semaforos = sizeof(configuracion_suse.SEM_IDS) / sizeof(configuracion_suse.SEM_IDS[0]);
+
+	bool buscador_sem_name(t_suse_semaforos* sem, int index){
+		return sem->NAME == configuracion_suse.SEM_IDS[index];
+	}
 
 	for(uint32_t i = 0; i < cantidad_semaforos; i++){
 
-		t_suse_semaforos* semaforo = malloc (sizeof(t_suse_semaforos));
-		semaforo->NAME = configuracion_suse.SEM_ID[i];
+		t_suse_semaforos* semaforo = malloc(sizeof(t_suse_semaforos));
+		semaforo->NAME = list_find(semaforo, i);
 		semaforo->INIT = (uint32_t)configuracion_suse.SEM_INIT[i];
 		semaforo->MAX = (uint32_t)configuracion_suse.SEM_MAX[i];
 		semaforo->VALUE = (uint32_t)configuracion_suse.SEM_INIT[i];
 
-		list_add(configuracion_suse.semaforos,semaforo);
+		list_add(configuracion_suse.semaforos, semaforo);
 	}
 
 }
@@ -73,11 +78,12 @@ suse_configuration get_configuracion() {
 	log_info(logger, "Levantando archivo de configuracion de SUSE \n");
 
 	suse_configuration configuracion_suse;
-	t_config* archivo_configuracion = config_create(SUSE_CONFIG_PATH);
+	t_config* archivo_configuracion;
+	archivo_configuracion = config_create(suse_config_path);
 	
 	configuracion_suse.LISTEN_PORT = copy_string(get_campo_config_string(archivo_configuracion, "LISTEN_PORT"));
 	configuracion_suse.METRICS_TIMER = get_campo_config_int(archivo_configuracion, "ESTIMACION_INICIAL");
-	configuracion_suse.SEM_ID = get_campo_config_array(archivo_configuracion, "SEM_ID");
+	configuracion_suse.SEM_IDS = get_campo_config_array(archivo_configuracion, "SEM_ID");
 	configuracion_suse.SEM_INIT = get_campo_config_array(archivo_configuracion, "SEM_INIT");
 	configuracion_suse.SEM_MAX = get_campo_config_array(archivo_configuracion, "SEM_MAX");
 	configuracion_suse.ALPHA_SJF = get_campo_config_int(archivo_configuracion, "ALPHA_SJF");

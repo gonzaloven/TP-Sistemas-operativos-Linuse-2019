@@ -13,14 +13,11 @@
 #include <commons/string.h>
 #include <libraries.h>
 
-
-#define SUSE_CONFIG_PATH "../configs/planificador.config"
-
 typedef struct suse_configuration
 {
 	char* LISTEN_PORT;
 	int METRICS_TIMER;
-	char ** SEM_ID;
+	char ** SEM_IDS;
 	char ** SEM_INIT;
 	char ** SEM_MAX;
 	int ALPHA_SJF;
