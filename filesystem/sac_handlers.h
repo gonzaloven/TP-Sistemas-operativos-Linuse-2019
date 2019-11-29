@@ -6,6 +6,7 @@
 #include "sac_servidor.h"
 #include <commons/string.h>
 #include <math.h>
+#include <pthread.h>
 
 char **splitPath(char *path, int *size);
 
