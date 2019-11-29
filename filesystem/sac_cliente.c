@@ -22,7 +22,7 @@ int send_path(FuncType func_type, const char *path){
 
 	f.args[0].type = VAR_CHAR_PTR;
 	f.args[0].size = strlen(path) + 1;
-	f.args[0].value.val_charptr = malloc(f.args[0].size); //Aca hay memory leaks segun Valgrind
+	f.args[0].value.val_charptr = malloc(f.args[0].size);
 	memcpy(f.args[0].value.val_charptr, path, f.args[0].size);
 
 	f.type = func_type;
@@ -203,8 +203,12 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	fsend.args[1].value.val_charptr = malloc(fsend.args[1].size);
 	memcpy(fsend.args[1].value.val_charptr, path, fsend.args[1].size);
 
+	fsend.args[2].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	fsend.args[2].size = sizeof(uint32_t);
+	fsend.args[2].value.val_u32 = size;
+
 	fsend.type = FUNCTION_READ;
-	fsend.num_args = 2;
+	fsend.num_args = 3;
 
 	if(send_call(&fsend) == -1){
 		free(fsend.args[1].value.val_charptr);
