@@ -5,10 +5,14 @@
 #include <stdlib.h>
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/collections/list.h>
 #include <signal.h>
-#include <utils_suse/libraries.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <commons/string.h>
+#include <libraries.h>
+
 
 #define SUSE_CONFIG_PATH "../configs/planificador.config"
 
@@ -23,7 +27,7 @@ typedef struct suse_configuration
 	int MAX_MULTIPROG;
 	t_list * process;
 	t_list * semaforos;
-	uint32_t ACTUAL_MULTIPROG;
+	int ACTUAL_MULTIPROG;
 }suse_configuration;
 
 suse_configuration configuracion_suse;
@@ -50,11 +54,11 @@ t_process * generar_programa(int socket_hilolay);
 
 void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay);
 
-void close_tid(int tid);
+int close_tid(int tid, int socket_actual);
 
-void handle_close_tid(socket_actual,received_packet);
+void handle_close_tid(un_socket socket_actual, t_paquete* received_packet);
 
-void handle_wait_sem(socket_actual, received_packet);
+void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem);
 
 int i_thread = 0;
 pthread_t threads[20];
@@ -73,8 +77,29 @@ void estimar_ULTs_listos(t_list* ready_list);
 
 void estimar_rafaga(t_suse_thread * ULT);
 
+void init_semaforos();
 
+bool funcion_SJF(t_suse_thread* ULT1, t_suse_thread* ULT2);
 
+void ordenar_por_sjf(t_list* ready_list);
+
+void nuevo_a_exit(t_suse_thread* thread, un_socket socket_actual);
+
+void bloqueado_a_exit(t_suse_thread* thread, un_socket socket);
+
+void listo_a_exit(t_suse_thread* thread, un_socket socket);
+
+t_process * generar_process(un_socket socket);
+
+void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid);
+
+void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem);
+
+int incrementar_semaforo(uint32_t tid, char* sem);
+
+int decrementar_semaforo(int socket_actual,int tid, char* sem_name);
+
+void ejecucion_a_exit(t_suse_thread* thread, un_socket socket);
 
 
 /*
