@@ -42,10 +42,10 @@ int main(void){
 	list_destroy(blocked_queue);
 	list_destroy(exit_queue);
 
-	free(&mutex_new_queue);
-	free(&mutex_blocked_queue);
-	free(&mutex_multiprog);
-	free(&mutex_semaforos);
+	pthread_mutex_destroy(&mutex_new_queue);
+	pthread_mutex_destroy(&mutex_blocked_queue);
+	pthread_mutex_destroy(&mutex_multiprog);
+	pthread_mutex_destroy(&mutex_semaforos);
 
 	return EXIT_SUCCESS;
 }
@@ -59,9 +59,9 @@ void init_semaforos(){
 
 		t_suse_semaforos* semaforo = malloc (sizeof(t_suse_semaforos));
 		semaforo->NAME = configuracion_suse.SEM_ID[i];
-		semaforo->INIT = configuracion_suse.SEM_INIT[i];
-		semaforo->MAX = configuracion_suse.SEM_MAX[i];
-		semaforo->VALUE = configuracion_suse.SEM_INIT[i];
+		semaforo->INIT = (uint32_t)configuracion_suse.SEM_INIT[i];
+		semaforo->MAX = (uint32_t)configuracion_suse.SEM_MAX[i];
+		semaforo->VALUE = (uint32_t)configuracion_suse.SEM_INIT[i];
 
 		list_add(configuracion_suse.semaforos,semaforo);
 	}
@@ -97,7 +97,7 @@ void iniciar_servidor() {
 	hints.ai_flags = AI_PASSIVE;
 	if ((rv = getaddrinfo(NULL, configuracion_suse.LISTEN_PORT, &hints, &ai)) != 0) {
 		fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
-		salir(1);
+		exit(1); //decia salir
 	}
 
 	for(p = ai; p != NULL; p = p->ai_next) {
@@ -137,13 +137,13 @@ void iniciar_servidor() {
 		free(handshake);
 		//Creo un hilo por programa que se conecta
 		log_info(logger, "Creando process con id... %d. \n", new_connection);
-		thread_params = list_add(thread_params, new_connection);
+		int posicionRetornada = list_add(thread_params, &new_connection);
 		nuevo_hilo(process_conectado_funcion_thread, thread_params);
 	}
 }
 
 void* process_conectado_funcion_thread(void* argumentos) {
-	un_socket socket_actual = list_get(argumentos, 0);
+	un_socket socket_actual = (int)list_get(argumentos, 0);
 	list_destroy(argumentos);
 	handle_conection_suse(socket_actual);
 	pthread_detach(pthread_self()); //todo verificar si esto esta ok por lo de utn.so
@@ -243,7 +243,7 @@ int join(un_socket socket, int tid){
 	}
 
 	t_process* process = list_find(configuracion_suse.process, buscador_process_id);
-	t_suse_thread* thread_executing = list_get(process->ULTS,process->EXEC_THREAD);
+	t_suse_thread* thread_executing = process->EXEC_THREAD;
 	t_suse_thread* thread_joined = list_find(process->ULTS, buscador_thread_id);
 
 	if(thread_joined == NULL)
@@ -441,7 +441,8 @@ void desjoinear(t_process* process, t_suse_thread* thread_joineado)
 
 	for(int i = 0; i < size; i++)
 	{
-		desjoinear_hilo(thread_joineado,thread_joineado->joinedBy[i]);
+		t_suse_thread* thread= list_get(thread_joineado->joinedBy,i);
+		desjoinear_hilo(thread_joineado,thread);
 	}
 
 }
@@ -452,7 +453,7 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 		return th->tid == thread_joineado->tid;
 	}
 
-	list_remove(thread_joiner->joinTo,comparador);
+	list_remove_by_condition(thread_joiner->joinTo,comparador);
 
 	if(list_is_empty(thread_joiner->joinTo))
 	{
@@ -486,6 +487,10 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 
 }
 
+bool validar_grado_multiprogramacion()
+{
+	return configuracion_suse.MAX_MULTIPROG >= configuracion_suse.ACTUAL_MULTIPROG + 1;
+}
 
 t_process * generar_process(un_socket socket) {
 	t_process * process = malloc(sizeof(t_process));
@@ -551,8 +556,6 @@ int obtener_proximo_ejecutar(t_process* process){
 
 	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
 
-	//actualizarRafaga(next_ULT);
-
 	process->LAST_EXEC = next_ULT; //Esto para que sirve??
 
 	next_ULT->duracionRafaga = aux; //Le pongo el momento de inicio de la rafaga.
@@ -610,21 +613,6 @@ bool funcion_SJF(t_suse_thread* ULT1, t_suse_thread* ULT2) {
 	return ULT1->estimacionUltimaRafaga < ULT2->estimacionUltimaRafaga;
 }
 
-//void actualizarRafaga(t_suse_thread * ULT) {
-//
-//	bool comparador(t_process* program)
-//	{
-//		return program->PROCESS_ID == ULT->procesoId;
-//	}
-//
-//	t_process* process = list_find(lista_de_process,comparador);
-//
-//	if(ULT == process->LAST_EXEC)
-//	{
-//		ULT->duracionRafaga++;
-//	}
-//}
-
 
 void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem){
 	//Recibo el semaforo a decremetnar
@@ -679,15 +667,14 @@ void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 }
 
 //todo definir que le pasas, si un char* o un t_sem*
-int desbloquear_hilos_semaforo(sem){
+int desbloquear_hilos_semaforo(char* sem){
 
 	bool buscador_sem_name(t_suse_semaforos* semaforo){
 		return semaforo->NAME == sem;
 	}
 
-	bool buscador_process_id(t_process* p){
-		return p->PROCESS_ID == socket;
-	}
+
+
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, buscador_sem_name);
 
 	if(list_get(semaforo->BLOCKED_LIST, 0) == NULL){
@@ -696,7 +683,12 @@ int desbloquear_hilos_semaforo(sem){
 
 	//todo encontrar solucion  con listas
 
-	t_suse_thread* thread = semaforo->BLOCKED_LIST[0];
+	t_suse_thread* thread = list_get(semaforo->BLOCKED_LIST,0);
+
+	bool buscador_process_id(t_process* p){
+		return p->PROCESS_ID == thread->procesoId;
+	}
+
 	t_process * process = list_find(configuracion_suse.process, buscador_process_id);
 
 	bloqueado_a_listo(thread,process);
@@ -711,6 +703,7 @@ int incrementar_semaforo(uint32_t tid, char* sem){
 	bool comparador(t_suse_semaforos* semaforo){
 		return semaforo->NAME == sem;
 	}
+
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, comparador);
 
 	if(semaforo == NULL)
@@ -901,7 +894,7 @@ void bloqueado_a_listo(t_suse_thread* thread,t_process* program)
 {
 	eliminar_ULT_cola_actual(thread,program);
 	thread->estado = E_READY;
-	list_add(program->READY_LIST,thread->tid);
+	list_add(program->READY_LIST,thread);
 	log_info(logger, "El thread %d paso de blocked a ready \n", thread->tid);
 }
 
@@ -1012,7 +1005,7 @@ void nuevo_a_listo(t_suse_thread* ULT, int process_id)
 
 	t_process* program = list_find(configuracion_suse.process, comparador);
 
-	list_add(program->READY_LIST, ULT->tid);
+	list_add(program->READY_LIST, ULT);
 
 	eliminar_ULT_cola_actual(ULT, program);
 	ULT->estado = E_READY;

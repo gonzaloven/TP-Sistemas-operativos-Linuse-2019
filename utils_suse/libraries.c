@@ -232,7 +232,7 @@ bool esperar_handshake(un_socket socket_del_cliente, t_paquete* inicio_del_hands
 	return resultado;
 }
 
-char get_campo_config_char(t_config* archivo_configuracion, char* nombre_campo) {
+char* get_campo_config_char(t_config* archivo_configuracion, char* nombre_campo) {
 	char* valor;
 	if(config_has_property(archivo_configuracion, nombre_campo)){
 		valor = config_get_string_value(archivo_configuracion, nombre_campo);
@@ -510,10 +510,10 @@ t_list * recibir_listado_de_strings(un_socket socket) {
 	liberar_paquete(paqueteListado);
 	return listado;
 }
-
-int cantidad_entradas_necesarias(char* valor, int tamanio_entrada) {
-	return ceil((float)(size_of_string(valor) - 1) / tamanio_entrada);
-}
+//
+//int cantidad_entradas_necesarias(char* valor, int tamanio_entrada) {
+//	return ceil((float)(size_of_string(valor) - 1) / tamanio_entrada);
+//}
 
 void serializar_int(void * buffer, int * desplazamiento, int valor) {
 	memcpy(buffer + *desplazamiento, &valor, sizeof(int));

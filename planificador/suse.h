@@ -101,7 +101,21 @@ int decrementar_semaforo(int socket_actual,int tid, char* sem_name);
 
 void ejecucion_a_exit(t_suse_thread* thread, un_socket socket);
 
+void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay);
 
+void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido);
+
+int join(un_socket socket, int tid);
+
+void desjoinear(t_process* process, t_suse_thread* thread_joineado);
+
+void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joiner);
+
+void listo_a_ejecucion(t_suse_thread* thread, un_socket socket);
+
+int desbloquear_hilos_semaforo(char* sem);
+
+bool validar_grado_multiprogramacion();
 /*
 --------------------------------------------------------
 ----------------- Variables para el Servidor -----------

@@ -147,7 +147,7 @@ bool realizar_handshake(un_socket socket_del_servidor, int cop_handshake);
 bool esperar_handshake(un_socket socket_del_cliente,
 		t_paquete* inicio_del_handshake, int cop_handshake);
 
-char get_campo_config_char(t_config* archivo_configuracion, char* nombre_campo);
+char* get_campo_config_char(t_config* archivo_configuracion, char* nombre_campo);
 
 int get_campo_config_int(t_config* archivo_configuracion, char* nombre_campo);
 
@@ -243,7 +243,6 @@ void remover_ULT_bloqueado(t_suse_thread* thread);
 
 void remover_ULT_exec(t_process* process);
 
-bool validar_grado_multiprogramacion();
 
 void nuevo_a_listo(t_suse_thread* ULT, int process_id);
 
@@ -257,6 +256,6 @@ void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semafo
 
 pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros);
 
-bool validar_grado_multiprogramacion();
+
 
 #endif /* LIBRARIES_H_ */
