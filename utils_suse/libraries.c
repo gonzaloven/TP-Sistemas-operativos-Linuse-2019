@@ -556,6 +556,10 @@ char* deserializar_string(void * buffer, int * desplazamiento) {
 	return valor;
 }
 
+void serializar_valor(char* valor, void* buffer, int* desplazamiento) {
+		serializar_string(buffer, desplazamiento, valor);
+	}
+
 void serializar_lista_strings(void * buffer, int * desplazamiento, t_list * lista) {
 	serializar_int(buffer, desplazamiento, list_size(lista));
 	void serializar_valor(char* valor) {

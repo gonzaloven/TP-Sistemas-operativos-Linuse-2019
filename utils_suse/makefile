@@ -1,4 +1,4 @@
-TARGET:=utils_suse
+TARGET:=libutils_suse
 CC:=gcc
 CFLAGS:= -g
 SRCS := libraries.c 

@@ -93,6 +93,8 @@ typedef struct t_suse_semaforos{
 }t_suse_semaforos;
 
 
+void serializar_valor(char* valor);
+
 
 /**	@NAME: conectar_a
  * 	@DESC: Intenta conectarse.
