@@ -104,31 +104,34 @@ page *find_free_frame()
 	{	
 		if (main_memory[curr_frame_num].metadata.is_free == true){
 			main_memory[curr_frame_num].metadata.is_free = false;
+			main_memory[curr_frame_num].metadata.free_size = 0; //TODO: si una pagina apunta a un frame y no usa todo su espacio (paginacion interna), consideramos igual que el frame tiene espacio libre = 0?
 			pag->is_present = true;
 			pag->page_num = 0;
 			pag->fr = &main_memory[curr_frame_num];	
 			return pag;
 		}
 	}
-	printf("Loco, nos quedamos sin frames libres");
+	log_debug(debug_logger, "NOS QUEDAMOS SIN FRAMES LIBRES ");
 	return NULL;
 }
 
 void metricas_por_socket_conectado(uint32_t pid){
-	int prog_id = search_program(pid);
-	program *prog = list_get(program_list, prog_id);
+	int nro_prog = search_program(pid);
+	program *prog = list_get(program_list, nro_prog);
+
+	int nro_de_seg;
 
 	int cantidad_de_segmentos_asignados = list_size(prog->segment_table);
 	int cantidad_de_segmentos_totales = list_size(segment_list);
 
-	log_trace(metricas_logger, "pid: %d tiene asignados %d segmentos de %d en sistema", 
-			prog_id, cantidad_de_segmentos_asignados, cantidad_de_segmentos_totales);
+	log_trace(metricas_logger, "pid: %d tiene asignados %d de %d segmentos en el sistema", 
+			nro_prog, cantidad_de_segmentos_asignados, cantidad_de_segmentos_totales);
 	number_of_free_frames();
 }
 
 uint32_t memory_malloc(int size, uint32_t pid)
-{
-	int prog_id;
+{	
+	int nro_prog;
 	uint32_t seg_id;
 	uint32_t page_id;
 	uint32_t logical_address = 0;
@@ -139,11 +142,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	int total_pages_needed;
 	
 	total_pages_needed = (size / PAGE_SIZE) + ((size % PAGE_SIZE) != 0); // ceil( size / PAGE_SIZE )
-	total_size = total_pages_needed * PAGE_SIZE;
-
-	log_debug(debug_logger, "Se necesitan %d bytes que serian %d paginas ", total_size, total_pages_needed);
-
-	if((prog_id = search_program(pid)) == -1)
+	
+	if((nro_prog = search_program(pid)) == -1)
 	{
 		//si el programa no está en la lista de programas	
 		//agregamos el programa a la lista de programas y le creamos un nuevo segmento
@@ -152,27 +152,35 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		
 		prog->pid = pid;
 		prog->segment_table = list_create();
+		nro_prog = list_add(program_list, prog);	
 
-		list_add(program_list, prog);
-		
+		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", nro_prog);
+
 	}	  	
-	prog = list_get(program_list, prog_id);
-	if((seg_id = segment_with_free_space(prog, size)) != -1 ) 
+	prog = list_get(program_list, nro_prog);
+	
+	if(segment_with_free_space(prog, size) != -1) 
 		//si hay espacio en su segmento, malloqueo ahí
 	{
+		seg_id = segment_with_free_space(prog, size);
 		seg = list_get(prog->segment_table, seg_id);	//seg = segmento con espacio		
 		seg->free_size -= size;
-		list_add(prog->segment_table, pag);
+		list_add(prog->segment_table, pag);		
 	}
-	/* TODO: 
+	
+	/* TODO: crear caso
 	else if (puedo agrandar un segmento)
 		 lo agrando 
 	*/
 
 	else 	//si no hay espacio en su último segmento, le creo uno
 	{
+
+		total_size = total_pages_needed * PAGE_SIZE;
+		log_debug(debug_logger, "Se necesitan %d bytes que serian %d paginas ", total_size, total_pages_needed);
+
 		seg = (segment *) malloc(sizeof(segment));
-		seg->free_size -= total_size;
+		seg->free_size = total_size - size;
 		seg->page_table = list_create();
 		seg->is_heap = true;
 		
@@ -182,8 +190,9 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			pag = find_free_frame();
 			list_add(seg->page_table, pag);
 		}
-
+		number_of_free_frames();
 		page_id = list_add(seg->page_table, find_free_frame());
+		//la ultima pagina que pedimos será nuestro page_id TODO: no debería ser la 1ra? 
 		list_add(prog->segment_table, seg);	
 		seg_id = list_add(segment_list, seg);	
 	}
@@ -197,12 +206,21 @@ int segment_with_free_space(program *prog, int size)
 {
 	int i=0;
 	segment *seg;
-	while(i < list_size(prog->segment_table))
+
+	int cantidadDeSegmentos = list_size(prog->segment_table);
+	int max_free_size = 0;
+	int total_free_size = 0;	
+
+	while(i < cantidadDeSegmentos)
 	{
 		seg = list_get(prog->segment_table, i);
+		total_free_size += seg->free_size;
+		if(seg->free_size >= max_free_size) max_free_size = seg->free_size;
 		if(seg->free_size >= size) {return i;}
 		i++;
 	}
+	log_debug(debug_logger, "No habia ningun segmento con %d de espacio libre, el maximo fue de %d", size, max_free_size);
+	log_debug(debug_logger, "Se encontraron en total %d bytes libres en el programa", total_free_size);
 	return -1;
 }
 
@@ -219,7 +237,7 @@ uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 {
 	uint32_t destination = 0;
 
-	// Busco el programa, despues busco el segmento 0 del programa y de ese segmento busco su página 0
+	// Busco el programa, despues busco el segmento 0 del programa y de ese segmento busco su página 0 TODO ?? 
 	program *prg = list_get(program_list, search_program(pid));
 	segment *seg = list_get(prg->segment_table, 0);
 	page *pag = list_get(seg->page_table, 0);
@@ -228,9 +246,9 @@ uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	memcpy(&destination, pag->fr->data, numBytes);
 	return destination;
 
-	//How does memcpy works
+	// How does memcpy works:
 	// Copies "numBytes" bytes from address "from" to address "to"
-	void * memcpy(void *to, const void *from, size_t numBytes);
+	// void * memcpy(void *to, const void *from, size_t numBytes);
 }
 
 uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
@@ -244,13 +262,13 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	return 0;
 }
 
+
+// Apalancándonos en el mismo mecanismo que permite el swapping de páginas,
+// la funcionalidad de memoria compartida que proveerá MUSE (a través de sus 
+// funciones de muse_map) se realizará sobre un archivo compartido, en vez 
+// del archivo de swap. Esta distinción deberá estar plasmada en la tabla de segmentos.
 uint32_t memory_map(char *path, size_t length, int flags, uint32_t pid)
 {
-	// Apalancándonos en el mismo mecanismo que permite el swapping de páginas,
-	// la funcionalidad de memoria compartida que proveerá MUSE (a través de sus 
-	// funciones de muse_map) se realizará sobre un archivo compartido, en vez 
-	// del archivo de swap. Esta distinción deberá estar plasmada en la tabla de segmentos.
-
 	/* Idea Original:*/
 	int file_descriptor = open(path, O_RDONLY);
    	void* map = mmap(NULL, length, PROT_NONE, flags, file_descriptor, 0);
@@ -273,10 +291,5 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 		//log_error(muse_logger,"Could not unmap");
 		return -1;
 	}
-	return 0;
-}
-
-uint32_t muse_add_segment_to_program(program *prog, int segm_size, uint32_t pid)
-{
 	return 0;
 }

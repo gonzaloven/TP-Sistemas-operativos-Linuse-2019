@@ -43,9 +43,9 @@ typedef struct frame_s
 /*Estructura de una pagina: sabemos si está presente, su numero y a que frame apunta */
 typedef struct page_s
 {
-	bool is_present; //sirve para páginas compartidas
+	bool is_present; //1 si está en memoria principal, 0 en disco
 	uint16_t page_num;
-	frame *fr; 
+	frame *fr; //si is_present = 1, indica el frame de MP. Caso contrario indicará la posición de Swap
 }page;
 
 /*

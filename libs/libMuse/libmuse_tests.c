@@ -1,35 +1,98 @@
 #include "libmuse.h"
 #include <unistd.h>
+#include <string.h>     /* strcat */
+
+
+void foo1();
+void foo2();
+void foo3();
+void foo4();
+void foo5();
+
+const char *byte_to_binary(int x)
+{
+    static char b[9];
+    b[0] = '\0';
+
+    int z;
+    for (z = 128; z > 0; z >>= 1)
+    {
+        strcat(b, ((x & z) == z) ? "1" : "0");
+    }
+
+    return b;
+}
+
 
 int main(int argc,char *argv[])
 {
-	int pid1 = getpid();
-	if (muse_init(pid1) == 0)
-		printf("Libmuse with proccess_id = %d initialized!\n",pid1);
-
-
-	// int pi2 = muse_init(21);	
-	// printf("Libmuse with proccess_id = %d initialized!\n",pi2);
-
-	int dir = muse_alloc(200);
-	printf("La direccion de los 200 byes reservados es %d\n",dir);
-	int dir2 = muse_alloc(300);
-	printf("La direccion de los 300 byes reservados es %d\n",dir2);
-	int dir3 = muse_alloc(500);
-	printf("La direccion de los 500 byes reservados es %d\n",dir3);
-
-	muse_free(dir);
-	printf("Se libero la direccion logica %d\n",dir);
-
-	muse_close();
-
-	int pid2 = getpid();
-	if (muse_init(pid2) == 0)
-		printf("Libmuse with proccess_id = %d initialized!\n",pid2);
+	int pid = getpid();
+	char ch;
+	int todoOK = muse_init(pid);
+	if (todoOK == 0)
+	{
+		printf("Libmuse with proccess_id = %d initialized!\n",pid);
 	
-	int dir4 = muse_alloc(2000);
-	printf("La direccion de los 2000 byes reservados es %d\n",dir4);
-	
+		printf("Introduzca un nro del 1-5: ");
+
+		ch=getchar();
+		switch(ch) 
+		{
+			case '1': foo1();
+			break;
+			case '2': foo2();
+			break;
+			case '3': foo3();
+			break;
+			case '4': //foo4();
+			break;
+			case '5': //foo5();
+			break;
+			default: puts("Error");
+		}
+	}else printf("Libmuse with proccess_id = %d couldn't be initialized :( \n",pid);
 
 	return 0;
+}
+void imprimir(int alocados, int dir){
+	printf("La direccion_vir de los %5d bytes reservados es	%d(dec),	%s(bin) \n",alocados,dir,byte_to_binary(dir));
+}
+
+void foo1(){
+	
+		int dir = muse_alloc(200);
+		imprimir(200, dir);
+		int dir2 = muse_alloc(300);
+		imprimir(300, dir2);
+		int dir3 = muse_alloc(500);
+		imprimir(500, dir3);
+		int dir4 = muse_alloc(2000);		
+		imprimir(2000, dir4);
+
+		muse_free(dir);		
+		printf("Se libero la direccion logica %d\n",dir);
+
+		muse_close();
+}	
+
+void foo2()
+{
+	int dir4 = muse_alloc(20);
+	imprimir(20, dir4);
+
+}
+
+void foo3(){
+	
+		int dir = muse_alloc(300);
+		imprimir(300, dir);
+		int dir2 = muse_alloc(300);
+		imprimir(300, dir2);
+		int dir3 = muse_alloc(300);
+		imprimir(300, dir3);
+
+		muse_free(dir);		
+		printf("Se libero la direccion logica %d\n",dir);
+
+		muse_close();
 }

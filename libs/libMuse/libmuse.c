@@ -1,6 +1,7 @@
 #include "libmuse.h"
 
-int master_socket;
+int MASTER_SOCKET;
+int PROCESS_ID;
 
 int muse_init(int id)
 {
@@ -8,7 +9,6 @@ int muse_init(int id)
 
 	if(config == NULL)
 	{
-		//log_error(muse_logger,"Configuration couldn't be loaded.Quitting program!");
 		printf("Configuration couldn't be loaded.Quitting program!\n");
 		return(-1);
 	}
@@ -16,7 +16,14 @@ int muse_init(int id)
 	char* SERVER_IP = config_get_string_value(config, "SERVER_IP");
 	int SERVER_PORT = config_get_int_value(config, "SERVER_PORT");
 	
-	master_socket = connect_to(SERVER_IP,SERVER_PORT);
+	MASTER_SOCKET = connect_to(SERVER_IP,SERVER_PORT);
+
+	PROCESS_ID = id;
+
+	/*
+	TODO: importante, en una parte de acá, debería mandarle a muse mi p_id, ya que ahora todos 
+	los programas libMuse que se están corriendo tiene p_id = 1, independientemente del socket que se conecten
+	*/
 
 	config_destroy(config);
 
@@ -26,20 +33,20 @@ int muse_init(int id)
 int call(Function *function)
 {
 	Message msg;
-	MessageHeader header;
-	
-	create_message_header(&header,MESSAGE_CALL,1,sizeof(Function));
+	MessageHeader header;	
+
+	create_message_header(&header,MESSAGE_CALL,PROCESS_ID,sizeof(Function));
 	create_function_message(&msg,&header,function);
 
-	send_message(master_socket,&msg);
-	receive_message(master_socket,&msg);
+	send_message(MASTER_SOCKET,&msg);
+	receive_message(MASTER_SOCKET,&msg);
 	int *response = msg.data;
 	return *response;
 }
 
 void muse_close()
 {
-	close(master_socket);
+	close(MASTER_SOCKET);
 	return;
 }
 

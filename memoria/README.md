@@ -9,6 +9,7 @@
 3. Se creará el ejecutable muse (memoria/muse) y el archivo de pruebas (libs/libMuse/libmuse)
 4. El archivo de pruebas se puede ir modificando para que llame a las distintas funciones de libMuse
 5. Podemos ejecutar muse y abrirá el server y el mismo podrá escuchar, luego ir ejecutás libmuse (desde otra terminal) y muse irá logueando lo que va ocurriendo
+6. muse se cierra al presionar " ctrl + c " en la terminal que está corriendo
 
 ----
 
