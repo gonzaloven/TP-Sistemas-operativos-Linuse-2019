@@ -243,7 +243,7 @@ void remover_ULT_bloqueado(t_suse_thread* thread);
 
 void remover_ULT_exec(t_process* process);
 
-
+double get_campo_config_double(t_config* archivo_configuracion, char* nombre_campo);
 void nuevo_a_listo(t_suse_thread* ULT, int process_id);
 
 void remover_ULT_listo(t_suse_thread* thread,t_process* process);

@@ -252,6 +252,16 @@ int get_campo_config_int(t_config* archivo_configuracion, char* nombre_campo) {
 	return NULL;
 }
 
+double get_campo_config_double(t_config* archivo_configuracion, char* nombre_campo) {
+	double valor;
+	if(config_has_property(archivo_configuracion, nombre_campo))
+	{
+		valor = config_get_double_value(archivo_configuracion, nombre_campo);
+		printf("El %s es: %f\n", nombre_campo, valor);
+		return valor;
+	}
+	return valor;
+}
 
 char* get_campo_config_string(t_config* archivo_configuracion, char* nombre_campo) {
 	char* valor;

@@ -11,11 +11,11 @@
 #include "libraries.h"
 
 t_log* logger;
-char * suse_config_path = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config";
+char * suse_config_path = "/home/utnso/tp-2019-2c-Los-Trapitos/configs/planificador.config";
 
 int main(void){
 	char* log_file;
-	log_file = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
+	log_file = "/home/utnso/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
 	logger = log_create(log_file, "SUSE logs", 1, 1);
 	log_info(logger, "Inicializando SUSE. \n");
 
@@ -52,23 +52,19 @@ int main(void){
 }
 
 void init_semaforos(){
+
 	log_info(logger, "Inicializando semaforos \n");
-
-	uint32_t cantidad_semaforos = sizeof(configuracion_suse.SEM_IDS) / sizeof(configuracion_suse.SEM_IDS[0]);
-
-	bool buscador_sem_name(t_suse_semaforos* sem, int index){
-		return sem->NAME == configuracion_suse.SEM_IDS[index];
-	}
-
-	for(uint32_t i = 0; i < cantidad_semaforos; i++){
-
+	int i = 0;
+	while(configuracion_suse.SEM_IDS[i] != NULL)
+	{
 		t_suse_semaforos* semaforo = malloc(sizeof(t_suse_semaforos));
-		semaforo->NAME = list_find(semaforo, i);
-		semaforo->INIT = (uint32_t)configuracion_suse.SEM_INIT[i];
-		semaforo->MAX = (uint32_t)configuracion_suse.SEM_MAX[i];
-		semaforo->VALUE = (uint32_t)configuracion_suse.SEM_INIT[i];
+				semaforo->NAME = (char*)configuracion_suse.SEM_IDS[i];
+				semaforo->INIT = (uint32_t)configuracion_suse.SEM_INIT[i];
+				semaforo->MAX = (uint32_t)configuracion_suse.SEM_MAX[i];
+				semaforo->VALUE = (uint32_t)configuracion_suse.SEM_INIT[i];
 
-		list_add(configuracion_suse.semaforos, semaforo);
+				list_add(configuracion_suse.semaforos, semaforo);
+				i++;
 	}
 
 }
@@ -83,12 +79,14 @@ suse_configuration get_configuracion() {
 	
 	configuracion_suse.LISTEN_PORT = copy_string(get_campo_config_string(archivo_configuracion, "LISTEN_PORT"));
 	configuracion_suse.METRICS_TIMER = get_campo_config_int(archivo_configuracion, "ESTIMACION_INICIAL");
-	configuracion_suse.SEM_IDS = get_campo_config_array(archivo_configuracion, "SEM_ID");
+	configuracion_suse.SEM_IDS = get_campo_config_array(archivo_configuracion, "SEM_IDS");
 	configuracion_suse.SEM_INIT = get_campo_config_array(archivo_configuracion, "SEM_INIT");
 	configuracion_suse.SEM_MAX = get_campo_config_array(archivo_configuracion, "SEM_MAX");
 	configuracion_suse.ALPHA_SJF = get_campo_config_int(archivo_configuracion, "ALPHA_SJF");
 	configuracion_suse.MAX_MULTIPROG = get_campo_config_int(archivo_configuracion,"MAX_MULTIPROG");
 	configuracion_suse.ACTUAL_MULTIPROG = 0;
+	t_list* lista = list_create();
+	configuracion_suse.semaforos = lista;
 
 	config_destroy(archivo_configuracion);
 

@@ -17,7 +17,7 @@ typedef struct suse_configuration
 {
 	char* LISTEN_PORT;
 	int METRICS_TIMER;
-	char ** SEM_IDS;
+	char** SEM_IDS;
 	char ** SEM_INIT;
 	char ** SEM_MAX;
 	int ALPHA_SJF;
