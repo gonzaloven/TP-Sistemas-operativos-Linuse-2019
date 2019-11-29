@@ -47,6 +47,7 @@ void inicioTablaDeNodos(){
 	double divisionDos = divisionUno / (double) 8;
 	double divisionTres = divisionDos / tamanioBloque;
 	int tamanioBitmapBloque = ceil(divisionTres);
+	cantidadDeBloquesBitmap = tamanioBitmapBloque;
 
 	bloqueInicioTablaDeNodos = tamanioHeader + tamanioBitmapBloque;
 }
@@ -54,10 +55,6 @@ void inicioTablaDeNodos(){
 void inicioBloquesDeDatos(){
 	bloqueInicioBloquesDeDatos = bloqueInicioTablaDeNodos + MAX_NUMBER_OF_FILES + 1;
 }
-
-/*int finBloquesDeDatos(){
-	return inicioBloquesDeDatos + ;
-}*/
 
 void configurar_server(){
 	int fileDescriptor = 0;
@@ -70,13 +67,7 @@ void configurar_server(){
 	inicioTablaDeNodos();
 	inicioBloquesDeDatos();
 
-	//Esto hay que corregirlo, deberia ser BloqueSize * cantidadDeBloquesDelBitmap TODO
-	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, MSB_FIRST);
-
-//	for(int i=1024; i<bitarray_get_max_bit(bitmap); i++){
-//		int valor0 = bitarray_test_bit(bitmap, i);
-//		printf("%d", valor0);
-//	}
+	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE * cantidadDeBloquesBitmap, MSB_FIRST);
 
 	tablaDeNodos = (GFile*) (disco + bloqueInicioTablaDeNodos);
 	bloquesDeDatos = disco + bloqueInicioBloquesDeDatos;

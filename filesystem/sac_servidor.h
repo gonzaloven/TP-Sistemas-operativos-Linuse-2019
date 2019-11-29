@@ -84,6 +84,7 @@ t_bitarray* bitmap;
 size_t diskSize;
 int bloqueInicioTablaDeNodos;
 int bloqueInicioBloquesDeDatos;
+int cantidadDeBloquesBitmap;
 
 // memory mapping data definition
 struct sac_server_header *header_start;
