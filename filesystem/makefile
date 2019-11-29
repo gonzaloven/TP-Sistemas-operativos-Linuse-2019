@@ -5,7 +5,7 @@ CFLAGSCLI := -g -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=27
 CFLAGSSV := -g
 UTILS := ../utils/
 INCDIR := -I$(UTILS)
-LFLAGSCLI := -lfuse -lcommons -pthread
+LFLAGSCLI := -lfuse -lcommons -pthread -lm
 LFLAGSSV := -lcommons -pthread -lm
 SRCSCLI := sac_handlers.c sac_cliente.c $(UTILS)network.c $(UTILS)message.c
 SRCSSV := sac_handlers.c sac_servidor.c $(UTILS)network.c $(UTILS)message.c

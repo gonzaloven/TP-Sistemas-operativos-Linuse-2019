@@ -71,7 +71,7 @@ void configurar_server(){
 	inicioBloquesDeDatos();
 
 	//Esto hay que corregirlo, deberia ser BloqueSize * cantidadDeBloquesDelBitmap TODO
-	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
+	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, MSB_FIRST);
 
 //	for(int i=1024; i<bitarray_get_max_bit(bitmap); i++){
 //		int valor0 = bitarray_test_bit(bitmap, i);
