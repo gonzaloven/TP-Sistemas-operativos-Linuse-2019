@@ -62,3 +62,43 @@
 
 [INFO] 15:11:37:889 SUSE logs/(25991:25991): Inicializando semaforos 
 
+[INFO] 15:15:39:583 SUSE logs/(26252:26252): Inicializando SUSE. 
+
+[INFO] 15:15:39:587 SUSE logs/(26252:26252): Levantando archivo de configuracion de SUSE 
+
+[INFO] 15:15:39:587 SUSE logs/(26252:26252): Archivo de configuracion levantado. 
+
+[INFO] 15:15:39:587 SUSE logs/(26252:26252): Inicializando semaforos 
+
+[INFO] 15:16:34:904 SUSE logs/(26334:26334): Inicializando SUSE. 
+
+[INFO] 15:16:34:909 SUSE logs/(26334:26334): Levantando archivo de configuracion de SUSE 
+
+[INFO] 15:16:34:909 SUSE logs/(26334:26334): Archivo de configuracion levantado. 
+
+[INFO] 15:16:34:910 SUSE logs/(26334:26334): Inicializando semaforos 
+
+[INFO] 15:16:49:775 SUSE logs/(26361:26361): Inicializando SUSE. 
+
+[INFO] 15:16:49:778 SUSE logs/(26361:26361): Levantando archivo de configuracion de SUSE 
+
+[INFO] 15:16:49:778 SUSE logs/(26361:26361): Archivo de configuracion levantado. 
+
+[INFO] 15:16:49:778 SUSE logs/(26361:26361): Inicializando semaforos 
+
+[INFO] 15:18:13:915 SUSE logs/(26437:26437): Inicializando SUSE. 
+
+[INFO] 15:18:13:918 SUSE logs/(26437:26437): Levantando archivo de configuracion de SUSE 
+
+[INFO] 15:18:13:925 SUSE logs/(26437:26437): Archivo de configuracion levantado. 
+
+[INFO] 15:18:13:925 SUSE logs/(26437:26437): Inicializando semaforos 
+
+[INFO] 15:18:16:783 SUSE logs/(26456:26456): Inicializando SUSE. 
+
+[INFO] 15:18:16:788 SUSE logs/(26456:26456): Levantando archivo de configuracion de SUSE 
+
+[INFO] 15:18:16:789 SUSE logs/(26456:26456): Archivo de configuracion levantado. 
+
+[INFO] 15:18:16:789 SUSE logs/(26456:26456): Inicializando semaforos 
+

@@ -37,6 +37,7 @@ int main(void){
 	pthread_mutex_init(&mutex_semaforos,NULL);
 	pthread_mutex_init(&mutex_process_list, NULL);
 
+	log_info(logger, "Iniciando servidor... \n");
 	iniciar_servidor();
 
 	list_destroy(new_queue);
@@ -135,6 +136,7 @@ void iniciar_servidor() {
 --------------------------------------------------------
 */
 	while(1){
+		log_info("SUSE esperando conexiones...\n")
 		int new_connection = aceptar_conexion(listener);
 		t_paquete* handshake = recibir(listener);
 		log_info(logger, "Soy SUSE y recibi una nueva conexion del socket %d. \n", new_connection);
