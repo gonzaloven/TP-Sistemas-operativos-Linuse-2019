@@ -136,11 +136,16 @@ void iniciar_servidor() {
 --------------------------------------------------------
 */
 	while(1){
-		log_info("SUSE esperando conexiones...\n")
+		log_info(logger,"SUSE esperando conexiones...\n");
+
 		int new_connection = aceptar_conexion(listener);
+
 		t_paquete* handshake = recibir(listener);
+
 		log_info(logger, "Soy SUSE y recibi una nueva conexion del socket %d. \n", new_connection);
+
 		free(handshake);
+
 		//Creo un hilo por programa que se conecta
 		log_info(logger, "Creando process con id... %d. \n", new_connection);
 		int posicionRetornada = list_add(thread_params, &new_connection);
