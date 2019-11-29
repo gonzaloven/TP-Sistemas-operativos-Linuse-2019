@@ -11,11 +11,11 @@
 #include "libraries.h"
 
 t_log* logger;
-char * suse_config_path = "/home/utnso/tp-2019-2c-Los-Trapitos/configs/planificador.config";
+char * suse_config_path = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config";
 
 int main(void){
 	char* log_file;
-	log_file = "/home/utnso/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
+	log_file = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
 	logger = log_create(log_file, "SUSE logs", 1, 1);
 	log_info(logger, "Inicializando SUSE. \n");
 
@@ -82,7 +82,7 @@ suse_configuration get_configuracion() {
 	configuracion_suse.SEM_IDS = get_campo_config_array(archivo_configuracion, "SEM_IDS");
 	configuracion_suse.SEM_INIT = get_campo_config_array(archivo_configuracion, "SEM_INIT");
 	configuracion_suse.SEM_MAX = get_campo_config_array(archivo_configuracion, "SEM_MAX");
-	configuracion_suse.ALPHA_SJF = get_campo_config_int(archivo_configuracion, "ALPHA_SJF");
+	configuracion_suse.ALPHA_SJF = get_campo_config_double(archivo_configuracion, "ALPHA_SJF");
 	configuracion_suse.MAX_MULTIPROG = get_campo_config_int(archivo_configuracion,"MAX_MULTIPROG");
 	configuracion_suse.ACTUAL_MULTIPROG = 0;
 	t_list* lista = list_create();

@@ -20,7 +20,7 @@ typedef struct suse_configuration
 	char** SEM_IDS;
 	char ** SEM_INIT;
 	char ** SEM_MAX;
-	int ALPHA_SJF;
+	double ALPHA_SJF;
 	int MAX_MULTIPROG;
 	t_list * process;
 	t_list * semaforos;
