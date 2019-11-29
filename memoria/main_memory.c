@@ -111,7 +111,7 @@ page *find_free_frame()
 			return pag;
 		}
 	}
-	log_debug(debug_logger, "NOS QUEDAMOS SIN FRAMES LIBRES ");
+	log_debug(debug_logger, "Nos quedamos sin frames libres");
 	return NULL;
 }
 
@@ -124,7 +124,7 @@ void metricas_por_socket_conectado(uint32_t pid){
 	int cantidad_de_segmentos_asignados = list_size(prog->segment_table);
 	int cantidad_de_segmentos_totales = list_size(segment_list);
 
-	log_trace(metricas_logger, "pid: %d tiene asignados %d de %d segmentos en el sistema", 
+	log_trace(metricas_logger, "El programa n° %d tiene asignados %d de %d segmentos en el sistema", 
 			nro_prog, cantidad_de_segmentos_asignados, cantidad_de_segmentos_totales);
 	number_of_free_frames();
 }

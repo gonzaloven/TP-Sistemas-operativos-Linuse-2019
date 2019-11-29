@@ -14,8 +14,6 @@ clean:
 	make clean -C memoria
 #	make clean -C planificador
 #	make clean -C tests	
-	rm logs/muse.log
-	rm logs/server.log
 
 libmuse:
 	make clean -C libs/libMuse

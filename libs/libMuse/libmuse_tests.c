@@ -50,12 +50,12 @@ int main(int argc,char *argv[])
 			break;
 			default: puts("Error");
 		}
-	}else printf("Libmuse with proccess_id = %d couldn't be initialized :( \n",pid);
+	}else printf("Libmuse with proccess_id = %d couldn't be initialized :(\n",pid);
 
 	return 0;
 }
 void imprimir(int alocados, int dir){
-	printf("La direccion_vir de los %5d bytes reservados es	%d(dec),	%s(bin) \n",alocados,dir,byte_to_binary(dir));
+	printf("La direccion_vir de los %5d bytes reservados es %4d(dec),	%s(bin)\n",alocados,dir,byte_to_binary(dir));
 }
 
 void foo1(){
