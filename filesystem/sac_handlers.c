@@ -466,7 +466,7 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 }
 
 int get_bloque_vacio(){
-	//IMPORTANTE METER SEMAFOROS ACA, ESTA TOCANDO UN RECURSO COMPARTIDO
+	//IMPORTANTE METER SEMAFOROS ACA, ESTA TOCANDO UN RECURSO COMPARTIDO TODO
 	int bitActual = bloqueInicioBloquesDeDatos - 1;
 	int bitsTotales = bitarray_get_max_bit(bitmap);
 

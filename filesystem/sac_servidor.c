@@ -70,6 +70,7 @@ void configurar_server(){
 	inicioTablaDeNodos();
 	inicioBloquesDeDatos();
 
+	//Esto hay que corregirlo, deberia ser BloqueSize * cantidadDeBloquesDelBitmap TODO
 	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE, LSB_FIRST);
 
 //	for(int i=1024; i<bitarray_get_max_bit(bitmap); i++){
@@ -128,7 +129,7 @@ void message_handler(Message *m,int sock)
 
 			liberarMemoria(&frespuesta);
 
-			liberarMemoria((Function *)m->data);
+			//liberarMemoria((Function *)m->data);
 			free(m->data);
 			m->data = NULL;
 
