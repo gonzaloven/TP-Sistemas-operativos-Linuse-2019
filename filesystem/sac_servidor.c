@@ -120,7 +120,7 @@ void message_handler(Message *m,int sock)
 
 			liberarMemoria(&frespuesta);
 
-			//liberarMemoria((Function *)m->data);
+			liberarMemoria((Function *)m->data);
 			free(m->data);
 			m->data = NULL;
 
