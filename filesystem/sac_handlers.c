@@ -173,7 +173,7 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
 		punterosBloquesDatos *bloqueDePunterosDatos = (punterosBloquesDatos *) (disco + bloqueDePunterosPosicion);
 
-		for(int j=0; i<PUNTEROS_A_BLOQUES_DATOS; j++){
+		for(int j=0; j<PUNTEROS_A_BLOQUES_DATOS; j++){
 
 			ptrGBloque bloqueDeDatosPosicion = bloqueDePunterosDatos->punteros_a_bloques[j];
 
