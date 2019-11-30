@@ -370,7 +370,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	}
 
 	log_info(fuse_logger, "Nodo creado -> Estado: %d, Nombre: %s, Bloque padre: %d", tipoDeArchivo, fileName, nodoVacio->parent_dir_block);
-
+	//hola
 	msync(disco, diskSize, MS_SYNC);
 
 	for(int y=0; y<dimListaSpliteada; y++) // libero cada integrante de la matriz
