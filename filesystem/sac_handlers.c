@@ -85,6 +85,8 @@ int determine_nodo(char *path){
 	ptrGBloque nodoUltimoPadre = bloqueInicioTablaDeNodos;
 	char *filenameBuscado;
 
+	//fuse_logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/fusee.log","FUSE",true,LOG_LEVEL_TRACE);
+
 	int dimListaSpliteada, i;
 	char **listaSpliteada;
 
@@ -121,7 +123,6 @@ int determine_nodo(char *path){
 
 			free(listaSpliteada);
 			listaSpliteada = NULL;
-			log_error(fuse_logger, "El Path ingresado no corresponde con un nodo existente.");
 			return -1;
 		}else{
 			nodoUltimoPadre += bloqueInicioTablaDeNodos;
@@ -368,7 +369,7 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 		//pthread_mutex_unlock(&s_tablaDeBloquesDeDatos);
 	}
 
-	log_info(fuse_logger, "Nodo creado en -> Path: %s, Estado: %d, Nombre: %s", parentDirPath, tipoDeArchivo, fileName);
+	log_info(fuse_logger, "Nodo creado -> Estado: %d, Nombre: %s, Bloque padre: %d", tipoDeArchivo, fileName, nodoVacio->parent_dir_block);
 
 	msync(disco, diskSize, MS_SYNC);
 
@@ -414,6 +415,7 @@ Function validarSiExiste(char* path, FuncType tipoFuncion){
 	int nodoBuscado = determine_nodo(path);
 
 	if(nodoBuscado == -1){
+		log_error(fuse_logger, "El Path ingresado no corresponde con un nodo existente.");
 		arg[0].type = VAR_UINT32;
 		arg[0].size = sizeof(uint32_t);
 		arg[0].value.val_u32 = -ENOENT;

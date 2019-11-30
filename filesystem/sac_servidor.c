@@ -257,6 +257,7 @@ Function sac_server_getattr(char* path){
 	int nodoBuscadoPosicion = determine_nodo(path);
 
 	if(nodoBuscadoPosicion == -1){
+		log_error(fuse_logger, "El Path ingresado no corresponde con un nodo existente.");
 		return retornar_error(fsend);
 	}
 
