@@ -167,27 +167,27 @@ Function fuse_invoke_function(Function *f)
 	switch(f->type)
 	{
 		case FUNCTION_GETATTR:
-			log_debug(fuse_logger,"Getattr llamado");
+			log_info(fuse_logger,"Getattr llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_getattr(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_READDIR:
-			log_debug(fuse_logger,"Readdir llamado");
+			log_info(fuse_logger,"Readdir llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_readdir(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_OPEN:
-			log_debug(fuse_logger,"Open llamado");
+			log_info(fuse_logger,"Open llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_open(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_READ:
-			log_debug(fuse_logger,"Read llamado with -> Path: %s  Size: %d Offset: %d", f->args[1].value.val_charptr, f->args[2].value.val_u32, f->args[0].value.val_u32);
+			log_info(fuse_logger,"Read llamado with -> Path: %s  Size: %d Offset: %d", f->args[1].value.val_charptr, f->args[2].value.val_u32, f->args[0].value.val_u32);
 			func_ret = sac_server_read(f->args[1].value.val_charptr, f->args[2].value.val_u32, f->args[0].value.val_u32);
 			break;
 		case FUNCTION_OPENDIR:
-			log_debug(fuse_logger,"Opendir llamado");
+			log_debug(fuse_logger,"Opendir llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_opendir(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_MKNOD:
-			log_debug(fuse_logger,"Mknod llamado");
+			log_debug(fuse_logger,"Mknod llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_mknod(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_WRITE:
@@ -195,15 +195,15 @@ Function fuse_invoke_function(Function *f)
 			func_ret = sac_server_write(f->args[1].value.val_charptr, f->args[2].value.val_charptr, f->args[2].size, f->args[0].value.val_u32);
 			break;
 		case FUNCTION_UNLINK:
-			log_debug(fuse_logger,"Unlink llamado");
+			log_debug(fuse_logger,"Unlink llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_unlink(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_MKDIR:
-			log_debug(fuse_logger,"Mkdir llamado");
+			log_debug(fuse_logger,"Mkdir llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_mkdir(f->args[0].value.val_charptr);
 			break;
 		case FUNCTION_RMDIR:
-			log_debug(fuse_logger,"Rmdir llamado");
+			log_debug(fuse_logger,"Rmdir llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_rmdir(f->args[0].value.val_charptr);
 			break;
 		default:
