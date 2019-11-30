@@ -424,14 +424,35 @@ static struct fuse_operations sac_oper = {
 		.unlink = sac_unlink,
 };
 
+fuse_configuration* load_configuration(char *path)
+{
+	t_config *config = config_create(path);
+	fuse_configuration *fc = (fuse_configuration *)malloc(sizeof(fuse_configuration));
+	if(config == NULL)
+	{
+		log_error(fuse_logger,"No se pudo cargar la configuracion.");
+		exit(-1);
+	}
+
+	fc->ip_cliente = malloc(strlen(config_get_string_value(config,"IP_CLIENTE")));
+
+	strcpy(fc->ip_cliente,config_get_string_value(config,"IP_CLIENTE"));
+	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
+
+	config_destroy(config);
+	return fc;
+}
+
 // Dentro de los argumentos que recibe nuestro programa obligatoriamente
 // debe estar el path al directorio donde vamos a montar nuestro FS
 int main(int argc, char *argv[]){
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
 	////////////////////////////////no se donde hacer el close del socket////////////////////////////////////////
-	//esta bastante hardcodeado esto, creo que deberia tomarlo del config
-	serverSocket = connect_to("127.0.0.1",8003);
+	fuse_config = load_configuration(SAC_CONFIG_PATH);
+	serverSocket = connect_to(fuse_config->ip_cliente,fuse_config->listen_port);
+
+	free(fuse_config->ip_cliente);
 
 	// Esta es la funcion principal de FUSE, es la que se encarga
 	// de realizar el montaje, comuniscarse con el kernel, delegar todo
