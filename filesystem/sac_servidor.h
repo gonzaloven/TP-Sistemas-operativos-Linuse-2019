@@ -30,7 +30,7 @@
 #define BITMAP_SIZE_BLOCKS 1
 #define PUNTEROS_A_BLOQUES_DATOS 1024
 
-//NO DEJAR ASI
+//NO DEJAR ASI TODO
 #define SAC_CONFIG_PATH2 "../configs/filesystem.config"
 #define SAC_CONFIG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/configs/filesystem.config"
 
