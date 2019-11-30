@@ -119,7 +119,7 @@ ssize_t receive_packet(int socket,void *buffer,size_t buffer_size)
 	memset(buffer,0,buffer_size);
 	MessageHeader header;
 	void *cursor = buffer;
-	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t)*2;
+	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);
 	unsigned int recv_bytes = recv(socket,cursor,header_size,MSG_WAITALL);
 
 	header_decode(cursor,buffer_size,&header);
@@ -130,7 +130,7 @@ ssize_t receive_packet(int socket,void *buffer,size_t buffer_size)
 
 ssize_t receive_packet_var(int socket,void** bufferReal){
 	MessageHeader header;
-	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t)*2;
+	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);
 	void *buffer = malloc(header_size);
 	unsigned int recv_bytes = recv(socket,buffer,header_size,MSG_WAITALL);
 
@@ -155,7 +155,7 @@ ssize_t send_packet(int socket_fd,void *buffer,size_t buffer_size)
 
 ssize_t send_message(int socket_fd,Message *msg)
 {
-	size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
+	size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t) + msg->header.data_size;
 	char buffer[buffer_size];
 	memset(buffer, 0, buffer_size);
 	message_encode(msg,buffer,buffer_size);
@@ -174,7 +174,7 @@ ssize_t receive_message(int socket_fd,Message *msg)
 
 ssize_t receive_message_var(int socket_fd, Message* msg){
 	MessageHeader header;
-	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t)*2;
+	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);
 	void *buffer = malloc(header_size);
 	unsigned int recv_bytes = recv(socket_fd,buffer,header_size,MSG_WAITALL);
 
