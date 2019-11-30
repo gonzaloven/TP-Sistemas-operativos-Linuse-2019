@@ -44,7 +44,7 @@ int main(int argc,char *argv[])
 			break;
 			case '3': foo3();
 			break;
-			case '4': //foo4();
+			case '4': foo4();
 			break;
 			case '5': //foo5();
 			break;
@@ -95,4 +95,24 @@ void foo3(){
 		printf("Se libero la direccion logica %d\n",dir);
 
 		muse_close();
+}
+
+void foo4(){
+		int dir = muse_alloc(10);
+		imprimir(10, dir);
+		int dir2 = muse_alloc(20);
+		imprimir(20, dir2);
+		int dir3 = muse_alloc(30);
+		imprimir(30, dir3);
+
+		muse_free(dir);		
+		printf("Se libero la direccion logica %d\n",dir);
+
+		muse_close();
+}
+
+void foo5(){
+	muse_map(‘hola.txt’, 20, 0);
+	muse_unmap(‘hola.txt’);
+	muse_close();
 }

@@ -1,4 +1,7 @@
 all:
+	make clean -C libs/libMuse
+	make clean -C memoria
+	
 #make -C libs/Hilolay
 	make -C libs/libMuse
 #make -C filesystem

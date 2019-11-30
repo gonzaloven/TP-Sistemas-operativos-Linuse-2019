@@ -9,7 +9,7 @@
 #include <commons/collections/list.h>
 #include <commons/log.h>
 
-#define MUSE_LOG_PATH "../logs/muse.log"
+#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 /**
  * @struct program_s   
@@ -43,8 +43,9 @@ typedef struct frame_s
 /*Estructura de una pagina: sabemos si está presente, su numero y a que frame apunta */
 typedef struct page_s
 {
+	bool is_modify;
 	bool is_present; //1 si está en memoria principal, 0 en disco
-	uint16_t page_num;
+	//uint16_t page_num;
 	frame *fr; //si is_present = 1, indica el frame de MP. Caso contrario indicará la posición de Swap
 }page;
 
@@ -56,8 +57,8 @@ typedef struct segment_s
 {
 	bool is_heap; //(1 is common_segment, 0 is mmap)
 	uint16_t free_size;
-	uint32_t *base;
-	uint32_t *limit;
+	uint32_t base; //base lógica
+	uint32_t limit;
 	t_list *page_table;
 }segment;
 
@@ -71,6 +72,8 @@ void muse_main_memory_stop();
 int number_of_free_frames();
 
 void metricas_por_socket_conectado(uint32_t pid);
+
+int busca_segmento(program *prog,uint32_t va);
 
 /**
  * Busca el process_id en program_list

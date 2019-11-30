@@ -62,6 +62,8 @@ void muse_main_memory_stop()
 	free(main_memory);
 	list_destroy(program_list);
 	list_destroy(segment_list);
+	log_destroy(metricas_logger);
+	log_destroy(debug_logger);
 }
 
 int search_program(uint32_t pid)
@@ -94,8 +96,14 @@ int number_of_free_frames(){
 	return frames_libres;
 }
 
-page *find_free_frame()
+page *find_free_frame(int size)
 {
+	if (size>PAGE_SIZE)
+	{
+		log_debug(debug_logger, "No podes pedir frames de %d",size);
+		return NULL;
+	}
+
 	int curr_frame_num;
 
 	page *pag = (page *) malloc(PAGE_SIZE); 
@@ -104,15 +112,32 @@ page *find_free_frame()
 	{	
 		if (main_memory[curr_frame_num].metadata.is_free == true){
 			main_memory[curr_frame_num].metadata.is_free = false;
-			main_memory[curr_frame_num].metadata.free_size = 0; //TODO: si una pagina apunta a un frame y no usa todo su espacio (paginacion interna), consideramos igual que el frame tiene espacio libre = 0?
+			main_memory[curr_frame_num].metadata.free_size -= size;
 			pag->is_present = true;
-			pag->page_num = 0;
+			pag->is_modify = false;
 			pag->fr = &main_memory[curr_frame_num];	
 			return pag;
 		}
 	}
 	log_debug(debug_logger, "Nos quedamos sin frames libres");
 	return NULL;
+}
+
+void free_page(page *pag)
+{
+	int curr_frame_num;
+
+	for(curr_frame_num=0; curr_frame_num < TOTAL_FRAME_NUM; curr_frame_num++)
+	{	
+		if (pag->fr == &main_memory[curr_frame_num])
+		{
+			main_memory[curr_frame_num].metadata.is_free = true;
+			main_memory[curr_frame_num].metadata.free_size = PAGE_SIZE;
+			pag->is_present = true;
+			pag->is_modify = false;
+			pag->fr = NULL;			
+		}
+	}	
 }
 
 void metricas_por_socket_conectado(uint32_t pid){
@@ -134,14 +159,17 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	int nro_prog;
 	uint32_t seg_id;
 	uint32_t page_id;
+	uint32_t offset = 0; //TODO: esto debería cambiarlo
 	uint32_t logical_address = 0;
 	page *pag;
 	segment *seg;
 	program *prog;
 	int total_size;
 	int total_pages_needed;
+	int page_size_sin_metadata = PAGE_SIZE - METADATA_SIZE;
+	int espacio_usado_de_ultima_pagina;
 	
-	total_pages_needed = (size / PAGE_SIZE) + ((size % PAGE_SIZE) != 0); // ceil( size / PAGE_SIZE )
+	total_pages_needed = (size / page_size_sin_metadata) + ((size % page_size_sin_metadata) != 0); // ceil( size / page_size_sin_metadata )
 	
 	if((nro_prog = search_program(pid)) == -1)
 	{
@@ -169,36 +197,60 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	}
 	
 	/* TODO: crear caso
-	else if (puedo agrandar un segmento)
+	else if (puedo_agrandar_un_segmento)
 		 lo agrando 
 	*/
 
 	else 	//si no hay espacio en su último segmento, le creo uno
 	{
 
-		total_size = total_pages_needed * PAGE_SIZE;
-		log_debug(debug_logger, "Se necesitan %d bytes que serian %d paginas ", total_size, total_pages_needed);
+		total_size = (total_pages_needed * METADATA_SIZE) + size;
+		espacio_usado_de_ultima_pagina = (total_size % PAGE_SIZE );
+		
+		log_debug(debug_logger, "Se pidieron %d bytes que vendrian a ser %d pagina/s ", size, (size/PAGE_SIZE)+1);
+
+		if(total_pages_needed>((size/PAGE_SIZE)+1))
+		{
+			log_debug(debug_logger, "Sin embargo, si consideramos que la metadata ocupa %d bytes", METADATA_SIZE);
+			log_debug(debug_logger, "Se necesitarían %d bytes osea %d pagina/s y la ultima pagina solo usariía %d bytes", 
+				total_size, total_pages_needed),espacio_usado_de_ultima_pagina;
+		}
 
 		seg = (segment *) malloc(sizeof(segment));
-		seg->free_size = total_size - size;
+		seg->free_size = PAGE_SIZE - espacio_usado_de_ultima_pagina;
 		seg->page_table = list_create();
 		seg->is_heap = true;
 		
-		//vamos a pedir todas las paginas que necesitemos
-		for(int i=0 ; i < total_pages_needed ; i++ )
+		if (total_pages_needed>1)
 		{
-			pag = find_free_frame();
-			list_add(seg->page_table, pag);
+			//page_id = prog.segmento_utilizado.page_table.1er_pagina_pedida
+			page_id = list_add(seg->page_table, find_free_frame(PAGE_SIZE));			
+
+			//vamos a pedir todo el resto de paginas que necesitemos
+			for(int i=0 ; i < total_pages_needed-2 ; i++ )
+			{
+				pag = find_free_frame(PAGE_SIZE);
+				list_add(seg->page_table, pag);
+			}
+
+			list_add(seg->page_table, find_free_frame(espacio_usado_de_ultima_pagina));
 		}
+		else
+		{
+			//page_id = prog.segmento_utilizado.page_table.1er_pagina_pedida
+			page_id = list_add(seg->page_table, find_free_frame(espacio_usado_de_ultima_pagina));
+		}
+		
+		// seg_id = prog.segment_table.segmento_pedido
+		seg_id = list_add(prog->segment_table, seg);
+
 		number_of_free_frames();
-		page_id = list_add(seg->page_table, find_free_frame());
-		//la ultima pagina que pedimos será nuestro page_id TODO: no debería ser la 1ra? 
-		list_add(prog->segment_table, seg);	
-		seg_id = list_add(segment_list, seg);	
+
+		list_add(segment_list, seg);	
 	}
 	
 	metricas_por_socket_conectado(pid);
-	logical_address = seg_id * 10 + page_id; //TODO ??	  	
+	logical_address = (page_id * PAGE_SIZE) + offset + ; //TODO ??	  	
 	return logical_address;
 }
 
@@ -206,8 +258,10 @@ int segment_with_free_space(program *prog, int size)
 {
 	int i=0;
 	segment *seg;
-
 	int cantidadDeSegmentos = list_size(prog->segment_table);
+
+	if (cantidadDeSegmentos==0) return -1;
+
 	int max_free_size = 0;
 	int total_free_size = 0;	
 
@@ -227,14 +281,62 @@ int segment_with_free_space(program *prog, int size)
 
 uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 {
+	int nro_prog = search_program(pid);
+	program *prog;
+	segment *seg;
+	page *pag;	
+	prog = list_get(program_list, nro_prog);
+	int nro_seg = busca_segmento(prog,virtual_address);	
+	seg = list_get(prog->segment_table,nro_seg);
+	pag = list_get(seg->page_table,numero_pagina);		
+	int base = seg->base;
+	int numero_pagina = (virtual_address - base) / PAGE_SIZE;
+	pag = list_get(seg->page_table,numero_pagina);
+	int offset = (virtual_address - base) - (numero_pagina * PAGE_SIZE);
+	printf("%d representa el seg %d pag %d offset %d \n",virtual_address,nro_seg,numero_pagina,offset);
+	
+	free_page(numero_pagina);
+
+
+	// otro flaco:
 	//uint8_t seg_index = virual_address >> ;
 	//uint8_t page_index = virtual_address & PAGE_MASK >> 
 	return 0;
 }
 
+int busca_segmento(program *prog, uint32_t va)
+{
+	int i=0;
+	segment *seg;
+	int cantidadDeSegmentos = list_size(prog->segment_table);
+
+	if (cantidadDeSegmentos==0) return -1;
+
+	uint32_t virtual_address_base = 0;
+	uint32_t virtual_address_final = 0;
+	
+	while(i < cantidadDeSegmentos)
+	{
+		seg = list_get(prog->segment_table, i);	
+		virtual_address_final += list_size(seg->page_table) * PAGE_SIZE;
+
+		if(va>=virtual_address_base && va<=virtual_address_final)
+		{
+			printf("Se encontro el seg %d que tiene las direcciones logicas desde %d hasta %d \n",
+					i, virtual_address_base, virtual_address_final);
+			seg->base = virtual_address_base;		
+			return i;
+		} 
+		else virtual_address_base = virtual_address_final+1;
+	}
+	return -1;
+}
 // No se usan ni dst ni src
 uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 {
+
+	/* Cosas que hizo el otro flaco ?? */
+
 	uint32_t destination = 0;
 
 	// Busco el programa, despues busco el segmento 0 del programa y de ese segmento busco su página 0 TODO ?? 
@@ -245,6 +347,8 @@ uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	// copio "numBytes" bytes desde la dirección "pag->fr->data" a la direccion &0 de la memoria de MUSE
 	memcpy(&destination, pag->fr->data, numBytes);
 	return destination;
+
+	/* 					 */
 
 	// How does memcpy works:
 	// Copies "numBytes" bytes from address "from" to address "to"
