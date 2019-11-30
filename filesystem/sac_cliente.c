@@ -1,4 +1,7 @@
 #include "sac_cliente.h"
+#include <pthread.h>
+
+pthread_mutex_t s_socket = PTHREAD_MUTEX_INITIALIZER;
 
 int send_call(Function *f)
 {
@@ -8,7 +11,9 @@ int send_call(Function *f)
 	create_message_header(&header,MESSAGE_CALL,1,sizeof(char) * tamDataFunction(*f));
 	create_function_message(msg,&header,f);
 
+	pthread_mutex_lock(&s_socket);
 	int resultado = send_message(serverSocket,msg);
+	pthread_mutex_unlock(&s_socket);
 
 	free(msg);
 	msg = NULL;
@@ -45,7 +50,9 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 		return EXIT_FAILURE;
 	}
 
+	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* f = msg.data;
 
@@ -88,7 +95,9 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 			return EXIT_FAILURE;
 	}
 
+	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* f = msg.data;
 
@@ -144,7 +153,9 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 		return EXIT_FAILURE;
 	}
 
+	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* f = msg.data;
 
@@ -169,7 +180,9 @@ static int sac_opendir(const char *path, struct fuse_file_info *fi){
 		return EXIT_FAILURE;
 	}
 
+	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* f = msg.data;
 
@@ -219,7 +232,9 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	free(fsend.args[1].value.val_charptr);
 	fsend.args[1].value.val_charptr = NULL;
 
+	pthread_mutex_lock(&s_socket);
 	receive_message_var(serverSocket,&msg); // esto cambie
+	pthread_mutex_unlock(&s_socket);
 
 	Function* freceive = msg.data;
 
@@ -257,7 +272,9 @@ static int sac_mknod(const char* path, mode_t mode, dev_t rdev){
 		return EXIT_FAILURE;
 	}
 
+	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* f = msg.data;
 
@@ -315,7 +332,9 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	free(f.args[2].value.val_charptr);
 	f.args[2].value.val_charptr = NULL;
 
+	pthread_mutex_lock(&s_socket);
 	receive_message_var(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* fresp = msg.data;
 
@@ -341,7 +360,9 @@ static int sac_unlink(const char* path){
 		return EXIT_FAILURE;
 	}
 
+	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* fresp = msg.data;
 
@@ -368,7 +389,9 @@ static int sac_mkdir(const char* path, mode_t mode){
 		return EXIT_FAILURE;
 	}
 
+	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* fresp = msg.data;
 
@@ -393,7 +416,9 @@ static int sac_rmdir(const char* path){
 		return EXIT_FAILURE;
 	}
 
+	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* fresp = msg.data;
 
