@@ -46,7 +46,7 @@ int main(int argc,char *argv[])
 			break;
 			case '4': foo4();
 			break;
-			case '5': //foo5();
+			case '5': foo5();
 			break;
 			default: puts("Error");
 		}
@@ -112,7 +112,7 @@ void foo4(){
 }
 
 void foo5(){
-	muse_map(‘hola.txt’, 20, 0);
-	muse_unmap(‘hola.txt’);
+	muse_map("hola.txt", 20, 0);
+	muse_unmap("hola.txt");
 	muse_close();
 }

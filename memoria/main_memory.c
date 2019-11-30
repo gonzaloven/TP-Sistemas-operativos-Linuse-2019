@@ -11,7 +11,8 @@
 #include <sys/mman.h> //for mmap() & munmap()
 #include <sys/stat.h>
 
-frame *main_memory = NULL;
+void *MAIN_MEMORY = NULL;
+heap_metadata metadata;
 
 t_list *program_list = NULL;
 t_list *segment_list = NULL;
@@ -20,18 +21,19 @@ t_log *debug_logger = NULL;
 
 int PAGE_SIZE = 0;
 int TOTAL_FRAME_NUM = 0;
-int METADATA_SIZE = 0;
+int METADATA_SIZE = sizeof(heap_metadata);
+int BITMAP[];
 
 void muse_main_memory_init(int memory_size, int page_size)
 {
 	int i;
 	int curr_page_num;	
-	void *mem_ptr = main_memory;	
-	
+	void *mem_ptr = MAIN_MEMORY;
 	PAGE_SIZE = page_size;
-	main_memory = (frame *) malloc(memory_size); // aka UPCM
+	MAIN_MEMORY = (void *) malloc(memory_size); // aka UPCM
+	metadata = (heap_metadata*) malloc (METADATA_SIZE);
 	TOTAL_FRAME_NUM = (memory_size / PAGE_SIZE);
-	METADATA_SIZE = sizeof(main_memory[0].metadata);		
+	BITMAP[TOTAL_FRAME_NUM]; //1 if free;
 
 	program_list = list_create();
 	segment_list = list_create();
@@ -42,13 +44,8 @@ void muse_main_memory_init(int memory_size, int page_size)
 	printf("Dividiento la memoria en frames...\n");
 	for(i=0; i < TOTAL_FRAME_NUM; i++)
 	{	
-		main_memory[i].metadata.is_free = true ;
-		main_memory[i].metadata.free_size = PAGE_SIZE;
-		main_memory[i].data = mem_ptr + i * PAGE_SIZE; 
-		// supongamos que los frames son de 32 bytes
-		// main_memory[0].data va a ser igual a 0 + 0 * 32 = 0
-		// main_memory[1].data va a ser igual a 0 + 1 * 32 = 32
-		//osea data vendría a ser la base de los frames
+		MAIN_MEMORY[i] = mem_ptr + i * PAGE_SIZE;
+		BITMAP[i] = 1;
 	}
 
 	log_trace(metricas_logger, "Tamaño de pagina = tamaño de frame: %d", PAGE_SIZE);
@@ -59,7 +56,7 @@ void muse_main_memory_init(int memory_size, int page_size)
 
 void muse_main_memory_stop()
 {
-	free(main_memory);
+	free(MAIN_MEMORY);
 	list_destroy(program_list);
 	list_destroy(segment_list);
 	log_destroy(metricas_logger);
@@ -86,9 +83,10 @@ int number_of_free_frames(){
 
 	for(i=0; i < TOTAL_FRAME_NUM; i++)
 	{	
-		frames_libres += (main_memory[i].metadata.is_free == true);
-		memoria_libre += main_memory[i].metadata.free_size; 
+		frames_libres += (BITMAP[i]);
 	}
+
+	memoria_libre = frames_libres * PAGE_SIZE;
 
 	log_trace(metricas_logger, "Cantidad de Memoria libre:%d ", memoria_libre);	
 	log_trace(metricas_logger, "Cantidad de Frames libres:%d / %d ", frames_libres, TOTAL_FRAME_NUM);
@@ -96,7 +94,7 @@ int number_of_free_frames(){
 	return frames_libres;
 }
 
-page *find_free_frame(int size)
+page *page_with_free_size(int size)
 {
 	if (size>PAGE_SIZE)
 	{
@@ -104,21 +102,28 @@ page *find_free_frame(int size)
 		return NULL;
 	}
 
+	metadata = (heap_metadata*) malloc (METADATA_SIZE);
+
 	int curr_frame_num;
 
 	page *pag = (page *) malloc(PAGE_SIZE); 
 
 	for(curr_frame_num=0; curr_frame_num < TOTAL_FRAME_NUM; curr_frame_num++)
 	{	
-		if (main_memory[curr_frame_num].metadata.is_free == true){
-			main_memory[curr_frame_num].metadata.is_free = false;
-			main_memory[curr_frame_num].metadata.free_size -= size;
+		if (BITMAP[curr_frame_num])
+		{
+			BITMAP[curr_frame_num] = 0;
 			pag->is_present = true;
 			pag->is_modify = false;
-			pag->fr = &main_memory[curr_frame_num];	
+			pag->fr = &MAIN_MEMORY[curr_frame_num];
+			MAIN_MEMORY[curr_frame_num] = metadata;
+			metadata->is_free=0;
+			metadata->free_size= PAGE_SIZE-size;
+
 			return pag;
 		}
 	}
+
 	log_debug(debug_logger, "Nos quedamos sin frames libres");
 	return NULL;
 }
@@ -129,13 +134,14 @@ void free_page(page *pag)
 
 	for(curr_frame_num=0; curr_frame_num < TOTAL_FRAME_NUM; curr_frame_num++)
 	{	
-		if (pag->fr == &main_memory[curr_frame_num])
+		if (pag->fr == &MAIN_MEMORY[curr_frame_num])
 		{
-			main_memory[curr_frame_num].metadata.is_free = true;
-			main_memory[curr_frame_num].metadata.free_size = PAGE_SIZE;
+			BITMAP[curr_frame_num] = 0;
+			MAIN_MEMORY[curr_frame_num] = metadata;
+			metadata->is_free = 0;
 			pag->is_present = true;
 			pag->is_modify = false;
-			pag->fr = NULL;			
+			pag->fr = NULL;
 		}
 	}	
 }
@@ -223,22 +229,23 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		
 		if (total_pages_needed>1)
 		{
+			pag = page_with_free_size(PAGE_SIZE)
 			//page_id = prog.segmento_utilizado.page_table.1er_pagina_pedida
-			page_id = list_add(seg->page_table, find_free_frame(PAGE_SIZE));			
+			page_id = list_add(seg->page_table, pag);
 
 			//vamos a pedir todo el resto de paginas que necesitemos
 			for(int i=0 ; i < total_pages_needed-2 ; i++ )
 			{
-				pag = find_free_frame(PAGE_SIZE);
+				pag = page_with_free_size(PAGE_SIZE);
 				list_add(seg->page_table, pag);
 			}
 
-			list_add(seg->page_table, find_free_frame(espacio_usado_de_ultima_pagina));
+			list_add(seg->page_table, page_with_free_size(espacio_usado_de_ultima_pagina));
 		}
 		else
 		{
 			//page_id = prog.segmento_utilizado.page_table.1er_pagina_pedida
-			page_id = list_add(seg->page_table, find_free_frame(espacio_usado_de_ultima_pagina));
+			page_id = list_add(seg->page_table, page_with_free_size(espacio_usado_de_ultima_pagina));
 		}
 		
 		// seg_id = prog.segment_table.segmento_pedido
@@ -250,7 +257,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	}
 	
 	metricas_por_socket_conectado(pid);
-	logical_address = (page_id * PAGE_SIZE) + offset + ; //TODO ??	  	
+	logical_address = (page_id * PAGE_SIZE) + offset; //TODO ??
 	return logical_address;
 }
 
@@ -288,7 +295,6 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 	prog = list_get(program_list, nro_prog);
 	int nro_seg = busca_segmento(prog,virtual_address);	
 	seg = list_get(prog->segment_table,nro_seg);
-	pag = list_get(seg->page_table,numero_pagina);		
 	int base = seg->base;
 	int numero_pagina = (virtual_address - base) / PAGE_SIZE;
 	pag = list_get(seg->page_table,numero_pagina);
@@ -345,7 +351,7 @@ uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	page *pag = list_get(seg->page_table, 0);
 
 	// copio "numBytes" bytes desde la dirección "pag->fr->data" a la direccion &0 de la memoria de MUSE
-	memcpy(&destination, pag->fr->data, numBytes);
+	memcpy(&destination, pag->fr, numBytes);
 	return destination;
 
 	/* 					 */
@@ -361,7 +367,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	program *prg = list_get(program_list, i);
 	segment *seg = list_get(prg->segment_table, 0);
 	page *pag = list_get(seg->page_table, 0);
-	memcpy(pag->fr->data, src, n);
+	memcpy(pag->fr, src, n);
 	
 	return 0;
 }
@@ -376,14 +382,25 @@ uint32_t memory_map(char *path, size_t length, int flags, uint32_t pid)
 	/* Idea Original:*/
 	int file_descriptor = open(path, O_RDONLY);
    	void* map = mmap(NULL, length, PROT_NONE, flags, file_descriptor, 0);
-   	printf(map, length);   
+   	printf(map, length);
+
+   	mapeame(length);
+
 	return *(int*) map; 
+}
+
+void mapeame(size_t length){
+
 }
 
 uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid)
 {
+	/*synchronize a file with a memory map*/
+	msync(addr, len, MS_SYNC);
 	return 0;
 }
+
+
 
 int memory_unmap(uint32_t dir, uint32_t pid)
 {
