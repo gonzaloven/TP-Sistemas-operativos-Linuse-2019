@@ -102,3 +102,465 @@
 
 [INFO] 15:18:16:789 SUSE logs/(26456:26456): Inicializando semaforos 
 
+[INFO] 18:27:11:792 SUSE logs/(31188:31188): Inicializando SUSE. 
+
+[INFO] 18:27:11:792 SUSE logs/(31188:31188): Levantando archivo de configuracion de SUSE 
+
+[INFO] 18:27:11:792 SUSE logs/(31188:31188): Archivo de configuracion levantado. 
+
+[INFO] 18:27:11:792 SUSE logs/(31188:31188): Inicializando semaforos 
+
+[INFO] 18:27:23:659 SUSE logs/(31213:31213): Inicializando SUSE. 
+
+[INFO] 18:27:23:660 SUSE logs/(31213:31213): Levantando archivo de configuracion de SUSE 
+
+[INFO] 18:27:23:667 SUSE logs/(31213:31213): Archivo de configuracion levantado. 
+
+[INFO] 18:27:23:667 SUSE logs/(31213:31213): Inicializando semaforos 
+
+[INFO] 18:27:45:455 SUSE logs/(31261:31261): Inicializando SUSE. 
+
+[INFO] 18:27:45:456 SUSE logs/(31261:31261): Levantando archivo de configuracion de SUSE 
+
+[INFO] 18:27:45:456 SUSE logs/(31261:31261): Archivo de configuracion levantado. 
+
+[INFO] 18:27:45:456 SUSE logs/(31261:31261): Inicializando semaforos 
+
+[INFO] 12:17:01:899 SUSE logs/(6144:6144): Inicializando SUSE. 
+
+[INFO] 12:17:01:904 SUSE logs/(6144:6144): Levantando archivo de configuracion de SUSE 
+
+[INFO] 12:17:01:906 SUSE logs/(6144:6144): Archivo de configuracion levantado. 
+
+[INFO] 12:17:01:906 SUSE logs/(6144:6144): Inicializando semaforos 
+
+[INFO] 12:17:01:909 SUSE logs/(6144:6144): Iniciando servidor... 
+
+[INFO] 12:17:01:911 SUSE logs/(6144:6144): SUSE esperando conexiones...
+
+[INFO] 12:21:11:496 SUSE logs/(6285:6285): Inicializando SUSE. 
+
+[INFO] 12:21:11:496 SUSE logs/(6285:6285): Levantando archivo de configuracion de SUSE 
+
+[INFO] 12:21:11:496 SUSE logs/(6285:6285): Archivo de configuracion levantado. 
+
+[INFO] 12:21:11:497 SUSE logs/(6285:6285): Inicializando semaforos 
+
+[INFO] 12:21:11:497 SUSE logs/(6285:6285): Iniciando servidor... 
+
+[INFO] 12:21:11:497 SUSE logs/(6285:6285): SUSE esperando conexiones...
+
+[INFO] 12:24:47:219 SUSE logs/(6738:6738): Inicializando SUSE. 
+
+[INFO] 12:24:47:544 SUSE logs/(6738:6738): Levantando archivo de configuracion de SUSE 
+
+[INFO] 12:25:01:756 SUSE logs/(6738:6738): Archivo de configuracion levantado. 
+
+[INFO] 12:25:02:293 SUSE logs/(6738:6738): Inicializando semaforos 
+
+[INFO] 12:25:06:947 SUSE logs/(6738:6738): Iniciando servidor... 
+
+[INFO] 12:25:18:521 SUSE logs/(6738:6738): SUSE esperando conexiones...
+
+[INFO] 12:30:45:116 SUSE logs/(6873:6873): Inicializando SUSE. 
+
+[INFO] 12:30:45:117 SUSE logs/(6873:6873): Levantando archivo de configuracion de SUSE 
+
+[INFO] 12:30:45:117 SUSE logs/(6873:6873): Archivo de configuracion levantado. 
+
+[INFO] 12:30:45:117 SUSE logs/(6873:6873): Inicializando semaforos 
+
+[INFO] 12:30:45:117 SUSE logs/(6873:6873): Iniciando servidor... 
+
+[INFO] 12:30:45:117 SUSE logs/(6873:6873): SUSE esperando conexiones...
+
+[INFO] 13:46:26:506 SUSE logs/(7021:7021): Inicializando SUSE. 
+
+[INFO] 13:46:26:507 SUSE logs/(7021:7021): Levantando archivo de configuracion de SUSE 
+
+[INFO] 13:46:26:507 SUSE logs/(7021:7021): Archivo de configuracion levantado. 
+
+[INFO] 13:46:26:507 SUSE logs/(7021:7021): Inicializando semaforos 
+
+[INFO] 13:46:26:507 SUSE logs/(7021:7021): Iniciando servidor... 
+
+[INFO] 13:46:26:507 SUSE logs/(7021:7021): SUSE esperando conexiones...
+
+[INFO] 13:46:44:40 SUSE logs/(7031:7031): Inicializando SUSE. 
+
+[INFO] 13:46:44:40 SUSE logs/(7031:7031): Levantando archivo de configuracion de SUSE 
+
+[INFO] 13:46:44:41 SUSE logs/(7031:7031): Archivo de configuracion levantado. 
+
+[INFO] 13:46:44:41 SUSE logs/(7031:7031): Inicializando semaforos 
+
+[INFO] 13:46:44:41 SUSE logs/(7031:7031): Iniciando servidor... 
+
+[INFO] 13:47:21:684 SUSE logs/(7090:7090): Inicializando SUSE. 
+
+[INFO] 13:47:21:685 SUSE logs/(7090:7090): Levantando archivo de configuracion de SUSE 
+
+[INFO] 13:47:21:685 SUSE logs/(7090:7090): Archivo de configuracion levantado. 
+
+[INFO] 13:47:21:685 SUSE logs/(7090:7090): Inicializando semaforos 
+
+[INFO] 13:47:21:685 SUSE logs/(7090:7090): Iniciando servidor... 
+
+[INFO] 13:47:21:686 SUSE logs/(7090:7090): SUSE esperando conexiones...
+
+[INFO] 13:47:44:529 SUSE logs/(7138:7138): Inicializando SUSE. 
+
+[INFO] 13:47:44:530 SUSE logs/(7138:7138): Levantando archivo de configuracion de SUSE 
+
+[INFO] 13:47:44:530 SUSE logs/(7138:7138): Archivo de configuracion levantado. 
+
+[INFO] 13:47:44:530 SUSE logs/(7138:7138): Inicializando semaforos 
+
+[INFO] 13:47:44:530 SUSE logs/(7138:7138): Iniciando servidor... 
+
+[INFO] 13:47:44:530 SUSE logs/(7138:7138): SUSE esperando conexiones...
+
+[INFO] 13:48:46:39 SUSE logs/(7156:7156): Inicializando SUSE. 
+
+[INFO] 13:48:46:45 SUSE logs/(7156:7156): Levantando archivo de configuracion de SUSE 
+
+[INFO] 13:48:46:46 SUSE logs/(7156:7156): Archivo de configuracion levantado. 
+
+[INFO] 13:48:46:46 SUSE logs/(7156:7156): Inicializando semaforos 
+
+[INFO] 13:48:46:46 SUSE logs/(7156:7156): Iniciando servidor... 
+
+[INFO] 16:23:16:34 SUSE logs/(13560:13560): Inicializando SUSE. 
+
+[INFO] 16:23:16:34 SUSE logs/(13560:13560): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:23:16:34 SUSE logs/(13560:13560): Archivo de configuracion levantado. 
+
+[INFO] 16:23:16:34 SUSE logs/(13560:13560): Inicializando semaforos 
+
+[INFO] 16:23:16:35 SUSE logs/(13560:13560): Iniciando servidor... 
+
+[INFO] 16:23:16:35 SUSE logs/(13560:13560): SUSE esperando conexiones...
+
+[INFO] 16:25:11:54 SUSE logs/(13672:13672): Inicializando SUSE. 
+
+[INFO] 16:25:11:54 SUSE logs/(13672:13672): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:25:11:54 SUSE logs/(13672:13672): Archivo de configuracion levantado. 
+
+[INFO] 16:25:11:54 SUSE logs/(13672:13672): Inicializando semaforos 
+
+[INFO] 16:25:11:55 SUSE logs/(13672:13672): Iniciando servidor... 
+
+[INFO] 16:25:11:55 SUSE logs/(13672:13672): SUSE esperando conexiones...
+
+[INFO] 16:36:06:956 SUSE logs/(13672:13672): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 16:36:06:957 SUSE logs/(13672:13672): Creando process con id... 5. 
+
+[INFO] 16:54:35:517 SUSE logs/(14983:14983): Inicializando SUSE. 
+
+[INFO] 16:54:35:518 SUSE logs/(14983:14983): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:54:35:519 SUSE logs/(14983:14983): Archivo de configuracion levantado. 
+
+[INFO] 16:54:35:519 SUSE logs/(14983:14983): Inicializando semaforos 
+
+[INFO] 16:54:35:519 SUSE logs/(14983:14983): Iniciando servidor... 
+
+[INFO] 16:54:35:519 SUSE logs/(14983:14983): SUSE esperando conexiones...
+
+[INFO] 17:24:32:34 SUSE logs/(17157:17157): Inicializando SUSE. 
+
+[INFO] 17:24:32:34 SUSE logs/(17157:17157): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:24:32:35 SUSE logs/(17157:17157): Archivo de configuracion levantado. 
+
+[INFO] 17:24:32:35 SUSE logs/(17157:17157): Inicializando semaforos 
+
+[INFO] 17:24:32:35 SUSE logs/(17157:17157): Iniciando servidor... 
+
+[INFO] 17:24:32:35 SUSE logs/(17157:17157): SUSE esperando conexiones...
+
+[INFO] 17:25:06:767 SUSE logs/(17157:17157): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:25:06:767 SUSE logs/(17157:17157): Creando process con id... 5. 
+
+[INFO] 17:27:07:217 SUSE logs/(17429:17429): Inicializando SUSE. 
+
+[INFO] 17:27:07:218 SUSE logs/(17429:17429): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:27:07:218 SUSE logs/(17429:17429): Archivo de configuracion levantado. 
+
+[INFO] 17:27:07:219 SUSE logs/(17429:17429): Inicializando semaforos 
+
+[INFO] 17:27:07:219 SUSE logs/(17429:17429): Iniciando servidor... 
+
+[INFO] 17:27:07:219 SUSE logs/(17429:17429): SUSE esperando conexiones...
+
+[INFO] 17:27:12:179 SUSE logs/(17429:17429): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:27:12:179 SUSE logs/(17429:17429): Creando process con id... 5. 
+
+[INFO] 17:29:32:386 SUSE logs/(17612:17612): Inicializando SUSE. 
+
+[INFO] 17:29:32:386 SUSE logs/(17612:17612): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:29:32:386 SUSE logs/(17612:17612): Archivo de configuracion levantado. 
+
+[INFO] 17:29:32:386 SUSE logs/(17612:17612): Inicializando semaforos 
+
+[INFO] 17:29:32:386 SUSE logs/(17612:17612): Iniciando servidor... 
+
+[INFO] 17:29:32:387 SUSE logs/(17612:17612): SUSE esperando conexiones...
+
+[INFO] 17:29:41:367 SUSE logs/(17612:17612): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:29:41:367 SUSE logs/(17612:17612): Creando process con id... 5. 
+
+[INFO] 17:30:41:138 SUSE logs/(17831:17831): Inicializando SUSE. 
+
+[INFO] 17:30:41:138 SUSE logs/(17831:17831): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:30:41:139 SUSE logs/(17831:17831): Archivo de configuracion levantado. 
+
+[INFO] 17:30:41:139 SUSE logs/(17831:17831): Inicializando semaforos 
+
+[INFO] 17:30:41:139 SUSE logs/(17831:17831): Iniciando servidor... 
+
+[INFO] 17:30:41:139 SUSE logs/(17831:17831): SUSE esperando conexiones...
+
+[INFO] 17:30:43:299 SUSE logs/(17831:17831): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:30:43:299 SUSE logs/(17831:17831): Creando process con id... 5. 
+
+[INFO] 17:32:08:634 SUSE logs/(17862:17862): Inicializando SUSE. 
+
+[INFO] 17:32:08:634 SUSE logs/(17862:17862): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:32:08:634 SUSE logs/(17862:17862): Archivo de configuracion levantado. 
+
+[INFO] 17:32:08:634 SUSE logs/(17862:17862): Inicializando semaforos 
+
+[INFO] 17:32:08:634 SUSE logs/(17862:17862): Iniciando servidor... 
+
+[INFO] 17:32:08:635 SUSE logs/(17862:17862): SUSE esperando conexiones...
+
+[INFO] 17:32:12:978 SUSE logs/(17862:17862): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:32:12:978 SUSE logs/(17862:17862): Creando process con id... 5. 
+
+[INFO] 17:32:35:919 SUSE logs/(17879:17879): Inicializando SUSE. 
+
+[INFO] 17:32:35:922 SUSE logs/(17879:17879): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:32:35:926 SUSE logs/(17879:17879): Archivo de configuracion levantado. 
+
+[INFO] 17:32:35:926 SUSE logs/(17879:17879): Inicializando semaforos 
+
+[INFO] 17:32:35:926 SUSE logs/(17879:17879): Iniciando servidor... 
+
+[INFO] 17:32:35:927 SUSE logs/(17879:17879): SUSE esperando conexiones...
+
+[INFO] 17:32:41:388 SUSE logs/(17879:17879): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:32:41:389 SUSE logs/(17879:17879): Creando process con id... 5. 
+
+[INFO] 17:33:26:936 SUSE logs/(18055:18055): Inicializando SUSE. 
+
+[INFO] 17:33:26:936 SUSE logs/(18055:18055): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:33:26:937 SUSE logs/(18055:18055): Archivo de configuracion levantado. 
+
+[INFO] 17:33:26:937 SUSE logs/(18055:18055): Inicializando semaforos 
+
+[INFO] 17:33:26:937 SUSE logs/(18055:18055): Iniciando servidor... 
+
+[INFO] 17:33:26:937 SUSE logs/(18055:18055): SUSE esperando conexiones...
+
+[INFO] 17:33:32:260 SUSE logs/(18055:18055): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:33:32:260 SUSE logs/(18055:18055): Creando process con id... 5. 
+
+[INFO] 17:34:04:892 SUSE logs/(18160:18160): Inicializando SUSE. 
+
+[INFO] 17:34:04:892 SUSE logs/(18160:18160): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:34:04:892 SUSE logs/(18160:18160): Archivo de configuracion levantado. 
+
+[INFO] 17:34:04:892 SUSE logs/(18160:18160): Inicializando semaforos 
+
+[INFO] 17:34:04:892 SUSE logs/(18160:18160): Iniciando servidor... 
+
+[INFO] 17:34:04:893 SUSE logs/(18160:18160): SUSE esperando conexiones...
+
+[INFO] 17:34:08:470 SUSE logs/(18160:18160): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:34:08:470 SUSE logs/(18160:18160): Creando process con id... 5. 
+
+[INFO] 17:34:19:384 SUSE logs/(18254:18254): Inicializando SUSE. 
+
+[INFO] 17:34:19:384 SUSE logs/(18254:18254): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:34:19:385 SUSE logs/(18254:18254): Archivo de configuracion levantado. 
+
+[INFO] 17:34:19:385 SUSE logs/(18254:18254): Inicializando semaforos 
+
+[INFO] 17:34:19:385 SUSE logs/(18254:18254): Iniciando servidor... 
+
+[INFO] 17:34:19:385 SUSE logs/(18254:18254): SUSE esperando conexiones...
+
+[INFO] 17:34:23:181 SUSE logs/(18254:18254): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:34:23:181 SUSE logs/(18254:18254): Creando process con id... 5. 
+
+[INFO] 17:34:59:339 SUSE logs/(18369:18369): Inicializando SUSE. 
+
+[INFO] 17:34:59:340 SUSE logs/(18369:18369): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:34:59:340 SUSE logs/(18369:18369): Archivo de configuracion levantado. 
+
+[INFO] 17:34:59:340 SUSE logs/(18369:18369): Inicializando semaforos 
+
+[INFO] 17:34:59:340 SUSE logs/(18369:18369): Iniciando servidor... 
+
+[INFO] 17:34:59:340 SUSE logs/(18369:18369): SUSE esperando conexiones...
+
+[INFO] 17:35:04:692 SUSE logs/(18369:18369): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:35:04:692 SUSE logs/(18369:18369): Creando process con id... 5. 
+
+[INFO] 17:36:29:582 SUSE logs/(18523:18523): Inicializando SUSE. 
+
+[INFO] 17:36:29:582 SUSE logs/(18523:18523): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:36:29:582 SUSE logs/(18523:18523): Archivo de configuracion levantado. 
+
+[INFO] 17:36:29:582 SUSE logs/(18523:18523): Inicializando semaforos 
+
+[INFO] 17:36:29:582 SUSE logs/(18523:18523): Iniciando servidor... 
+
+[INFO] 17:36:29:582 SUSE logs/(18523:18523): SUSE esperando conexiones...
+
+[INFO] 17:36:33:971 SUSE logs/(18523:18523): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:36:33:971 SUSE logs/(18523:18523): Creando process con id... 5. 
+
+[INFO] 17:36:59:971 SUSE logs/(18561:18561): Inicializando SUSE. 
+
+[INFO] 17:36:59:972 SUSE logs/(18561:18561): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:36:59:972 SUSE logs/(18561:18561): Archivo de configuracion levantado. 
+
+[INFO] 17:36:59:972 SUSE logs/(18561:18561): Inicializando semaforos 
+
+[INFO] 17:36:59:972 SUSE logs/(18561:18561): Iniciando servidor... 
+
+[INFO] 17:36:59:972 SUSE logs/(18561:18561): SUSE esperando conexiones...
+
+[INFO] 17:37:26:510 SUSE logs/(18581:18581): Inicializando SUSE. 
+
+[INFO] 17:37:26:512 SUSE logs/(18581:18581): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:37:26:512 SUSE logs/(18581:18581): Archivo de configuracion levantado. 
+
+[INFO] 17:37:26:512 SUSE logs/(18581:18581): Inicializando semaforos 
+
+[INFO] 17:37:26:512 SUSE logs/(18581:18581): Iniciando servidor... 
+
+[INFO] 17:38:02:374 SUSE logs/(18732:18732): Inicializando SUSE. 
+
+[INFO] 17:38:02:375 SUSE logs/(18732:18732): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:38:02:375 SUSE logs/(18732:18732): Archivo de configuracion levantado. 
+
+[INFO] 17:38:02:375 SUSE logs/(18732:18732): Inicializando semaforos 
+
+[INFO] 17:38:02:375 SUSE logs/(18732:18732): Iniciando servidor... 
+
+[INFO] 17:38:02:375 SUSE logs/(18732:18732): SUSE esperando conexiones...
+
+[INFO] 17:38:06:954 SUSE logs/(18732:18732): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:38:06:954 SUSE logs/(18732:18732): Creando process con id... 5. 
+
+[INFO] 17:38:43:322 SUSE logs/(18874:18874): Inicializando SUSE. 
+
+[INFO] 17:38:43:322 SUSE logs/(18874:18874): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:38:43:322 SUSE logs/(18874:18874): Archivo de configuracion levantado. 
+
+[INFO] 17:38:43:323 SUSE logs/(18874:18874): Inicializando semaforos 
+
+[INFO] 17:38:43:323 SUSE logs/(18874:18874): Iniciando servidor... 
+
+[INFO] 17:38:43:323 SUSE logs/(18874:18874): SUSE esperando conexiones...
+
+[INFO] 17:38:52:729 SUSE logs/(18874:18874): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:38:52:730 SUSE logs/(18874:18874): Creando process con id... 5. 
+
+[INFO] 17:40:57:369 SUSE logs/(19017:19017): Inicializando SUSE. 
+
+[INFO] 17:40:57:369 SUSE logs/(19017:19017): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:40:57:370 SUSE logs/(19017:19017): Archivo de configuracion levantado. 
+
+[INFO] 17:40:57:370 SUSE logs/(19017:19017): Inicializando semaforos 
+
+[INFO] 17:40:57:370 SUSE logs/(19017:19017): Iniciando servidor... 
+
+[INFO] 17:40:57:370 SUSE logs/(19017:19017): SUSE esperando conexiones...
+
+[INFO] 17:41:09:376 SUSE logs/(19017:19017): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:41:09:376 SUSE logs/(19017:19017): Creando process con id... 5. 
+
+[INFO] 17:41:42:113 SUSE logs/(19168:19168): Inicializando SUSE. 
+
+[INFO] 17:41:42:114 SUSE logs/(19168:19168): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:41:42:114 SUSE logs/(19168:19168): Archivo de configuracion levantado. 
+
+[INFO] 17:41:42:114 SUSE logs/(19168:19168): Inicializando semaforos 
+
+[INFO] 17:41:42:116 SUSE logs/(19168:19168): Iniciando servidor... 
+
+[INFO] 17:41:42:116 SUSE logs/(19168:19168): SUSE esperando conexiones...
+
+[INFO] 17:41:47:159 SUSE logs/(19168:19168): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:41:47:159 SUSE logs/(19168:19168): Creando process con id... 5. 
+
+[INFO] 17:42:36:336 SUSE logs/(19207:19207): Inicializando SUSE. 
+
+[INFO] 17:42:36:827 SUSE logs/(19207:19207): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:42:43:338 SUSE logs/(19207:19207): Archivo de configuracion levantado. 
+
+[INFO] 17:42:44:298 SUSE logs/(19207:19207): Inicializando semaforos 
+
+[INFO] 17:42:49:733 SUSE logs/(19207:19207): Iniciando servidor... 
+
+[INFO] 17:42:56:314 SUSE logs/(19207:19207): SUSE esperando conexiones...
+
+[INFO] 17:44:44:819 SUSE logs/(19207:19207): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:44:50:31 SUSE logs/(19207:19207): Creando process con id... 5. 
+
+[INFO] 17:45:55:817 SUSE logs/(19344:19344): Inicializando SUSE. 
+
+[INFO] 17:45:56:142 SUSE logs/(19344:19344): Levantando archivo de configuracion de SUSE 
+
+[INFO] 17:45:59:530 SUSE logs/(19344:19344): Archivo de configuracion levantado. 
+
+[INFO] 17:45:59:886 SUSE logs/(19344:19344): Inicializando semaforos 
+
+[INFO] 17:46:02:801 SUSE logs/(19344:19344): Iniciando servidor... 
+
+[INFO] 17:46:05:748 SUSE logs/(19344:19344): SUSE esperando conexiones...
+
+[INFO] 17:46:15:663 SUSE logs/(19344:19344): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 17:46:33:460 SUSE logs/(19344:19344): Creando process con id... 5. 
+

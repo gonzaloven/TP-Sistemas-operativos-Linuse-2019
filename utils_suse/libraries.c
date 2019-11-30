@@ -146,11 +146,13 @@ void enviar(un_socket socket_para_enviar, int codigo_operacion, int tamanio,
 }
 
 t_paquete* recibir(un_socket socket_para_recibir) {
+	printf("Receiving package");
 
 	t_paquete * paquete_recibido = malloc(sizeof(t_paquete));
-	int retorno = 0;
-	retorno = recv(socket_para_recibir, &paquete_recibido->codigo_operacion, sizeof(int),
+	int retorno = recv(socket_para_recibir, &(paquete_recibido->codigo_operacion), sizeof(int),
 	MSG_WAITALL);
+
+	printf("Received package");
 
 	if(retorno==0){
 		paquete_recibido->codigo_operacion=-1;
@@ -159,10 +161,15 @@ t_paquete* recibir(un_socket socket_para_recibir) {
 		return paquete_recibido;
 
 	}
-	recv(socket_para_recibir, &paquete_recibido->tamanio, sizeof(int),
+
+	printf("Computing size");
+
+	recv(socket_para_recibir, &(paquete_recibido->tamanio), sizeof(int),
 	MSG_WAITALL);
 
-	if(paquete_recibido->tamanio > 0)
+	printf("el tamanio es %d", paquete_recibido->tamanio);
+
+	if(1 > 0)
 	{
 		void * informacion_recibida = malloc(paquete_recibido->tamanio);
 
@@ -558,7 +565,7 @@ char* deserializar_string(void * buffer, int * desplazamiento) {
 
 void serializar_valor(char* valor, void* buffer, int* desplazamiento) {
 		serializar_string(buffer, desplazamiento, valor);
-	}
+}
 
 void serializar_lista_strings(void * buffer, int * desplazamiento, t_list * lista) {
 	serializar_int(buffer, desplazamiento, list_size(lista));

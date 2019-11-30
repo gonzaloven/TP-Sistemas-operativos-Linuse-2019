@@ -142,14 +142,18 @@ void iniciar_servidor() {
 
 		t_paquete* handshake = recibir(listener);
 
-		log_info(logger, "Soy SUSE y recibi una nueva conexion del socket %d. \n", new_connection);
+		log_info(logger, "Recibi una nueva conexion del socket %d. \n", new_connection);
 
 		free(handshake);
 
 		//Creo un hilo por programa que se conecta
-		log_info(logger, "Creando process con id... %d. \n", new_connection);
-		int posicionRetornada = list_add(thread_params, &new_connection);
+		log_info(logger, "Creando process con id %d. \n", (int)new_connection);
+		log_info(logger, "funca?");
+
+		t_list* thread_params = list_create();
+		list_add(thread_params, &new_connection);
 		nuevo_hilo(process_conectado_funcion_thread, thread_params);
+		log_info(logger, "Cree el hilo");
 	}
 }
 

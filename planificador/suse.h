@@ -62,8 +62,6 @@ pthread_t threads[20];
 
 pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros);
 
-t_list* thread_params;
-
 void* process_conectado_funcion_thread(void* argumentos);
 
 int obtener_proximo_ejecutar(t_process* process);
