@@ -420,6 +420,59 @@ static int sac_unlink(const char* path){
 	return respuesta; //Devuelve 0 si todo bien, -1 si todo mal
 }
 
+static int sac_truncate(const char* path, off_t size){
+	Message msg;
+	char *lectura;
+
+	Function fsend;
+
+	fsend.args[0].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
+	fsend.args[0].size = sizeof(uint32_t);
+	fsend.args[0].value.val_u32 = size;
+
+	fsend.args[1].type = VAR_CHAR_PTR;
+	fsend.args[1].size = strlen(path) + 1;
+	fsend.args[1].value.val_charptr = malloc(fsend.args[1].size);
+	memcpy(fsend.args[1].value.val_charptr, path, fsend.args[1].size);
+
+	fsend.type = FUNCTION_TRUNCATE;
+	fsend.num_args = 2;
+
+	log_info(logger,"Truncate llamado -> Path: %s, Size: %d", path, size);
+
+	if(send_call(&fsend) == -1){
+		free(fsend.args[1].value.val_charptr);
+		fsend.args[1].value.val_charptr = NULL;
+		return EXIT_FAILURE;
+	}
+
+	free(fsend.args[1].value.val_charptr);
+	fsend.args[1].value.val_charptr = NULL;
+
+	pthread_mutex_lock(&s_socket);
+	receive_message_var(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
+
+	Function* freceive = msg.data;
+
+	if(freceive->type != FUNCTION_RTA_TRUNCATE){
+		free(msg.data);
+		msg.data = NULL;
+		log_error(logger,"Respuesta Truncate recibida -> No se ha podido cambiar el size del archivo.");
+		return -ENOENT;
+	}
+
+	int respuesta = freceive->args[0].value.val_u32;
+
+	log_info(logger,"Respuesta Truncate recibida -> Se ha cambiado el size del archivo correctamente");
+
+	free(msg.data);
+	msg.data = NULL;
+
+	return respuesta;
+}
+
+
 static int sac_mkdir(const char* path, mode_t mode){
 	Message msg;
 
@@ -445,6 +498,63 @@ static int sac_mkdir(const char* path, mode_t mode){
 	int respuesta = fresp->args[0].value.val_u32;
 
 	log_info(logger,"Respuesta Mkdir recibida -> Se ha creado el directorio correctamente.");
+
+	free(msg.data);
+	msg.data = NULL;
+
+	return respuesta;
+}
+
+static int sac_rename(const char *path, const char *nuevoPath){
+	Message msg;
+	char *lectura;
+
+	Function fsend;
+
+	fsend.args[0].type = VAR_CHAR_PTR;
+	fsend.args[0].size = strlen(path) + 1;
+	fsend.args[0].value.val_charptr = malloc(fsend.args[0].size);
+	memcpy(fsend.args[0].value.val_charptr, path, fsend.args[0].size);
+
+	fsend.args[1].type = VAR_CHAR_PTR;
+	fsend.args[1].size = strlen(nuevoPath) + 1;
+	fsend.args[1].value.val_charptr = malloc(fsend.args[1].size);
+	memcpy(fsend.args[1].value.val_charptr, nuevoPath, fsend.args[1].size);
+
+	fsend.type = FUNCTION_RENAME;
+	fsend.num_args = 2;
+
+	log_info(logger,"Rename llamado -> Path viejo: %s, Path nuevo: %s", path, nuevoPath);
+
+	if(send_call(&fsend) == -1){
+		free(fsend.args[1].value.val_charptr);
+		fsend.args[1].value.val_charptr = NULL;
+		free(fsend.args[0].value.val_charptr);
+		fsend.args[0].value.val_charptr = NULL;
+		return EXIT_FAILURE;
+	}
+
+	free(fsend.args[1].value.val_charptr);
+	fsend.args[1].value.val_charptr = NULL;
+	free(fsend.args[0].value.val_charptr);
+	fsend.args[0].value.val_charptr = NULL;
+
+	pthread_mutex_lock(&s_socket);
+	receive_message_var(serverSocket,&msg);
+	pthread_mutex_unlock(&s_socket);
+
+	Function* freceive = msg.data;
+
+	if(freceive->type != FUNCTION_RTA_RENAME){
+		free(msg.data);
+		msg.data = NULL;
+		log_error(logger,"Respuesta Rename recibida -> No se ha podido renombrar al archivo.");
+		return -ENOENT;
+	}
+
+	int respuesta = freceive->args[0].value.val_u32;
+
+	log_info(logger,"Respuesta Rename recibida -> Se ha renombrado el archivo correctamente");
 
 	free(msg.data);
 	msg.data = NULL;
@@ -495,6 +605,8 @@ static struct fuse_operations sac_oper = {
 		.write = sac_write,
 		.mknod = sac_mknod,
 		.unlink = sac_unlink,
+		.truncate = sac_truncate,
+		.rename = sac_rename
 };
 
 fuse_configuration* load_configuration(char *path)

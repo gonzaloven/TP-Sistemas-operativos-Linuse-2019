@@ -108,6 +108,8 @@ Function sac_server_rmdir(char* path);
 Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset);
 Function sac_server_mknod(char* path);
 Function sac_server_unlink(char* path);
+Function sac_server_truncate(char* path, uint32_t size);
+Function sac_server_rename(char* path, char* nuevoPath);
 
 
 // Auxiliary structure management functions, located in sac_handlers

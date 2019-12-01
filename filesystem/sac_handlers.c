@@ -163,10 +163,193 @@ void lista_a_string(t_list* lista, char** string){
 	int jamon = 1;
 }
 
+int validar_si_ya_existe_otro(char* path, char* fileName){
+	char* pathduplicado = strdup(path);
+	char* parentDirPath = dirname(pathduplicado);
+	int nodoPadreDenuevo = determine_nodo(parentDirPath);
+	int bloquePadre = nodoPadreDenuevo + bloqueInicioTablaDeNodos;
+
+	for(int i=0; i<MAX_NUMBER_OF_FILES; i++){
+		if(tablaDeNodos[i].parent_dir_block == bloquePadre){
+			if(!strcmp(tablaDeNodos[i].fname, fileName)){
+				log_error(fuse_logger, "Ya existe un nodo con ese nombre en este directorio.");
+
+				free(pathduplicado);
+				return -EEXIST;
+			}
+		}
+	}
+	return 0;
+}
+
+int renombrar_archivo(int nodoBuscadoPosicion, char* path, char* nuevoPath){
+	char* pathDuplicado = strdup(nuevoPath);
+	char* pathDuplicadoDenuevo = strdup(nuevoPath);
+	char* parentDirNuevoPath;
+	char* fileName;
+	int respuesta = 0;
+
+	parentDirNuevoPath = dirname(pathDuplicado);
+	fileName = basename(pathDuplicadoDenuevo);
+
+	int existenciaDeOtro = validar_si_ya_existe_otro(nuevoPath, fileName);
+
+	if(respuesta != 0){
+		free(pathDuplicadoDenuevo);
+		free(pathDuplicado);
+		return respuesta;
+	}
+
+	int nodoNuevoPadre = determine_nodo(parentDirNuevoPath);
+
+	if(nodoNuevoPadre == -1){
+		free(pathDuplicadoDenuevo);
+		free(pathDuplicado);
+		respuesta = -1;
+		return respuesta;
+	}
+
+	GFile *nodoARenombrar = tablaDeNodos + nodoBuscadoPosicion;
+
+	memset(nodoARenombrar->fname,0,strlen(nodoARenombrar->fname) + 1);
+
+	strcpy((char*) nodoARenombrar->fname, fileName);
+
+	nodoARenombrar->parent_dir_block = nodoNuevoPadre + bloqueInicioTablaDeNodos;
+
+	free(pathDuplicadoDenuevo);
+	free(pathDuplicado);
+
+	return respuesta;
+}
+
+int truncar_archivo(int nodoBuscadoPosicion, uint32_t size){
+	int respuesta = 0;
+
+	if(nodoBuscadoPosicion == -1){
+		respuesta = -1;
+		return respuesta;
+	}
+
+	int file_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
+
+	GFile *nodoATruncar = tablaDeNodos + nodoBuscadoPosicion;
+
+	if(size > file_size){
+		respuesta = get_new_space(nodoATruncar, (size - file_size));
+	}else{
+		int pointer_to_delete;
+		int data_to_delete;
+
+		setear_posicion(&pointer_to_delete, &data_to_delete, 0, size);
+
+		respuesta = delete_nodes_upto(nodoATruncar, pointer_to_delete, data_to_delete);
+	}
+
+	nodoATruncar->file_size = size;
+
+	msync(disco, diskSize, MS_SYNC);
+
+	return respuesta;
+}
+
+int setear_posicion (int *pointer_block, int *data_block, size_t size, off_t offset){
+	div_t divi;
+	divi = div(offset, (BLOQUE_SIZE*PUNTEROS_A_BLOQUES_DATOS));
+	*pointer_block = divi.quot;
+	*data_block = divi.rem / BLOQUE_SIZE;
+	return 0;
+}
+
+
+int delete_nodes_upto (GFile *file_data, int pointer_upto, int data_upto){
+	size_t file_size = file_data->file_size;
+	int node_to_delete, node_pointer_to_delete, delete_upto;
+	punterosBloquesDatos *aux; // Auxiliar utilizado para saber que nodo redireccionar
+	int data_pos, pointer_pos;
+
+	// Ubica cual es el ultimo nodo del archivo
+	setear_posicion(&pointer_pos, &data_pos, 0, file_size);
+	if (file_size%(BLOQUE_SIZE*PUNTEROS_A_BLOQUES_DATOS) == 0) {
+		pointer_pos--;
+		data_pos = PUNTEROS_A_BLOQUES_DATOS-1;
+	}
+	else if (file_size%BLOQUE_SIZE == 0) data_pos--;
+
+	// Activa el DELETE_MODE. Este modo NO debe activarse cuando se hacen operaciones que
+	// dejen al archivo con un solo nodo. Por ejemplo, truncate -s 0.
+	// Deberia estar activo en otro momento.
+	if((pointer_upto != 0) | (data_upto != 0)) DISABLE_DELETE_MODE;
+
+	// Borra hasta que los nodos de posicion coincidan con los nodos especificados.
+	while( (data_pos != data_upto) | (pointer_pos != pointer_upto) | (DELETE_MODE == 1) ){  // | ((data_pos == 0) & (pointer_pos == 0)) ){
+		if ((data_pos < 0) | (pointer_pos < 0)) break;
+
+		// localiza el puntero de datos a borrar.
+		node_pointer_to_delete = file_data->indirect_blocks_array[pointer_pos];
+		aux = (punterosBloquesDatos *) (disco + node_pointer_to_delete);
+
+		// Indica hasta que nodo debe borrar.
+		if (pointer_pos == pointer_upto){
+			delete_upto = data_upto;
+		} else {
+			delete_upto = 0;
+		}
+
+		// Borra los nodos de datos que sean necesarios.
+		while ((data_pos + DELETE_MODE) != delete_upto){
+			node_to_delete = aux->punteros_a_bloques[data_pos];
+			aux->punteros_a_bloques[data_pos] = 0;
+			bitarray_clean_bit(bitmap, node_to_delete);
+			data_pos--;
+		}
+
+		// Si es necesario, borra el nodo de punteros.
+		if ((pointer_pos + DELETE_MODE) != pointer_upto){
+			bitarray_clean_bit(bitmap, node_pointer_to_delete);
+			file_data->indirect_blocks_array[pointer_pos] = 0;
+			pointer_pos--;
+		}
+
+	}
+
+	return 0;
+}
+
+int get_new_space (GFile *file_data, int size){
+	size_t file_size = file_data->file_size, space_in_block = file_size % BLOQUE_SIZE;
+	int new_node;
+	space_in_block = BLOQUE_SIZE - space_in_block; // Calcula cuanto tamanio le queda para ocupar en el bloque
+
+	// Si no hay suficiente espacio, retorna error.
+	if ((cantidad_bloques_libres()*BLOQUE_SIZE) < (size - space_in_block)) return -ENOSPC;
+
+	// Actualiza el file size al tamanio que le corresponde:
+	if (space_in_block >= size){
+		file_data->file_size += size;
+		return 0;
+	} else {
+		file_data->file_size += space_in_block;
+	}
+
+	while ( (space_in_block <= size) ){ // Siempre que lo que haya que escribir sea mas grande que el espacio que quedaba en el bloque
+		new_node = get_bloque_vacio();
+		agregar_nodo(file_data, new_node);
+		size -= BLOQUE_SIZE;
+		file_data->file_size += BLOQUE_SIZE;
+	}
+
+	file_data->file_size += size;
+
+	return 0;
+}
+
 void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
 	int i = 0;
 	int tamanioMaximoDireccionablePorPuntero = (PUNTEROS_A_BLOQUES_DATOS * BLOQUE_SIZE);
+
+	pthread_mutex_lock(&s_bitmap);
 
 	for(i = 0; i < tamanio / tamanioMaximoDireccionablePorPuntero; i++){
 		ptrGBloque bloqueDePunterosPosicion = tablaDeNodos[nodoABorrarPosicion].indirect_blocks_array[i];
@@ -177,16 +360,12 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
 			ptrGBloque bloqueDeDatosPosicion = bloqueDePunterosDatos->punteros_a_bloques[j];
 
-			pthread_mutex_lock(&s_bitmap);
 			bitarray_clean_bit(bitmap, bloqueDeDatosPosicion);
-			pthread_mutex_unlock(&s_bitmap);
 
 			msync(disco, diskSize, MS_SYNC);
 		}
 
-		pthread_mutex_lock(&s_bitmap);
 		bitarray_clean_bit(bitmap, bloqueDePunterosPosicion);
-		pthread_mutex_unlock(&s_bitmap);
 
 		msync(disco, diskSize, MS_SYNC);
 	}
@@ -198,14 +377,11 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 	for(int j = 0; j < ceil((float) (tamanio % tamanioMaximoDireccionablePorPuntero) / BLOQUE_SIZE); j++){
 		ptrGBloque bloque = bloqueDePunterosDatosFaltantes->punteros_a_bloques[j];
 
-		pthread_mutex_lock(&s_bitmap);
 		bitarray_clean_bit(bitmap, bloque);
-		pthread_mutex_unlock(&s_bitmap);
 
 		msync(disco, diskSize, MS_SYNC);
 	}
 
-	pthread_mutex_lock(&s_bitmap);
 	bitarray_clean_bit(bitmap, ultimoBloquePunterosDirectos);
 	pthread_mutex_unlock(&s_bitmap);
 
@@ -220,7 +396,6 @@ int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){
 		return -1;
 	}
 
-	pthread_mutex_lock(&s_tablaDeNodos);
 	if(tablaDeNodos[nodoABorrarPosicion].state == 2){
 		nodoABorrar->state = 0;
 		nodoABorrar->file_size = 0;
@@ -235,7 +410,6 @@ int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){
 
 	nodoABorrar->state = 0;
 	nodoABorrar->file_size = 0;
-	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	log_info(fuse_logger, "Archivo -> Nodo: %d | borrado correctamente.", nodoABorrarPosicion);
 
@@ -336,6 +510,13 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 		parentDirPath = dirname(pathduplicado);
 		nodoPadre = determine_nodo(parentDirPath);
 		free(pathduplicado);
+	}
+
+	int respuesta = validar_si_ya_existe_otro(path, fileName);
+
+	if(respuesta != 0){
+		free(listaSpliteada);
+		return respuesta;
 	}
 
 	GFile *nodoVacio = tablaDeNodos + currNode;
@@ -545,14 +726,6 @@ int cantidad_bloques_libres(){
 
 }
 
-int setear_posicion (int *pointer_block, int *data_block, size_t size, off_t offset){
-	div_t divi;
-	divi = div(offset, (BLOQUE_SIZE*PUNTEROS_A_BLOQUES_DATOS));
-	*pointer_block = divi.quot;
-	*data_block = divi.rem / BLOQUE_SIZE;
-	return 0;
-}
-
 int agregar_nodo(GFile *file_data, int numeroNodo){
 	int node_pointer_number, position;
 	size_t tam = file_data->file_size;
@@ -636,8 +809,6 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 		return -EFBIG;
 	}
 
-	pthread_mutex_lock(&s_tablaDeNodos);
-
 	// Guarda tantas veces como sea necesario, consigue nodos y actualiza el archivo.
 	while (tam != 0){
 
@@ -707,7 +878,6 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 	respuesta = size;
 
 	finalizar:
-	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	msync(disco, diskSize, MS_SYNC);
 

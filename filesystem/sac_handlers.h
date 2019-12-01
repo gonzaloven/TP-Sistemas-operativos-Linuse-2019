@@ -8,6 +8,11 @@
 #include <math.h>
 #include <pthread.h>
 
+#define DELETE_MODE _del_mode
+#define ENABLE_DELETE_MODE _del_mode=1
+#define DISABLE_DELETE_MODE _del_mode=0
+int _del_mode;
+
 int tamDataFunction(Function f);
 
 char **splitPath(char *path, int *size);
@@ -51,6 +56,16 @@ int setear_posicion (int *pointer_block, int *data_block, size_t size, off_t off
 int cantidad_bloques_libres();
 
 int get_bloque_vacio();
+
+int delete_nodes_upto (GFile *file_data, int pointer_upto, int data_upto);
+
+int get_new_space (GFile *file_data, int size);
+
+int truncar_archivo(int nodoBuscadoPosicion, uint32_t size);
+
+int renombrar_archivo(int nodoBuscadoPosicion, char* path, char* nuevoPath);
+
+int validar_si_ya_existe_otro(char* path, char* fileName);
 
 
 #endif /* FILESYSTEM_SAC_HANDLERS_H_ */

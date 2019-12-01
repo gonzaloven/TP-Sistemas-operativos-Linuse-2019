@@ -204,12 +204,33 @@ Function fuse_invoke_function(Function *f)
 			log_info(fuse_logger,"Rmdir llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_rmdir(f->args[0].value.val_charptr);
 			break;
+		case FUNCTION_TRUNCATE:
+			log_info(fuse_logger,"Truncate llamado with -> Path: %s, Size: %d", f->args[1].value.val_charptr, f->args[0].value.val_u32);
+			func_ret = sac_server_truncate(f->args[1].value.val_charptr, f->args[0].value.val_u32);
+			break;
+		case FUNCTION_RENAME:
+			log_info(fuse_logger,"Rename llamado with -> Path viejo: %s, Path nuevo: %s", f->args[0].value.val_charptr, f->args[1].value.val_charptr);
+			func_ret = sac_server_rename(f->args[0].value.val_charptr, f->args[1].value.val_charptr);
+			break;
 		default:
 			log_error(fuse_logger,"Funcion desconocida");
 			break;
 	}
 	return func_ret;
 
+}
+
+Function sac_server_rename(char* path, char* nuevoPath){
+	int nodoBuscadoPosicion = determine_nodo(path);
+	int respuesta = renombrar_archivo(nodoBuscadoPosicion, path, nuevoPath);
+	return enviar_respuesta_basica(respuesta, FUNCTION_RTA_RENAME);
+}
+
+
+Function sac_server_truncate(char* path, uint32_t size){
+	int nodoBuscadoPosicion = determine_nodo(path);
+	int respuesta = truncar_archivo(nodoBuscadoPosicion, size);
+	return enviar_respuesta_basica(respuesta, FUNCTION_RTA_TRUNCATE);
 }
 
 Function sac_server_open(char* path){

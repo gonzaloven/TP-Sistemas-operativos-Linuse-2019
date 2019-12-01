@@ -100,6 +100,10 @@ static int sac_open(const char *path, struct fuse_file_info *fi);
 
 static int sac_opendir(const char *path, struct fuse_file_info *fi);
 
+static int sac_truncate(const char* path, off_t size);
+
+static int sac_rename(const char *path, const char *nuevoPath);
+
 // Writing functions //
 
 /*
