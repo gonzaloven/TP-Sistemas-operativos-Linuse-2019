@@ -46,6 +46,8 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	memset(stbuf, 0, sizeof(struct stat));
 
+	log_info(logger,"Gettatr llamado -> Path: %s", path);
+
 	if(send_path(FUNCTION_GETATTR, path) == -1){
 		return EXIT_FAILURE;
 	}
@@ -62,16 +64,22 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 		free(msg.data);
 		msg.data = NULL;
-
+		log_info(logger,"Respuesta Getattr recibida -> Nodo raiz encontrado.");
 		return EXIT_SUCCESS;
 	}
 
 	if(f->type != FUNCTION_RTA_GETATTR){
 		free(msg.data);
 		msg.data = NULL;
+		log_error(logger,"Respuesta Getattr recibida -> El nodo buscado no existe.");
 		return -ENOENT;
 	}
 	
+	log_info(logger,"Respuesta Gettatr recibida -> Modo: %d, Links: %d, Size: %d",
+					f->args[0].value.val_u32,
+					f->args[1].value.val_u32,
+					f->args[2].value.val_u32);
+
 	stbuf->st_mode = f->args[0].value.val_u32; // fijarse que pegue int 32, sino agregarlo a menssage (junto con type etc) o usar char*
 	stbuf->st_nlink = f->args[1].value.val_u32;
 	stbuf->st_size = f->args[2].value.val_u32;
@@ -91,6 +99,8 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 	uint8_t tam_dir = 0;
 	uint16_t off = 0;
 
+	log_info(logger,"Readdir llamado -> Path: %s", path);
+
 	if(send_path(FUNCTION_READDIR, path) == -1){
 			return EXIT_FAILURE;
 	}
@@ -104,7 +114,7 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 	if(f->type != FUNCTION_RTA_READDIR){
 		free(msg.data);
 		msg.data = NULL;
-		return -ENOENT;
+		return -1;
 	}
 
 	int dimListaSpliteada;
@@ -119,11 +129,14 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 		free(f->args[0].value.val_charptr);
 		f->args[0].value.val_charptr = NULL;
 		free(msg.data);
+		log_info(logger,"Respuesta Readdir recibida -> El directorio buscado esta vacio.");
 		return 0;
 	}
 
 	listaSpliteada = string_split(f->args[0].value.val_charptr, "/");
 	dimListaSpliteada = largoListaString(listaSpliteada);
+
+	log_info(logger,"Respuesta Readdir recibida -> Nodos encontrados: %d", dimListaSpliteada);
 
 	for(int i=0 ; i<dimListaSpliteada; i++){
 
@@ -149,6 +162,8 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 	Message msg;
 
+	log_info(logger,"Open llamado -> Path: %s", path);
+
 	if(send_path(FUNCTION_OPEN, path) == -1){
 		return EXIT_FAILURE;
 	}
@@ -162,19 +177,24 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 	if(f->type != FUNCTION_RTA_OPEN){
 		free(msg.data);
 		msg.data = NULL;
-		return -EACCES;
+		log_error(logger,"Respuesta Open recibida -> No se ha encontrado el archivo.");
+		return -ENOENT;
 	}
+
+	log_info(logger,"Respuesta Open recibida -> Se ha encontrado el archivo buscado.");
 
 	int respuesta = f->args[0].value.val_u32;
 
 	free(msg.data);
 	msg.data = NULL;
 
-	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
+	return respuesta;
 }
 
 static int sac_opendir(const char *path, struct fuse_file_info *fi){
 	Message msg;
+
+	log_info(logger,"Opendir llamado -> Path: %s", path);
 
 	if(send_path(FUNCTION_OPENDIR, path) == -1){
 		return EXIT_FAILURE;
@@ -189,15 +209,18 @@ static int sac_opendir(const char *path, struct fuse_file_info *fi){
 	if(f->type != FUNCTION_RTA_OPENDIR){
 		free(msg.data);
 		msg.data = NULL;
-		return -EACCES;
+		log_error(logger,"Respuesta Opendir recibida -> No se ha encontrado el directorio.");
+		return -ENOENT;
 	}
+
+	log_info(logger,"Respuesta Opendir recibida -> Se ha encontrado el directorio buscado.");
 
 	int respuesta = f->args[0].value.val_u32;
 
 	free(msg.data);
 	msg.data = NULL;
 
-	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
+	return respuesta;
 }
 
 static int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
@@ -223,6 +246,8 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	fsend.type = FUNCTION_READ;
 	fsend.num_args = 3;
 
+	log_info(logger,"Read llamado -> Path: %s, Size: %d, Offset: %d", path, size, offset);
+
 	if(send_call(&fsend) == -1){
 		free(fsend.args[1].value.val_charptr);
 		fsend.args[1].value.val_charptr = NULL;
@@ -241,6 +266,7 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	if(freceive->type != FUNCTION_RTA_READ){
 		free(msg.data);
 		msg.data = NULL;
+		log_error(logger,"Respuesta Read recibida -> No se ha podido leer el archivo.");
 		return -ENOENT;
 	}
 
@@ -252,8 +278,11 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 		free(freceive);
 		freceive = NULL;
 
+		log_info(logger,"Respuesta Read recibida -> El archivo esta vacio.");
 		return tamanioLectura;
 	}
+
+	log_info(logger,"Respuesta Read recibida -> Bytes leidos: %d", tamanioLectura);
 
 	memcpy(buf, freceive->args[0].value.val_charptr, tamanioLectura);
 
@@ -268,6 +297,8 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 static int sac_mknod(const char* path, mode_t mode, dev_t rdev){
 	Message msg;
 
+	log_info(logger,"Mknod llamado -> Path: %s", path);
+
 	if(send_path(FUNCTION_MKNOD, path) == -1){
 		return EXIT_FAILURE;
 	}
@@ -281,8 +312,11 @@ static int sac_mknod(const char* path, mode_t mode, dev_t rdev){
 	if(f->type != FUNCTION_RTA_MKNOD){
 		free(msg.data);
 		msg.data = NULL;
+		log_error(logger,"Respuesta Mknod recibida -> No se ha podido crear el archivo.");
 		return -1;
 	}
+
+	log_info(logger,"Respuesta Mknod recibida -> Se ha creado el archivo correctamente.");
 
 	int respuesta = f->args[0].value.val_u32;
 
@@ -311,13 +345,11 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	f.args[2].value.val_charptr = malloc(f.args[2].size);
 	memcpy(f.args[2].value.val_charptr, buf, f.args[2].size);
 
-	//f.args[1].type = VAR_SIZE_T;
-	//f.args[1].size = sizeof(size_t);
-	//f.args[1].value.val_sizet = size;
-
 	f.args[0].type = VAR_UINT32; // fijarse si pega con int32, sino agregarlo / usar char*
 	f.args[0].size = sizeof(uint32_t);
 	f.args[0].value.val_u32 = offset;
+
+	log_info(logger,"Write llamado -> Path: %s, Pide Escribir: %s, Size: %d, Offset: %d", path, buf, size, offset);
 
 	if(send_call(&f) == -1){
 		free(f.args[1].value.val_charptr);
@@ -341,10 +373,13 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	if(fresp->type != FUNCTION_RTA_WRITE){
 		free(msg.data);
 		msg.data = NULL;
+		log_error(logger,"Respuesta Write recibida -> No se ha podido escribir el archivo.");
 		return -ENOENT;
 	}
 
 	int bytesEscritos = fresp->args[0].value.val_u32;
+
+	log_info(logger,"Respuesta Write recibida -> Bytes escritos: %d", bytesEscritos);
 
 	free(msg.data);
 	msg.data = NULL;
@@ -355,6 +390,8 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 
 static int sac_unlink(const char* path){
 	Message msg;
+
+	log_info(logger,"Unlink llamado -> Path: %s", path);
 
 	if(send_path(FUNCTION_UNLINK, path) == -1){
 		return EXIT_FAILURE;
@@ -369,12 +406,13 @@ static int sac_unlink(const char* path){
 	if(fresp->type != FUNCTION_RTA_UNLINK){
 		free(msg.data);
 		msg.data = NULL;
-		return -ENOENT;
+		log_error(logger,"Respuesta Unlink recibida -> No se ha podido borrar el archivo.");
+		return -1;
 	}
 
 	int respuesta = fresp->args[0].value.val_u32;
 
-	//Aca deberia agarrar el valor de bytes borrados, ponerlo en un log y mostrarlo. Finalmente retornar 0 si borro >=0 bytes, si es -1 error
+	log_info(logger,"Respuesta Unlink recibida -> Se ha borrado el archivo correctamente.");
 
 	free(msg.data);
 	msg.data = NULL;
@@ -384,6 +422,8 @@ static int sac_unlink(const char* path){
 
 static int sac_mkdir(const char* path, mode_t mode){
 	Message msg;
+
+	log_info(logger,"Mkdir llamado -> Path: %s", path);
 
 	if(send_path(FUNCTION_MKDIR, path) == -1){
 		return EXIT_FAILURE;
@@ -398,10 +438,13 @@ static int sac_mkdir(const char* path, mode_t mode){
 	if(fresp->type != FUNCTION_RTA_MKDIR){
 		free(msg.data);
 		msg.data = NULL;
+		log_error(logger,"Respuesta Mkdir recibida -> No se ha podido crear el directorio.");
 		return -1;
 	}
 
 	int respuesta = fresp->args[0].value.val_u32;
+
+	log_info(logger,"Respuesta Mkdir recibida -> Se ha creado el directorio correctamente.");
 
 	free(msg.data);
 	msg.data = NULL;
@@ -411,6 +454,8 @@ static int sac_mkdir(const char* path, mode_t mode){
 
 static int sac_rmdir(const char* path){
 	Message msg;
+
+	log_info(logger,"Rmdir llamado -> Path: %s", path);
 
 	if(send_path(FUNCTION_RMDIR, path) == -1){
 		return EXIT_FAILURE;
@@ -425,15 +470,18 @@ static int sac_rmdir(const char* path){
 	if(fresp->type != FUNCTION_RTA_RMDIR){
 		free(msg.data);
 		msg.data = NULL;
-		return -ENOENT;
+		log_error(logger,"Respuesta Rmdir recibida -> No se ha podido borrar el directorio.");
+		return -1;
 	}
 
 	int respuesta = fresp->args[0].value.val_u32;
 
+	log_info(logger,"Respuesta Rmdir recibida -> El directorio se ha borrado correctamente.");
+
 	free(msg.data);
 	msg.data = NULL;
 
-	return respuesta; // retorna 0 si existe, o -EACCESS en caso contrario.
+	return respuesta; // retorna 0 si existe.
 }
 
 static struct fuse_operations sac_oper = {
@@ -468,13 +516,27 @@ fuse_configuration* load_configuration(char *path)
 	return fc;
 }
 
+void cliente_stop_service()
+{
+	log_info(logger,"SIGINT recibida. Cliente desconectado!");
+	free(fuse_config);
+	log_destroy(logger);
+}
+
 // Dentro de los argumentos que recibe nuestro programa obligatoriamente
 // debe estar el path al directorio donde vamos a montar nuestro FS
 int main(int argc, char *argv[]){
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
+	signal(SIGINT,cliente_stop_service);
+
 	////////////////////////////////no se donde hacer el close del socket////////////////////////////////////////
+
+	//Cargando Configuraciones
 	fuse_config = load_configuration(SAC_CONFIG_PATH);
+	//Inicializando el logger
+	logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/sac_cliente.log","SAC_CLIENTE",true,LOG_LEVEL_TRACE);
+	//Conectando al servidor
 	serverSocket = connect_to(fuse_config->ip_cliente,fuse_config->listen_port);
 
 	free(fuse_config->ip_cliente);
