@@ -85,8 +85,6 @@ int determine_nodo(char *path){
 	ptrGBloque nodoUltimoPadre = bloqueInicioTablaDeNodos;
 	char *filenameBuscado;
 
-	//fuse_logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/fusee.log","FUSE",true,LOG_LEVEL_TRACE);
-
 	int dimListaSpliteada, i;
 	char **listaSpliteada;
 
@@ -179,16 +177,16 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 
 			ptrGBloque bloqueDeDatosPosicion = bloqueDePunterosDatos->punteros_a_bloques[j];
 
-			//pthread_mutex_lock(&s_bitmap);
+			pthread_mutex_lock(&s_bitmap);
 			bitarray_clean_bit(bitmap, bloqueDeDatosPosicion);
-			//pthread_mutex_unlock(&s_bitmap);
+			pthread_mutex_unlock(&s_bitmap);
 
 			msync(disco, diskSize, MS_SYNC);
 		}
 
-		//pthread_mutex_lock(&s_bitmap);
+		pthread_mutex_lock(&s_bitmap);
 		bitarray_clean_bit(bitmap, bloqueDePunterosPosicion);
-		//pthread_mutex_unlock(&s_bitmap);
+		pthread_mutex_unlock(&s_bitmap);
 
 		msync(disco, diskSize, MS_SYNC);
 	}
@@ -200,16 +198,16 @@ void borrar_contenido(int nodoABorrarPosicion, int tamanio){
 	for(int j = 0; j < ceil((float) (tamanio % tamanioMaximoDireccionablePorPuntero) / BLOQUE_SIZE); j++){
 		ptrGBloque bloque = bloqueDePunterosDatosFaltantes->punteros_a_bloques[j];
 
-		//pthread_mutex_lock(&s_bitmap);
+		pthread_mutex_lock(&s_bitmap);
 		bitarray_clean_bit(bitmap, bloque);
-		//pthread_mutex_unlock(&s_bitmap);
+		pthread_mutex_unlock(&s_bitmap);
 
 		msync(disco, diskSize, MS_SYNC);
 	}
 
-	//pthread_mutex_lock(&s_bitmap);
+	pthread_mutex_lock(&s_bitmap);
 	bitarray_clean_bit(bitmap, ultimoBloquePunterosDirectos);
-	//pthread_mutex_unlock(&s_bitmap);
+	pthread_mutex_unlock(&s_bitmap);
 
 	log_info(fuse_logger, "Archivo -> Nodo: %d | Contenido borrado correctamente.", nodoABorrarPosicion);
 
@@ -222,7 +220,7 @@ int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){
 		return -1;
 	}
 
-	//pthread_mutex_lock(&s_tablaDeNodos);
+	pthread_mutex_lock(&s_tablaDeNodos);
 	if(tablaDeNodos[nodoABorrarPosicion].state == 2){
 		nodoABorrar->state = 0;
 		nodoABorrar->file_size = 0;
@@ -237,7 +235,7 @@ int borrar_archivo(GFile* nodoABorrar, int nodoABorrarPosicion){
 
 	nodoABorrar->state = 0;
 	nodoABorrar->file_size = 0;
-	//pthread_mutex_unlock(&s_tablaDeNodos);
+	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	log_info(fuse_logger, "Archivo -> Nodo: %d | borrado correctamente.", nodoABorrarPosicion);
 
@@ -316,7 +314,8 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	dimListaSpliteada = largoListaString(listaSpliteada);
 	fileName = listaSpliteada[dimListaSpliteada - 1];
 
-	//pthread_mutex_lock(&s_tablaDeNodos);
+	pthread_mutex_lock(&s_tablaDeNodos);
+
 	while(tablaDeNodos[currNode].state != 0 && currNode < MAX_NUMBER_OF_FILES){
 		currNode++;
 	}
@@ -331,7 +330,6 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 		free(listaSpliteada);
 		return EDQUOT;
 	}
-	//pthread_mutex_unlock(&s_tablaDeNodos);
 
 	if(dimListaSpliteada > 1){
 		char* pathduplicado = strdup(path);
@@ -342,7 +340,6 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 
 	GFile *nodoVacio = tablaDeNodos + currNode;
 
-	//pthread_mutex_lock(&s_tablaDeNodos);
 	strcpy((char*) nodoVacio->fname, fileName);
 	nodoVacio->file_size = 0;
 
@@ -355,22 +352,21 @@ int crear_nuevo_nodo (char* path, int tipoDeArchivo){
 	nodoVacio->state = tipoDeArchivo;
 	nodoVacio->create_date = time(NULL);
 	nodoVacio->modify_date = time(NULL);
-	//pthread_mutex_unlock(&s_tablaDeNodos);
+
+	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	if(tipoDeArchivo == 1){
 		int nuevo_nodo_vacio = get_bloque_vacio();
 
 		agregar_nodo(nodoVacio, nuevo_nodo_vacio);
 
-		//pthread_mutex_lock(&s_tablaDeBloquesDeDatos);
 		GBlock *bloqueDeDatos = disco + nuevo_nodo_vacio;
 
 		memset(bloqueDeDatos->bytes, 0, BLOQUE_SIZE);
-		//pthread_mutex_unlock(&s_tablaDeBloquesDeDatos);
 	}
 
 	log_info(fuse_logger, "Nodo creado -> Estado: %d, Nombre: %s, Bloque padre: %d", tipoDeArchivo, fileName, nodoVacio->parent_dir_block);
-	//hola
+
 	msync(disco, diskSize, MS_SYNC);
 
 	for(int y=0; y<dimListaSpliteada; y++) // libero cada integrante de la matriz
@@ -435,7 +431,6 @@ Function validarSiExiste(char* path, FuncType tipoFuncion){
 }
 
 int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
-	//log_info(logger, "Reading: Path: %s - Size: %d - Offset %d",path, size, offset);
 	unsigned int nodoDelArchivo, bloque_punteros, num_bloque_datos;
 	unsigned int bloque_a_buscar;
 	GFile *node;
@@ -449,18 +444,11 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 
 	node = tablaDeNodos + nodoDelArchivo;
 
-	//pthread_rwlock_rdlock(&rwlock); //Toma un lock de lectura.
-	//log_lock_trace(logger, "Read: Toma lock lectura. Cantidad de lectores: %d", rwlock.__data.__nr_readers);
-
 	if(node->file_size <= offset){
-		//log_error(logger, "Se intenta leer un offset mayor o igual que el tamanio de archivo. Se retorna size 0. File: %s, Size: %d", path, node->file_size);
-		// TODO enviar error al cliente
+		log_error(fuse_logger, "Se intenta leer un offset mayor o igual que el tamanio de archivo. Se retorna size 0. File: %s, Size: %d", path, node->file_size);
 		respuesta = 0;
 		goto finalizar;
 	} else if (node->file_size <= (offset + size)){
-		//tamanio = size = ((node->file_size) - (offset));
-		// TODO enviar error al cliente
-		//log_error(logger, "Se intenta leer una posicion mayor o igual que el tamanio de archivo. Se retornaran %d bytes. File: %s, Size: %d", size, path, node->file_size);
 		size = node->file_size - offset;
 		tamanio = size;
 	}
@@ -512,12 +500,12 @@ int leer_archivo(char* buffer, char *path, size_t size, uint32_t offset){
 	respuesta = size;
 
 	finalizar:
-	//log_trace(logger, "Terminada lectura.");
+	log_trace(fuse_logger, "Terminada lectura.");
 	return respuesta;
 }
 
 int get_bloque_vacio(){
-	//pthread_mutex_lock(&s_bitmap);
+	pthread_mutex_lock(&s_bitmap);
 
 	int bitActual = bloqueInicioBloquesDeDatos - 1;
 	int bitsTotales = bitarray_get_max_bit(bitmap);
@@ -532,7 +520,7 @@ int get_bloque_vacio(){
 	}
 
 	bitarray_set_bit(bitmap, bitActual);
-	//pthread_mutex_unlock(&s_bitmap);
+	pthread_mutex_unlock(&s_bitmap);
 
 	log_debug(fuse_logger, "Bloque vacio disponible en posicion: %d.", bitActual + 1);
 
@@ -571,6 +559,8 @@ int agregar_nodo(GFile *file_data, int numeroNodo){
 	int new_pointer_block;
 	punterosBloquesDatos* nodo_punteros;
 
+	pthread_mutex_lock(&s_tablaDeNodos);
+
 	// Ubica el ultimo nodo escrito y se posiciona en el mismo.
 	setear_posicion(&node_pointer_number, &position, 0, tam);
 
@@ -606,14 +596,14 @@ int agregar_nodo(GFile *file_data, int numeroNodo){
 		new_pointer_block = file_data->indirect_blocks_array[node_pointer_number]; //Se usa como auxiliar para encontrar el numero del bloque de punteros
 	}
 
-	//pthread_mutex_lock(&s_tablaDeNodos);
 	// Ubica el nodo de punteros
 	nodo_punteros = (punterosBloquesDatos *) (disco + new_pointer_block);
 
 
 	// Hace que dicho puntero, en la posicion ya obtenida, apunte al nodo indicado.
 	nodo_punteros->punteros_a_bloques[position] = numeroNodo;
-	//pthread_mutex_unlock(&s_tablaDeNodos);
+
+	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	msync(disco, diskSize, MS_SYNC);
 
@@ -622,8 +612,6 @@ int agregar_nodo(GFile *file_data, int numeroNodo){
 }
 
 int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
-	//log_trace(logger, "Writing: Path: %s - Size: %d - Offset %d", path, size, offset);
-
 	int nodoDelArchivo = determine_nodo(path);
 	int nodo_libre_nuevo;
 	GFile *node;
@@ -648,12 +636,7 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 		return -EFBIG;
 	}
 
-	// Toma un lock de escritura.
-	//log_lock_trace(logger, "Write: Pide lock escritura. Escribiendo: %d. En cola: %d.", rwlock.__data.__writer, rwlock.__data.__nr_writers_queued);
-	//pthread_rwlock_wrlock(&rwlock);
-	//log_lock_trace(logger, "Write: Recibe lock escritura.");
-
-	//pthread_mutex_lock(&s_tablaDeNodos);
+	pthread_mutex_lock(&s_tablaDeNodos);
 
 	// Guarda tantas veces como sea necesario, consigue nodos y actualiza el archivo.
 	while (tam != 0){
@@ -724,8 +707,7 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 	respuesta = size;
 
 	finalizar:
-	// Devuelve el lock de escritura.
-	//pthread_mutex_unlock(&s_tablaDeNodos);
+	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	msync(disco, diskSize, MS_SYNC);
 
