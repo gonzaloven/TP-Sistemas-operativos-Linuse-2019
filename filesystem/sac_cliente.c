@@ -84,6 +84,11 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 	stbuf->st_nlink = f->args[1].value.val_u32;
 	stbuf->st_size = f->args[2].value.val_u32;
 
+	struct timespec tiempo;
+	tiempo.tv_sec = (uint64_t) f->args[3].value.val_u32;
+
+	stbuf->st_mtim = tiempo;
+
 	free(msg.data);
 	msg.data = NULL;
 
@@ -548,8 +553,8 @@ static int sac_rename(const char *path, const char *nuevoPath){
 	if(freceive->type != FUNCTION_RTA_RENAME){
 		free(msg.data);
 		msg.data = NULL;
-		log_error(logger,"Respuesta Rename recibida -> No se ha podido renombrar al archivo.");
-		return -ENOENT;
+		log_error(logger,"Respuesta Rename recibida -> Ya hay otro nodo con ese nombre en esa direccion.");
+		return -EEXIST;
 	}
 
 	int respuesta = freceive->args[0].value.val_u32;

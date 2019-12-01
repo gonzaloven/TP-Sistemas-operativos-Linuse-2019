@@ -244,7 +244,7 @@ Function sac_server_opendir(char* path){
 Function sac_server_getattr(char* path){
 	Message msg;
 	Function fsend;
-	Arg arg[3];
+	Arg arg[4];
 
 	uint32_t modo;
 	uint32_t nlink_t;
@@ -279,6 +279,7 @@ Function sac_server_getattr(char* path){
 	modo = esArchivo == 1 ? (S_IFREG | 0777) : (S_IFDIR | 0777);
 	nlink_t = 1;
 	total_size = tablaDeNodos[nodoBuscadoPosicion].file_size;
+	uint64_t fechaModificacion = tablaDeNodos[nodoBuscadoPosicion].modify_date;
 
 	log_info(fuse_logger, "Nodo encontrado -> Numero nodo: %d, Estado: %d, Size: %d, Bloque padre: %d",
 				nodoBuscadoPosicion,
@@ -298,11 +299,16 @@ Function sac_server_getattr(char* path){
 	arg[2].size = sizeof(uint32_t);
 	arg[2].value.val_u32 = total_size;
 
+	arg[3].type = VAR_UINT32;
+	arg[3].size = sizeof(uint64_t);
+	arg[3].value.val_u32 = fechaModificacion;
+
 	fsend.type = FUNCTION_RTA_GETATTR;
-	fsend.num_args = 3;
+	fsend.num_args = 4;
 	fsend.args[0] = arg[0];
 	fsend.args[1] = arg[1];
 	fsend.args[2] = arg[2];
+	fsend.args[3] = arg[3];
 
 	return fsend;
 }
