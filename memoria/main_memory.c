@@ -11,8 +11,9 @@
 #include <sys/mman.h> //for mmap() & munmap()
 #include <sys/stat.h>
 
+#define METADATA_SIZE sizeof(struct HeapMetadata)
+
 void *MAIN_MEMORY = NULL;
-heap_metadata metadata;
 
 t_list *program_list = NULL;
 t_list *segment_list = NULL;
@@ -21,8 +22,8 @@ t_log *debug_logger = NULL;
 
 int PAGE_SIZE = 0;
 int TOTAL_FRAME_NUM = 0;
-int METADATA_SIZE = sizeof(heap_metadata);
-int BITMAP[];
+bool BITMAP[];
+
 
 void muse_main_memory_init(int memory_size, int page_size)
 {
@@ -44,7 +45,7 @@ void muse_main_memory_init(int memory_size, int page_size)
 	printf("Dividiento la memoria en frames...\n");
 	for(i=0; i < TOTAL_FRAME_NUM; i++)
 	{	
-		MAIN_MEMORY[i] = mem_ptr + i * PAGE_SIZE;
+		//MAIN_MEMORY[i] = mem_ptr + i * PAGE_SIZE;
 		BITMAP[i] = 1;
 	}
 
@@ -56,9 +57,14 @@ void muse_main_memory_init(int memory_size, int page_size)
 
 void muse_main_memory_stop()
 {
+	int i;
+	for(i=0; i<TOTAL_FRAME_NUM; i++)
+		free MAIN_MEMORY[i];
 	free(MAIN_MEMORY);
+
 	list_destroy(program_list);
 	list_destroy(segment_list);
+
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
 }
@@ -170,12 +176,11 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	page *pag;
 	segment *seg;
 	program *prog;
-	int total_size;
+	int total_size = size + METADATA_SIZE;
 	int total_pages_needed;
-	int page_size_sin_metadata = PAGE_SIZE - METADATA_SIZE;
 	int espacio_usado_de_ultima_pagina;
 	
-	total_pages_needed = (size / page_size_sin_metadata) + ((size % page_size_sin_metadata) != 0); // ceil( size / page_size_sin_metadata )
+	total_pages_needed = (total_size / PAGE_SIZE) + ((total_size % PAGE_SIZE) != 0); // ceil(total_size / PAGE_SIZE)
 	
 	if((nro_prog = search_program(pid)) == -1)
 	{
@@ -189,18 +194,19 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		nro_prog = list_add(program_list, prog);	
 
 		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", nro_prog);
+	}	 
 
-	}	  	
 	prog = list_get(program_list, nro_prog);
-	
-	if(segment_with_free_space(prog, size) != -1) 
-		//si hay espacio en su segmento, malloqueo ahí
-	{
-		seg_id = segment_with_free_space(prog, size);
+
+	seg_id = segment_with_free_space(prog, size);
+	if(seg_id != -1) 
+	{	//si hay espacio en su segmento, malloqueo ahí
+		
 		seg = list_get(prog->segment_table, seg_id);	//seg = segmento con espacio		
 		seg->free_size -= size;
 		list_add(prog->segment_table, pag);		
 	}
+	
 	
 	/* TODO: crear caso
 	else if (puedo_agrandar_un_segmento)

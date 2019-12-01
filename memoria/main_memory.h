@@ -34,13 +34,13 @@ typedef struct HeapMetadata
 }heap_metadata;
 
 
-/* LLoran2
-typedef struct frame_s
+//Una frame puede tener varios bloques, un mismo bloque puede ser compartido por varios frames
+typedef struct bloque_s
 {
 	heap_metadata metadata;
 	void *data;
-}frame;
-/*
+}bloque;
+
 
 /*Estructura de una pagina: sabemos si está presente, su numero y a que frame apunta */
 typedef struct page_s
