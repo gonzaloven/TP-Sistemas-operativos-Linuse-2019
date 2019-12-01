@@ -49,7 +49,7 @@ t_list* exit_queue;
 
 t_process * generar_programa(int socket_hilolay);
 
-void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay);
+void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay);
 
 int close_tid(int tid, int socket_actual);
 
@@ -96,7 +96,7 @@ int decrementar_semaforo(int socket_actual,int tid, char* sem_name);
 
 void ejecucion_a_exit(t_suse_thread* thread, un_socket socket);
 
-void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay);
+void handle_ULT_create(t_process* process, int tid);
 
 void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido);
 
@@ -111,6 +111,10 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket);
 int desbloquear_hilos_semaforo(char* sem);
 
 bool validar_grado_multiprogramacion();
+
+void handle_main_thread_create(t_process* process, int tid);
+
+t_suse_thread* ULT_create(t_process* process, int tid);
 /*
 --------------------------------------------------------
 ----------------- Variables para el Servidor -----------

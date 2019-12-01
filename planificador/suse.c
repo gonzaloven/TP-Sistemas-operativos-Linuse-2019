@@ -77,6 +77,8 @@ suse_configuration get_configuracion() {
 	suse_configuration configuracion_suse;
 	t_config* archivo_configuracion;
 	archivo_configuracion = config_create(suse_config_path);
+	t_list* process = list_create();
+	t_list* semaforos;
 	
 	configuracion_suse.LISTEN_PORT = copy_string(get_campo_config_string(archivo_configuracion, "LISTEN_PORT"));
 	configuracion_suse.METRICS_TIMER = get_campo_config_int(archivo_configuracion, "ESTIMACION_INICIAL");
@@ -86,8 +88,8 @@ suse_configuration get_configuracion() {
 	configuracion_suse.ALPHA_SJF = get_campo_config_double(archivo_configuracion, "ALPHA_SJF");
 	configuracion_suse.MAX_MULTIPROG = get_campo_config_int(archivo_configuracion,"MAX_MULTIPROG");
 	configuracion_suse.ACTUAL_MULTIPROG = 0;
-	t_list* lista = list_create();
-	configuracion_suse.semaforos = lista;
+	configuracion_suse.process = process;
+	configuracion_suse.semaforos = list_create();
 
 	config_destroy(archivo_configuracion);
 
@@ -138,7 +140,7 @@ void iniciar_servidor() {
 	while(1){
 		log_info(logger,"SUSE esperando conexiones...\n");
 
-		int new_connection = aceptar_conexion(listener);
+		un_socket new_connection = aceptar_conexion(listener);
 
 		t_paquete* handshake = recibir(listener);
 
@@ -147,21 +149,23 @@ void iniciar_servidor() {
 		free(handshake);
 
 		//Creo un hilo por programa que se conecta
-		log_info(logger, "Creando process con id %d. \n", (int)new_connection);
-		log_info(logger, "funca?");
+		log_info(logger, "Creando process con id %d. \n", new_connection);
 
-		t_list* thread_params = list_create();
-		list_add(thread_params, &new_connection);
+		t_list* thread_params;
+		thread_params = list_create();
+		list_add(thread_params, new_connection);
 		nuevo_hilo(process_conectado_funcion_thread, thread_params);
-		log_info(logger, "Cree el hilo");
+		log_info(logger, "Cree el hilo para el programa %d", new_connection);
 	}
 }
 
 void* process_conectado_funcion_thread(void* argumentos) {
-	un_socket socket_actual = (int)list_get(argumentos, 0);
+	log_info(logger, "Entro a la funcion del hilo ");
+	un_socket socket_actual = list_get(argumentos, 0);
+	log_info(logger, "El socket es %d", socket_actual);
 	list_destroy(argumentos);
 	handle_conection_suse(socket_actual);
-	pthread_detach(pthread_self()); //todo verificar si esto esta ok por lo de utn.so
+	pthread_detach(pthread_self());
 	return NULL;
 }
 
@@ -170,10 +174,8 @@ void handle_conection_suse(un_socket socket_actual) {
 	t_paquete* paquete_recibido = recibir(socket_actual);
 
 	switch(paquete_recibido->codigo_operacion){
-		case cop_handshake_hilolay_suse:
-			handle_hilolay(socket_actual, paquete_recibido);
-		break;
 		case cop_suse_create:
+			log_info(logger, "Entro al cop");
 			handle_suse_create(socket_actual, paquete_recibido);
 		break;
 		case cop_next_tid:
@@ -192,7 +194,7 @@ void handle_conection_suse(un_socket socket_actual) {
 			handle_suse_join(socket_actual,paquete_recibido);
 		break;
 
-	}
+	}//todo cerrar sockets
 	liberar_paquete(paquete_recibido);
 }
 
@@ -275,93 +277,101 @@ int join(un_socket socket, int tid){
 
 }
 
-void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay) {
-	log_info(logger, "Esperando primer handshake de hilolay...\n");
-	esperar_handshake(socket_actual, paquete_hilolay, cop_handshake_hilolay_suse);
+void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay) {
+	log_info(logger, "Esperando handshake...\n");
+	esperar_handshake(socket_actual, paquete_hilolay, cop_suse_create);
 
-	log_info(logger, "Realice el primer handshake con hilolay.\n");
+	log_info(logger, "Realice el handshake con hilolay.\n");
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 
-	int desplazamiento = 0;
-	int main_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
-
-
-	t_process * process = generar_process(socket_actual);
-	log_info(logger, "El  programa que se conecto es el de ID %d \n", process->PROCESS_ID);
-
-	list_add(configuracion_suse.process, process);
-
-	//Creo el main thread
-	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
-
-	new_thread->tid = main_tid;
-	new_thread->procesoId = socket_actual;
-	new_thread->estado = E_NEW;
-
-	list_add(process->ULTS,new_thread);
-	list_add(new_queue, new_thread);
-
-	log_info(logger, "El main thread tiene id %d \n", new_thread->tid);
-
-	pthread_mutex_lock(&mutex_multiprog);
-
-	log_info(logger, "El grado de multiprogramacion es %d, validando...", configuracion_suse.ACTUAL_MULTIPROG);
-	if(configuracion_suse.ACTUAL_MULTIPROG + 1 <= configuracion_suse.MAX_MULTIPROG){
-		nuevo_a_ejecucion(new_thread, socket_actual);
+	bool find_process_by_id(void* process) {
+		return ((t_process*)process)->PROCESS_ID == socket_actual;
 	}
-	pthread_mutex_unlock(&mutex_multiprog);
+
+	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
+
+	log_info(logger, "Esperando ULT del proceso %d \n", socket_actual);
+
+	int desplazamiento = 0;
+	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
+
+	log_info(logger, "Recibi el ULT %d \n", tid);
+	log_info(logger, "Validando si es main thread o  ULT comun \n");
+
+	if(find_process_by_id){
+		log_info(logger, "El proceso %d ya tiene un main_thread \n", socket_actual);
+		handle_ULT_create(process, tid);
+
+	}
+	else{
+		log_info(logger, "El proceso %d es nuevo \n", socket_actual);
+		handle_main_thread_create(process, tid);
+	}
 
 	liberar_paquete(paquete_recibido);
 }
 
-void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay){
-	log_info(logger, "Esperando handshake de suse_create...\n");
+void handle_ULT_create(t_process* process, int tid){
 
-	//Obtengo el hilo
-	esperar_handshake(socket_actual, paquete_hilolay, cop_suse_create);
-	log_info(logger, "Realice handshake en suse_create \n");
+	t_suse_thread * new_thread;
+	new_thread  = ULT_create(process, tid);
 
-	t_paquete* paquete_recibido = recibir(socket_actual);
-	log_info(logger, "El programa que se conecto es el de ID %d \n", socket_actual);
+	log_info(logger, "El grado de multiprogramacion es %d", configuracion_suse.ACTUAL_MULTIPROG);
 
-	int desplazamiento = 0;
-	int new_tid = deserializar_int(paquete_recibido->data, &desplazamiento);
-
-	log_info(logger, "Recibi el hilo", "%d", new_tid);
-
-	bool find_process_by_id(t_process* process) //TODO: Extraer a utils!!!!!!!!!!!!!!!!!!!!!!!!!
-	{
-		return process->PROCESS_ID == socket_actual;
-	}
-
-	pthread_mutex_lock(&mutex_process_list);
-	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
-	pthread_mutex_unlock(&mutex_process_list);
-
-	t_suse_thread * new_thread = malloc(sizeof(t_suse_thread));
-
-	new_thread->tid = new_tid;
-	new_thread->estado = E_NEW;
-	new_thread->procesoId = process->PROCESS_ID;
-	new_thread->duracionRafaga = 0;
-	new_thread->ejecutado_desde_estimacion = false;
-
-	list_add(process->ULTS,new_thread);
-	list_add(new_queue,new_thread);
-
-	log_info(logger, "El grado de multiprogramacion es %d, validando...", configuracion_suse.ACTUAL_MULTIPROG);
 	pthread_mutex_lock(&mutex_multiprog);
 	if(validar_grado_multiprogramacion())
 	{
+		log_info(logger, "Agrego el tid %d a la cola de ready \n", tid);
 		nuevo_a_listo(new_thread,process->PROCESS_ID);
-		log_info(logger, "El thread %d del programa %d esta en ready", new_thread->tid, process->PROCESS_ID);
+		log_info(logger, "El thread %d del programa %d esta en ready \n", new_thread->tid, process->PROCESS_ID);
+	}
+	else{
+		log_info(logger, "No puedo agregar el hilo %d a la cola de new por grado de multiprogramacion \n", tid);
 	}
 
 	pthread_mutex_unlock(&mutex_multiprog);
 
-	liberar_paquete(paquete_recibido);
 }
+
+void handle_main_thread_create(t_process* process, int tid) {
+
+	t_process* new_process = generar_process(process->PROCESS_ID);
+	log_info(logger, "Proceso creado con id %d \n", process->PROCESS_ID);
+
+	list_add(configuracion_suse.process, process);
+
+	t_suse_thread* main_thread = ULT_create(process, tid);
+
+	log_info(logger, "Validando si puedo poner e ejecutar el main thread... \n", configuracion_suse.ACTUAL_MULTIPROG);
+
+	if(process->EXEC_THREAD == NULL){
+		log_info(logger, "No puedo poner a ejecutar el hilo %d porque el hilo %d esta en ejecucion \n", main_thread->tid, process->EXEC_THREAD->tid);
+
+	}
+	else{
+		nuevo_a_ejecucion(main_thread, process->PROCESS_ID);
+		log_info(logger, "El thread %d del programa %d esta en ready \n", main_thread->tid, process->PROCESS_ID);
+	}
+}
+
+t_suse_thread* ULT_create(t_process* process, int tid){
+	log_info(logger, "Creando ULT %d", tid);
+
+	t_suse_thread* new_thread = malloc(sizeof(t_suse_thread));
+	new_thread->tid = tid;
+	new_thread->procesoId = process->PROCESS_ID;
+	new_thread->estado = E_NEW;
+	new_thread->duracionRafaga = 0;
+	new_thread->ejecutado_desde_estimacion = false;
+	//todo ver si hace falta inicializar todo
+	list_add(process->ULTS, new_thread);
+	list_add(new_queue, new_thread);
+	log_info(logger, "Main thread creado con id %d \n", new_thread->tid);
+
+	return new_thread;
+}
+
 
 int close_tid(int tid, int socket_actual){
 
@@ -504,24 +514,19 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 
 bool validar_grado_multiprogramacion()
 {
+	log_info(logger, "Validando grado de multiprogramacion...\n");
 	return configuracion_suse.MAX_MULTIPROG >= configuracion_suse.ACTUAL_MULTIPROG + 1;
+	log_info(logger, "El grado de multiprogramacion es %d\n", configuracion_suse.ACTUAL_MULTIPROG);
 }
 
-t_process * generar_process(un_socket socket) {
+t_process * generar_process(int process_id) {
 	t_process * process = malloc(sizeof(t_process));
-	process->PROCESS_ID = (int)socket; //todo ver si el socket solo es un int o hay que castear
+	process->PROCESS_ID = process_id; //todo ver tipo de dato
+	process->ULTS = list_create();
+	process->READY_LIST = list_create();
 	return process;
 }
 
-//t_process* process_por_id(int process_id){
-//	bool encontrar_process(void* process){
-//		return ((t_process*)process)->PROCESS_ID == process_id;
-//	}
-//	pthread_mutex_lock(&mutex_lista_de_process);
-//	t_process* result = list_find(lista_de_process, encontrar_process);
-//	pthread_mutex_unlock(&mutex_lista_de_process);
-//	return result;
-//}
 
 void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	log_info(logger, "Esperando handshake de suse_schedule_next...\n");
