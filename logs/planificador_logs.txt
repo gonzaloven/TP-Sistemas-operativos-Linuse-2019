@@ -564,3 +564,1629 @@
 
 [INFO] 17:46:33:460 SUSE logs/(19344:19344): Creando process con id... 5. 
 
+[INFO] 08:45:26:211 SUSE logs/(3054:3054): Inicializando SUSE. 
+
+[INFO] 08:45:26:916 SUSE logs/(3054:3054): Levantando archivo de configuracion de SUSE 
+
+[INFO] 08:45:47:594 SUSE logs/(3054:3054): Archivo de configuracion levantado. 
+
+[INFO] 08:45:49:527 SUSE logs/(3054:3054): Inicializando semaforos 
+
+[INFO] 08:45:56:465 SUSE logs/(3054:3054): Iniciando servidor... 
+
+[INFO] 08:46:02:562 SUSE logs/(3054:3054): SUSE esperando conexiones...
+
+[INFO] 08:46:38:205 SUSE logs/(3054:3054): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 08:46:38:206 SUSE logs/(3054:3054): Creando process con id... 5. 
+
+[INFO] 08:47:29:243 SUSE logs/(3444:3444): Inicializando SUSE. 
+
+[INFO] 08:47:29:469 SUSE logs/(3444:3444): Levantando archivo de configuracion de SUSE 
+
+[INFO] 08:47:33:706 SUSE logs/(3444:3444): Archivo de configuracion levantado. 
+
+[INFO] 08:47:34:120 SUSE logs/(3444:3444): Inicializando semaforos 
+
+[INFO] 08:47:37:897 SUSE logs/(3444:3444): Iniciando servidor... 
+
+[INFO] 08:47:41:260 SUSE logs/(3444:3444): SUSE esperando conexiones...
+
+[INFO] 08:48:13:258 SUSE logs/(3444:3444): Soy SUSE y recibi una nueva conexion del socket 5. 
+
+[INFO] 08:48:26:400 SUSE logs/(3444:3444): Creando process con id... 5. 
+
+[INFO] 08:50:04:525 SUSE logs/(3634:3634): Inicializando SUSE. 
+
+[INFO] 08:50:04:663 SUSE logs/(3634:3634): Levantando archivo de configuracion de SUSE 
+
+[INFO] 08:50:06:739 SUSE logs/(3634:3634): Archivo de configuracion levantado. 
+
+[INFO] 08:50:06:992 SUSE logs/(3634:3634): Inicializando semaforos 
+
+[INFO] 08:50:09:972 SUSE logs/(3634:3634): Iniciando servidor... 
+
+[INFO] 08:50:11:697 SUSE logs/(3634:3634): SUSE esperando conexiones...
+
+[INFO] 08:50:30:14 SUSE logs/(3760:3760): Inicializando SUSE. 
+
+[INFO] 08:50:30:195 SUSE logs/(3760:3760): Levantando archivo de configuracion de SUSE 
+
+[INFO] 08:50:33:11 SUSE logs/(3760:3760): Archivo de configuracion levantado. 
+
+[INFO] 08:50:33:497 SUSE logs/(3760:3760): Inicializando semaforos 
+
+[INFO] 08:50:36:419 SUSE logs/(3760:3760): Iniciando servidor... 
+
+[INFO] 08:50:41:697 SUSE logs/(3760:3760): SUSE esperando conexiones...
+
+[INFO] 08:52:45:750 SUSE logs/(4021:4021): Inicializando SUSE. 
+
+[INFO] 08:52:46:132 SUSE logs/(4021:4021): Levantando archivo de configuracion de SUSE 
+
+[INFO] 08:52:50:717 SUSE logs/(4021:4021): Archivo de configuracion levantado. 
+
+[INFO] 08:52:51:116 SUSE logs/(4021:4021): Inicializando semaforos 
+
+[INFO] 08:52:53:299 SUSE logs/(4021:4021): Iniciando servidor... 
+
+[INFO] 08:53:49:626 SUSE logs/(4292:4292): Inicializando SUSE. 
+
+[INFO] 08:53:49:974 SUSE logs/(4292:4292): Levantando archivo de configuracion de SUSE 
+
+[INFO] 08:53:56:766 SUSE logs/(4292:4292): Archivo de configuracion levantado. 
+
+[INFO] 08:53:56:965 SUSE logs/(4292:4292): Inicializando semaforos 
+
+[INFO] 08:53:59:494 SUSE logs/(4292:4292): Iniciando servidor... 
+
+[INFO] 08:54:00:536 SUSE logs/(4292:4292): probando
+[INFO] 08:54:01:231 SUSE logs/(4292:4292): SUSE esperando conexiones...
+
+[INFO] 08:54:29:184 SUSE logs/(4292:4292): Recibi una nueva conexion del socket 5. 
+
+[INFO] 08:55:39:56 SUSE logs/(4292:4292): Creando process con id 2. 
+
+[INFO] 08:55:41:436 SUSE logs/(4292:4292): funca?
+[INFO] 08:55:53:84 SUSE logs/(4292:4292): Cree el hilo
+[INFO] 08:56:25:129 SUSE logs/(4292:4292): probando
+[INFO] 08:56:26:467 SUSE logs/(4292:4292): SUSE esperando conexiones...
+
+[INFO] 08:58:45:327 SUSE logs/(4681:4681): Inicializando SUSE. 
+
+[INFO] 08:58:45:480 SUSE logs/(4681:4681): Levantando archivo de configuracion de SUSE 
+
+[INFO] 08:58:49:229 SUSE logs/(4681:4681): Archivo de configuracion levantado. 
+
+[INFO] 08:58:49:654 SUSE logs/(4681:4681): Inicializando semaforos 
+
+[INFO] 08:58:53:285 SUSE logs/(4681:4681): Iniciando servidor... 
+
+[INFO] 08:59:02:461 SUSE logs/(4681:4681): probando
+[INFO] 08:59:04:5 SUSE logs/(4681:4681): SUSE esperando conexiones...
+
+[INFO] 09:00:50:603 SUSE logs/(4905:4905): Inicializando SUSE. 
+
+[INFO] 09:00:51:39 SUSE logs/(4905:4905): Levantando archivo de configuracion de SUSE 
+
+[INFO] 09:00:56:795 SUSE logs/(4905:4905): Archivo de configuracion levantado. 
+
+[INFO] 09:00:57:353 SUSE logs/(4905:4905): Inicializando semaforos 
+
+[INFO] 09:01:00:780 SUSE logs/(4905:4905): Iniciando servidor... 
+
+[INFO] 09:01:03:697 SUSE logs/(4905:4905): probando
+[INFO] 09:01:04:714 SUSE logs/(4905:4905): SUSE esperando conexiones...
+
+[INFO] 09:01:18:682 SUSE logs/(4905:4905): Recibi una nueva conexion del socket 5. 
+
+[INFO] 09:01:26:508 SUSE logs/(4905:4905): Creando process con id 5. 
+
+[INFO] 09:01:29:500 SUSE logs/(4905:4905): funca?
+[INFO] 09:02:34:936 SUSE logs/(4905:4905): Cree el hilo
+[INFO] 09:04:37:379 SUSE logs/(5084:5084): Inicializando SUSE. 
+
+[INFO] 09:04:37:634 SUSE logs/(5084:5084): Levantando archivo de configuracion de SUSE 
+
+[INFO] 09:04:44:754 SUSE logs/(5084:5084): Archivo de configuracion levantado. 
+
+[INFO] 09:04:45:0 SUSE logs/(5084:5084): Inicializando semaforos 
+
+[INFO] 09:04:49:880 SUSE logs/(5084:5084): Iniciando servidor... 
+
+[INFO] 09:04:51:401 SUSE logs/(5084:5084): probando
+[INFO] 09:04:52:550 SUSE logs/(5084:5084): SUSE esperando conexiones...
+
+[INFO] 09:05:00:375 SUSE logs/(5084:5084): Recibi una nueva conexion del socket 5. 
+
+[INFO] 09:05:02:135 SUSE logs/(5084:5084): Creando process con id 5. 
+
+[INFO] 09:05:02:575 SUSE logs/(5084:5084): funca?
+[INFO] 09:05:14:819 SUSE logs/(5084:5084): Cree el hilo
+[INFO] 09:05:14:820 SUSE logs/(5084:5084): probando
+[INFO] 09:05:14:822 SUSE logs/(5084:5084): SUSE esperando conexiones...
+
+[INFO] 09:07:57:669 SUSE logs/(5240:5240): Inicializando SUSE. 
+
+[INFO] 09:07:57:2 SUSE logs/(5240:5240): Levantando archivo de configuracion de SUSE 
+
+[INFO] 09:08:02:297 SUSE logs/(5240:5240): Archivo de configuracion levantado. 
+
+[INFO] 09:08:03:456 SUSE logs/(5240:5240): Inicializando semaforos 
+
+[INFO] 09:08:08:691 SUSE logs/(5240:5240): Iniciando servidor... 
+
+[INFO] 09:08:12:240 SUSE logs/(5240:5240): probando
+[INFO] 09:08:12:762 SUSE logs/(5240:5240): SUSE esperando conexiones...
+
+[INFO] 09:09:53:270 SUSE logs/(5240:5240): Recibi una nueva conexion del socket 5. 
+
+[INFO] 09:09:53:271 SUSE logs/(5240:5240): Creando process con id 5. 
+
+[INFO] 09:09:53:271 SUSE logs/(5240:5240): funca?
+[INFO] 09:09:53:271 SUSE logs/(5240:5240): Cree el hilo
+[INFO] 09:09:53:271 SUSE logs/(5240:5240): probando
+[INFO] 09:09:53:271 SUSE logs/(5240:5240): SUSE esperando conexiones...
+
+[INFO] 09:10:07:662 SUSE logs/(5404:5404): Inicializando SUSE. 
+
+[INFO] 09:10:07:830 SUSE logs/(5404:5404): Levantando archivo de configuracion de SUSE 
+
+[INFO] 09:10:11:82 SUSE logs/(5404:5404): Archivo de configuracion levantado. 
+
+[INFO] 09:10:11:269 SUSE logs/(5404:5404): Inicializando semaforos 
+
+[INFO] 09:10:18:537 SUSE logs/(5404:5404): Iniciando servidor... 
+
+[INFO] 09:10:57:97 SUSE logs/(5773:5773): Inicializando SUSE. 
+
+[INFO] 09:10:57:391 SUSE logs/(5773:5773): Levantando archivo de configuracion de SUSE 
+
+[INFO] 09:11:04:345 SUSE logs/(5773:5773): Archivo de configuracion levantado. 
+
+[INFO] 09:11:04:711 SUSE logs/(5773:5773): Inicializando semaforos 
+
+[INFO] 09:11:07:963 SUSE logs/(5773:5773): Iniciando servidor... 
+
+[INFO] 09:11:10:93 SUSE logs/(5773:5773): probando
+[INFO] 09:11:10:93 SUSE logs/(5773:5773): SUSE esperando conexiones...
+
+[INFO] 09:13:24:19 SUSE logs/(5773:5773): Recibi una nueva conexion del socket 5. 
+
+[INFO] 09:13:30:960 SUSE logs/(5773:5773): Creando process con id 5. 
+
+[INFO] 09:13:32:121 SUSE logs/(5773:5773): funca?
+[INFO] 09:13:53:707 SUSE logs/(5773:5773): Cree el hilo
+[INFO] 09:13:53:707 SUSE logs/(5773:5773): probando
+[INFO] 09:13:53:707 SUSE logs/(5773:5773): SUSE esperando conexiones...
+
+[INFO] 09:20:22:909 SUSE logs/(6487:6487): Inicializando SUSE. 
+
+[INFO] 09:20:23:261 SUSE logs/(6487:6487): Levantando archivo de configuracion de SUSE 
+
+[INFO] 09:20:30:385 SUSE logs/(6487:6487): Archivo de configuracion levantado. 
+
+[INFO] 09:20:30:775 SUSE logs/(6487:6487): Inicializando semaforos 
+
+[INFO] 09:20:33:403 SUSE logs/(6487:6487): Iniciando servidor... 
+
+[INFO] 09:20:36:334 SUSE logs/(6487:6487): probando
+[INFO] 09:20:36:966 SUSE logs/(6487:6487): SUSE esperando conexiones...
+
+[INFO] 09:21:03:701 SUSE logs/(6487:6487): Recibi una nueva conexion del socket 5. 
+
+[INFO] 09:21:19:141 SUSE logs/(6487:6487): Creando process con id 5. 
+
+[INFO] 09:21:30:64 SUSE logs/(6487:6487): funca?
+[INFO] 09:21:50:473 SUSE logs/(6487:6487): Cree el hilo
+[INFO] 09:21:50:473 SUSE logs/(6487:6487): probando
+[INFO] 09:21:50:473 SUSE logs/(6487:6487): SUSE esperando conexiones...
+
+[INFO] 09:22:30:147 SUSE logs/(6487:6487): Recibi una nueva conexion del socket 5. 
+
+[INFO] 09:22:32:763 SUSE logs/(6487:6487): Creando process con id 6. 
+
+[INFO] 09:22:37:341 SUSE logs/(6487:6487): funca?
+[INFO] 09:22:49:316 SUSE logs/(6487:6487): Cree el hilo
+[INFO] 09:22:49:316 SUSE logs/(6487:6487): probando
+[INFO] 09:22:49:316 SUSE logs/(6487:6487): SUSE esperando conexiones...
+
+[INFO] 09:46:38:562 SUSE logs/(7648:7648): Inicializando SUSE. 
+
+[INFO] 09:46:39:384 SUSE logs/(7648:7648): Levantando archivo de configuracion de SUSE 
+
+[INFO] 09:46:49:863 SUSE logs/(7648:7648): Archivo de configuracion levantado. 
+
+[INFO] 09:46:51:751 SUSE logs/(7648:7648): Inicializando semaforos 
+
+[INFO] 09:46:56:197 SUSE logs/(7648:7648): Iniciando servidor... 
+
+[INFO] 09:46:57:714 SUSE logs/(7648:7648): SUSE esperando conexiones...
+
+[INFO] 10:57:24:695 SUSE logs/(10564:10564): Inicializando SUSE. 
+
+[INFO] 10:57:25:334 SUSE logs/(10564:10564): Levantando archivo de configuracion de SUSE 
+
+[INFO] 10:57:40:849 SUSE logs/(10564:10564): Archivo de configuracion levantado. 
+
+[INFO] 10:57:41:508 SUSE logs/(10564:10564): Inicializando semaforos 
+
+[INFO] 10:57:44:537 SUSE logs/(10564:10564): Iniciando servidor... 
+
+[INFO] 10:57:45:788 SUSE logs/(10564:10564): SUSE esperando conexiones...
+
+[INFO] 11:01:42:17 SUSE logs/(11032:11032): Inicializando SUSE. 
+
+[INFO] 11:01:42:199 SUSE logs/(11032:11032): Levantando archivo de configuracion de SUSE 
+
+[INFO] 11:01:42:359 SUSE logs/(11032:11032): Archivo de configuracion levantado. 
+
+[INFO] 11:01:42:484 SUSE logs/(11032:11032): Inicializando semaforos 
+
+[INFO] 11:01:44:706 SUSE logs/(11032:11032): Iniciando servidor... 
+
+[INFO] 11:01:46:739 SUSE logs/(11032:11032): SUSE esperando conexiones...
+
+[INFO] 11:03:51:740 SUSE logs/(11260:11260): Inicializando SUSE. 
+
+[INFO] 11:03:51:942 SUSE logs/(11260:11260): Levantando archivo de configuracion de SUSE 
+
+[INFO] 11:03:52:336 SUSE logs/(11260:11260): Archivo de configuracion levantado. 
+
+[INFO] 11:03:52:797 SUSE logs/(11260:11260): Inicializando semaforos 
+
+[INFO] 11:03:55:684 SUSE logs/(11260:11260): Iniciando servidor... 
+
+[INFO] 11:03:57:655 SUSE logs/(11260:11260): SUSE esperando conexiones...
+
+[INFO] 11:04:28:49 SUSE logs/(11260:11260): Recibi una nueva conexion del socket 5. 
+
+[INFO] 11:04:32:941 SUSE logs/(11260:11260): Creando process con id 5. 
+
+[INFO] 11:04:43:914 SUSE logs/(11260:11260): Cree el hilo
+[INFO] 11:04:43:914 SUSE logs/(11260:11260): SUSE esperando conexiones...
+
+[INFO] 11:05:56:546 SUSE logs/(11475:11475): Inicializando SUSE. 
+
+[INFO] 11:05:56:661 SUSE logs/(11475:11475): Levantando archivo de configuracion de SUSE 
+
+[INFO] 11:05:56:797 SUSE logs/(11475:11475): Archivo de configuracion levantado. 
+
+[INFO] 11:05:57:4 SUSE logs/(11475:11475): Inicializando semaforos 
+
+[INFO] 11:05:58:613 SUSE logs/(11475:11475): Iniciando servidor... 
+
+[INFO] 11:06:47:957 SUSE logs/(11659:11659): Inicializando SUSE. 
+
+[INFO] 11:06:48:207 SUSE logs/(11659:11659): Levantando archivo de configuracion de SUSE 
+
+[INFO] 11:06:48:619 SUSE logs/(11659:11659): Archivo de configuracion levantado. 
+
+[INFO] 11:06:48:0 SUSE logs/(11659:11659): Inicializando semaforos 
+
+[INFO] 11:07:01:632 SUSE logs/(11659:11659): Iniciando servidor... 
+
+[INFO] 11:08:00:529 SUSE logs/(11906:11906): Inicializando SUSE. 
+
+[INFO] 11:08:00:696 SUSE logs/(11906:11906): Levantando archivo de configuracion de SUSE 
+
+[INFO] 11:08:00:887 SUSE logs/(11906:11906): Archivo de configuracion levantado. 
+
+[INFO] 11:08:01:73 SUSE logs/(11906:11906): Inicializando semaforos 
+
+[INFO] 11:08:03:286 SUSE logs/(11906:11906): Iniciando servidor... 
+
+[INFO] 11:08:03:713 SUSE logs/(11906:11906): SUSE esperando conexiones...
+
+[INFO] 11:10:07:661 SUSE logs/(12128:12128): Inicializando SUSE. 
+
+[INFO] 11:10:07:983 SUSE logs/(12128:12128): Levantando archivo de configuracion de SUSE 
+
+[INFO] 11:10:09:13 SUSE logs/(12128:12128): Archivo de configuracion levantado. 
+
+[INFO] 11:10:09:177 SUSE logs/(12128:12128): Inicializando semaforos 
+
+[INFO] 11:10:10:842 SUSE logs/(12128:12128): Iniciando servidor... 
+
+[INFO] 11:10:10:986 SUSE logs/(12128:12128): SUSE esperando conexiones...
+
+[INFO] 11:11:43:273 SUSE logs/(12351:12351): Inicializando SUSE. 
+
+[INFO] 11:11:43:443 SUSE logs/(12351:12351): Levantando archivo de configuracion de SUSE 
+
+[INFO] 11:11:43:595 SUSE logs/(12351:12351): Archivo de configuracion levantado. 
+
+[INFO] 11:11:43:800 SUSE logs/(12351:12351): Inicializando semaforos 
+
+[INFO] 11:11:45:508 SUSE logs/(12351:12351): Iniciando servidor... 
+
+[INFO] 11:11:45:666 SUSE logs/(12351:12351): SUSE esperando conexiones...
+
+[INFO] 11:12:56:683 SUSE logs/(12574:12574): Inicializando SUSE. 
+
+[INFO] 11:12:56:828 SUSE logs/(12574:12574): Levantando archivo de configuracion de SUSE 
+
+[INFO] 11:12:56:0 SUSE logs/(12574:12574): Archivo de configuracion levantado. 
+
+[INFO] 11:12:57:153 SUSE logs/(12574:12574): Inicializando semaforos 
+
+[INFO] 11:12:59:7 SUSE logs/(12574:12574): Iniciando servidor... 
+
+[INFO] 11:12:59:146 SUSE logs/(12574:12574): SUSE esperando conexiones...
+
+[INFO] 11:13:30:520 SUSE logs/(12574:12574): Recibi una nueva conexion del socket 5. 
+
+[INFO] 11:13:49:776 SUSE logs/(12574:12574): Creando process con id 5. 
+
+[INFO] 11:13:56:465 SUSE logs/(12574:12574): Cree el hilo para el programa 5
+[INFO] 11:13:56:465 SUSE logs/(12574:12574): SUSE esperando conexiones...
+
+[INFO] 14:07:45:946 SUSE logs/(14326:14326): Inicializando SUSE. 
+
+[INFO] 14:07:46:542 SUSE logs/(14326:14326): Levantando archivo de configuracion de SUSE 
+
+[INFO] 14:07:47:295 SUSE logs/(14326:14326): Archivo de configuracion levantado. 
+
+[INFO] 14:07:49:808 SUSE logs/(14326:14326): Inicializando semaforos 
+
+[INFO] 14:07:54:607 SUSE logs/(14326:14326): Iniciando servidor... 
+
+[INFO] 14:07:55:790 SUSE logs/(14326:14326): SUSE esperando conexiones...
+
+[INFO] 14:08:10:749 SUSE logs/(14326:14326): Recibi una nueva conexion del socket 5. 
+
+[INFO] 14:08:10:749 SUSE logs/(14326:14326): Creando process con id 5. 
+
+[INFO] 14:09:36:44 SUSE logs/(14326:14326): Cree el hilo para el programa 5
+[INFO] 14:09:36:44 SUSE logs/(14326:14326): SUSE esperando conexiones...
+
+[INFO] 14:17:06:713 SUSE logs/(14651:14651): Inicializando SUSE. 
+
+[INFO] 14:17:07:191 SUSE logs/(14651:14651): Levantando archivo de configuracion de SUSE 
+
+[INFO] 14:17:07:890 SUSE logs/(14651:14651): Archivo de configuracion levantado. 
+
+[INFO] 14:17:08:223 SUSE logs/(14651:14651): Inicializando semaforos 
+
+[INFO] 14:17:10:960 SUSE logs/(14651:14651): Iniciando servidor... 
+
+[INFO] 14:17:11:545 SUSE logs/(14651:14651): SUSE esperando conexiones...
+
+[INFO] 14:17:22:274 SUSE logs/(14651:14651): Recibi una nueva conexion del socket 5. 
+
+[INFO] 14:17:22:274 SUSE logs/(14651:14651): Creando process con id 5. 
+
+[INFO] 14:20:23:443 SUSE logs/(14651:14651): Cree el hilo para el programa 5
+[INFO] 14:25:40:25 SUSE logs/(15126:15126): Inicializando SUSE. 
+
+[INFO] 14:25:40:25 SUSE logs/(15126:15126): Levantando archivo de configuracion de SUSE 
+
+[INFO] 14:25:40:25 SUSE logs/(15126:15126): Archivo de configuracion levantado. 
+
+[INFO] 14:25:40:25 SUSE logs/(15126:15126): Inicializando semaforos 
+
+[INFO] 14:25:40:25 SUSE logs/(15126:15126): Iniciando servidor... 
+
+[INFO] 14:25:40:26 SUSE logs/(15126:15126): SUSE esperando conexiones...
+
+[INFO] 14:25:50:378 SUSE logs/(15126:15126): Recibi una nueva conexion del socket 5. 
+
+[INFO] 14:25:50:378 SUSE logs/(15126:15126): Creando process con id 5. 
+
+[INFO] 14:26:01:675 SUSE logs/(15126:15126): Cree el hilo para el programa 5
+[INFO] 14:26:01:676 SUSE logs/(15126:15126): SUSE esperando conexiones...
+
+[INFO] 14:26:45:865 SUSE logs/(15126:15166): Entro a la funcion del hilo 
+[INFO] 14:30:05:261 SUSE logs/(15364:15364): Inicializando SUSE. 
+
+[INFO] 14:30:05:261 SUSE logs/(15364:15364): Levantando archivo de configuracion de SUSE 
+
+[INFO] 14:30:05:261 SUSE logs/(15364:15364): Archivo de configuracion levantado. 
+
+[INFO] 14:30:05:261 SUSE logs/(15364:15364): Inicializando semaforos 
+
+[INFO] 14:30:05:261 SUSE logs/(15364:15364): Iniciando servidor... 
+
+[INFO] 14:30:05:261 SUSE logs/(15364:15364): SUSE esperando conexiones...
+
+[INFO] 14:30:20:445 SUSE logs/(15364:15364): Recibi una nueva conexion del socket 5. 
+
+[INFO] 14:30:20:445 SUSE logs/(15364:15364): Creando process con id 5. 
+
+[INFO] 14:30:25:787 SUSE logs/(15364:15364): Cree el hilo para el programa 5
+[INFO] 14:30:25:788 SUSE logs/(15364:15364): SUSE esperando conexiones...
+
+[INFO] 14:32:10:614 SUSE logs/(15449:15449): Inicializando SUSE. 
+
+[INFO] 14:32:10:614 SUSE logs/(15449:15449): Levantando archivo de configuracion de SUSE 
+
+[INFO] 14:32:10:614 SUSE logs/(15449:15449): Archivo de configuracion levantado. 
+
+[INFO] 14:32:10:614 SUSE logs/(15449:15449): Inicializando semaforos 
+
+[INFO] 14:32:10:614 SUSE logs/(15449:15449): Iniciando servidor... 
+
+[INFO] 14:32:10:614 SUSE logs/(15449:15449): SUSE esperando conexiones...
+
+[INFO] 14:32:22:738 SUSE logs/(15449:15449): Recibi una nueva conexion del socket 5. 
+
+[INFO] 14:32:22:739 SUSE logs/(15449:15449): Creando process con id 5. 
+
+[INFO] 14:32:31:417 SUSE logs/(15449:15449): Cree el hilo para el programa 5
+[INFO] 14:32:31:417 SUSE logs/(15449:15449): SUSE esperando conexiones...
+
+[INFO] 14:33:17:662 SUSE logs/(15798:15798): Inicializando SUSE. 
+
+[INFO] 14:33:17:662 SUSE logs/(15798:15798): Levantando archivo de configuracion de SUSE 
+
+[INFO] 14:33:17:662 SUSE logs/(15798:15798): Archivo de configuracion levantado. 
+
+[INFO] 14:33:17:662 SUSE logs/(15798:15798): Inicializando semaforos 
+
+[INFO] 14:33:17:662 SUSE logs/(15798:15798): Iniciando servidor... 
+
+[INFO] 14:33:17:663 SUSE logs/(15798:15798): SUSE esperando conexiones...
+
+[INFO] 14:33:24:842 SUSE logs/(15798:15798): Recibi una nueva conexion del socket 5. 
+
+[INFO] 14:33:24:842 SUSE logs/(15798:15798): Creando process con id 5. 
+
+[INFO] 14:33:28:690 SUSE logs/(15798:15798): leichu
+[INFO] 14:33:28:691 SUSE logs/(15798:15798): Cree el hilo para el programa 5
+[INFO] 14:33:28:691 SUSE logs/(15798:15798): SUSE esperando conexiones...
+
+[INFO] 14:36:54:934 SUSE logs/(15959:15959): Inicializando SUSE. 
+
+[INFO] 14:36:54:954 SUSE logs/(15959:15959): Levantando archivo de configuracion de SUSE 
+
+[INFO] 14:36:54:6 SUSE logs/(15959:15959): Archivo de configuracion levantado. 
+
+[INFO] 14:36:54:7 SUSE logs/(15959:15959): Inicializando semaforos 
+
+[INFO] 14:36:55:10 SUSE logs/(15959:15959): Iniciando servidor... 
+
+[INFO] 14:36:55:49 SUSE logs/(15959:15959): SUSE esperando conexiones...
+
+[INFO] 14:37:10:250 SUSE logs/(15959:15959): Recibi una nueva conexion del socket 5. 
+
+[INFO] 14:37:10:252 SUSE logs/(15959:15959): Creando process con id 5. 
+
+[INFO] 14:37:10:271 SUSE logs/(15959:15959): leichu
+[INFO] 14:42:34:361 SUSE logs/(16295:16295): Inicializando SUSE. 
+
+[INFO] 14:42:34:380 SUSE logs/(16295:16295): Levantando archivo de configuracion de SUSE 
+
+[INFO] 14:42:34:427 SUSE logs/(16295:16295): Archivo de configuracion levantado. 
+
+[INFO] 14:42:34:427 SUSE logs/(16295:16295): Inicializando semaforos 
+
+[INFO] 14:42:34:431 SUSE logs/(16295:16295): Iniciando servidor... 
+
+[INFO] 14:42:34:468 SUSE logs/(16295:16295): SUSE esperando conexiones...
+
+[INFO] 14:42:40:112 SUSE logs/(16295:16295): Recibi una nueva conexion del socket 5. 
+
+[INFO] 14:42:40:113 SUSE logs/(16295:16295): Creando process con id 5. 
+
+[INFO] 14:42:40:113 SUSE logs/(16295:16295): holis
+[INFO] 14:42:40:119 SUSE logs/(16295:16295): leichu
+[INFO] 14:42:40:122 SUSE logs/(16295:16295): Cree el hilo para el programa 5
+[INFO] 14:42:40:123 SUSE logs/(16295:16295): SUSE esperando conexiones...
+
+[INFO] 14:42:40:124 SUSE logs/(16295:16301): Entro a la funcion del hilo 
+[INFO] 14:42:40:125 SUSE logs/(16295:16301): El socket es -1091851520
+[INFO] 14:47:47:3 SUSE logs/(16624:16624): Inicializando SUSE. 
+
+[INFO] 14:47:48:24 SUSE logs/(16624:16624): Levantando archivo de configuracion de SUSE 
+
+[INFO] 14:47:48:78 SUSE logs/(16624:16624): Archivo de configuracion levantado. 
+
+[INFO] 14:47:48:78 SUSE logs/(16624:16624): Inicializando semaforos 
+
+[INFO] 14:47:48:81 SUSE logs/(16624:16624): Iniciando servidor... 
+
+[INFO] 14:47:48:118 SUSE logs/(16624:16624): SUSE esperando conexiones...
+
+[INFO] 14:47:51:147 SUSE logs/(16624:16624): Recibi una nueva conexion del socket 5. 
+
+[INFO] 14:47:51:161 SUSE logs/(16624:16624): Creando process con id 5. 
+
+[INFO] 14:47:51:162 SUSE logs/(16624:16624): holis
+[INFO] 14:47:51:198 SUSE logs/(16624:16629): Entro a la funcion del hilo 
+[INFO] 14:47:51:201 SUSE logs/(16624:16624): leichu
+[INFO] 14:47:51:202 SUSE logs/(16624:16624): Cree el hilo para el programa 5
+[INFO] 14:47:51:203 SUSE logs/(16624:16624): SUSE esperando conexiones...
+
+[INFO] 14:47:51:208 SUSE logs/(16624:16629): El socket es 5
+[INFO] 14:47:51:214 SUSE logs/(16624:16629): Entro al cop
+[INFO] 14:47:51:215 SUSE logs/(16624:16629): Esperando handshake...
+
+[INFO] 14:47:51:220 SUSE logs/(16624:16629): Realice el handshake con hilolay.
+
+[INFO] 14:47:51:221 SUSE logs/(16624:16629): Esperando ULT del proceso 5 
+
+[INFO] 14:47:51:222 SUSE logs/(16624:16629): Recibi el ULT 0 
+
+[INFO] 15:56:05:946 SUSE logs/(19303:19303): Inicializando SUSE. 
+
+[INFO] 15:56:05:990 SUSE logs/(19303:19303): Levantando archivo de configuracion de SUSE 
+
+[INFO] 15:56:06:51 SUSE logs/(19303:19303): Archivo de configuracion levantado. 
+
+[INFO] 15:56:06:54 SUSE logs/(19303:19303): Inicializando semaforos 
+
+[INFO] 15:56:06:58 SUSE logs/(19303:19303): Iniciando servidor... 
+
+[INFO] 15:56:06:93 SUSE logs/(19303:19303): SUSE esperando conexiones...
+
+[INFO] 15:56:12:469 SUSE logs/(19303:19303): Recibi una nueva conexion del socket 5. 
+
+[INFO] 15:56:12:469 SUSE logs/(19303:19303): Creando process con id 5. 
+
+[INFO] 15:56:12:470 SUSE logs/(19303:19303): holis
+[INFO] 15:56:12:476 SUSE logs/(19303:19303): leichu
+[INFO] 15:56:12:477 SUSE logs/(19303:19303): Cree el hilo para el programa 5
+[INFO] 15:56:12:478 SUSE logs/(19303:19303): SUSE esperando conexiones...
+
+[INFO] 15:56:12:479 SUSE logs/(19303:19421): Entro a la funcion del hilo 
+[INFO] 15:56:12:482 SUSE logs/(19303:19421): El socket es 5
+[INFO] 15:56:12:483 SUSE logs/(19303:19421): Entro al cop
+[INFO] 15:56:12:484 SUSE logs/(19303:19421): Esperando handshake...
+
+[INFO] 15:56:12:489 SUSE logs/(19303:19421): Realice el handshake con hilolay.
+
+[INFO] 15:57:55:803 SUSE logs/(19726:19726): Inicializando SUSE. 
+
+[INFO] 15:57:55:822 SUSE logs/(19726:19726): Levantando archivo de configuracion de SUSE 
+
+[INFO] 15:57:55:872 SUSE logs/(19726:19726): Archivo de configuracion levantado. 
+
+[INFO] 15:57:55:873 SUSE logs/(19726:19726): Inicializando semaforos 
+
+[INFO] 15:57:55:877 SUSE logs/(19726:19726): Iniciando servidor... 
+
+[INFO] 15:57:55:916 SUSE logs/(19726:19726): SUSE esperando conexiones...
+
+[INFO] 15:58:03:34 SUSE logs/(19726:19726): Recibi una nueva conexion del socket 5. 
+
+[INFO] 15:58:03:35 SUSE logs/(19726:19726): Creando process con id 5. 
+
+[INFO] 15:58:03:36 SUSE logs/(19726:19726): holis
+[INFO] 15:58:03:49 SUSE logs/(19726:19726): leichu
+[INFO] 15:58:03:53 SUSE logs/(19726:19726): Cree el hilo para el programa 5
+[INFO] 15:58:03:53 SUSE logs/(19726:19726): SUSE esperando conexiones...
+
+[INFO] 15:58:03:55 SUSE logs/(19726:19732): Entro a la funcion del hilo 
+[INFO] 15:58:03:55 SUSE logs/(19726:19732): El socket es 5
+[INFO] 15:58:03:65 SUSE logs/(19726:19732): Entro al cop
+[INFO] 15:58:03:65 SUSE logs/(19726:19732): Esperando handshake...
+
+[INFO] 15:58:03:70 SUSE logs/(19726:19732): Realice el handshake con hilolay.
+
+[INFO] 16:05:04:489 SUSE logs/(20104:20104): Inicializando SUSE. 
+
+[INFO] 16:05:04:509 SUSE logs/(20104:20104): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:05:04:560 SUSE logs/(20104:20104): Archivo de configuracion levantado. 
+
+[INFO] 16:05:04:560 SUSE logs/(20104:20104): Inicializando semaforos 
+
+[INFO] 16:05:04:564 SUSE logs/(20104:20104): Iniciando servidor... 
+
+[INFO] 16:05:04:601 SUSE logs/(20104:20104): SUSE esperando conexiones...
+
+[INFO] 16:05:07:305 SUSE logs/(20104:20104): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:05:07:305 SUSE logs/(20104:20104): Creando process con id 5. 
+
+[INFO] 16:05:07:306 SUSE logs/(20104:20104): holis
+[INFO] 16:05:07:318 SUSE logs/(20104:20104): leichu
+[INFO] 16:05:07:319 SUSE logs/(20104:20104): Cree el hilo para el programa 5
+[INFO] 16:05:07:322 SUSE logs/(20104:20109): Entro a la funcion del hilo 
+[INFO] 16:05:07:323 SUSE logs/(20104:20104): SUSE esperando conexiones...
+
+[INFO] 16:05:07:325 SUSE logs/(20104:20109): El socket es 5
+[INFO] 16:05:07:328 SUSE logs/(20104:20109): Entro al cop
+[INFO] 16:05:07:329 SUSE logs/(20104:20109): Esperando handshake...
+
+[INFO] 16:05:07:335 SUSE logs/(20104:20109): Realice el handshake con hilolay.
+
+[INFO] 16:08:02:972 SUSE logs/(20363:20363): Inicializando SUSE. 
+
+[INFO] 16:08:02:972 SUSE logs/(20363:20363): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:08:02:972 SUSE logs/(20363:20363): Archivo de configuracion levantado. 
+
+[INFO] 16:08:02:972 SUSE logs/(20363:20363): Inicializando semaforos 
+
+[INFO] 16:08:02:973 SUSE logs/(20363:20363): Iniciando servidor... 
+
+[INFO] 16:08:02:973 SUSE logs/(20363:20363): SUSE esperando conexiones...
+
+[INFO] 16:08:33:156 SUSE logs/(20363:20363): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:08:33:158 SUSE logs/(20363:20363): Creando process con id 5. 
+
+[INFO] 16:08:41:912 SUSE logs/(20363:20363): holis
+[INFO] 16:08:53:331 SUSE logs/(20363:20363): leichu
+[INFO] 16:08:53:331 SUSE logs/(20363:20613): Entro a la funcion del hilo 
+[INFO] 16:08:53:331 SUSE logs/(20363:20363): Cree el hilo para el programa 5
+[INFO] 16:08:53:331 SUSE logs/(20363:20363): SUSE esperando conexiones...
+
+[INFO] 16:09:37:913 SUSE logs/(20775:20775): Inicializando SUSE. 
+
+[INFO] 16:09:37:914 SUSE logs/(20775:20775): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:09:37:914 SUSE logs/(20775:20775): Archivo de configuracion levantado. 
+
+[INFO] 16:09:37:914 SUSE logs/(20775:20775): Inicializando semaforos 
+
+[INFO] 16:09:37:914 SUSE logs/(20775:20775): Iniciando servidor... 
+
+[INFO] 16:09:37:914 SUSE logs/(20775:20775): SUSE esperando conexiones...
+
+[INFO] 16:09:57:563 SUSE logs/(20775:20775): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:09:57:563 SUSE logs/(20775:20775): Creando process con id 5. 
+
+[INFO] 16:10:05:820 SUSE logs/(20775:20775): holis
+[INFO] 16:10:12:189 SUSE logs/(20775:20793): Entro a la funcion del hilo 
+[INFO] 16:10:19:705 SUSE logs/(20775:20775): leichu
+[INFO] 16:10:19:706 SUSE logs/(20775:20775): Cree el hilo para el programa 5
+[INFO] 16:10:19:706 SUSE logs/(20775:20775): SUSE esperando conexiones...
+
+[INFO] 16:10:49:282 SUSE logs/(21041:21041): Inicializando SUSE. 
+
+[INFO] 16:10:49:306 SUSE logs/(21041:21041): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:10:49:365 SUSE logs/(21041:21041): Archivo de configuracion levantado. 
+
+[INFO] 16:10:49:368 SUSE logs/(21041:21041): Inicializando semaforos 
+
+[INFO] 16:10:49:371 SUSE logs/(21041:21041): Iniciando servidor... 
+
+[INFO] 16:10:49:410 SUSE logs/(21041:21041): SUSE esperando conexiones...
+
+[INFO] 16:10:55:72 SUSE logs/(21041:21041): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:10:55:73 SUSE logs/(21041:21041): Creando process con id 5. 
+
+[INFO] 16:10:55:80 SUSE logs/(21041:21041): Cree el hilo para el programa 5
+[INFO] 16:10:55:82 SUSE logs/(21041:21041): SUSE esperando conexiones...
+
+[INFO] 16:10:55:85 SUSE logs/(21041:21159): Entro a la funcion del hilo 
+[INFO] 16:10:55:86 SUSE logs/(21041:21159): El socket es 5
+[INFO] 16:10:55:87 SUSE logs/(21041:21159): Entro al cop
+[INFO] 16:10:55:88 SUSE logs/(21041:21159): Esperando handshake...
+
+[INFO] 16:10:55:93 SUSE logs/(21041:21159): Realice el handshake con hilolay.
+
+[INFO] 16:12:24:564 SUSE logs/(21466:21466): Inicializando SUSE. 
+
+[INFO] 16:12:24:584 SUSE logs/(21466:21466): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:12:24:639 SUSE logs/(21466:21466): Archivo de configuracion levantado. 
+
+[INFO] 16:12:24:639 SUSE logs/(21466:21466): Inicializando semaforos 
+
+[INFO] 16:12:24:642 SUSE logs/(21466:21466): Iniciando servidor... 
+
+[INFO] 16:12:24:679 SUSE logs/(21466:21466): SUSE esperando conexiones...
+
+[INFO] 16:12:27:528 SUSE logs/(21466:21466): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:12:27:529 SUSE logs/(21466:21466): Creando process con id 5. 
+
+[INFO] 16:12:27:545 SUSE logs/(21466:21466): Cree el hilo para el programa 5
+[INFO] 16:12:27:550 SUSE logs/(21466:21473): Entro a la funcion del hilo 
+[INFO] 16:12:27:558 SUSE logs/(21466:21466): SUSE esperando conexiones...
+
+[INFO] 16:12:27:560 SUSE logs/(21466:21473): El socket es 5
+[INFO] 16:12:27:564 SUSE logs/(21466:21473): Entro al cop
+[INFO] 16:12:27:565 SUSE logs/(21466:21473): Esperando handshake...
+
+[INFO] 16:12:27:573 SUSE logs/(21466:21473): Realice el handshake con hilolay.
+
+[INFO] 16:12:27:574 SUSE logs/(21466:21473): Esperando ULT del proceso 5 
+
+[INFO] 16:12:27:576 SUSE logs/(21466:21473): Recibi el ULT 0 
+
+[INFO] 16:12:27:577 SUSE logs/(21466:21473): Validando si es main thread o  ULT comun 
+
+[INFO] 16:12:27:577 SUSE logs/(21466:21473): El proceso 5 ya tiene un main_thread 
+
+[INFO] 16:12:27:582 SUSE logs/(21466:21473): Creando ULT 0
+[INFO] 16:18:26:326 SUSE logs/(21705:21705): Inicializando SUSE. 
+
+[INFO] 16:18:26:345 SUSE logs/(21705:21705): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:18:26:398 SUSE logs/(21705:21705): Archivo de configuracion levantado. 
+
+[INFO] 16:18:26:399 SUSE logs/(21705:21705): Inicializando semaforos 
+
+[INFO] 16:18:26:402 SUSE logs/(21705:21705): Iniciando servidor... 
+
+[INFO] 16:18:26:439 SUSE logs/(21705:21705): SUSE esperando conexiones...
+
+[INFO] 16:18:32:960 SUSE logs/(21705:21705): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:18:32:960 SUSE logs/(21705:21705): Creando process con id 5. 
+
+[INFO] 16:18:32:968 SUSE logs/(21705:21705): Cree el hilo para el programa 5
+[INFO] 16:18:32:969 SUSE logs/(21705:21705): SUSE esperando conexiones...
+
+[INFO] 16:18:32:971 SUSE logs/(21705:21825): Entro a la funcion del hilo 
+[INFO] 16:18:32:972 SUSE logs/(21705:21825): El socket es 5
+[INFO] 16:18:32:974 SUSE logs/(21705:21825): Entro al cop
+[INFO] 16:18:32:974 SUSE logs/(21705:21825): Esperando handshake...
+
+[INFO] 16:18:32:979 SUSE logs/(21705:21825): Realice el handshake con hilolay.
+
+[INFO] 16:18:32:980 SUSE logs/(21705:21825): Esperando ULT del proceso 5 
+
+[INFO] 16:18:32:981 SUSE logs/(21705:21825): Recibi el ULT 0 
+
+[INFO] 16:18:32:984 SUSE logs/(21705:21825): Validando si es main thread o  ULT comun 
+
+[INFO] 16:18:32:984 SUSE logs/(21705:21825): El proceso 5 ya tiene un main_thread 
+
+[INFO] 16:18:32:986 SUSE logs/(21705:21825): Creando ULT 0
+[INFO] 16:20:25:350 SUSE logs/(21983:21983): Inicializando SUSE. 
+
+[INFO] 16:20:25:373 SUSE logs/(21983:21983): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:20:25:464 SUSE logs/(21983:21983): Archivo de configuracion levantado. 
+
+[INFO] 16:20:25:465 SUSE logs/(21983:21983): Inicializando semaforos 
+
+[INFO] 16:20:25:471 SUSE logs/(21983:21983): Iniciando servidor... 
+
+[INFO] 16:20:25:527 SUSE logs/(21983:21983): SUSE esperando conexiones...
+
+[INFO] 16:20:33:56 SUSE logs/(21983:21983): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:20:33:56 SUSE logs/(21983:21983): Creando process con id 5. 
+
+[INFO] 16:20:33:63 SUSE logs/(21983:21983): Cree el hilo para el programa 5
+[INFO] 16:20:33:65 SUSE logs/(21983:21983): SUSE esperando conexiones...
+
+[INFO] 16:20:33:67 SUSE logs/(21983:22103): Entro a la funcion del hilo 
+[INFO] 16:20:33:68 SUSE logs/(21983:22103): El socket es 5
+[INFO] 16:20:33:70 SUSE logs/(21983:22103): Entro al cop
+[INFO] 16:20:33:70 SUSE logs/(21983:22103): Esperando handshake...
+
+[INFO] 16:20:33:76 SUSE logs/(21983:22103): Realice el handshake con hilolay.
+
+[INFO] 16:20:33:77 SUSE logs/(21983:22103): Esperando ULT del proceso 5 
+
+[INFO] 16:20:33:78 SUSE logs/(21983:22103): Recibi el ULT 0 
+
+[INFO] 16:20:33:82 SUSE logs/(21983:22103): Validando si es main thread o  ULT comun 
+
+[INFO] 16:20:33:82 SUSE logs/(21983:22103): El proceso 5 ya tiene un main_thread 
+
+[INFO] 16:20:33:83 SUSE logs/(21983:22103): Creando ULT 0
+[INFO] 16:25:45:899 SUSE logs/(22601:22601): Inicializando SUSE. 
+
+[INFO] 16:25:45:918 SUSE logs/(22601:22601): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:25:45:971 SUSE logs/(22601:22601): Archivo de configuracion levantado. 
+
+[INFO] 16:25:45:971 SUSE logs/(22601:22601): Inicializando semaforos 
+
+[INFO] 16:25:45:974 SUSE logs/(22601:22601): Iniciando servidor... 
+
+[INFO] 16:25:46:10 SUSE logs/(22601:22601): SUSE esperando conexiones...
+
+[INFO] 16:25:50:273 SUSE logs/(22601:22601): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:25:50:274 SUSE logs/(22601:22601): Creando process con id 5. 
+
+[INFO] 16:25:50:283 SUSE logs/(22601:22601): Cree el hilo para el programa 5
+[INFO] 16:25:50:292 SUSE logs/(22601:22601): SUSE esperando conexiones...
+
+[INFO] 16:25:50:294 SUSE logs/(22601:22606): Entro a la funcion del hilo 
+[INFO] 16:25:50:295 SUSE logs/(22601:22606): El socket es 5
+[INFO] 16:25:50:297 SUSE logs/(22601:22606): Entro al cop
+[INFO] 16:25:50:297 SUSE logs/(22601:22606): Esperando handshake...
+
+[INFO] 16:25:50:306 SUSE logs/(22601:22606): Realice el handshake con hilolay.
+
+[INFO] 16:25:50:307 SUSE logs/(22601:22606): Esperando ULT del proceso 5 
+
+[INFO] 16:25:50:308 SUSE logs/(22601:22606): Recibi el ULT 0 
+
+[INFO] 16:25:50:309 SUSE logs/(22601:22606): Validando si es main thread o  ULT comun 
+
+[INFO] 16:25:50:309 SUSE logs/(22601:22606): El proceso 5 ya tiene un main_thread 
+
+[INFO] 16:25:50:309 SUSE logs/(22601:22606): Creando ULT 0
+[INFO] 16:31:09:688 SUSE logs/(23163:23163): Inicializando SUSE. 
+
+[INFO] 16:31:09:709 SUSE logs/(23163:23163): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:31:09:759 SUSE logs/(23163:23163): Archivo de configuracion levantado. 
+
+[INFO] 16:31:09:759 SUSE logs/(23163:23163): Inicializando semaforos 
+
+[INFO] 16:31:09:763 SUSE logs/(23163:23163): Iniciando servidor... 
+
+[INFO] 16:31:09:797 SUSE logs/(23163:23163): SUSE esperando conexiones...
+
+[INFO] 16:31:12:421 SUSE logs/(23163:23163): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:31:12:422 SUSE logs/(23163:23163): Creando process con id 5. 
+
+[INFO] 16:31:12:430 SUSE logs/(23163:23163): Cree el hilo para el programa 5
+[INFO] 16:31:12:431 SUSE logs/(23163:23163): SUSE esperando conexiones...
+
+[INFO] 16:31:12:433 SUSE logs/(23163:23168): Entro a la funcion del hilo 
+[INFO] 16:31:12:434 SUSE logs/(23163:23168): El socket es 5
+[INFO] 16:31:12:435 SUSE logs/(23163:23168): Entro al cop
+[INFO] 16:31:12:436 SUSE logs/(23163:23168): Esperando handshake...
+
+[INFO] 16:31:12:440 SUSE logs/(23163:23168): Realice el handshake con hilolay.
+
+[INFO] 16:31:12:441 SUSE logs/(23163:23168): Esperando ULT del proceso 5 
+
+[INFO] 16:31:12:442 SUSE logs/(23163:23168): Recibi el ULT 0 
+
+[INFO] 16:31:12:442 SUSE logs/(23163:23168): Validando si es main thread o  ULT comun 
+
+[INFO] 16:31:12:442 SUSE logs/(23163:23168): El proceso 5 ya tiene un main_thread 
+
+[INFO] 16:31:12:443 SUSE logs/(23163:23168): Creando ULT 0
+[INFO] 16:32:17:902 SUSE logs/(23485:23485): Inicializando SUSE. 
+
+[INFO] 16:32:17:921 SUSE logs/(23485:23485): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:32:17:969 SUSE logs/(23485:23485): Archivo de configuracion levantado. 
+
+[INFO] 16:32:17:970 SUSE logs/(23485:23485): Inicializando semaforos 
+
+[INFO] 16:32:17:973 SUSE logs/(23485:23485): Iniciando servidor... 
+
+[INFO] 16:32:18:9 SUSE logs/(23485:23485): SUSE esperando conexiones...
+
+[INFO] 16:32:20:862 SUSE logs/(23485:23485): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:32:20:862 SUSE logs/(23485:23485): Creando process con id 5. 
+
+[INFO] 16:32:20:879 SUSE logs/(23485:23485): Cree el hilo para el programa 5
+[INFO] 16:32:20:881 SUSE logs/(23485:23485): SUSE esperando conexiones...
+
+[INFO] 16:32:20:882 SUSE logs/(23485:23490): Entro a la funcion del hilo 
+[INFO] 16:32:20:884 SUSE logs/(23485:23490): El socket es 5
+[INFO] 16:32:20:890 SUSE logs/(23485:23490): Entro al cop
+[INFO] 16:32:20:892 SUSE logs/(23485:23490): Esperando handshake...
+
+[INFO] 16:32:20:897 SUSE logs/(23485:23490): Realice el handshake con hilolay.
+
+[INFO] 16:32:20:898 SUSE logs/(23485:23490): Esperando ULT del proceso 5 
+
+[INFO] 16:32:20:899 SUSE logs/(23485:23490): Recibi el ULT 0 
+
+[INFO] 16:32:20:899 SUSE logs/(23485:23490): Validando si es main thread o  ULT comun 
+
+[INFO] 16:32:20:899 SUSE logs/(23485:23490): El proceso 5 ya tiene un main_thread 
+
+[INFO] 16:32:20:900 SUSE logs/(23485:23490): Creando ULT 0
+[INFO] 16:33:46:593 SUSE logs/(23536:23536): Inicializando SUSE. 
+
+[INFO] 16:33:46:593 SUSE logs/(23536:23536): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:33:46:593 SUSE logs/(23536:23536): Archivo de configuracion levantado. 
+
+[INFO] 16:33:46:593 SUSE logs/(23536:23536): Inicializando semaforos 
+
+[INFO] 16:33:46:593 SUSE logs/(23536:23536): Iniciando servidor... 
+
+[INFO] 16:33:46:593 SUSE logs/(23536:23536): SUSE esperando conexiones...
+
+[INFO] 16:34:22:882 SUSE logs/(23692:23692): Inicializando SUSE. 
+
+[INFO] 16:34:22:882 SUSE logs/(23692:23692): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:34:22:882 SUSE logs/(23692:23692): Archivo de configuracion levantado. 
+
+[INFO] 16:34:22:882 SUSE logs/(23692:23692): Inicializando semaforos 
+
+[INFO] 16:34:22:882 SUSE logs/(23692:23692): Iniciando servidor... 
+
+[INFO] 16:34:22:882 SUSE logs/(23692:23692): SUSE esperando conexiones...
+
+[INFO] 16:34:46:25 SUSE logs/(23692:23692): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:34:46:25 SUSE logs/(23692:23692): Creando process con id 5. 
+
+[INFO] 16:34:48:462 SUSE logs/(23692:23692): Cree el hilo para el programa 5
+[INFO] 16:34:48:462 SUSE logs/(23692:23692): SUSE esperando conexiones...
+
+[INFO] 16:35:09:452 SUSE logs/(23692:23823): Entro a la funcion del hilo 
+[INFO] 16:35:09:453 SUSE logs/(23692:23823): El socket es 5
+[INFO] 16:35:24:338 SUSE logs/(23692:23823): Entro al cop
+[INFO] 16:35:24:338 SUSE logs/(23692:23823): Esperando handshake...
+
+[INFO] 16:35:24:338 SUSE logs/(23692:23823): Realice el handshake con hilolay.
+
+[INFO] 16:35:24:338 SUSE logs/(23692:23823): Esperando ULT del proceso 5 
+
+[INFO] 16:35:24:338 SUSE logs/(23692:23823): Recibi el ULT 0 
+
+[INFO] 16:35:24:338 SUSE logs/(23692:23823): Validando si es main thread o  ULT comun 
+
+[INFO] 16:35:24:338 SUSE logs/(23692:23823): El proceso 5 ya tiene un main_thread 
+
+[INFO] 16:35:24:338 SUSE logs/(23692:23823): Creando ULT 0
+[INFO] 16:42:29:583 SUSE logs/(24707:24707): Inicializando SUSE. 
+
+[INFO] 16:42:29:602 SUSE logs/(24707:24707): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:42:29:657 SUSE logs/(24707:24707): Archivo de configuracion levantado. 
+
+[INFO] 16:42:29:657 SUSE logs/(24707:24707): Inicializando semaforos 
+
+[INFO] 16:42:29:661 SUSE logs/(24707:24707): Iniciando servidor... 
+
+[INFO] 16:42:29:697 SUSE logs/(24707:24707): SUSE esperando conexiones...
+
+[INFO] 16:42:31:770 SUSE logs/(24707:24707): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:42:31:771 SUSE logs/(24707:24707): Creando process con id 5. 
+
+[INFO] 16:42:31:779 SUSE logs/(24707:24707): Cree el hilo para el programa 5
+[INFO] 16:42:31:780 SUSE logs/(24707:24707): SUSE esperando conexiones...
+
+[INFO] 16:42:31:783 SUSE logs/(24707:24714): Entro a la funcion del hilo 
+[INFO] 16:42:31:784 SUSE logs/(24707:24714): El socket es 5
+[INFO] 16:42:31:785 SUSE logs/(24707:24714): Entro al cop
+[INFO] 16:42:31:786 SUSE logs/(24707:24714): Esperando handshake...
+
+[INFO] 16:42:31:792 SUSE logs/(24707:24714): Realice el handshake con hilolay.
+
+[INFO] 16:42:31:793 SUSE logs/(24707:24714): Esperando ULT del proceso 5 
+
+[INFO] 16:42:31:794 SUSE logs/(24707:24714): Recibi el ULT 0 
+
+[INFO] 16:42:31:794 SUSE logs/(24707:24714): Validando si es main thread o  ULT comun 
+
+[INFO] 16:42:31:795 SUSE logs/(24707:24714): El proceso 5 es nuevo 
+
+[INFO] 16:42:31:797 SUSE logs/(24707:24714): Proceso creado con id 5 
+
+[INFO] 16:42:31:798 SUSE logs/(24707:24714): Creando ULT 0
+[INFO] 16:42:31:799 SUSE logs/(24707:24714): Main thread creado con id 0 
+
+[INFO] 16:42:31:799 SUSE logs/(24707:24714): Validando si puedo poner e ejecutar el main thread... 
+
+[INFO] 16:51:18:570 SUSE logs/(25239:25239): Inicializando SUSE. 
+
+[INFO] 16:51:18:591 SUSE logs/(25239:25239): Levantando archivo de configuracion de SUSE 
+
+[INFO] 16:51:18:647 SUSE logs/(25239:25239): Archivo de configuracion levantado. 
+
+[INFO] 16:51:18:647 SUSE logs/(25239:25239): Inicializando semaforos 
+
+[INFO] 16:51:18:650 SUSE logs/(25239:25239): Iniciando servidor... 
+
+[INFO] 16:51:18:689 SUSE logs/(25239:25239): SUSE esperando conexiones...
+
+[INFO] 16:51:58:997 SUSE logs/(25239:25239): Recibi una nueva conexion del socket 5. 
+
+[INFO] 16:51:58:998 SUSE logs/(25239:25239): Creando process con id 5. 
+
+[INFO] 16:51:59:9 SUSE logs/(25239:25239): Cree el hilo para el programa 5
+[INFO] 16:51:59:10 SUSE logs/(25239:25239): SUSE esperando conexiones...
+
+[INFO] 16:51:59:12 SUSE logs/(25239:25364): Entro a la funcion del hilo 
+[INFO] 16:51:59:13 SUSE logs/(25239:25364): El socket es 5
+[INFO] 16:51:59:14 SUSE logs/(25239:25364): Entro al cop
+[INFO] 16:51:59:15 SUSE logs/(25239:25364): Esperando handshake...
+
+[INFO] 16:51:59:22 SUSE logs/(25239:25364): Realice el handshake con hilolay.
+
+[INFO] 16:51:59:23 SUSE logs/(25239:25364): Esperando ULT del proceso 5 
+
+[INFO] 16:51:59:24 SUSE logs/(25239:25364): Recibi el ULT 0 
+
+[INFO] 16:51:59:26 SUSE logs/(25239:25364): Validando si es main thread o  ULT comun 
+
+[INFO] 16:51:59:26 SUSE logs/(25239:25364): El proceso 5 ya tiene un main_thread 
+
+[INFO] 16:51:59:27 SUSE logs/(25239:25364): Creando ULT 0
+[INFO] 19:05:28:913 SUSE logs/(27063:27063): Inicializando SUSE. 
+
+[INFO] 19:05:28:932 SUSE logs/(27063:27063): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:05:28:980 SUSE logs/(27063:27063): Archivo de configuracion levantado. 
+
+[INFO] 19:05:28:981 SUSE logs/(27063:27063): Inicializando semaforos 
+
+[INFO] 19:05:28:984 SUSE logs/(27063:27063): Iniciando servidor... 
+
+[INFO] 19:05:29:18 SUSE logs/(27063:27063): SUSE esperando conexiones...
+
+[INFO] 19:05:52:145 SUSE logs/(27063:27063): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:05:52:146 SUSE logs/(27063:27063): Creando process con id 5. 
+
+[INFO] 19:05:52:155 SUSE logs/(27063:27063): Cree el hilo para el programa 5
+[INFO] 19:05:52:157 SUSE logs/(27063:27063): SUSE esperando conexiones...
+
+[INFO] 19:05:52:160 SUSE logs/(27063:27193): Entro a la funcion del hilo 
+[INFO] 19:05:52:161 SUSE logs/(27063:27193): El socket es 5
+[INFO] 19:05:52:162 SUSE logs/(27063:27193): Entro al cop
+[INFO] 19:05:52:163 SUSE logs/(27063:27193): Esperando handshake...
+
+[INFO] 19:05:52:170 SUSE logs/(27063:27193): Realice el handshake con hilolay.
+
+[INFO] 19:05:52:171 SUSE logs/(27063:27193): Esperando ULT del proceso 5 
+
+[INFO] 19:05:52:174 SUSE logs/(27063:27193): Recibi el ULT 0 
+
+[INFO] 19:05:52:174 SUSE logs/(27063:27193): Validando si es main thread o  ULT comun 
+
+[INFO] 19:05:52:175 SUSE logs/(27063:27193): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:05:52:175 SUSE logs/(27063:27193): Creando ULT 0
+[INFO] 19:09:06:151 SUSE logs/(27266:27266): Inicializando SUSE. 
+
+[INFO] 19:09:06:151 SUSE logs/(27266:27266): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:09:06:151 SUSE logs/(27266:27266): Archivo de configuracion levantado. 
+
+[INFO] 19:09:06:151 SUSE logs/(27266:27266): Inicializando semaforos 
+
+[INFO] 19:09:06:151 SUSE logs/(27266:27266): Iniciando servidor... 
+
+[INFO] 19:09:06:151 SUSE logs/(27266:27266): SUSE esperando conexiones...
+
+[INFO] 19:09:34:705 SUSE logs/(27266:27266): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:09:41:259 SUSE logs/(27266:27266): Creando process con id 5. 
+
+[INFO] 19:10:04:492 SUSE logs/(27266:27304): Entro a la funcion del hilo 
+[INFO] 19:10:04:492 SUSE logs/(27266:27304): El socket es 5
+[INFO] 19:10:14:139 SUSE logs/(27266:27266): Cree el hilo para el programa 5
+[INFO] 19:10:14:139 SUSE logs/(27266:27266): SUSE esperando conexiones...
+
+[INFO] 19:10:14:175 SUSE logs/(27266:27304): Entro al cop
+[INFO] 19:10:14:175 SUSE logs/(27266:27304): Esperando handshake...
+
+[INFO] 19:10:14:176 SUSE logs/(27266:27304): Realice el handshake con hilolay.
+
+[INFO] 19:14:50:466 SUSE logs/(27424:27424): Inicializando SUSE. 
+
+[INFO] 19:14:50:466 SUSE logs/(27424:27424): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:14:50:466 SUSE logs/(27424:27424): Archivo de configuracion levantado. 
+
+[INFO] 19:14:50:466 SUSE logs/(27424:27424): Inicializando semaforos 
+
+[INFO] 19:14:50:467 SUSE logs/(27424:27424): Iniciando servidor... 
+
+[INFO] 19:14:50:467 SUSE logs/(27424:27424): SUSE esperando conexiones...
+
+[INFO] 19:15:06:58 SUSE logs/(27424:27424): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:15:06:58 SUSE logs/(27424:27424): Creando process con id 5. 
+
+[INFO] 19:15:12:761 SUSE logs/(27424:27424): Cree el hilo para el programa 5
+[INFO] 19:15:12:761 SUSE logs/(27424:27424): SUSE esperando conexiones...
+
+[INFO] 19:15:31:758 SUSE logs/(27424:27443): Entro a la funcion del hilo 
+[INFO] 19:15:31:758 SUSE logs/(27424:27443): El socket es 5
+[INFO] 19:15:52:326 SUSE logs/(27424:27443): Entro al cop
+[INFO] 19:15:52:326 SUSE logs/(27424:27443): Esperando handshake...
+
+[INFO] 19:15:55:688 SUSE logs/(27424:27443): Realice el handshake con hilolay.
+
+[INFO] 19:17:03:882 SUSE logs/(27424:27443): Esperando ULT del proceso 5 
+
+[INFO] 19:17:15:80 SUSE logs/(27424:27443): Recibi el ULT 0 
+
+[INFO] 19:17:17:841 SUSE logs/(27424:27443): Validando si es main thread o  ULT comun 
+
+[INFO] 19:17:49:280 SUSE logs/(27538:27538): Inicializando SUSE. 
+
+[INFO] 19:17:49:280 SUSE logs/(27538:27538): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:17:49:280 SUSE logs/(27538:27538): Archivo de configuracion levantado. 
+
+[INFO] 19:17:49:280 SUSE logs/(27538:27538): Inicializando semaforos 
+
+[INFO] 19:17:49:280 SUSE logs/(27538:27538): Iniciando servidor... 
+
+[INFO] 19:17:49:280 SUSE logs/(27538:27538): SUSE esperando conexiones...
+
+[INFO] 19:17:57:43 SUSE logs/(27538:27538): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:17:57:43 SUSE logs/(27538:27538): Creando process con id 5. 
+
+[INFO] 19:17:59:269 SUSE logs/(27538:27538): Cree el hilo para el programa 5
+[INFO] 19:17:59:270 SUSE logs/(27538:27538): SUSE esperando conexiones...
+
+[INFO] 19:18:03:736 SUSE logs/(27538:27556): Entro a la funcion del hilo 
+[INFO] 19:18:03:736 SUSE logs/(27538:27556): El socket es 5
+[INFO] 19:18:11:214 SUSE logs/(27538:27556): Entro al cop
+[INFO] 19:18:11:214 SUSE logs/(27538:27556): Esperando handshake...
+
+[INFO] 19:18:14:764 SUSE logs/(27538:27556): Realice el handshake con hilolay.
+
+[INFO] 19:18:31:865 SUSE logs/(27538:27556): Esperando ULT del proceso 5 
+
+[INFO] 19:18:42:874 SUSE logs/(27538:27556): Recibi el ULT 0 
+
+[INFO] 19:18:44:483 SUSE logs/(27538:27556): Validando si es main thread o  ULT comun 
+
+[INFO] 19:19:38:669 SUSE logs/(27648:27648): Inicializando SUSE. 
+
+[INFO] 19:19:38:669 SUSE logs/(27648:27648): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:19:38:669 SUSE logs/(27648:27648): Archivo de configuracion levantado. 
+
+[INFO] 19:19:38:669 SUSE logs/(27648:27648): Inicializando semaforos 
+
+[INFO] 19:19:38:669 SUSE logs/(27648:27648): Iniciando servidor... 
+
+[INFO] 19:19:38:669 SUSE logs/(27648:27648): SUSE esperando conexiones...
+
+[INFO] 19:19:44:121 SUSE logs/(27648:27648): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:19:44:121 SUSE logs/(27648:27648): Creando process con id 5. 
+
+[INFO] 19:19:47:360 SUSE logs/(27648:27648): Cree el hilo para el programa 5
+[INFO] 19:19:47:360 SUSE logs/(27648:27648): SUSE esperando conexiones...
+
+[INFO] 19:19:49:812 SUSE logs/(27648:27666): Entro a la funcion del hilo 
+[INFO] 19:19:49:812 SUSE logs/(27648:27666): El socket es 5
+[INFO] 19:19:49:812 SUSE logs/(27648:27666): Entro al cop
+[INFO] 19:19:49:812 SUSE logs/(27648:27666): Esperando handshake...
+
+[INFO] 19:19:56:697 SUSE logs/(27648:27666): Realice el handshake con hilolay.
+
+[INFO] 19:20:23:409 SUSE logs/(27648:27666): Esperando ULT del proceso 5 
+
+[INFO] 19:20:25:301 SUSE logs/(27648:27666): Recibi el ULT 0 
+
+[INFO] 19:20:30:170 SUSE logs/(27648:27666): Validando si es main thread o  ULT comun 
+
+[INFO] 19:20:35:288 SUSE logs/(27648:27666): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:20:40:348 SUSE logs/(27648:27666): Creando ULT 0
+[INFO] 19:22:19:250 SUSE logs/(27745:27745): Inicializando SUSE. 
+
+[INFO] 19:22:19:251 SUSE logs/(27745:27745): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:22:19:251 SUSE logs/(27745:27745): Archivo de configuracion levantado. 
+
+[INFO] 19:22:19:251 SUSE logs/(27745:27745): Inicializando semaforos 
+
+[INFO] 19:22:19:251 SUSE logs/(27745:27745): Iniciando servidor... 
+
+[INFO] 19:22:19:251 SUSE logs/(27745:27745): SUSE esperando conexiones...
+
+[INFO] 19:22:24:441 SUSE logs/(27745:27745): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:22:24:442 SUSE logs/(27745:27745): Creando process con id 5. 
+
+[INFO] 19:22:26:639 SUSE logs/(27745:27745): Cree el hilo para el programa 5
+[INFO] 19:22:26:639 SUSE logs/(27745:27745): SUSE esperando conexiones...
+
+[INFO] 19:22:27:476 SUSE logs/(27745:27765): Entro a la funcion del hilo 
+[INFO] 19:22:27:476 SUSE logs/(27745:27765): El socket es 5
+[INFO] 19:22:27:476 SUSE logs/(27745:27765): Entro al cop
+[INFO] 19:22:27:476 SUSE logs/(27745:27765): Esperando handshake...
+
+[INFO] 19:22:28:594 SUSE logs/(27745:27765): Realice el handshake con hilolay.
+
+[INFO] 19:23:03:527 SUSE logs/(27745:27765): Esperando ULT del proceso 5 
+
+[INFO] 19:23:03:527 SUSE logs/(27745:27765): Recibi el ULT 0 
+
+[INFO] 19:23:03:527 SUSE logs/(27745:27765): Validando si es main thread o  ULT comun 
+
+[INFO] 19:23:09:69 SUSE logs/(27745:27765): El proceso 5 ya tiene un main_thread 
+
+[INFO] 21:08:02:825 SUSE logs/(29777:29777): Inicializando SUSE. 
+
+[INFO] 21:08:02:825 SUSE logs/(29777:29777): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:08:02:825 SUSE logs/(29777:29777): Archivo de configuracion levantado. 
+
+[INFO] 21:08:02:825 SUSE logs/(29777:29777): Inicializando semaforos 
+
+[INFO] 21:08:02:825 SUSE logs/(29777:29777): Iniciando servidor... 
+
+[INFO] 21:08:02:825 SUSE logs/(29777:29777): SUSE esperando conexiones...
+
+[INFO] 21:08:20:138 SUSE logs/(29777:29777): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:08:20:138 SUSE logs/(29777:29777): Creando hilo para el proceso id 5. 
+
+[INFO] 21:08:28:61 SUSE logs/(29777:29777): Cree el hilo para el proceso 5
+[INFO] 21:08:28:62 SUSE logs/(29777:29777): SUSE esperando conexiones...
+
+[INFO] 21:08:30:482 SUSE logs/(29777:29939): Entro a la funcion del hilo 
+[INFO] 21:08:30:482 SUSE logs/(29777:29939): El socket es 5
+[INFO] 21:08:30:482 SUSE logs/(29777:29939): Entro al cop
+[INFO] 21:08:30:482 SUSE logs/(29777:29939): Esperando handshake...
+
+[INFO] 21:08:33:856 SUSE logs/(29777:29939): Realice el handshake con hilolay.
+
+[INFO] 21:08:33:857 SUSE logs/(29777:29939): compioloo
+[INFO] 21:09:50:211 SUSE logs/(29777:29939): Esperando ULT del proceso 5 
+
+[INFO] 21:09:50:211 SUSE logs/(29777:29939): Recibi el ULT 0 
+
+[INFO] 21:09:50:211 SUSE logs/(29777:29939): Validando si es main thread o  ULT comun 
+
+[INFO] 21:09:54:227 SUSE logs/(29777:29939): El proceso 5 ya tiene un main_thread 
+
+[INFO] 21:09:54:228 SUSE logs/(29777:29939): Creando ULT 0
+[INFO] 21:11:36:871 SUSE logs/(30194:30194): Inicializando SUSE. 
+
+[INFO] 21:11:36:871 SUSE logs/(30194:30194): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:11:36:871 SUSE logs/(30194:30194): Archivo de configuracion levantado. 
+
+[INFO] 21:11:36:871 SUSE logs/(30194:30194): Inicializando semaforos 
+
+[INFO] 21:11:36:871 SUSE logs/(30194:30194): Iniciando servidor... 
+
+[INFO] 21:11:36:871 SUSE logs/(30194:30194): SUSE esperando conexiones...
+
+[INFO] 21:12:12:455 SUSE logs/(30194:30194): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:12:12:455 SUSE logs/(30194:30194): Creando hilo para el proceso id 5. 
+
+[INFO] 21:12:14:647 SUSE logs/(30194:30194): Cree el hilo para el proceso 5
+[INFO] 21:12:14:647 SUSE logs/(30194:30194): SUSE esperando conexiones...
+
+[INFO] 21:12:15:684 SUSE logs/(30194:30380): Entro a la funcion del hilo 
+[INFO] 21:12:15:685 SUSE logs/(30194:30380): El socket es 5
+[INFO] 21:12:15:685 SUSE logs/(30194:30380): Entro al cop
+[INFO] 21:12:15:685 SUSE logs/(30194:30380): Esperando handshake...
+
+[INFO] 21:12:18:451 SUSE logs/(30194:30380): Realice el handshake con hilolay.
+
+[INFO] 21:12:43:828 SUSE logs/(30194:30380): Esperando ULT del proceso 5 
+
+[INFO] 21:12:52:160 SUSE logs/(30194:30380): Recibi el ULT 0 
+
+[INFO] 21:12:52:841 SUSE logs/(30194:30380): Validando si es main thread o  ULT comun 
+
+[INFO] 21:12:54:305 SUSE logs/(30194:30380): El proceso 5 ya tiene un main_thread 
+
+[INFO] 21:12:59:671 SUSE logs/(30194:30380): Creando ULT 0
+[INFO] 21:14:00:732 SUSE logs/(30681:30681): Inicializando SUSE. 
+
+[INFO] 21:14:00:733 SUSE logs/(30681:30681): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:14:00:733 SUSE logs/(30681:30681): Archivo de configuracion levantado. 
+
+[INFO] 21:14:00:733 SUSE logs/(30681:30681): Inicializando semaforos 
+
+[INFO] 21:14:00:733 SUSE logs/(30681:30681): Iniciando servidor... 
+
+[INFO] 21:14:00:733 SUSE logs/(30681:30681): SUSE esperando conexiones...
+
+[INFO] 21:14:32:346 SUSE logs/(30681:30681): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:14:32:346 SUSE logs/(30681:30681): Creando hilo para el proceso id 5. 
+
+[INFO] 21:14:36:654 SUSE logs/(30681:30681): Cree el hilo para el proceso 5
+[INFO] 21:14:36:654 SUSE logs/(30681:30681): SUSE esperando conexiones...
+
+[INFO] 21:14:38:938 SUSE logs/(30681:30821): Entro a la funcion del hilo 
+[INFO] 21:14:38:938 SUSE logs/(30681:30821): El socket es 5
+[INFO] 21:14:38:938 SUSE logs/(30681:30821): Entro al cop
+[INFO] 21:14:38:938 SUSE logs/(30681:30821): Esperando handshake...
+
+[INFO] 21:14:45:565 SUSE logs/(30681:30821): Realice el handshake con hilolay.
+
+[INFO] 21:16:33:344 SUSE logs/(31080:31080): Inicializando SUSE. 
+
+[INFO] 21:16:33:365 SUSE logs/(31080:31080): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:16:33:478 SUSE logs/(31080:31080): Archivo de configuracion levantado. 
+
+[INFO] 21:16:33:478 SUSE logs/(31080:31080): Inicializando semaforos 
+
+[INFO] 21:16:33:482 SUSE logs/(31080:31080): Iniciando servidor... 
+
+[INFO] 21:16:33:517 SUSE logs/(31080:31080): SUSE esperando conexiones...
+
+[INFO] 21:16:35:875 SUSE logs/(31080:31080): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:16:35:876 SUSE logs/(31080:31080): Creando hilo para el proceso id 5. 
+
+[INFO] 21:16:35:884 SUSE logs/(31080:31080): Cree el hilo para el proceso 5
+[INFO] 21:16:35:886 SUSE logs/(31080:31080): SUSE esperando conexiones...
+
+[INFO] 21:16:35:888 SUSE logs/(31080:31085): Entro a la funcion del hilo 
+[INFO] 21:16:35:888 SUSE logs/(31080:31085): El socket es 5
+[INFO] 21:16:35:890 SUSE logs/(31080:31085): Entro al cop
+[INFO] 21:16:35:890 SUSE logs/(31080:31085): Esperando handshake...
+
+[INFO] 21:16:35:895 SUSE logs/(31080:31085): Realice el handshake con hilolay.
+
+[INFO] 21:16:35:896 SUSE logs/(31080:31085): Esperando ULT del proceso 5 
+
+[INFO] 21:16:35:899 SUSE logs/(31080:31085): Recibi el ULT 0 
+
+[INFO] 21:16:35:899 SUSE logs/(31080:31085): Validando si es main thread o  ULT comun 
+
+[INFO] 21:16:35:900 SUSE logs/(31080:31085): El proceso 5 ya tiene un main_thread 
+
+[INFO] 21:16:35:902 SUSE logs/(31080:31085): Creando ULT 0
+[INFO] 21:22:55:410 SUSE logs/(31549:31549): Inicializando SUSE. 
+
+[INFO] 21:22:55:430 SUSE logs/(31549:31549): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:22:55:484 SUSE logs/(31549:31549): Archivo de configuracion levantado. 
+
+[INFO] 21:22:55:484 SUSE logs/(31549:31549): Inicializando semaforos 
+
+[INFO] 21:22:55:489 SUSE logs/(31549:31549): Iniciando servidor... 
+
+[INFO] 21:22:55:529 SUSE logs/(31549:31549): SUSE esperando conexiones...
+
+[INFO] 21:23:10:119 SUSE logs/(31549:31549): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:23:10:119 SUSE logs/(31549:31549): Creando hilo para el proceso id 5. 
+
+[INFO] 21:23:10:127 SUSE logs/(31549:31549): Cree el hilo para el proceso 5
+[INFO] 21:23:10:129 SUSE logs/(31549:31549): SUSE esperando conexiones...
+
+[INFO] 21:23:10:131 SUSE logs/(31549:31709): Entro a la funcion del hilo 
+[INFO] 21:23:10:132 SUSE logs/(31549:31709): El socket es 5
+[INFO] 21:23:10:134 SUSE logs/(31549:31709): Esperando handshake...
+
+[INFO] 21:23:10:141 SUSE logs/(31549:31709): Realice el handshake con hilolay.
+
+[INFO] 21:23:10:143 SUSE logs/(31549:31709): Esperando ULT del proceso 5 
+
+[INFO] 21:23:10:143 SUSE logs/(31549:31709): Recibi el ULT 0 
+
+[INFO] 21:23:10:146 SUSE logs/(31549:31709): Validando si es main thread o  ULT comun 
+
+[INFO] 21:23:10:146 SUSE logs/(31549:31709): El proceso 5 ya tiene un main_thread 
+
+[INFO] 21:23:10:147 SUSE logs/(31549:31709): Creando ULT 0
+[INFO] 21:27:05:737 SUSE logs/(32179:32179): Inicializando SUSE. 
+
+[INFO] 21:27:05:737 SUSE logs/(32179:32179): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:27:05:737 SUSE logs/(32179:32179): Archivo de configuracion levantado. 
+
+[INFO] 21:27:05:737 SUSE logs/(32179:32179): Inicializando semaforos 
+
+[INFO] 21:27:05:737 SUSE logs/(32179:32179): Iniciando servidor... 
+
+[INFO] 21:27:05:737 SUSE logs/(32179:32179): SUSE esperando conexiones...
+
+[INFO] 21:27:15:633 SUSE logs/(32179:32179): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:27:15:633 SUSE logs/(32179:32179): Creando hilo para el proceso id 5. 
+
+[INFO] 21:27:18:483 SUSE logs/(32179:32179): Cree el hilo para el proceso 5
+[INFO] 21:27:18:484 SUSE logs/(32179:32179): SUSE esperando conexiones...
+
+[INFO] 21:27:24:100 SUSE logs/(32179:32239): Entro a la funcion del hilo 
+[INFO] 21:27:24:100 SUSE logs/(32179:32239): El socket es 5
+[INFO] 21:27:24:100 SUSE logs/(32179:32239): Esperando handshake...
+
+[INFO] 21:27:26:604 SUSE logs/(32179:32239): Realice el handshake con hilolay.
+
+[INFO] 21:27:50:232 SUSE logs/(32179:32239): no  es vacia la lista de tamanio 0
+[INFO] 21:27:57:157 SUSE logs/(32179:32239): Esperando ULT del proceso 5 
+
+[INFO] 21:28:00:596 SUSE logs/(32179:32239): Recibi el ULT 0 
+
+[INFO] 21:28:01:461 SUSE logs/(32179:32239): Validando si es main thread o  ULT comun 
+
+[INFO] 21:28:10:57 SUSE logs/(32179:32239): El proceso 5 es nuevo 
+
+[INFO] 21:28:12:922 SUSE logs/(32179:32239): Proceso creado con id 5 
+
+[INFO] 21:28:12:923 SUSE logs/(32179:32239): Creando ULT 0
+[INFO] 21:28:12:923 SUSE logs/(32179:32239): Main thread creado con id 0 
+
+[INFO] 21:28:12:923 SUSE logs/(32179:32239): Validando si puedo poner e ejecutar el main thread... 
+
+[INFO] 21:29:34:843 SUSE logs/(32558:32558): Inicializando SUSE. 
+
+[INFO] 21:29:34:861 SUSE logs/(32558:32558): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:29:34:911 SUSE logs/(32558:32558): Archivo de configuracion levantado. 
+
+[INFO] 21:29:34:912 SUSE logs/(32558:32558): Inicializando semaforos 
+
+[INFO] 21:29:34:915 SUSE logs/(32558:32558): Iniciando servidor... 
+
+[INFO] 21:29:34:952 SUSE logs/(32558:32558): SUSE esperando conexiones...
+
+[INFO] 21:29:38:362 SUSE logs/(32558:32558): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:29:38:362 SUSE logs/(32558:32558): Creando hilo para el proceso id 5. 
+
+[INFO] 21:29:38:382 SUSE logs/(32558:32587): Entro a la funcion del hilo 
+[INFO] 21:29:38:388 SUSE logs/(32558:32558): Cree el hilo para el proceso 5
+[INFO] 21:29:38:391 SUSE logs/(32558:32558): SUSE esperando conexiones...
+
+[INFO] 21:29:38:391 SUSE logs/(32558:32587): El socket es 5
+[INFO] 21:29:38:393 SUSE logs/(32558:32587): Esperando handshake...
+
+[INFO] 21:29:38:398 SUSE logs/(32558:32587): Realice el handshake con hilolay.
+
+[INFO] 21:29:38:399 SUSE logs/(32558:32587): no  es vacia la lista de tamanio 0
+[INFO] 21:29:38:400 SUSE logs/(32558:32587): Esperando ULT del proceso 5 
+
+[INFO] 21:29:38:400 SUSE logs/(32558:32587): Recibi el ULT 0 
+
+[INFO] 21:29:38:401 SUSE logs/(32558:32587): Validando si es main thread o  ULT comun 
+
+[INFO] 21:29:38:401 SUSE logs/(32558:32587): El proceso 5 es nuevo 
+
+[INFO] 21:29:38:402 SUSE logs/(32558:32587): Proceso creado con id 5 
+
+[INFO] 21:29:38:402 SUSE logs/(32558:32587): Creando ULT 0
+[INFO] 21:29:38:407 SUSE logs/(32558:32587): Main thread creado con id 0 
+
+[INFO] 21:29:38:408 SUSE logs/(32558:32587): Validando si puedo poner e ejecutar el main thread... 
+
+[INFO] 21:33:39:798 SUSE logs/(620:620): Inicializando SUSE. 
+
+[INFO] 21:33:39:816 SUSE logs/(620:620): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:33:39:866 SUSE logs/(620:620): Archivo de configuracion levantado. 
+
+[INFO] 21:33:39:867 SUSE logs/(620:620): Inicializando semaforos 
+
+[INFO] 21:33:39:873 SUSE logs/(620:620): Iniciando servidor... 
+
+[INFO] 21:33:39:910 SUSE logs/(620:620): SUSE esperando conexiones...
+
+[INFO] 21:33:46:334 SUSE logs/(620:620): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:33:46:335 SUSE logs/(620:620): Creando hilo para el proceso id 5. 
+
+[INFO] 21:33:46:343 SUSE logs/(620:620): Cree el hilo para el proceso 5
+[INFO] 21:33:46:345 SUSE logs/(620:620): SUSE esperando conexiones...
+
+[INFO] 21:33:46:348 SUSE logs/(620:655): Entro a la funcion del hilo 
+[INFO] 21:33:46:348 SUSE logs/(620:655): El socket es 5
+[INFO] 21:33:46:350 SUSE logs/(620:655): Esperando handshake...
+
+[INFO] 21:33:46:356 SUSE logs/(620:655): Realice el handshake con hilolay.
+
+[INFO] 21:33:46:358 SUSE logs/(620:655): no  es vacia la lista de tamanio 0
+[INFO] 21:33:46:359 SUSE logs/(620:655): Esperando ULT del proceso 5 
+
+[INFO] 21:33:46:363 SUSE logs/(620:655): Recibi el ULT 0 
+
+[INFO] 21:33:46:364 SUSE logs/(620:655): Validando si es main thread o  ULT comun 
+
+[INFO] 21:33:46:364 SUSE logs/(620:655): El proceso 5 es nuevo 
+
+[INFO] 21:33:46:365 SUSE logs/(620:655): Proceso creado con id 5 
+
+[INFO] 21:33:46:365 SUSE logs/(620:655): Creando ULT 0
+[INFO] 21:33:46:366 SUSE logs/(620:655): Main thread creado con id 0 
+
+[INFO] 21:33:46:367 SUSE logs/(620:655): Validando si puedo poner e ejecutar el main thread... 
+
+[INFO] 21:39:39:162 SUSE logs/(1074:1074): Inicializando SUSE. 
+
+[INFO] 21:39:39:186 SUSE logs/(1074:1074): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:39:39:253 SUSE logs/(1074:1074): Archivo de configuracion levantado. 
+
+[INFO] 21:39:39:253 SUSE logs/(1074:1074): Inicializando semaforos 
+
+[INFO] 21:39:39:257 SUSE logs/(1074:1074): Iniciando servidor... 
+
+[INFO] 21:39:39:297 SUSE logs/(1074:1074): SUSE esperando conexiones...
+
+[INFO] 21:39:42:786 SUSE logs/(1074:1074): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:39:42:786 SUSE logs/(1074:1074): Creando hilo para el proceso id 5. 
+
+[INFO] 21:39:42:805 SUSE logs/(1074:1074): Cree el hilo para el proceso 5
+[INFO] 21:39:42:806 SUSE logs/(1074:1074): SUSE esperando conexiones...
+
+[INFO] 21:39:42:809 SUSE logs/(1074:1079): Entro a la funcion del hilo 
+[INFO] 21:39:42:810 SUSE logs/(1074:1079): El socket es 5
+[INFO] 21:39:42:820 SUSE logs/(1074:1079): Esperando handshake...
+
+[INFO] 21:39:42:827 SUSE logs/(1074:1079): Realice el handshake con hilolay.
+
+[INFO] 21:39:42:832 SUSE logs/(1074:1079): no  es vacia la lista de tamanio 0
+[INFO] 21:39:42:833 SUSE logs/(1074:1079): Esperando ULT del proceso 5 
+
+[INFO] 21:39:42:834 SUSE logs/(1074:1079): Recibi el ULT 0 
+
+[INFO] 21:39:42:834 SUSE logs/(1074:1079): Validando si es main thread o  ULT comun 
+
+[INFO] 21:39:42:834 SUSE logs/(1074:1079): El proceso 5 es nuevo 
+
+[INFO] 21:39:42:835 SUSE logs/(1074:1079): Proceso creado con id 5 
+
+[INFO] 21:39:42:836 SUSE logs/(1074:1079): Creando ULT 0
+[INFO] 21:39:42:836 SUSE logs/(1074:1079): Main thread creado con id 0 
+
+[INFO] 21:39:42:837 SUSE logs/(1074:1079): Validando si puedo poner e ejecutar el main thread... 
+
+[INFO] 21:39:42:844 SUSE logs/(1074:1079): El thread 0 paso de new a execute 
+
+[INFO] 21:39:42:844 SUSE logs/(1074:1079): El thread 0 del programa 5 esta en ready 
+
+[INFO] 21:45:57:425 SUSE logs/(1488:1488): Inicializando SUSE. 
+
+[INFO] 21:45:57:445 SUSE logs/(1488:1488): Levantando archivo de configuracion de SUSE 
+
+[INFO] 21:45:57:503 SUSE logs/(1488:1488): Archivo de configuracion levantado. 
+
+[INFO] 21:45:57:503 SUSE logs/(1488:1488): Inicializando semaforos 
+
+[INFO] 21:45:57:510 SUSE logs/(1488:1488): Iniciando servidor... 
+
+[INFO] 21:45:57:548 SUSE logs/(1488:1488): SUSE esperando conexiones...
+
+[INFO] 21:46:02:468 SUSE logs/(1488:1488): Recibi una nueva conexion del socket 5. 
+
+[INFO] 21:46:02:469 SUSE logs/(1488:1488): Creando hilo para el proceso id 5. 
+
+[INFO] 21:46:02:477 SUSE logs/(1488:1488): Cree el hilo para el proceso 5
+[INFO] 21:46:02:480 SUSE logs/(1488:1488): SUSE esperando conexiones...
+
+[INFO] 21:46:02:482 SUSE logs/(1488:1493): Entro a la funcion del hilo 
+[INFO] 21:46:02:482 SUSE logs/(1488:1493): El socket es 5
+[INFO] 21:46:02:484 SUSE logs/(1488:1493): Esperando handshake...
+
+[INFO] 21:46:02:489 SUSE logs/(1488:1493): Realice el handshake con hilolay.
+
+[INFO] 21:46:02:491 SUSE logs/(1488:1493): no  es vacia la lista de tamanio 0
+[INFO] 21:46:02:491 SUSE logs/(1488:1493): Esperando ULT del proceso 5 
+
+[INFO] 21:46:02:492 SUSE logs/(1488:1493): Recibi el ULT 0 
+
+[INFO] 21:46:02:492 SUSE logs/(1488:1493): Validando si es main thread o  ULT comun 
+
+[INFO] 21:46:02:493 SUSE logs/(1488:1493): El proceso 5 es nuevo 
+
+[INFO] 21:46:02:498 SUSE logs/(1488:1493): Proceso creado con id 5 
+
+[INFO] 21:46:02:499 SUSE logs/(1488:1493): Creando ULT 0
+[INFO] 21:46:02:499 SUSE logs/(1488:1493): Main thread creado con id 0 
+
+[INFO] 21:46:02:500 SUSE logs/(1488:1493): Validando si puedo poner e ejecutar el main thread... 
+
+[INFO] 21:46:02:505 SUSE logs/(1488:1493): El thread 0 paso de new a execute 
+
+[INFO] 21:46:02:506 SUSE logs/(1488:1493): El thread 0 del programa 5 esta ejecutando 
+
+[INFO] 21:46:46:969 SUSE logs/(1488:1488): Recibi una nueva conexion del socket 7. 
+
+[INFO] 21:46:46:969 SUSE logs/(1488:1488): Creando hilo para el proceso id 7. 
+
+[INFO] 21:46:46:972 SUSE logs/(1488:1488): Cree el hilo para el proceso 7
+[INFO] 21:46:46:972 SUSE logs/(1488:1488): SUSE esperando conexiones...
+
+[INFO] 21:46:46:973 SUSE logs/(1488:1768): Entro a la funcion del hilo 
+[INFO] 21:46:46:973 SUSE logs/(1488:1768): El socket es 7
+[INFO] 21:46:46:973 SUSE logs/(1488:1768): Esperando handshake...
+
+[INFO] 21:46:46:974 SUSE logs/(1488:1768): Realice el handshake con hilolay.
+
+[INFO] 21:46:46:974 SUSE logs/(1488:1768): no  es vacia la lista de tamanio 1
+[INFO] 21:46:46:974 SUSE logs/(1488:1768): Esperando ULT del proceso 7 
+
+[INFO] 21:46:46:975 SUSE logs/(1488:1768): Recibi el ULT 0 
+
+[INFO] 21:46:46:975 SUSE logs/(1488:1768): Validando si es main thread o  ULT comun 
+
+[INFO] 21:46:46:975 SUSE logs/(1488:1768): El proceso 7 ya tiene un main_thread 
+
+[INFO] 21:46:46:976 SUSE logs/(1488:1768): Creando ULT 0
