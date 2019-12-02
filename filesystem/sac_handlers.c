@@ -734,6 +734,8 @@ int agregar_nodo(GFile *file_data, int numeroNodo){
 	int new_pointer_block;
 	punterosBloquesDatos* nodo_punteros;
 
+	pthread_mutex_lock(&s_tablaDeNodos);
+
 	// Ubica el ultimo nodo escrito y se posiciona en el mismo.
 	setear_posicion(&node_pointer_number, &position, 0, tam);
 
@@ -775,6 +777,8 @@ int agregar_nodo(GFile *file_data, int numeroNodo){
 
 	// Hace que dicho puntero, en la posicion ya obtenida, apunte al nodo indicado.
 	nodo_punteros->punteros_a_bloques[position] = numeroNodo;
+
+	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	msync(disco, diskSize, MS_SYNC);
 
