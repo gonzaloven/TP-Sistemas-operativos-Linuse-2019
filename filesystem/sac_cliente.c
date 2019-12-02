@@ -624,7 +624,7 @@ fuse_configuration* load_configuration(char *path)
 		exit(-1);
 	}
 
-	fc->ip_cliente = malloc(strlen(config_get_string_value(config,"IP_CLIENTE")));
+	fc->ip_cliente = malloc(strlen(config_get_string_value(config,"IP_CLIENTE"))+ 1);
 
 	strcpy(fc->ip_cliente,config_get_string_value(config,"IP_CLIENTE"));
 	fc->listen_port = config_get_int_value(config,"LISTEN_PORT");
@@ -633,19 +633,10 @@ fuse_configuration* load_configuration(char *path)
 	return fc;
 }
 
-void cliente_stop_service()
-{
-	log_info(logger,"SIGINT recibida. Cliente desconectado!");
-	free(fuse_config);
-	log_destroy(logger);
-}
-
 // Dentro de los argumentos que recibe nuestro programa obligatoriamente
 // debe estar el path al directorio donde vamos a montar nuestro FS
 int main(int argc, char *argv[]){
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
-
-	signal(SIGINT,cliente_stop_service);
 
 	////////////////////////////////no se donde hacer el close del socket////////////////////////////////////////
 
@@ -661,5 +652,12 @@ int main(int argc, char *argv[]){
 	// Esta es la funcion principal de FUSE, es la que se encarga
 	// de realizar el montaje, comuniscarse con el kernel, delegar todo
 	// en varios threads
-	return fuse_main(args.argc, args.argv, &sac_oper, NULL);
+
+	fuse_main(args.argc, args.argv, &sac_oper, NULL);
+
+	log_info(logger,"SIGINT recibida. Cliente desconectado!");
+	log_destroy(logger);
+	free(fuse_config);
+
+	return 0;
 }
