@@ -149,7 +149,7 @@ void iniciar_servidor() {
 		free(handshake);
 
 		//Creo un hilo por programa que se conecta
-		log_info(logger, "Creando hilo para el proceso id %d. \n", new_connection);
+		log_info(logger, "Creando hilo para atender al proceso %d. \n", new_connection);
 
 		t_list* thread_params;
 		thread_params = list_create();
@@ -160,9 +160,7 @@ void iniciar_servidor() {
 }
 
 void* process_conectado_funcion_thread(void* argumentos) {
-	log_info(logger, "Entro a la funcion del hilo ");
 	un_socket socket_actual = list_get(argumentos, 0);
-	log_info(logger, "El socket es %d", socket_actual);
 	list_destroy(argumentos);
 	handle_conection_suse(socket_actual);
 	pthread_detach(pthread_self());
@@ -225,13 +223,14 @@ void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
 {
 	esperar_handshake(socket, paquete_recibido, cop_close_tid);
 
-	log_info(logger, "Realice el primer handshake con hilolay\n");
-	sprintf("el socket es", "%d", socket);
+	log_info(logger, "Realice el handshake de close_tid\n");
 
 	t_paquete* paquete = recibir(socket);
 
 	int desplazamiento = 0;
 	int tid = deserializar_int(paquete->data, &desplazamiento);
+
+	log_info(logger, "Recibi un close para el ULT %d\n", tid);
 
 	int resultado = close_tid(tid,socket);
 
@@ -240,7 +239,7 @@ void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
 	int desp = 0;
 
 	serializar_int(buffer, &desp, resultado);
-	enviar(socket, cop_wait_sem, tamanio_buffer, buffer);
+	enviar(socket, cop_close_tid, tamanio_buffer, buffer);
 
 	free(buffer);
 	liberar_paquete(paquete);
@@ -276,10 +275,8 @@ int join(un_socket socket, int tid){
 }
 
 void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay) {
-	log_info(logger, "Esperando handshake...\n");
+	log_info(logger, "Esperando handshake en suse_create...\n");
 	esperar_handshake(socket_actual, paquete_hilolay, cop_suse_create);
-
-	log_info(logger, "Realice el handshake con hilolay.\n");
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 
@@ -289,15 +286,11 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay) {
 
 	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
 
-	log_info(logger, "no  es vacia la lista de tamanio %d", list_size(configuracion_suse.process));
-
-	log_info(logger, "Esperando ULT del proceso %d \n", socket_actual);
-
 	int desplazamiento = 0;
 	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	log_info(logger, "Recibi el ULT %d \n", tid);
-	log_info(logger, "Validando si es main thread o  ULT comun \n");
+	log_info(logger, "Recibi el ULT %d del proceso %d \n", tid, socket_actual);
+	log_info(logger, "Validando si es el main thread o ULT comun \n");
 
 	if(list_size(configuracion_suse.process) != 0  && find_process_by_id){
 		log_info(logger, "El proceso %d ya tiene un main_thread \n", socket_actual);
@@ -316,17 +309,16 @@ void handle_ULT_create(t_process* process, int tid){
 	t_suse_thread * new_thread;
 	new_thread  = ULT_create(process, tid);
 
-	log_info(logger, "El grado de multiprogramacion es %d", configuracion_suse.ACTUAL_MULTIPROG);
+	log_info(logger, "El grado de multiprogramacion es %d \n", configuracion_suse.ACTUAL_MULTIPROG);
 
 	pthread_mutex_lock(&mutex_multiprog);
 	if(validar_grado_multiprogramacion())
 	{
-		log_info(logger, "Agrego el tid %d a la cola de ready \n", tid);
 		nuevo_a_listo(new_thread,process->PROCESS_ID);
-		log_info(logger, "El thread %d del programa %d esta en ready \n", new_thread->tid, process->PROCESS_ID);
+		log_info(logger, "El ULT %d del proceso %d esta en ready \n", new_thread->tid, process->PROCESS_ID);
 	}
 	else{
-		log_info(logger, "No puedo agregar el hilo %d a la cola de new por grado de multiprogramacion \n", tid);
+		log_info(logger, "No puedo agregar el ULT %d del proceso %d a la cola de ready por grado de multiprogramacion \n", tid);
 	}
 
 	pthread_mutex_unlock(&mutex_multiprog);
@@ -342,10 +334,10 @@ void handle_main_thread_create(un_socket socket_actual, int tid) {
 
 	t_suse_thread* main_thread = ULT_create(new_process, tid);
 
-	log_info(logger, "Validando si puedo poner e ejecutar el main thread... \n", configuracion_suse.ACTUAL_MULTIPROG);
+	log_info(logger, "Validando si puedo poner a ejecutar el main thread... \n", configuracion_suse.ACTUAL_MULTIPROG);
 
 	nuevo_a_ejecucion(main_thread, new_process->PROCESS_ID);
-	log_info(logger, "El thread %d del programa %d esta ejecutando \n", main_thread->tid, new_process->PROCESS_ID);
+	log_info(logger, "El thread %d del proceso %d esta ejecutando \n", main_thread->tid, new_process->PROCESS_ID);
 }
 
 t_suse_thread* ULT_create(t_process* process, int tid){
@@ -357,10 +349,10 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 	new_thread->estado = E_NEW;
 	new_thread->duracionRafaga = 0;
 	new_thread->ejecutado_desde_estimacion = false;
-	//todo ver si hace falta inicializar todo
+	//todo para agregar a new hay que chequear el grado de multiprog o no
 	list_add(process->ULTS, new_thread);
 	list_add(new_queue, new_thread);
-	log_info(logger, "Main thread creado con id %d \n", new_thread->tid);
+	log_info(logger, "ULT creado con id %d \n", new_thread->tid);
 
 	return new_thread;
 }
@@ -377,17 +369,17 @@ int close_tid(int tid, int socket_actual){
 	{
 		return thread->tid == tid;
 	}
-	//todo esto hay que modificarlo
+
 	t_process* process = list_find(configuracion_suse.process,find_process_by_id);
 	t_suse_thread* thread = list_find(process->ULTS,find_thread_by_tid);
 
 	if(thread == NULL)
 	{
-
-		 list_destroy_and_destroy_elements(process->ULTS, free);
-		 list_remove_and_destroy_element(configuracion_suse.process, process, free);
-		 int resultado = close(socket_actual);
-		 return resultado;
+		log_info(logger, "Recibi un close para el ULT %d\n", tid);
+		list_destroy_and_destroy_elements(process->ULTS, free);
+		list_remove_and_destroy_element(configuracion_suse.process, process, free);
+		int resultado = close(socket_actual);
+		return resultado;
 	}
 
 	if(!list_is_empty(thread->joinedBy))
@@ -524,12 +516,12 @@ t_process * generar_process(int process_id) {
 void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	log_info(logger, "Esperando handshake de suse_schedule_next...\n");
 	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
-	log_info(logger, "Realice el handhsake de suse_schedule_next");
 
-	t_paquete* paquete_recibido = recibir(socket_actual); // Recibo hilo principal
+	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
-	liberar_paquete(paquete_recibido);
+
+	log_info(logger, "Recibi una peticion de suse_chedule_next \n");
 
 	bool comparador(t_process* p)
 	{
@@ -538,8 +530,9 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 
 	t_process* process = list_find(configuracion_suse.process, comparador);
 
-	log_info(logger, "Iniciando planificacion de programa %d...\n",process->PROCESS_ID);
-	int next_tid = obtener_proximo_ejecutar(process); //Inicia planificacion
+	log_info(logger, "Iniciando planificacion...\n");
+
+	int next_tid = obtener_proximo_ejecutar(process);
 
 	// Envio el next tid
 	int tamanio_buffer = sizeof(int);
@@ -547,12 +540,12 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	int desp = 0;
 	serializar_int(buffer, &desp, next_tid);
 	enviar(socket_actual, cop_next_tid, tamanio_buffer, buffer);
+	log_info(logger, "Envie el next_tid %d a SUSE", next_tid);
 	free(buffer);
 	liberar_paquete(paquete_recibido);
 }
 
 int obtener_proximo_ejecutar(t_process* process){
-	log_info(logger, "Ordenando cola de listos...");
 
 	clock_t aux = clock(); //pasado a float, segundos. Es el momento en que termina de ejcutar
 
@@ -566,7 +559,7 @@ int obtener_proximo_ejecutar(t_process* process){
 
 	t_suse_thread *next_ULT = list_get(process->READY_LIST, 0); // TODO: Si no funciona hacemos una bool que haga return thread != null; va a retornar el primero q haya
 	int next_tid = next_ULT->tid;
-	log_info(logger, "El proximo a ejecutar es %d", next_tid);
+	log_info(logger, "El proximo ULT a ejecutar es %d", next_tid);
 
 	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
 
@@ -584,7 +577,7 @@ void ordenar_cola_listos(t_list* ready_list) {
 
 void estimar_ULTs_listos(t_list* ready_list) {
 	//TODO ver sino es void*
-	log_info(logger, "Estimando ULTs...");
+	log_info(logger, "Estimando ULTs...\n");
 	void estimar(t_suse_thread* ULT) {
 		if (ULT->ejecutado_desde_estimacion) {
 			ULT->ejecutado_desde_estimacion = false;
