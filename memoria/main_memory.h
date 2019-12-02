@@ -8,6 +8,9 @@
 #include <stddef.h>
 #include <commons/collections/list.h>
 #include <commons/log.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <math.h>
 
 #define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
@@ -29,9 +32,8 @@ typedef struct program_s
  */
 typedef struct HeapMetadata 
 {
-	uint32_t free_size; //if is not free, free_size = used_size
+	uint32_t free_size; //if is not free, free_size = used_size //esto no es asi
 	bool is_free;
-	struct HeapMetadata* next;
 }heap_metadata;
 
 
