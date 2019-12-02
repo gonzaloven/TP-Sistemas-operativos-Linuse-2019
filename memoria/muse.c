@@ -2,7 +2,7 @@
  * De la manera en como está implementado, muse.c lo que hace es levantar el servidor central,
  * levanta los loggers y el archivo de configuración, se queda escuchando y esperando a los
  * clientes y dependiendo que funciones le manden, muse se encargará de llamar a dichas funciones,
- * toda la lógica de estas funciones está en main_memory.c  
+ * toda la lógica de estas funciones está en main_memory.c 
  */
 
 #include "muse.h"
@@ -128,7 +128,7 @@ uint32_t muse_invoke_function(Function *function,uint32_t pid)
 								function->args[1].value.val_u32,function->args[2].value.val_sizet,pid);
 			break;
 		case FUNCTION_COPY:
-			log_debug(muse_logger,"Copy called with args -> arg[0] %d  arg[1] %d arg[2] %d",function->args[0].value.val_u32,function->args[1].value.val_u32,function->args[2].value.val_u32);
+			log_debug(muse_logger,"Copy called with args -> arg[0] %d arg[1] %d arg[2] %d",function->args[0].value.val_u32,function->args[1].value.val_u32,function->args[2].value.val_u32);
 			func_ret = memory_cpy(function->args[0].value.val_u32,
 								&function->args[1].value.val_u32,function->args[2].value.val_u32,pid);
 			break;

@@ -75,20 +75,6 @@ uint32_t malloc(size_t size)
 	
 	total_pages_needed = (total_size / PAGE_SIZE) + ((total_size % PAGE_SIZE) != 0); // ceil(total_size / PAGE_SIZE)
 	
-	if((nro_prog = search_program(pid)) == -1)
-	{
-		//si el programa no está en la lista de programas	
-		//agregamos el programa a la lista de programas y le creamos un nuevo segmento
-
-		prog = (program *) malloc(sizeof(program));
-		
-		prog->pid = pid;
-		prog->segment_table = list_create();
-		nro_prog = list_add(program_list, prog);	
-
-		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", nro_prog);
-	}  
-
     if (!global_base)
     { // First call.
         block = request_space(NULL, size);

@@ -19,7 +19,7 @@
 typedef struct program_s
 {
 	uint16_t pid;
-	t_list *segment_table;
+	t_list *segment_table;	
 }program;
 
 /**
@@ -31,10 +31,11 @@ typedef struct HeapMetadata
 {
 	uint32_t free_size; //if is not free, free_size = used_size
 	bool is_free;
+	struct HeapMetadata* next;
 }heap_metadata;
 
 
-//Una frame puede tener varios bloques, un mismo bloque puede ser compartido por varios frames
+//Un frame puede tener varios bloques, un mismo bloque puede ser compartido por varios frames
 typedef struct bloque_s
 {
 	heap_metadata metadata;
