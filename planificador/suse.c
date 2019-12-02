@@ -167,39 +167,49 @@ void* process_conectado_funcion_thread(void* argumentos) {
 	return NULL;
 }
 
-void handle_conection_suse(un_socket socket_actual) {
+void handle_conection_suse(un_socket socket_actual)
+{
+	bool atender = true;
 
-	t_paquete* paquete_recibido = recibir(socket_actual);
+	while(atender)
+	{
 
-	switch(paquete_recibido->codigo_operacion){
-		case cop_suse_create:
-			handle_suse_create(socket_actual, paquete_recibido);
-		break;
-		case cop_next_tid:
-			handle_next_tid(socket_actual, paquete_recibido);
-		break;
-		case cop_close_tid:
-			handle_close_tid(socket_actual, paquete_recibido);
-		break;
-		case cop_wait_sem:
-			handle_wait_sem(socket_actual, paquete_recibido);
-		break;
-		case cop_signal_sem:
-			handle_signal_sem(socket_actual,paquete_recibido);
-		break;
-		case cop_suse_join:
-			handle_suse_join(socket_actual,paquete_recibido);
-		break;
+		t_paquete* paquete_recibido = recibir(socket_actual);
+
+		switch(paquete_recibido->codigo_operacion)
+		{
+			case cop_suse_create:
+				handle_suse_create(socket_actual, paquete_recibido);
+				break;
+			case cop_next_tid:
+				handle_next_tid(socket_actual, paquete_recibido);
+				break;
+			case cop_close_tid:
+				handle_close_tid(socket_actual, paquete_recibido);
+				break;
+			case cop_wait_sem:
+				handle_wait_sem(socket_actual, paquete_recibido);
+				break;
+			case cop_signal_sem:
+				handle_signal_sem(socket_actual,paquete_recibido);
+				break;
+			case cop_suse_join:
+				handle_suse_join(socket_actual,paquete_recibido);
+				break;
+
+			}
+
 
 	}
 }
 
 void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
 
+	log_info(logger,"Inicio Join");
 	esperar_handshake(socket_actual, paquete_recibido, cop_suse_join);
 
 	log_info(logger, "Realice el primer handshake con hilolay\n");
-	sprintf("el socket es", "%d", socket_actual);
+	log_info(logger,"el socket es", "%d", socket_actual);
 
 	t_paquete* paquete = recibir(socket_actual);
 
@@ -221,7 +231,7 @@ void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
 
 void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
 {
-	esperar_handshake(socket, paquete_recibido, cop_close_tid);
+	//esperar_handshake(socket, paquete_recibido, cop_close_tid);
 
 	log_info(logger, "Realice el handshake de close_tid\n");
 
@@ -292,7 +302,7 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	log_info(logger, "Recibi el ULT %d del proceso %d \n", tid, socket_actual);
 	log_info(logger, "Validando si es el main thread o ULT comun \n");
 
-	if(list_size(configuracion_suse.process) != 0  && find_process_by_id){
+	if(list_size(configuracion_suse.process) != 0  && process->PROCESS_ID > 0 /*list_find(configuracion_suse.process,find_process_by_id)*/){
 		log_info(logger, "El proceso %d ya tiene un main_thread \n", socket_actual);
 		handle_ULT_create(process, tid);
 	}
@@ -349,6 +359,8 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 	new_thread->estado = E_NEW;
 	new_thread->duracionRafaga = 0;
 	new_thread->ejecutado_desde_estimacion = false;
+	new_thread->joinTo = list_create();
+	new_thread->joinedBy = list_create();
 	//todo para agregar a new hay que chequear el grado de multiprog o no
 	list_add(process->ULTS, new_thread);
 	list_add(new_queue, new_thread);
@@ -509,19 +521,20 @@ t_process * generar_process(int process_id) {
 	process->PROCESS_ID = process_id; //todo ver tipo de dato
 	process->ULTS = list_create();
 	process->READY_LIST = list_create();
+	//process->EXEC_THREAD = malloc(sizeof(t_suse_thread));
 	return process;
 }
 
 
 void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
-	log_info(logger, "Esperando handshake de suse_schedule_next...\n");
+	log_info(logger, "Arranco schedule_next...\n");
 	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	log_info(logger, "Recibi una peticion de suse_chedule_next \n");
+	log_info(logger, "Recibi una peticion de suse_schedule_next \n");
 
 	bool comparador(t_process* p)
 	{
@@ -547,13 +560,23 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 
 int obtener_proximo_ejecutar(t_process* process){
 
-	clock_t aux = clock(); //pasado a float, segundos. Es el momento en que termina de ejcutar
+	struct timeval aux;
+	double tiempo;
+	gettimeofday(&aux,NULL);
 
 	t_suse_thread* exec_actual = process->EXEC_THREAD;
 
-	float aux2 = exec_actual->duracionRafaga;
+	if(exec_actual != 0)
+	{
+		double aux2 = exec_actual->duracionRafaga;
 
-	exec_actual->duracionRafaga = aux2 - aux; //La diferencia entre cuando empezo y termino es lo q duro la rafaga.
+		if(aux2 != 0)
+		{
+			tiempo = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
+			exec_actual->duracionRafaga = tiempo - aux2;
+		}
+
+	}
 
 	ordenar_cola_listos(process->READY_LIST);
 
@@ -562,11 +585,8 @@ int obtener_proximo_ejecutar(t_process* process){
 	log_info(logger, "El proximo ULT a ejecutar es %d", next_tid);
 
 	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
-
 	process->LAST_EXEC = next_ULT; //Esto para que sirve??
-
-	next_ULT->duracionRafaga = aux; //Le pongo el momento de inicio de la rafaga.
-
+	next_ULT->duracionRafaga = tiempo;
 	return next_tid;
 }
 
@@ -856,8 +876,11 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 	thread->estado = E_EXECUTE;
 	thread->ejecutado_desde_estimacion = true;
 
-	eliminar_ULT_cola_actual(process->EXEC_THREAD, process);
-	ejecucion_a_listo(process->EXEC_THREAD,socket);
+	t_suse_thread* threadEjecutando = process->EXEC_THREAD;
+	if(threadEjecutando != 0)
+	{
+		ejecucion_a_listo(process->EXEC_THREAD,socket);
+	}
 
 	process->EXEC_THREAD = thread;
 	log_info(logger, "El tid %d paso de ready a execute\n", thread->tid);
@@ -865,6 +888,9 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 {
+	struct timeval aux;
+	gettimeofday(&aux,NULL);
+
 	bool buscador(t_process* process){
 		return process->PROCESS_ID == socket;
 	}
@@ -873,7 +899,7 @@ void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 
 	eliminar_ULT_cola_actual(thread, process);
 
-	thread->duracionRafaga = clock(); //Pasado a int, segundos.
+	thread->duracionRafaga = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
 
 	thread->estado = E_EXECUTE;
 	process->EXEC_THREAD = thread;
@@ -892,7 +918,6 @@ void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
 
 	remover_ULT_exec(process);
 	thread->estado = E_READY;
-	process->EXEC_THREAD = NULL;
 	list_add(process->READY_LIST,thread);
 	log_info(logger, "El thread %d paso de execute a ready \n", thread->tid);
 
@@ -914,10 +939,19 @@ void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket)
 	}
 
 	t_process* process = list_find(configuracion_suse.process, buscador_process_id);
+	t_suse_thread* th = process->EXEC_THREAD;
+	double aux2 = th->duracionRafaga;
+	if(aux2 > 0)
+	{
+		struct timeval aux;
+		gettimeofday(&aux,NULL);
+		double tiempo = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
+		th->duracionRafaga = tiempo - aux2;
+	}
+
 
 	remover_ULT_exec(process);
 	thread->estado = E_BLOCKED;
-	process->EXEC_THREAD = NULL;
 	pthread_mutex_lock(&mutex_blocked_queue);
 	list_add(blocked_queue,thread);
 	pthread_mutex_unlock(&mutex_blocked_queue);
@@ -939,6 +973,15 @@ void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semafo
 	t_process* program = list_find(configuracion_suse.process,comparador);
 
 	t_suse_thread* thread = list_find(program->ULTS,comparadorThread);
+
+	double aux2 = thread->duracionRafaga;
+	if(aux2 > 0)
+	{
+		struct timeval aux;
+		gettimeofday(&aux,NULL);
+		double tiempo = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
+		thread->duracionRafaga = tiempo - aux2;
+	}
 
 	remover_ULT_exec(program);
 
@@ -1023,8 +1066,8 @@ void nuevo_a_listo(t_suse_thread* ULT, int process_id)
 void remover_ULT_listo(t_suse_thread* thread,t_process* process)
 {
 
-	bool comparador(int tid){
-		return tid == thread->tid;
+	bool comparador(t_suse_thread* th){
+		return th->tid == thread->tid;
 	}
 
 	list_remove_by_condition(process->READY_LIST,comparador); //Remuevo por tid.

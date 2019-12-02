@@ -48,7 +48,8 @@ void conectar_con_suse() {
 
 int suse_create(int master_thread){ //todo revisar el master thread
 	printf("Ejecutando suse_create... \n");
-	bool result = realizar_handshake(socket_suse, cop_suse_create);
+	bool result = realizar_handshake(socket_suse,cop_suse_create);
+	printf("handshake realizado... \n");
 	int retorno;
 
 	if(result){
@@ -73,17 +74,24 @@ int suse_create(int master_thread){ //todo revisar el master thread
 
 }
 
-int suse_schedule_next(){ //todo testear
-//	log_info(logger, "Ejecutando suse_schedule_next %d... \n");
+int suse_schedule_next(){
+
+	printf("Ejecutando suse_schedule_next... \n");
+	bool respuesta = realizar_handshake(socket_suse,cop_next_tid);
+	printf("handshake realizado... \n");
+
 	int next;
+
+	if(respuesta)
+	{
+
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
 	int desp = 0;
-	int msg = 1; //este mensaje es solo para preguntarle que thread se va a ejecutar
+	int msg = 1;
 
 	serializar_int(buffer, &desp, msg);
 	enviar(socket_suse, cop_next_tid, tamanio_buffer, buffer);
-//	log_info(logger, "Envie un mensaje (0) a SUSE. \n");
 	free(buffer);
 
 	t_paquete* received_packet = recibir(socket_suse);
@@ -91,14 +99,18 @@ int suse_schedule_next(){ //todo testear
 
 	if(received_packet->codigo_operacion == cop_next_tid){
 		next = deserializar_int(received_packet->data, &desplazamiento);
-//		log_info(logger, "Recibi el next_tid %d. \n", next);
+		liberar_paquete(received_packet);
 	}
 	else{
 		next = -1;
-//		log_info("El codigo de operacion es incorrecto, deberia ser cop_next_tid y es %d", received_packet->codigo_operacion);
+
+	}
+}
+	else{
+		next = -1;
 	}
 
-	liberar_paquete(received_packet);
+
 
 	return next;
 }
@@ -123,7 +135,13 @@ int suse_close(int tid){
 
 int suse_join(int tid)
 {
-	int tamanio_buffer = sizeof(int);
+	printf("Ejecutando suse_join... \n");
+	bool respuesta = realizar_handshake(socket_suse,cop_suse_join);
+	printf("handshake realizado... \n");
+	int result;
+	if(respuesta)
+	{
+		int tamanio_buffer = sizeof(int);
 		void * buffer = malloc(tamanio_buffer);
 		int desplazamiento = 0;
 		serializar_int(buffer, &desplazamiento, tid);
@@ -132,16 +150,24 @@ int suse_join(int tid)
 
 		t_paquete* received_packet = recibir(socket_suse);
 		int desp = 0;
-		int result = deserializar_int(received_packet->data, &desp);
+		result = deserializar_int(received_packet->data, &desp);
 		liberar_paquete(received_packet);
 
-		return result;
+	}
+	else{
+			result = -1;
+		}
+	return result;
 }
 
 
 int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructura agregar hilo + semaforos del mismo
 
-	int tamanio_buffer = sizeof(int);
+	printf("Ejecutando suse_join... \n");
+	bool respuesta = realizar_handshake(socket_suse,cop_wait_sem);
+	printf("handshake realizado... \n");
+
+	int tamanio_buffer = sizeof(int) + sizeof(char*); //TODO: aca esta el error, cuando esta solo int tira error, cuando le puse + char* no tiro error, pero no mando bien el nombre.. Fijate si sabes como se hace?
 	void * buffer = malloc(tamanio_buffer);
 	int desplazamiento = 0;
 	serializar_int(buffer, &desplazamiento, tid);
@@ -161,6 +187,10 @@ int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructura agreg
 
 
 int suse_signal(int tid, char *sem_name){
+
+	printf("Ejecutando suse_join... \n");
+	bool respuesta = realizar_handshake(socket_suse,cop_signal_sem);
+	printf("handshake realizado... \n");
 
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
@@ -208,5 +238,6 @@ void hilolay_init(void){
 	printf("Inicializando los recursos de la biblioteca... \n");
 	conectar_con_suse();
 	init_internal(&hiloops);
+	printf("Termino Init Internal \n");
 }
 

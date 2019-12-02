@@ -68,8 +68,8 @@ typedef struct t_suse_thread{
 	int tid;
 	int estado;
 	int procesoId;
-	float duracionRafaga;
-	float estimacionUltimaRafaga;
+	double duracionRafaga;
+	double estimacionUltimaRafaga;
 	bool ejecutado_desde_estimacion;
 	t_list* joinedBy;
 	t_list* joinTo;
