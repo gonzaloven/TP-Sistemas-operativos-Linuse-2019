@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <commons/string.h>
 #include <libraries.h>
+#include <stdbool.h>
 
 typedef struct suse_configuration
 {
@@ -112,7 +113,7 @@ int desbloquear_hilos_semaforo(char* sem);
 
 bool validar_grado_multiprogramacion();
 
-void handle_main_thread_create(t_process* process, int tid);
+void handle_main_thread_create(un_socket socket_actual, int tid);
 
 t_suse_thread* ULT_create(t_process* process, int tid);
 /*

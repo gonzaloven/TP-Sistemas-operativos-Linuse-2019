@@ -149,13 +149,13 @@ void iniciar_servidor() {
 		free(handshake);
 
 		//Creo un hilo por programa que se conecta
-		log_info(logger, "Creando process con id %d. \n", new_connection);
+		log_info(logger, "Creando hilo para el proceso id %d. \n", new_connection);
 
 		t_list* thread_params;
 		thread_params = list_create();
 		list_add(thread_params, new_connection);
 		nuevo_hilo(process_conectado_funcion_thread, thread_params);
-		log_info(logger, "Cree el hilo para el programa %d", new_connection);
+		log_info(logger, "Cree el hilo para el proceso %d", new_connection);
 	}
 }
 
@@ -175,7 +175,6 @@ void handle_conection_suse(un_socket socket_actual) {
 
 	switch(paquete_recibido->codigo_operacion){
 		case cop_suse_create:
-			log_info(logger, "Entro al cop");
 			handle_suse_create(socket_actual, paquete_recibido);
 		break;
 		case cop_next_tid:
@@ -194,8 +193,7 @@ void handle_conection_suse(un_socket socket_actual) {
 			handle_suse_join(socket_actual,paquete_recibido);
 		break;
 
-	}//todo cerrar sockets
-	liberar_paquete(paquete_recibido);
+	}
 }
 
 void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
@@ -286,10 +284,12 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	t_paquete* paquete_recibido = recibir(socket_actual);
 
 	bool find_process_by_id(void* process) {
-		return ((t_process*)process)->PROCESS_ID == socket_actual;
+		return ((t_process*)process)->PROCESS_ID == (int)socket_actual;
 	}
 
 	t_process* process = list_find(configuracion_suse.process, find_process_by_id);
+
+	log_info(logger, "no  es vacia la lista de tamanio %d", list_size(configuracion_suse.process));
 
 	log_info(logger, "Esperando ULT del proceso %d \n", socket_actual);
 
@@ -299,14 +299,13 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	log_info(logger, "Recibi el ULT %d \n", tid);
 	log_info(logger, "Validando si es main thread o  ULT comun \n");
 
-	if(find_process_by_id){
+	if(list_size(configuracion_suse.process) != 0  && find_process_by_id){
 		log_info(logger, "El proceso %d ya tiene un main_thread \n", socket_actual);
 		handle_ULT_create(process, tid);
-
 	}
 	else{
 		log_info(logger, "El proceso %d es nuevo \n", socket_actual);
-		handle_main_thread_create(process, tid);
+		handle_main_thread_create(socket_actual, tid);
 	}
 
 	liberar_paquete(paquete_recibido);
@@ -334,25 +333,19 @@ void handle_ULT_create(t_process* process, int tid){
 
 }
 
-void handle_main_thread_create(t_process* process, int tid) {
+void handle_main_thread_create(un_socket socket_actual, int tid) {
 
-	t_process* new_process = generar_process(process->PROCESS_ID);
-	log_info(logger, "Proceso creado con id %d \n", process->PROCESS_ID);
+	t_process* new_process = generar_process(socket_actual);
+	log_info(logger, "Proceso creado con id %d \n", new_process->PROCESS_ID);
 
-	list_add(configuracion_suse.process, process);
+	list_add(configuracion_suse.process, new_process);
 
-	t_suse_thread* main_thread = ULT_create(process, tid);
+	t_suse_thread* main_thread = ULT_create(new_process, tid);
 
 	log_info(logger, "Validando si puedo poner e ejecutar el main thread... \n", configuracion_suse.ACTUAL_MULTIPROG);
 
-	if(process->EXEC_THREAD == NULL){
-		log_info(logger, "No puedo poner a ejecutar el hilo %d porque el hilo %d esta en ejecucion \n", main_thread->tid, process->EXEC_THREAD->tid);
-
-	}
-	else{
-		nuevo_a_ejecucion(main_thread, process->PROCESS_ID);
-		log_info(logger, "El thread %d del programa %d esta en ready \n", main_thread->tid, process->PROCESS_ID);
-	}
+	nuevo_a_ejecucion(main_thread, new_process->PROCESS_ID);
+	log_info(logger, "El thread %d del programa %d esta ejecutando \n", main_thread->tid, new_process->PROCESS_ID);
 }
 
 t_suse_thread* ULT_create(t_process* process, int tid){
@@ -555,6 +548,7 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	serializar_int(buffer, &desp, next_tid);
 	enviar(socket_actual, cop_next_tid, tamanio_buffer, buffer);
 	free(buffer);
+	liberar_paquete(paquete_recibido);
 }
 
 int obtener_proximo_ejecutar(t_process* process){
@@ -656,6 +650,7 @@ void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem){
 	serializar_int(buffer, &desp, resultado);
 	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
+	liberar_paquete(paquete_recibido);
 
 }
 
@@ -683,6 +678,7 @@ void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 	serializar_int(buffer, &desp, resultado);
 	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
+	liberar_paquete(paquete_recibido);
 
 }
 
@@ -876,19 +872,18 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 {
-	bool buscador(t_process* process)
-	{
+	bool buscador(t_process* process){
 		return process->PROCESS_ID == socket;
 	}
 
-	t_process* program = list_get(configuracion_suse.process,buscador);
+	t_process* process = list_find(configuracion_suse.process, buscador);
 
-	eliminar_ULT_cola_actual(thread,program);
+	eliminar_ULT_cola_actual(thread, process);
 
 	thread->duracionRafaga = clock(); //Pasado a int, segundos.
 
 	thread->estado = E_EXECUTE;
-	program->EXEC_THREAD = thread;
+	process->EXEC_THREAD = thread;
 	configuracion_suse.ACTUAL_MULTIPROG ++;
 
 	log_info(logger, "El thread %d paso de new a execute \n", thread->tid);
