@@ -34,6 +34,8 @@
 #define SAC_CONFIG_PATH2 "../configs/filesystem.config"
 #define SAC_CONFIG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/configs/filesystem.config"
 
+t_dictionary * diccionarioDeMutex;
+
 typedef struct sac_configuration_s{
 	int listen_port;
 }sac_configuration;

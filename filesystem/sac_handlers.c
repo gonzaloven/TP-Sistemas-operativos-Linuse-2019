@@ -732,8 +732,6 @@ int agregar_nodo(GFile *file_data, int numeroNodo){
 	int new_pointer_block;
 	punterosBloquesDatos* nodo_punteros;
 
-	pthread_mutex_lock(&s_tablaDeNodos);
-
 	// Ubica el ultimo nodo escrito y se posiciona en el mismo.
 	setear_posicion(&node_pointer_number, &position, 0, tam);
 
@@ -776,8 +774,6 @@ int agregar_nodo(GFile *file_data, int numeroNodo){
 	// Hace que dicho puntero, en la posicion ya obtenida, apunte al nodo indicado.
 	nodo_punteros->punteros_a_bloques[position] = numeroNodo;
 
-	pthread_mutex_unlock(&s_tablaDeNodos);
-
 	msync(disco, diskSize, MS_SYNC);
 
 	return 0;
@@ -796,6 +792,19 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 	int respuesta = size;
 
 	unsigned long tamanio_maximo_teorico = (unsigned long) BLKINDIRECT * (unsigned long) PUNTEROS_A_BLOQUES_DATOS * (unsigned long) BLOQUE_SIZE;
+
+	pthread_mutex_t *mutex;
+
+	if(dictionary_has_key(diccionarioDeMutex, path)){
+		mutex = dictionary_get(diccionarioDeMutex, path);
+	}
+	else{
+		mutex = malloc(sizeof(pthread_mutex_t));
+		pthread_mutex_init(mutex, NULL);
+		dictionary_put(diccionarioDeMutex, path, mutex);
+	}
+
+	pthread_mutex_lock(mutex);
 
 	// Ubica el nodo correspondiente al archivo
 	node = tablaDeNodos + nodoDelArchivo;
@@ -878,6 +887,8 @@ int escribir_archivo (char* buffer, char* path, size_t size, uint32_t offset){
 	respuesta = size;
 
 	finalizar:
+
+	pthread_mutex_unlock(mutex);
 
 	msync(disco, diskSize, MS_SYNC);
 

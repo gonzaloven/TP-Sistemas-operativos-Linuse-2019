@@ -65,6 +65,7 @@ void configurar_server(){
 	inicioBloquesDeDatos();
 
 	bitmap = bitarray_create_with_mode((char *)(disco + 1), BLOQUE_SIZE * cantidadDeBloquesBitmap, MSB_FIRST);
+	diccionarioDeMutex = dictionary_create();
 
 	tablaDeNodos = (GFile*) (disco + bloqueInicioTablaDeNodos);
 	bloquesDeDatos = disco + bloqueInicioBloquesDeDatos;
