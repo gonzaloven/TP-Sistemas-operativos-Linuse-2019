@@ -213,11 +213,22 @@ int renombrar_archivo(int nodoBuscadoPosicion, char* path, char* nuevoPath){
 
 	GFile *nodoARenombrar = tablaDeNodos + nodoBuscadoPosicion;
 
+	pthread_mutex_lock(&s_tablaDeNodos);
 	memset(nodoARenombrar->fname,0,strlen(nodoARenombrar->fname) + 1);
 
 	strcpy((char*) nodoARenombrar->fname, fileName);
 
+	if(nodoNuevoPadre == 0){
+		nodoARenombrar->parent_dir_block = 0;
+		pthread_mutex_unlock(&s_tablaDeNodos);
+		free(pathDuplicadoDenuevo);
+		free(pathDuplicado);
+		return respuesta;
+	}
+
 	nodoARenombrar->parent_dir_block = nodoNuevoPadre + bloqueInicioTablaDeNodos;
+
+	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	free(pathDuplicadoDenuevo);
 	free(pathDuplicado);
@@ -248,7 +259,9 @@ int truncar_archivo(int nodoBuscadoPosicion, uint32_t size){
 		respuesta = delete_nodes_upto(nodoATruncar, pointer_to_delete, data_to_delete);
 	}
 
+	pthread_mutex_lock(&s_tablaDeNodos);
 	nodoATruncar->file_size = size;
+	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	msync(disco, diskSize, MS_SYNC);
 
@@ -301,15 +314,23 @@ int delete_nodes_upto (GFile *file_data, int pointer_upto, int data_upto){
 		// Borra los nodos de datos que sean necesarios.
 		while ((data_pos + DELETE_MODE) != delete_upto){
 			node_to_delete = aux->punteros_a_bloques[data_pos];
+			pthread_mutex_lock(&s_tablaDeNodos);
 			aux->punteros_a_bloques[data_pos] = 0;
+			pthread_mutex_unlock(&s_tablaDeNodos);
+			pthread_mutex_lock(&s_bitmap);
 			bitarray_clean_bit(bitmap, node_to_delete);
+			pthread_mutex_unlock(&s_bitmap);
 			data_pos--;
 		}
 
 		// Si es necesario, borra el nodo de punteros.
 		if ((pointer_pos + DELETE_MODE) != pointer_upto){
+			pthread_mutex_lock(&s_bitmap);
 			bitarray_clean_bit(bitmap, node_pointer_to_delete);
+			pthread_mutex_unlock(&s_bitmap);
+			pthread_mutex_lock(&s_tablaDeNodos);
 			file_data->indirect_blocks_array[pointer_pos] = 0;
+			pthread_mutex_unlock(&s_tablaDeNodos);
 			pointer_pos--;
 		}
 
@@ -328,20 +349,28 @@ int get_new_space (GFile *file_data, int size){
 
 	// Actualiza el file size al tamanio que le corresponde:
 	if (space_in_block >= size){
+		pthread_mutex_lock(&s_tablaDeNodos);
 		file_data->file_size += size;
+		pthread_mutex_unlock(&s_tablaDeNodos);
 		return 0;
 	} else {
+		pthread_mutex_lock(&s_tablaDeNodos);
 		file_data->file_size += space_in_block;
+		pthread_mutex_unlock(&s_tablaDeNodos);
 	}
 
 	while ( (space_in_block <= size) ){ // Siempre que lo que haya que escribir sea mas grande que el espacio que quedaba en el bloque
 		new_node = get_bloque_vacio();
 		agregar_nodo(file_data, new_node);
 		size -= BLOQUE_SIZE;
+		pthread_mutex_lock(&s_tablaDeNodos);
 		file_data->file_size += BLOQUE_SIZE;
+		pthread_mutex_unlock(&s_tablaDeNodos);
 	}
 
+	pthread_mutex_lock(&s_tablaDeNodos);
 	file_data->file_size += size;
+	pthread_mutex_unlock(&s_tablaDeNodos);
 
 	return 0;
 }
@@ -712,7 +741,7 @@ int get_bloque_vacio(){
 }
 
 int cantidad_bloques_libres(){
-	//pthread_mutex_lock(&s_bitmap);
+	pthread_mutex_lock(&s_bitmap);
 	int contador = 0;
 	int bitInicial = bloqueInicioBloquesDeDatos - 1;
 	int bitsTotales = bitarray_get_max_bit(bitmap);
@@ -722,7 +751,7 @@ int cantidad_bloques_libres(){
 			contador++;
 		}
 	}
-	//pthread_mutex_unlock(&s_bitmap);
+	pthread_mutex_unlock(&s_bitmap);
 
 	return contador;
 

@@ -5,6 +5,12 @@
 
 Function fuse_invoke_function(Function *f);
 
+
+void dic_data_destroyer(void* data){
+	free(data);
+	data = NULL;
+}
+
 void fuse_stop_service()
 {
 	log_info(fuse_logger,"SIGINT recibida. Servidor desconectado!");
@@ -12,6 +18,7 @@ void fuse_stop_service()
 	free(fuse_config);
 	log_destroy(fuse_logger);
 	bitarray_destroy(bitmap);
+	dictionary_destroy_and_destroy_elements(diccionarioDeMutex, &dic_data_destroyer);
 	server_stop();
 }
 
