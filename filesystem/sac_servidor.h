@@ -16,7 +16,8 @@
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
-
+#include <time.h>
+#include <math.h>
 
 #define BLOQUE_SIZE 4096
 #define MAX_NUMBER_OF_FILES 1024
@@ -27,7 +28,13 @@
 #define GFILEBYTABLE 1024
 #define BITMAP_START_BLOCK 1
 #define BITMAP_SIZE_BLOCKS 1
-#define SAC_CONFIG_PATH "../configs/filesystem.config"
+#define PUNTEROS_A_BLOQUES_DATOS 1024
+
+//NO DEJAR ASI TODO
+#define SAC_CONFIG_PATH2 "../configs/filesystem.config"
+#define SAC_CONFIG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/configs/filesystem.config"
+
+t_dictionary * diccionarioDeMutex;
 
 typedef struct sac_configuration_s{
 	int listen_port;
@@ -36,7 +43,9 @@ typedef struct sac_configuration_s{
 typedef struct fuse_configuration_s
 {
 	int listen_port;
+	char* ip_cliente;
 	uint32_t disk_size;
+	char *path_archivo;
 }fuse_configuration;
 
 typedef uint32_t ptrGBloque;
@@ -44,7 +53,7 @@ typedef uint32_t ptrGBloque;
 // sac server block struct
 typedef struct sac_server_block{
 	unsigned char bytes[BLOQUE_SIZE];
-}GBlock;
+}__attribute__((packed)) GBlock;
 
 // sac server header struct
 typedef struct sac_server_header{
@@ -53,7 +62,7 @@ typedef struct sac_server_header{
 	uint32_t bitmap_start;
 	uint32_t bitmap_size; // in blocks
 	unsigned char padding[4081];
-}Header;
+}__attribute__((packed)) Header;
 
 
 // sac server file struct
@@ -65,16 +74,23 @@ typedef struct sac_server_gfile{
 	uint64_t create_date;
 	uint64_t modify_date;
 	ptrGBloque indirect_blocks_array[BLKINDIRECT];
-}GFile;
+}__attribute__((packed)) GFile;
 
+typedef struct punteros_bloques_datos{
+	ptrGBloque punteros_a_bloques[PUNTEROS_A_BLOQUES_DATOS];
+}__attribute__((packed)) punterosBloquesDatos;
 
-// memory mapping data definition
-struct sac_server_header *header_start;
-struct sac_server_gfile *node_table_start, *data_block_start, *bitmap_start;
+GBlock *disco;
+GFile *tablaDeNodos;
+GBlock *bloquesDeDatos;
+t_bitarray* bitmap;
+size_t diskSize;
+int bloqueInicioTablaDeNodos;
+int bloqueInicioBloquesDeDatos;
+int cantidadDeBloquesBitmap;
 
-//semaphore that will be used to write:
-pthread_rwlock_t rwlock;
-t_log *logger;
+t_log *fuse_logger;
+fuse_configuration *fuse_config;
 
 // Use this structure to store the descriptor number in which the disk was opened
 int discDescriptor;
@@ -82,34 +98,23 @@ int discDescriptor;
 // Functions to handle the disk
 
 /* * To read, documentation sac_client.h */
-int sac_server_getattr(char* path);
-int sac_server_readdir(char* path);
-int sac_server_read(char* path, size_t size, uint32_t offset);
-int sac_server_open(char* path);
-int sac_server_opendir(char* path);
+Function sac_server_getattr(char* path);
+Function sac_server_readdir(char* path);
+Function sac_server_read(char* path, size_t size, uint32_t offset);
+Function sac_server_open(char* path);
+Function sac_server_opendir(char* path);
 
 /* * To write, documentation sac_client.h */
-int sac_server_mkdir(char* path);
-int sac_server_rmdir(char* path);
-int sac_server_write(char* path, char* buf, size_t size, uint32_t offset);
-int sac_server_mknod(char* path);
-int sac_server_unlink(char* path);
+Function sac_server_mkdir(char* path);
+Function sac_server_rmdir(char* path);
+Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset);
+Function sac_server_mknod(char* path);
+Function sac_server_unlink(char* path);
+Function sac_server_truncate(char* path, uint32_t size);
+Function sac_server_rename(char* path, char* nuevoPath);
 
 
 // Auxiliary structure management functions, located in sac_handlers
-
-/* @DESC
- * 		Determine which is the node where the path is located.
- *
- * 	@PARAM
- * 		path - Path of the directory/file to be found
- *
- * 	@RETURN
- * 		Returns the block number where is the path or -1 if an error ocurred
- *
- */
-
-ptrGBloque determine_node(const char* path);
 
 /*
  * 	@DESC
@@ -144,6 +149,10 @@ int split_path(const char* path, char** super_path, char** name);
  *
  */
 int lastchar(const char* str, char chr);
+
+void inicioTablaDeNodos();
+
+void liberarMemoria(Function* f);
 
 /*
  Starts server,creates a logger and loads configuration
