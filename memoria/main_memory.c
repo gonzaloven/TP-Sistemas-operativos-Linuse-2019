@@ -494,24 +494,13 @@ void crear_nuevo_segmento_mmap(size_t length, void* map, uint32_t pid){
 
 	total_pages_needed = (length / PAGE_SIZE) + ((length % PAGE_SIZE) != 0); // ceil(length / PAGE_SIZE);
 
+	//vamos a pedir todo el resto de paginas que necesitemos
+	for(int i=0 ; i < total_pages_needed ; i++ )
 	{
 		pag = (page *) malloc(sizeof(page));
 		pag->is_modify = false;
 		pag->is_present = false;
-		pag->fr = map;
-		//Y que haces con esto despues? TODO
 		nro_pag = list_add(seg->page_table, pag);
-
-		//vamos a pedir todo el resto de paginas que necesitemos
-		for(int i=0 ; i < total_pages_needed-1 ; i++ )
-		{
-			pag = (page *) malloc(sizeof(page));
-			pag->is_modify = false;
-			pag->is_present = false;
-			pag->fr = map;
-			//Y que haces con esto despues? denuevo TODO
-			nro_pag = list_add(seg->page_table, pag);
-		}
 	}
 }
 
@@ -557,6 +546,9 @@ uint32_t buscar_direccion_fisica(uint32_t dst, uint32_t pid){
 			break;
 		}
 	}
+
+	//Si no esta la pagina deberia reservar un frame, ir al disco y leer el contenido
+	//Meterlo en el frame recien reservado y asignarlo a la pagina TODO
 
 	int paginaBuscada = floor((dst - segmentoBuscado->base) / PAGE_SIZE);
 	int offset = (dst - segmentoBuscado->base) % PAGE_SIZE;
