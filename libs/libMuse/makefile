@@ -4,7 +4,7 @@ UTILS:= ../../utils/
 INCDIR:= -I$(UTILS)
 CFLAGS:= -g
 SRCS := libmuse_tests.c libmuse.c $(UTILS)network.c $(UTILS)message.c 
-LFLAGS := -pthread -lcommons
+LFLAGS := -pthread -lcommons -lm
 
 all: libmuse
 

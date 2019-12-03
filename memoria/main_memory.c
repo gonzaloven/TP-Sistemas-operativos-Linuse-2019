@@ -550,6 +550,9 @@ uint32_t buscar_direccion_fisica(uint32_t dst, uint32_t pid){
 		}
 	}
 
+	//Si no esta la pagina deberia reservar un frame, ir al disco y leer el contenido
+	//Meterlo en el frame recien reservado y asignarlo a la pagina TODO
+
 	int paginaBuscada = floor((dst - segmentoBuscado->base) / PAGE_SIZE);
 	int offset = (dst - segmentoBuscado->base) % PAGE_SIZE;
 

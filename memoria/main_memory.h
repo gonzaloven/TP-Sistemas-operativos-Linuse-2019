@@ -65,6 +65,7 @@ typedef struct segment_s
 	uint32_t base; //base lógica
 	uint32_t limit;
 	t_list *page_table;
+	void* archivo_mapeado;
 }segment;
 
 /**
