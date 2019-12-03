@@ -161,4 +161,7 @@ uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid);
 */
 int memory_unmap(uint32_t dir, uint32_t pid);
 
+heap_metadata* proxima_metadata_libre(int posicionActual, heap_metadata* metadataUsada, int paginaActualNumero, segment* segmento);
+
+
 #endif
