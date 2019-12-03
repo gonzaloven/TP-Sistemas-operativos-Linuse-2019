@@ -214,8 +214,8 @@ void free_page(page *pag)
 		if (pag->fr == (MAIN_MEMORY + curr_frame_num))
 		{
 			BITMAP[curr_frame_num] = 0;
-			metadata = (heap_metadata*) (MAIN_MEMORY + curr_frame_num*PAGE_SIZE);
-			metadata->is_free = 0;
+			metadata = (heap_metadata*) (MAIN_MEMORY + curr_frame_num * PAGE_SIZE);
+			metadata->is_free = true;
 			pag->is_present = true;
 			pag->is_modify = false;
 			pag->fr = NULL;
@@ -239,7 +239,7 @@ void metricas_por_socket_conectado(uint32_t pid){
 
 uint32_t memory_malloc(int size, uint32_t pid)
 {	
-	if (size <= 0) return NULL;
+	if (size <= 0) return -1;
 	int nro_prog;
 	uint32_t nro_seg;
 	uint32_t nro_pag;
@@ -329,7 +329,7 @@ int segment_with_free_space(program *prog, int size)
 	heap_metadata* primerMetadata;
 	int cantidadDeSegmentos = list_size(prog->segment_table);
 
-	if (cantidadDeSegmentos==0) return -1;
+	if (cantidadDeSegmentos == 0) return -1;
 
 	int cantidadDePaginasDelSegmento;	
 
@@ -346,7 +346,7 @@ int segment_with_free_space(program *prog, int size)
 			primerMetadata = (primerPagina->fr);
 			metadataActual = primerMetadata;
 
-			metadataActual = heap_metadata* proxima_metadata_libre(0, metadataActual, 1, segmentoActual)
+			metadataActual = proxima_metadata_libre(0, metadataActual, 1, segmentoActual);
 	
 			if(metadataActual->free_size >= size)
 			{
@@ -474,13 +474,19 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 	return 0;
 }
 
+segment* ultimo_segmento_programa(uint32_t pid){
+	int nro_prog = search_program(pid);
+	program *prog = list_get(program_list, nro_prog);
+	return list_get(prog->segment_table, list_size(prog->segment_table));
+}
+
 void crear_nuevo_segmento_mmap(size_t length, void* map, uint32_t pid){
 	segment* seg;
 	page* pag;
 	seg = (segment *) malloc(sizeof(segment));
 	seg->is_heap = false;
 	seg->page_table = list_create();
-	seg->base = 0; //cambiar 0 por base verdadera TODO
+	//seg->base = (ultimo_segmento_programa(pid)->limit+1);
 	seg->limit = &(seg->base) + length;
 
 	int nro_pag;
@@ -635,7 +641,7 @@ char* get_file_content_from_swap(){
 uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid)
 {
 	/*synchronize a file with a memory map*/
-	msync(addr, len, MS_SYNC);
+	//msync(addr, len, MS_SYNC);
 	return 0;
 }
 

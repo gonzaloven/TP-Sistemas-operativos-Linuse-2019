@@ -79,7 +79,6 @@ void foo2()
 {
 	int dir4 = muse_alloc(20);
 	imprimir(20, dir4);
-
 }
 
 void foo3(){
@@ -112,6 +111,7 @@ void foo4(){
 }
 
 void foo5(){
+
 	muse_map("hola.txt", 20, 0);
 	muse_unmap("hola.txt");
 	muse_close();
