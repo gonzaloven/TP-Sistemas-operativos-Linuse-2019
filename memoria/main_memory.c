@@ -502,6 +502,8 @@ void crear_nuevo_segmento_mmap(size_t length, void* map, uint32_t pid){
 		pag->is_present = false;
 		nro_pag = list_add(seg->page_table, pag);
 	}
+
+	seg->archivo_mapeado = map;
 }
 
 int busca_segmento(program *prog, uint32_t va)
