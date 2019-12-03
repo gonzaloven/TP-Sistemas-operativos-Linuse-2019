@@ -12,9 +12,9 @@
 #include <unistd.h>
 #include <math.h>
 
-//#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
+#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
-#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
+//#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 /**
  * @struct program_s   
@@ -52,6 +52,7 @@ typedef struct bloque_s
 typedef struct page_s
 {
 	bool is_modify;
+	bool is_used;
 	bool is_present; //1 si está en memoria principal, 0 en disco
 	//uint16_t page_num;
 	void *fr; //si is_present = 1, indica el frame de MP. Caso contrario indicará la posición de Swap

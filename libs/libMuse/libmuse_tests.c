@@ -69,8 +69,8 @@ void foo1(){
 		int dir4 = muse_alloc(2000);		
 		imprimir(2000, dir4);
 
-		muse_free(dir);		
-		printf("Se libero la direccion logica %d\n",dir);
+		//muse_free(dir);		
+		//printf("Se libero la direccion logica %d\n",dir);
 
 		muse_close();
 }	
@@ -90,8 +90,8 @@ void foo3(){
 		int dir3 = muse_alloc(300);
 		imprimir(300, dir3);
 
-		muse_free(dir);		
-		printf("Se libero la direccion logica %d\n",dir);
+		// muse_free(dir);		
+		// printf("Se libero la direccion logica %d\n",dir);
 
 		muse_close();
 }
