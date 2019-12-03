@@ -89,7 +89,8 @@ int muse_get(void* dst, uint32_t src, size_t n)
 {
 	Function function;
 	Arg arg[3];
-	uint32_t *direccion = (uint32_t *)dst;
+	//uint32_t *direccion = (uint32_t *)dst;
+	void* lo_que_habia_adentro_de_muse_en_src;
 
 	arg[0].type = VAR_VOID_PTR;
 	arg[0].size = sizeof(uint32_t);
@@ -109,7 +110,12 @@ int muse_get(void* dst, uint32_t src, size_t n)
 	function.args[1] = arg[1];
 	function.args[2] = arg[2];
 
-	*direccion = call(&function);
+	//*direccion = call(&function);
+
+	lo_que_habia_adentro_de_muse_en_src = call(&function);
+
+	memcpy(dst, lo_que_habia_adentro_de_muse_en_src, n);
+
 	return 0;
 }
 
