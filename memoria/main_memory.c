@@ -93,7 +93,6 @@ int number_of_free_frames(){
 }
 
 int proximo_frame_libre(){
-
 	int i;
 
 	for(i=0; i < TOTAL_FRAME_NUM; i++)
@@ -107,6 +106,7 @@ int frames_needed(int size_total){
 	return (size_total/PAGE_SIZE + (size_total%PAGE_SIZE != 0));
 }
 
+/*
 void addr_new_segment(uint32_t size_total, uint32_t pid){
 	segment* seg;
 	heap_metadata* metadata1;
@@ -143,7 +143,7 @@ void addr_new_segment(uint32_t size_total, uint32_t pid){
 		}
 	}
 }
-
+*/
 /*
 struct block_meta* request_space(struct block_meta* last, size_t size)
 {
@@ -194,7 +194,7 @@ page* page_with_free_size(int size){
 
 			metadata = (heap_metadata*) (MAIN_MEMORY + curr_frame_num*PAGE_SIZE);
 			metadata->is_free=0;
-			metadata->free_size= PAGE_SIZE-size;
+			metadata->free_size= PAGE_SIZE - size;
 
 			return pag;
 		}
@@ -240,11 +240,6 @@ void metricas_por_socket_conectado(uint32_t pid){
 uint32_t memory_malloc(int size, uint32_t pid)
 {	
 	if (size <= 0) return NULL;
-	if (size > (number_of_free_frames()/PAGE_SIZE))
-	{
-		printf("No hay tanto espacio libre en la memoria");
-		return NULL;
-	}
 	int nro_prog;
 	uint32_t nro_seg;
 	uint32_t nro_pag;
@@ -321,7 +316,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	}
 	
 	metricas_por_socket_conectado(pid);
-	logical_address = (nro_pag * PAGE_SIZE) + offset; //TODO ??
+	logical_address = (nro_pag * PAGE_SIZE) + offset ; //TODO ??
 	return logical_address;
 }
 
@@ -329,27 +324,40 @@ uint32_t memory_malloc(int size, uint32_t pid)
 int segment_with_free_space(program *prog, int size)
 {
 	int i=0;
-	segment *seg;
+	segment *segmentoActual;
+	heap_metadata* metadataActual;
+	heap_metadata* primerMetadata;
 	int cantidadDeSegmentos = list_size(prog->segment_table);
 
 	if (cantidadDeSegmentos==0) return -1;
 
-	int max_free_size = 0;
-	int total_free_size = 0;	
+	int cantidadDePaginasDelSegmento;	
 
 	while(i < cantidadDeSegmentos)
-	{
-		seg = list_get(prog->segment_table, i);
-		if (seg->is_heap)
+	{		
+		if (segmentoActual->is_heap)
 		{
-			seg->base;
-			if(seg->free_size >= max_free_size) max_free_size = seg->free_size;
-			if(seg->free_size >= size) {return i;}
+			segmentoActual = list_get(prog->segment_table, i);
+
+			cantidadDePaginasDelSegmento = list_size(segmentoActual->page_table);
+
+			page* primerPagina = list_get(segmentoActual->page_table, 0);
+			
+			primerMetadata = (primerPagina->fr);
+			metadataActual = primerMetadata;
+
+			metadataActual = heap_metadata* proxima_metadata_libre(0, metadataActual, 1, segmentoActual)
+	
+			if(metadataActual->free_size >= size)
+			{
+				log_debug(debug_logger, "Encontramos al segmento %d con una metadata de %d de free_size", 
+						i, metadataActual->free_size);
+				return i;
+			} 
 		}
 		i++;
 	}
-	log_debug(debug_logger, "No habia ningun segmento con %d de espacio libre, el maximo fue de %d", size, max_free_size);
-	log_debug(debug_logger, "Se encontraron en total %d bytes libres en el programa", total_free_size);
+	log_debug(debug_logger, "No habia ningun segmento con %d de espacio libre", size);
 	return -1;
 }
 
@@ -366,6 +374,8 @@ heap_metadata* metadata_siguiente(int posicionActual, heap_metadata* metadataAct
 		paginaActualNumero += cantidadDePaginasAMoverme;
 		page* paginaSiguiente = list_get(segmento->page_table, paginaActualNumero);
 
+		if (paginaSiguiente == NULL) return NULL;
+
 		metadataSiguiente = (paginaSiguiente->fr) + offset;
 
 	//En este caso la proxima metadata queda dentro de la misma pagina
@@ -380,7 +390,7 @@ heap_metadata* metadata_siguiente(int posicionActual, heap_metadata* metadataAct
 	return metadataSiguiente;
 }
 
-
+/* Se fija si la siguiente metadata is_free y sino */ 
 heap_metadata* proxima_metadata_libre(int posicionActual, heap_metadata* metadataUsada, int paginaActualNumero, segment* segmento){
 	heap_metadata* metadataSiguiente;
 
@@ -388,7 +398,9 @@ heap_metadata* proxima_metadata_libre(int posicionActual, heap_metadata* metadat
 
 	if(metadataSiguiente->is_free){
 		return metadataSiguiente;
-	}else{
+	}else if(metadataSiguiente == NULL)
+		return NULL;
+	else{
 		return proxima_metadata_libre(posicionActual, metadataSiguiente, paginaActualNumero, segmento);
 	}
 }
@@ -412,10 +424,11 @@ void compactar_espacios_libres(program *prog){
 	int posicionActual = 0;
 	int paginaActualNumero = 0;
 	int cantidadDePaginasAMoverme;
+	int i;
 	heap_metadata* metadataActual;
 	heap_metadata* metadataSiguiente;
 
-	for(int i=0; i < cantidad_de_segmentos; i++){
+	for(i=0; i < cantidad_de_segmentos; i++){
 		segment* segmentoActual = list_get(prog->segment_table, i);
 
 		int cantidadDePaginasDelSegmento = list_size(segmentoActual->page_table);
@@ -532,7 +545,7 @@ uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 
 	/* Cosas que hizo el otro flaco */
 
-	uint32_t destination = 0;
+		uint32_t destination = 0;
 
 	// Busco el programa, despues busco el segmento 0 del programa y de ese segmento busco su página 0 TODO ?? 
 	program *prg = list_get(program_list, search_program(pid));
@@ -553,7 +566,7 @@ uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 //Copia n bytes de LIBMUSE a MUSE
 uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 {
-	/* TODO: Mientros estoy haciendo la serializacion debería mandar por parametro los n bytes de source */
+	/* malloquear dst */ 
 	int i= search_program(pid);
 	program *prg = list_get(program_list, i);
 	segment *seg = list_get(prg->segment_table, 0);
