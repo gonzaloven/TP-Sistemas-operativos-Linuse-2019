@@ -28,7 +28,7 @@ t_log *debug_logger = NULL;
 
 int PAGE_SIZE = 0;
 int TOTAL_FRAME_NUM = 0;
-bool *BITMAP;
+bool BITMAP[];
 
 void muse_main_memory_init(int memory_size, int page_size)
 {
@@ -42,7 +42,13 @@ void muse_main_memory_init(int memory_size, int page_size)
 
 	metadata = (heap_metadata*) malloc(METADATA_SIZE);
 	TOTAL_FRAME_NUM = (memory_size / PAGE_SIZE);
-	*BITMAP = BITMAP[TOTAL_FRAME_NUM]; //1 if free;
+	//BITMAP = (bool*) malloc(sizeof(bool)*TOTAL_FRAME_NUM); //1 if free;
+	BITMAP[TOTAL_FRAME_NUM];
+
+	for(i=0; i < TOTAL_FRAME_NUM; i++)
+	{	
+		BITMAP[i] = 1;
+	}
 
 	program_list = list_create();
 	segment_list = list_create();
@@ -139,7 +145,7 @@ void addr_new_segment(uint32_t size_total, uint32_t pid){
 
 		metadata1 = (heap_metadata*) (MAIN_MEMORY + nor_frame_libre*PAGE_SIZE);
 		metadata1->is_free = 1;
-		metadata1-> size= size_total;
+		metadata1->size= size_total;
 
 		//vamos a pedir todo el resto de paginas que necesitemos
 		for(int i=0 ; i < framesNeeded - 1 ; i++ )
@@ -157,7 +163,7 @@ void addr_new_segment(uint32_t size_total, uint32_t pid){
 page* page_with_free_size(int size, bool is_first_page, bool is_last_page, int totalsize, int freesize){
 	heap_metadata* metadata;
 	heap_metadata* metadata2;
-	int espacio_libre_en_memoria = number_of_free_frames()/PAGE_SIZE;
+	int espacio_libre_en_memoria = number_of_free_frames() * PAGE_SIZE;
 
 	if (size > espacio_libre_en_memoria)
 	{
@@ -275,7 +281,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		seg = list_get(prog->segment_table, nro_seg);	//seg = segmento con espacio
 
 	}
-	else if (ultimo_segmento_programa(prog)->is_heap && number_of_free_frames() >= total_pages_needed)
+	else if (list_size(prog->segment_table)>0 && ultimo_segmento_programa(prog)->is_heap && number_of_free_frames() >= total_pages_needed)
 	{	//Si su ultimo segmento es heap y tiene en memoria están los frames que necesitamos
 		seg = ultimo_segmento_programa(prog);
 		seg->limit += total_pages_needed * PAGE_SIZE;		
@@ -335,10 +341,10 @@ int segment_with_free_space(program *prog, int size)
 
 	while(i < cantidadDeSegmentos)
 	{		
+		segmentoActual = list_get(prog->segment_table, i);
+
 		if (segmentoActual->is_heap)
 		{
-			segmentoActual = list_get(prog->segment_table, i);
-
 			cantidadDePaginasDelSegmento = list_size(segmentoActual->page_table);
 
 			page* primerPagina = list_get(segmentoActual->page_table, 0);
@@ -346,12 +352,12 @@ int segment_with_free_space(program *prog, int size)
 			primerMetadata = (primerPagina->fr);
 			metadataActual = primerMetadata;
 
-			metadataActual = proxima_metadata_libre(0, metadataActual, 1, segmentoActual);
+			metadataActual = proxima_metadata_libre(0, metadataActual, 0, segmentoActual);
 	
-			if(metadataActual-> size >= size)
+			if(metadataActual->size >= size)
 			{
 				log_debug(debug_logger, "Encontramos al segmento %d con una metadata de %d de  size", 
-						i, metadataActual-> size);
+						i, metadataActual->size);
 				return i;
 			} 
 		}
@@ -365,8 +371,8 @@ heap_metadata* metadata_siguiente(int posicionActual, heap_metadata* metadataAct
 	heap_metadata* metadataSiguiente;
 
 	//Si la proxima metadata queda en otra pagina, me muevo hasta ahi
-	if((posicionActual + metadataActual-> size + METADATA_SIZE) > PAGE_SIZE){
-		posicionActual += posicionActual + metadataActual-> size + METADATA_SIZE;
+	if((posicionActual + metadataActual->size + METADATA_SIZE) > PAGE_SIZE){
+		posicionActual += posicionActual + metadataActual->size + METADATA_SIZE;
 
 		int cantidadDePaginasAMoverme = floor(posicionActual/PAGE_SIZE);
 		int offset = (posicionActual % PAGE_SIZE);
@@ -380,7 +386,7 @@ heap_metadata* metadata_siguiente(int posicionActual, heap_metadata* metadataAct
 
 	//En este caso la proxima metadata queda dentro de la misma pagina
 	}else{
-		posicionActual = metadataActual-> size + METADATA_SIZE;
+		posicionActual = metadataActual->size + METADATA_SIZE;
 
 		page* paginaActual = list_get(segmento->page_table, paginaActualNumero);
 
@@ -396,13 +402,13 @@ heap_metadata* proxima_metadata_libre(int posicionActual, heap_metadata* metadat
 
 	metadataSiguiente = metadata_siguiente(posicionActual, metadataUsada, paginaActualNumero, segmento);
 
-	if(metadataSiguiente->is_free){
+	if(metadataSiguiente == NULL)
+		return NULL;	
+	else if(metadataSiguiente->is_free)
 		return metadataSiguiente;
-	}else if(metadataSiguiente == NULL)
-		return NULL;
-	else{
+	else
 		return proxima_metadata_libre(posicionActual, metadataSiguiente, paginaActualNumero, segmento);
-	}
+	
 }
 
 void compactar_en_segmento(int posicionActual, heap_metadata* metadataInicial, heap_metadata* metadataActual, int paginaActualNumero, segment* segmento){
