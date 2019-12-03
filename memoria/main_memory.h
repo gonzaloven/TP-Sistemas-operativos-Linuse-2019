@@ -32,7 +32,7 @@ typedef struct program_s
  */
 typedef struct HeapMetadata 
 {
-	uint32_t free_size; //if is not free, free_size = used_size //esto no es asi
+	uint32_t size; 
 	bool is_free;
 }heap_metadata;
 
@@ -62,7 +62,6 @@ typedef struct page_s
 typedef struct segment_s
 {
 	bool is_heap; //(1 is common_segment, 0 is mmap)
-	uint16_t free_size;
 	uint32_t base; //base lógica
 	uint32_t limit;
 	t_list *page_table;
@@ -164,5 +163,8 @@ int memory_unmap(uint32_t dir, uint32_t pid);
 
 heap_metadata* proxima_metadata_libre(int posicionActual, heap_metadata* metadataUsada, int paginaActualNumero, segment* segmento);
 
+segment* ultimo_segmento_programa(program *prog);
+
+//xq no se que problema tenía math.h
 
 #endif
