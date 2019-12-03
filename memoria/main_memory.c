@@ -301,7 +301,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		offset = seg->base + METADATA_SIZE;		
 
 		if(total_pages_needed>1){
-			pag = page_with_free_size(PAGE_SIZE,1,size,0,0);					
+			pag = page_with_free_size(PAGE_SIZE,1,0,size,0);
 			nro_pag = list_add(seg->page_table, pag);
 			espacio_que_queda_alocar =- PAGE_SIZE;
 
@@ -312,12 +312,11 @@ uint32_t memory_malloc(int size, uint32_t pid)
 				list_add(seg->page_table, pag);
 				espacio_que_queda_alocar =- PAGE_SIZE;
 			}
-			
-			pag = page_with_free_size(espacio_que_queda_alocar,0,0,1,espacio_q_quedara_libre);					
+			pag = page_with_free_size(espacio_que_queda_alocar,0,1,size,espacio_q_quedara_libre);
 			list_add(seg->page_table, pag);
 		}
 		else{ // si size_total ocupa menos de una pagina
-			pag = page_with_free_size(total_size,1,size,1,espacio_q_quedara_libre);					
+			pag = page_with_free_size(total_size,1,1,size,espacio_q_quedara_libre);
 			nro_pag = list_add(seg->page_table, pag);
 		}
 	

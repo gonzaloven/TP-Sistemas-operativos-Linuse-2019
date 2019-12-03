@@ -9,8 +9,11 @@
 #include <signal.h>
 #include <stdlib.h>
 
-#define MUSE_CONFIG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/configs/memoria.config"
-#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
+//#define MUSE_CONFIG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/configs/memoria.config"
+//#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
+
+#define MUSE_CONFIG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/configs/memoria.config"
+#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 /*
 	#define MUSE_CONFIG_PATH "../configs/memoria.config"
