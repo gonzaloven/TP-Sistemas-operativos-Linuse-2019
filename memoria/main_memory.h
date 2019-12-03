@@ -34,7 +34,7 @@ typedef struct HeapMetadata
 {
 	uint32_t size; 
 	bool is_free;
-}heap_metadata;
+}__attribute__((packed)) heap_metadata;
 
 
 /*
