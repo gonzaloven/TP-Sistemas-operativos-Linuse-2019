@@ -163,13 +163,6 @@ void addr_new_segment(uint32_t size_total, uint32_t pid){
 page* page_with_free_size(int size, bool is_first_page, bool is_last_page, int totalsize, int freesize){
 	heap_metadata* metadata;
 	heap_metadata* metadata2;
-	int espacio_libre_en_memoria = number_of_free_frames() * PAGE_SIZE;
-
-	if (size > espacio_libre_en_memoria)
-	{
-		log_debug(debug_logger, "La memoria no tiene tanto espacio libre");
-		return NULL;
-	}
 
 	log_debug(debug_logger, "Size solicitado para PAGE_WITH_FREE_SIZE: %d", size);
 
@@ -180,12 +173,18 @@ page* page_with_free_size(int size, bool is_first_page, bool is_last_page, int t
 
 	page* pag = (page *) malloc(PAGE_SIZE);
 
-	for(curr_frame_num=0; curr_frame_num < TOTAL_FRAME_NUM; curr_frame_num++)
+	for(curr_frame_num=0; true ; curr_frame_num++)
 	{	
+		if (curr_frame_num == TOTAL_FRAME_NUM){
+			log_debug(debug_logger, "Nos quedamos sin frames libres, aplicando algoritmo de reemplazo");
+			curr_frame_num = dame_nro_frame_reemplazado();						
+		}
+
 		if (BITMAP[curr_frame_num])
 		{
 			BITMAP[curr_frame_num] = 0;
 			pag->is_present = true;
+			pag->is_used = true;
 			pag->is_modify = false;
 			pag->fr = MAIN_MEMORY + curr_frame_num * PAGE_SIZE;
 			
@@ -201,16 +200,76 @@ page* page_with_free_size(int size, bool is_first_page, bool is_last_page, int t
 				metadata2->is_free = true;
 				metadata2->size = freesize;
 			}
-
 			return pag;
 		}
-	}
-
-	log_debug(debug_logger, "Nos quedamos sin frames libres, aplicando algoritmo de reemplazo");
-	return NULL;
+	}	
+	//return NULL;
 }
 
+
+/*
+	Teniendo al par (U , M)
+	1. Se busca (0,0) avanzando el puntero pero sin poner U en 0
+	2. Si no se encuentra, se busca (0,1) avanzando el puntero poniendo U en 0
+	3. Si no se encuentra, se vuelve al paso 1)
+	^
+	|__ ESTO SERÍA int nro_paso
+
+ */
+int dame_nro_frame_reemplazado(){
+	int cantidad_de_segmentos_totales = list_size(segment_list);
+	int cantidad_de_paginas_en_segmento;
+	int nro_de_segmento;
+	int nro_de_pag;
+	int nro_paso = 1;
+	page *pag;
+	segment *seg;
+	int U, M;
+
+	while(true)
+	{
+		for (nro_de_segmento = 0; nro_de_segmento < cantidad_de_segmentos_totales ; nro_de_segmento++)
+		{
+			seg = list_get(segment_list,nro_de_segmento);
+			cantidad_de_paginas_en_segmento = list_size(seg->page_table);
+			
+			for(nro_de_pag = 0; nro_de_pag < cantidad_de_paginas_en_segmento; nro_de_pag++)
+			{
+				pag =  list_get(seg->page_table,nro_de_pag);
+				U = pag->is_used;
+				M = pag->is_modify;
+				if (nro_paso == 1){
+					if (!U && !M){
+						pag->is_present = false;
+						//pag->fr = direccion_disco_donde_mandamos(pag);
+						log_debug(debug_logger, "Se eligio como victimica a la pagina %d del segmento %d",
+								nro_de_pag, nro_de_segmento);
+						return (BITMAP[1] = 1);						
+					} 
+				}
+				if (nro_paso == 2){
+					if (!U && M){
+						pag->is_present = false;
+						//pag->fr = direccion_disco_donde_mandamos(pag);
+						log_debug(debug_logger, "Se eligio como victimica a la pagina %d del segmento %d",
+								nro_de_pag, nro_de_segmento);
+						return (BITMAP[1] = 1);
+					}
+					U = 0;
+				}		
+				if (nro_paso == 3){
+					nro_paso = 0;
+				}
+				
+			}
+		}
+		nro_paso++;		
+	}
+}
+
+
 //Esta funcion esta al dope
+/* 
 void free_page(page *pag)
 {
 	heap_metadata* metadata;
@@ -223,11 +282,12 @@ void free_page(page *pag)
 			metadata = (heap_metadata*) (MAIN_MEMORY + curr_frame_num * PAGE_SIZE);
 			metadata->is_free = true;
 			pag->is_present = true;
-			pag->is_modify = false;
+			pag->is_used = true;
+			pag->is_modify = false;			
 			pag->fr = NULL;
 		}
 	}	
-}
+}*/
 
 void metricas_por_socket_conectado(uint32_t pid){
 	int nro_prog = search_program(pid);
@@ -254,10 +314,12 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	page *pag;
 	segment *seg;
 	program *prog;
+	heap_metadata *metadata; 
 	int total_size = size + METADATA_SIZE;
 	int total_pages_needed = (total_size / PAGE_SIZE) + ((total_size % PAGE_SIZE) != 0); // ceil(total_size / PAGE_SIZE)
 	int espacio_que_queda_alocar = total_size;
 	int espacio_q_quedara_libre = total_pages_needed * PAGE_SIZE - total_size;
+	int is_first_page = 1;
 	
 	
 	log_debug(debug_logger, "Se pidieron %d bytes, + metadata = %d ", size, total_size);
@@ -272,7 +334,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		prog->segment_table = list_create();
 		nro_prog = list_add(program_list, prog);
 		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", nro_prog);
-
 	}	 
 
 	prog = list_get(program_list, nro_prog);	
@@ -284,10 +345,22 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 	}
 	else if (list_size(prog->segment_table)>0 && ultimo_segmento_programa(prog)->is_heap && number_of_free_frames() >= total_pages_needed)
-	{	//Si su ultimo segmento es heap y tiene en memoria están los frames que necesitamos
+	{	//Si su ultimo segmento es heap y tiene memoria están los frames que necesitamos
 		seg = ultimo_segmento_programa(prog);
 		seg->limit += total_pages_needed * PAGE_SIZE;		
-		log_debug(debug_logger, "Se pudo agrandar el segmento %d ", seg);		
+		log_debug(debug_logger, "Se pudo agrandar el segmento %d ", seg);
+
+		//busco la proxima_metadata_libre
+		page* primerPagina = list_get(segmentoActual->page_table, 0);			
+		heap_metadata* primerMetadata = (primerPagina->fr);
+		metadata = heap_metadata* proxima_metadata_libre(seg->base, primerMetadata, 1, seg){
+
+		metadata->is_free = false;
+		espacio_que_queda_alocar -= metadata->size;
+		metadata->size = size;
+
+		is_first_page = 0;
+
 	}
 	else 	
 	{	//en ultimo caso: si no hay espacio ni se puede agrandar ningún segmento, le creo uno
@@ -298,12 +371,17 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		seg->limit = total_pages_needed * PAGE_SIZE;
 		nro_seg = list_add(prog->segment_table,seg);
 		log_debug(debug_logger, "Se creo el segmento n°%d ", nro_seg);	
+		list_add(segment_list, seg);
 	}
 	
 		offset = seg->base + METADATA_SIZE;		
 
 		if(total_pages_needed>1){
+<<<<<<< 0822bcec6ae0dd4d3ad6429ec701e4386d8fe865
 			pag = page_with_free_size(PAGE_SIZE, true, false, size, 0);
+=======
+			pag = page_with_free_size(PAGE_SIZE,is_first_page,0,size,0);
+>>>>>>> Agrego algoritmo de reemplazo
 			nro_pag = list_add(seg->page_table, pag);
 			espacio_que_queda_alocar -= PAGE_SIZE;
 
@@ -318,11 +396,16 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			list_add(seg->page_table, pag);
 		}
 		else{ // si size_total ocupa menos de una pagina
+<<<<<<< 0822bcec6ae0dd4d3ad6429ec701e4386d8fe865
 			pag = page_with_free_size(total_size, true, true, size, espacio_q_quedara_libre);
+=======
+			pag = page_with_free_size(espacio_que_queda_alocar,is_first_page,1,size,espacio_q_quedara_libre);
+>>>>>>> Agrego algoritmo de reemplazo
 			nro_pag = list_add(seg->page_table, pag);
 		}
 	
 	metricas_por_socket_conectado(pid);
+	number_of_free_frames();
 
 	logical_address = seg->base + (nro_pag * PAGE_SIZE) + offset ;
 	return logical_address;
@@ -359,7 +442,7 @@ int segment_with_free_space(program *prog, int size)
 	
 			if(metadataActual->size >= size)
 			{
-				log_debug(debug_logger, "Encontramos al segmento %d con una metadata de %d de  size", 
+				log_debug(debug_logger, "Encontramos al segmento %d con una metadata de %d de size", 
 						i, metadataActual->size);
 				return i;
 			} 
@@ -508,12 +591,16 @@ void crear_nuevo_segmento_mmap(size_t length, void* map, uint32_t pid){
 	for(int i=0 ; i < total_pages_needed ; i++ )
 	{
 		pag = (page *) malloc(sizeof(page));
+		pag->is_used = true;
 		pag->is_modify = false;
 		pag->is_present = false;
 		nro_pag = list_add(seg->page_table, pag);
 	}
 
 	seg->archivo_mapeado = map;
+
+	//list_add(prog->segment_list, seg);
+	list_add(segment_list, seg);
 
 }
 
