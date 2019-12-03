@@ -523,48 +523,49 @@ int busca_segmento(program *prog, uint32_t va)
 	}
 	return -1;
 }
+
+uint32_t buscar_direccion_fisica(uint32_t dst, uint32_t pid){
+	int i= search_program(pid);
+	program *prg = list_get(program_list, i);
+	segment* segmentoBuscado;
+
+	for(int i=0; i < prg->segment_table->elements_count; i++){
+		segment *seg = list_get(prg->segment_table, i);
+
+		//habria que ver si es una direccion invalida y enviar el error
+		if(dst >= seg->base && dst < seg->limit){
+			segmentoBuscado = seg;
+			break;
+		}
+	}
+
+	int paginaBuscada = floor((dst - segmentoBuscado->base) / PAGE_SIZE);
+	int offset = (dst - segmentoBuscado->base) % PAGE_SIZE;
+
+	page* paginaAEscribir = list_get(segmentoBuscado->page_table, paginaBuscada);
+
+	uint32_t direccionFisicaBuscada = (paginaAEscribir->fr) + offset;
+
+	return direccionFisicaBuscada;
+}
 // Copia n bytes de MUSE a LIBMUSE
 // No se usan ni dst ni src
 uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 {
-	//Idea: para esta funcion solo usar "uint32_t src" y devolver un void* src, de esa manera libmuse tomaría
-	//ese void* despues en su implementancion en libmuse.c (acá lo hariamos distinto a todo el resto de los casos) 
+	int direccionFisicaBuscada = buscar_direccion_fisica(src, pid);
+	memcpy(dst, direccionFisicaBuscada, numBytes);
 
-	/* Cosas que hizo el otro flaco */
+	return src;
 
-	uint32_t destination = 0;
-
-	// Busco el programa, despues busco el segmento 0 del programa y de ese segmento busco su página 0 TODO ?? 
-	program *prg = list_get(program_list, search_program(pid));
-	segment *seg = list_get(prg->segment_table, 0);
-	page *pag = list_get(seg->page_table, 0);
-
-	// copio "numBytes" bytes desde la dirección "pag->fr->data" a la direccion &0 de la memoria de MUSE
-	memcpy(&destination, pag->fr, numBytes);
-	return destination;
-
-	/* 					 */
-
-	// How does memcpy works:
-	// Copies "numBytes" bytes from address "from" to address "to"
-	// void * memcpy(void *to, const void *from, size_t numBytes);
 }
 
 //Copia n bytes de LIBMUSE a MUSE
 uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 {
-	/* TODO: Mientros estoy haciendo la serializacion debería mandar por parametro los n bytes de source */
-	int i= search_program(pid);
-	program *prg = list_get(program_list, i);
-	segment *seg = list_get(prg->segment_table, 0);
-	page *pag = list_get(seg->page_table, 0);
-	memcpy(pag->fr, src, n);
-
-	// How does memcpy works:
-	// Copies "numBytes" bytes from address "from" to address "to"
-	// void * memcpy(void *to, const void *from, size_t numBytes);
+	int direccionFisicaBuscada = buscar_direccion_fisica(dst, pid);
+	memcpy(direccionFisicaBuscada, src, n);
 	
-	return 0;
+	return dst;
 }
 
 
