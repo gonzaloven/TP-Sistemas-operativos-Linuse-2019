@@ -171,6 +171,8 @@ page* page_with_free_size(int size, bool is_first_page, bool is_last_page, int t
 		return NULL;
 	}
 
+	log_debug(debug_logger, "Size solicitado para PAGE_WITH_FREE_SIZE: %d", size);
+
 	metadata = (heap_metadata*) malloc(METADATA_SIZE);
 	metadata2 = (heap_metadata*) malloc(METADATA_SIZE);
 
@@ -187,7 +189,7 @@ page* page_with_free_size(int size, bool is_first_page, bool is_last_page, int t
 			pag->is_modify = false;
 			pag->fr = MAIN_MEMORY + curr_frame_num * PAGE_SIZE;
 			
-			if (is_first_page)
+			if(is_first_page)
 			{
 				metadata = (heap_metadata*) (MAIN_MEMORY + curr_frame_num * PAGE_SIZE);
 				metadata->is_free = false;
@@ -301,22 +303,22 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		offset = seg->base + METADATA_SIZE;		
 
 		if(total_pages_needed>1){
-			pag = page_with_free_size(PAGE_SIZE,1,0,size,0);
+			pag = page_with_free_size(PAGE_SIZE, true, false, size, 0);
 			nro_pag = list_add(seg->page_table, pag);
-			espacio_que_queda_alocar =- PAGE_SIZE;
+			espacio_que_queda_alocar -= PAGE_SIZE;
 
 			//vamos a pedir todo el resto de paginas que necesitemos
 			for(int i=0 ; i < total_pages_needed-2 ; i++ )
 			{
-				pag = page_with_free_size(PAGE_SIZE,0,0,0,0);
+				pag = page_with_free_size(PAGE_SIZE, false, false, 0, 0);
 				list_add(seg->page_table, pag);
-				espacio_que_queda_alocar =- PAGE_SIZE;
+				espacio_que_queda_alocar -= PAGE_SIZE;
 			}
-			pag = page_with_free_size(espacio_que_queda_alocar,0,1,size,espacio_q_quedara_libre);
+			pag = page_with_free_size(espacio_que_queda_alocar, false, true, size, espacio_q_quedara_libre);
 			list_add(seg->page_table, pag);
 		}
 		else{ // si size_total ocupa menos de una pagina
-			pag = page_with_free_size(total_size,1,1,size,espacio_q_quedara_libre);
+			pag = page_with_free_size(total_size, true, true, size, espacio_q_quedara_libre);
 			nro_pag = list_add(seg->page_table, pag);
 		}
 	
@@ -351,7 +353,9 @@ int segment_with_free_space(program *prog, int size)
 			primerMetadata = (primerPagina->fr);
 			metadataActual = primerMetadata;
 
-			metadataActual = proxima_metadata_libre(0, metadataActual, 0, segmentoActual);
+			if(!metadataActual->is_free){
+				metadataActual = proxima_metadata_libre(0, metadataActual, 0, segmentoActual);
+			}
 	
 			if(metadataActual->size >= size)
 			{
