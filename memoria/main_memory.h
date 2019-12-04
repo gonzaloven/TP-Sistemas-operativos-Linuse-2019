@@ -12,9 +12,9 @@
 #include <unistd.h>
 #include <math.h>
 
-#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
+//#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
-//#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
+#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 /**
  * @struct program_s   
@@ -164,7 +164,7 @@ uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid);
 */
 int memory_unmap(uint32_t dir, uint32_t pid);
 
-heap_metadata* proxima_metadata_libre(int posicionActual, heap_metadata* metadataUsada, int paginaActualNumero, segment* segmento);
+int proxima_metadata_libre(int paginaABuscar, int offset, segment* segmento);
 
 segment* ultimo_segmento_programa(program *prog);
 

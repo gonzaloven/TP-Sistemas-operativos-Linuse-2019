@@ -426,7 +426,7 @@ int segment_with_free_space(program *prog, int size)
 			metadataActual = primerMetadata;
 
 			if(!metadataActual->is_free){
-				metadataActual = proxima_metadata_libre(0, metadataActual, 0, segmentoActual);
+				//metadataActual = proxima_metadata_libre(0, metadataActual, 0, segmentoActual); TODO Cambiar
 			}
 	
 			if(metadataActual->size >= size)
@@ -452,54 +452,60 @@ heap_metadata* metadata_siguiente(int paginaABuscar, int offset, int *cantidadDe
 	//Si la proxima metadata queda en otra pagina, me muevo hasta ahi
 	if(bytesAMoverme > PAGE_SIZE){
 
-		cantidadDePaginasAMoverme = floor(metadataActual->size/PAGE_SIZE);
-		offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE);
+		*cantidadDePaginasAMoverme = floor(bytesAMoverme/PAGE_SIZE);
+		*offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE);
 
-		page* paginaSiguiente = list_get(segmento->page_table, cantidadDePaginasAMoverme);
+		page* paginaSiguiente = list_get(segmento->page_table, paginaABuscar + *cantidadDePaginasAMoverme);
 
 		if (paginaSiguiente == NULL) return NULL;
 
-		metadataSiguiente = (paginaSiguiente->fr) + offsetDentroDeLaPagina;
+		metadataSiguiente = (heap_metadata*) ((paginaSiguiente->fr) + *offsetDentroDeLaPagina);
 
 	//En este caso la proxima metadata queda dentro de la misma pagina
 	}else{
 		page* paginaActual = list_get(segmento->page_table, paginaABuscar);
 
-		metadataSiguiente = (paginaActual->fr) + bytesAMoverme;
+		metadataSiguiente = (heap_metadata*) ((paginaActual->fr) + bytesAMoverme);
 	}
 
 	return metadataSiguiente;
 }
 
 //Esto cuando se usa la idea es pasarle inicialmente -> PaginaABuscar = 0, Offset = 0, Segmento = el segmento que estemos queriendo recorrer
-heap_metadata* proxima_metadata_libre(int paginaABuscar, int offset, segment* segmento){
-	int cantidadDePaginasAMoverme;
-	int offsetDentroDeLaPagina;
+int proxima_metadata_libre(int paginaABuscar, int offset, segment* segmento){
+	int cantidadDePaginasAMoverme = 0;
+	int offsetDentroDeLaPagina = 0;
+	int cantidadDePaginasMovidas = 0;
+	int offsetTotalMovido = 0;
 	heap_metadata* metadataSiguiente;
 
 	metadataSiguiente = metadata_siguiente(paginaABuscar, offset, &cantidadDePaginasAMoverme, &offsetDentroDeLaPagina, segmento);
 
+	cantidadDePaginasMovidas += paginaABuscar;
+	offsetTotalMovido += offset;
+
 	if(metadataSiguiente == NULL){
-		return NULL;	
+		return -1;
 	}else if(metadataSiguiente->is_free){
-		return metadataSiguiente;
+		int direccionLogicaMetadataLibre = cantidadDePaginasMovidas * PAGE_SIZE + offsetTotalMovido + METADATA_SIZE;
+		return direccionLogicaMetadataLibre;
 	}else{
 		return proxima_metadata_libre(cantidadDePaginasAMoverme, offsetDentroDeLaPagina, segmento);
 	}
 }
 
 void compactar_en_segmento(int posicionActual, heap_metadata* metadataInicial, heap_metadata* metadataActual, int paginaActualNumero, segment* segmento){
-	heap_metadata* metadataSiguiente = metadata_siguiente(posicionActual, metadataActual, paginaActualNumero, segmento);
+	/*heap_metadata* metadataSiguiente = metadata_siguiente(posicionActual, metadataActual, paginaActualNumero, segmento); TODO
 
 	if(metadataSiguiente->is_free){
 		metadataInicial->size += metadataSiguiente->size;
 		metadataActual = metadataSiguiente;
 		compactar_en_segmento(posicionActual, metadataInicial, metadataActual, paginaActualNumero, segmento);
 	}else{
-		metadataInicial = proxima_metadata_libre(posicionActual, metadataSiguiente, paginaActualNumero, segmento);
+		metadataInicial = proxima_metadata_libre(posicionActual, metadataSiguiente, paginaActualNumero, segmento); TODO cambiar esto
 		metadataActual = metadataInicial;
 		compactar_en_segmento(posicionActual, metadataInicial, metadataActual, paginaActualNumero, segmento);
-	}
+	}*/
 }
 
 void compactar_espacios_libres(program *prog){
@@ -508,8 +514,7 @@ void compactar_espacios_libres(program *prog){
 	int paginaActualNumero = 0;
 	int cantidadDePaginasAMoverme;
 	int i;
-	heap_metadata* metadataActual;
-	heap_metadata* metadataSiguiente;
+	heap_metadata* metadataInicialLibre;
 
 	for(i=0; i < cantidad_de_segmentos; i++){
 		segment* segmentoActual = list_get(prog->segment_table, i);
@@ -519,13 +524,13 @@ void compactar_espacios_libres(program *prog){
 		page* primerPagina = list_get(segmentoActual->page_table, 0);
 
 		heap_metadata* primerMetadata = (primerPagina->fr);
-		metadataActual = primerMetadata;
+		metadataInicialLibre = primerMetadata;
 
 		if(!primerMetadata->is_free){
-			metadataActual = proxima_metadata_libre(posicionActual, primerMetadata, 0, segmentoActual);
+			int direccionLogicaMetadataLibre = proxima_metadata_libre(0, 0, segmentoActual);
 		}
 
-		compactar_en_segmento(posicionActual, metadataActual, metadataActual, 0, segmentoActual);
+		//compactar_en_segmento(posicionActual, metadataActual, metadataActual, 0, segmentoActual);
 	}
 
 }
