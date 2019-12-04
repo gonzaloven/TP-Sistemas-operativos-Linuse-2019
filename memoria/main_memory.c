@@ -301,25 +301,7 @@ heap_metadata* proxima_metadata(int paginaABuscar, int offset, segment* segmento
 
 		if (paginaSiguiente == NULL) return NULL;
 
-		heap_metadata* proximaMetadata = (heap_metadata*) ((paginaSiguiente->fr) + offsetDentroDeLaPagina);
-
-		if((offsetDentroDeLaPagina + METADATA_SIZE) > PAGE_SIZE){
-			heap_metadata metadataCopia;
-
-			page* proximaPagina = list_get(segmento->page_table, (paginaABuscar + cantidadDePaginasAMoverme + 1));
-			void* punteroAlFrameSiguiente = proximaPagina->fr;
-			int tamanioMetadataCortada = (PAGE_SIZE) - offsetDentroDeLaPagina;
-
-			memcpy(&metadataCopia, proximaMetadata, tamanioMetadataCortada);
-			memcpy((void*)(&metadataCopia) + 2, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
-
-			memcpy(proximaMetadata, &metadataCopia, tamanioMetadataCortada);
-			memcpy(punteroAlFrameSiguiente, (void*)(&metadataCopia) + 2, METADATA_SIZE - tamanioMetadataCortada);
-
-			metadataSiguiente = proximaMetadata;
-		}else{
-			metadataSiguiente = proximaMetadata;
-		}
+		metadataSiguiente = (heap_metadata*) ((paginaSiguiente->fr) + offsetDentroDeLaPagina);
 
 		log_debug(debug_logger, "Metadata siguiente tiene: size: %d, is_free: %d",
 								metadataSiguiente->size,
@@ -362,25 +344,7 @@ heap_metadata* metadata_siguiente(int paginaABuscar, int offset, int *cantidadDe
 
 		if (paginaSiguiente == NULL) return NULL;
 
-		heap_metadata* proximaMetadata = (heap_metadata*) ((paginaSiguiente->fr) + *offsetDentroDeLaPagina);
-
-		if((*offsetDentroDeLaPagina + METADATA_SIZE) > PAGE_SIZE){
-			heap_metadata metadataCopia;
-
-			page* proximaPagina = list_get(segmento->page_table, (paginaABuscar + cantidadDePaginasAMoverme + 1));
-			void* punteroAlFrameSiguiente = proximaPagina->fr;
-			int tamanioMetadataCortada = (PAGE_SIZE) - *offsetDentroDeLaPagina;
-
-			memcpy(&metadataCopia, proximaMetadata, tamanioMetadataCortada);
-			memcpy((void*)(&metadataCopia) + 2, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
-
-			memcpy(proximaMetadata, &metadataCopia, tamanioMetadataCortada);
-			memcpy(punteroAlFrameSiguiente, (void*)(&metadataCopia) + 2, METADATA_SIZE - tamanioMetadataCortada);
-
-			metadataSiguiente = proximaMetadata;
-		}else{
-			metadataSiguiente = proximaMetadata;
-		}
+		metadataSiguiente = (heap_metadata*) ((paginaSiguiente->fr) + *offsetDentroDeLaPagina);
 
 		log_debug(debug_logger, "Metadata siguiente tiene: size: %d, is_free: %d",
 								metadataSiguiente->size,
