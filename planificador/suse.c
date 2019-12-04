@@ -811,12 +811,16 @@ void ejecucion_a_exit(t_suse_thread* thread, un_socket socket)
 		{
 			return program->PROCESS_ID == socket;
 		}
-
+	bool buscadorThread(t_suse_thread* th)
+		{
+			return th->tid == thread->tid;
+		}
 	pthread_mutex_lock(&mutex_process_list);
 	t_process* process = list_find(configuracion_suse.process, buscador);
 	pthread_mutex_unlock(&mutex_process_list);
 
 	remover_ULT_exec(process);
+	list_remove_by_condition(process->ULTS,buscadorThread);
 	thread->estado = E_EXIT;
 	pthread_mutex_lock(&mutex_exit_queue);
 	list_add(exit_queue,thread);
@@ -831,12 +835,16 @@ void bloqueado_a_exit(t_suse_thread* thread,un_socket socket)
 			{
 				return program->PROCESS_ID == socket;
 			}
-
+	bool buscadorThread(t_suse_thread* th)
+		{
+			return th->tid == thread->tid;
+		}
 	pthread_mutex_lock(&mutex_process_list);
 	t_process* process = list_find(configuracion_suse.process, buscador);
 	pthread_mutex_unlock(&mutex_process_list);
 
 	eliminar_ULT_cola_actual(thread,process);
+	list_remove_by_condition(process->ULTS,buscadorThread);
 	thread->estado = E_EXIT;
 	pthread_mutex_lock(&mutex_exit_queue);
 	list_add(exit_queue,thread);
@@ -850,12 +858,16 @@ void listo_a_exit(t_suse_thread* thread,un_socket socket)
 	bool buscador(t_process* program){
 		return program->PROCESS_ID == socket;
 	}
-
+	bool buscadorThread(t_suse_thread* th)
+	{
+		return th->tid == thread->tid;
+	}
 	pthread_mutex_lock(&mutex_process_list);
 	t_process* process = list_find(configuracion_suse.process, buscador);
 	pthread_mutex_unlock(&mutex_process_list);
 
 	eliminar_ULT_cola_actual(thread,process);
+	list_remove_by_condition(process->ULTS,buscadorThread);
 	thread->estado = E_EXIT;
 	pthread_mutex_lock(&mutex_exit_queue);
 	list_add(exit_queue,thread);
@@ -871,13 +883,17 @@ void nuevo_a_exit(t_suse_thread* thread,un_socket socket_actual)
 		{
 			return program->PROCESS_ID == socket_actual;
 		}
+	bool buscadorThread(t_suse_thread* th)
+	{
+		return th->tid == thread->tid;
+	}
 
 	pthread_mutex_lock(&mutex_process_list);
 	t_process* process = list_find(configuracion_suse.process, buscador);
 	pthread_mutex_unlock(&mutex_process_list);
 
 	eliminar_ULT_cola_actual(thread,process);
-
+	list_remove_by_condition(process->ULTS,buscadorThread);
 	thread->estado = E_EXIT;
 	pthread_mutex_lock(&mutex_exit_queue);
 	list_add(exit_queue,thread);
