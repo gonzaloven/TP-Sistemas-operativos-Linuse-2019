@@ -86,9 +86,9 @@ typedef struct t_process
 
 typedef struct t_suse_semaforos{
 	char* NAME;
-	uint32_t INIT;
-	uint32_t MAX;
-	uint32_t VALUE;
+	int INIT;
+	int MAX;
+	int VALUE;
 	t_list * BLOCKED_LIST;
 }t_suse_semaforos;
 

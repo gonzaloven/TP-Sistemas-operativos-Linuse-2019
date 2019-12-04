@@ -60,10 +60,10 @@ void init_semaforos(){
 	{
 		t_suse_semaforos* semaforo = malloc(sizeof(t_suse_semaforos));
 				semaforo->NAME = (char*)configuracion_suse.SEM_IDS[i];
-				semaforo->INIT = (uint32_t)configuracion_suse.SEM_INIT[i];
-				semaforo->MAX = (uint32_t)configuracion_suse.SEM_MAX[i];
-				semaforo->VALUE = (uint32_t)configuracion_suse.SEM_INIT[i];
-
+				semaforo->INIT = atoi((char*)configuracion_suse.SEM_INIT[i]);
+				semaforo->MAX = atoi((char*)configuracion_suse.SEM_MAX[i]);
+				semaforo->VALUE = atoi((char*)configuracion_suse.SEM_INIT[i]);
+				semaforo->BLOCKED_LIST = list_create();
 				list_add(configuracion_suse.semaforos, semaforo);
 				i++;
 	}
@@ -81,7 +81,7 @@ suse_configuration get_configuracion() {
 	t_list* semaforos;
 	
 	configuracion_suse.LISTEN_PORT = copy_string(get_campo_config_string(archivo_configuracion, "LISTEN_PORT"));
-	configuracion_suse.METRICS_TIMER = get_campo_config_int(archivo_configuracion, "ESTIMACION_INICIAL");
+	configuracion_suse.METRICS_TIMER = get_campo_config_int(archivo_configuracion, "METRICS_TIMER"); //SE LLAMA METRICS TIMER
 	configuracion_suse.SEM_IDS = get_campo_config_array(archivo_configuracion, "SEM_IDS");
 	configuracion_suse.SEM_INIT = get_campo_config_array(archivo_configuracion, "SEM_INIT");
 	configuracion_suse.SEM_MAX = get_campo_config_array(archivo_configuracion, "SEM_MAX");
@@ -231,7 +231,7 @@ void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
 
 void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
 {
-	//esperar_handshake(socket, paquete_recibido, cop_close_tid);
+	esperar_handshake(socket, paquete_recibido, cop_close_tid);
 
 	log_info(logger, "Realice el handshake de close_tid\n");
 
@@ -239,7 +239,7 @@ void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
 
 	int desplazamiento = 0;
 	int tid = deserializar_int(paquete->data, &desplazamiento);
-
+	liberar_paquete(paquete);
 	log_info(logger, "Recibi un close para el ULT %d\n", tid);
 
 	int resultado = close_tid(tid,socket);
@@ -252,7 +252,7 @@ void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
 	enviar(socket, cop_close_tid, tamanio_buffer, buffer);
 
 	free(buffer);
-	liberar_paquete(paquete);
+
 }
 
 int join(un_socket socket, int tid){
@@ -372,12 +372,12 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 
 int close_tid(int tid, int socket_actual){
 
-	bool find_process_by_id(t_process* process) //TODO: Extraer a utils!!!!!!!!!!!!!!!!!!!!!!!!!
+	bool find_process_by_id(t_process* process)
 	{
 		return process->PROCESS_ID == socket_actual;
 	}
 
-	bool find_thread_by_tid(t_suse_thread* thread) //Extraer a utils!!!!!!!!!!!!!!!!!!!!
+	bool find_thread_by_tid(t_suse_thread* thread)
 	{
 		return thread->tid == tid;
 	}
@@ -401,45 +401,37 @@ int close_tid(int tid, int socket_actual){
 
 	switch(thread->estado){
 		case E_NEW:
-				/*
-				bool comparador_new(t_suse_thread* element){
-					return element->tid == tid && element->procesoId ==socket_actual;
-				}
-				*/
-
 				pthread_mutex_lock(&mutex_new_queue);
 				nuevo_a_exit(thread,socket_actual);
 				pthread_mutex_unlock(&mutex_new_queue);
 		break;
 
 		case E_BLOCKED:
-			/*
-			bool comparador_blocked(t_suse_thread* element)
-			{
-				return element->tid == tid && element->procesoId ==socket_actual;
-			}
-			*/
+
 			pthread_mutex_lock(&mutex_blocked_queue);
 			pthread_mutex_lock(&mutex_multiprog);
 
 			configuracion_suse.MAX_MULTIPROG --;
 			bloqueado_a_exit(thread,socket_actual);
+			if(validar_grado_multiprogramacion())
+			{
+				pasarNuevoProceso();
+			}
 
 			pthread_mutex_unlock(&mutex_multiprog);
 			pthread_mutex_unlock(&mutex_blocked_queue);
 		break;
 
 		case E_READY:
-			/*
-			bool comparador_ready(t_suse_thread* th){
-				return th->tid == thread->tid;
-			}
-			*/
 
 			pthread_mutex_lock(&mutex_multiprog);
 
 			configuracion_suse.MAX_MULTIPROG --;
 			listo_a_exit(thread,socket_actual);
+			if(validar_grado_multiprogramacion())
+			{
+				pasarNuevoProceso();
+			}
 
 			pthread_mutex_unlock(&mutex_multiprog);
 		break;
@@ -449,6 +441,11 @@ int close_tid(int tid, int socket_actual){
 				process->EXEC_THREAD = NULL;
 				ejecucion_a_exit(thread,socket_actual);
 				configuracion_suse.MAX_MULTIPROG --;
+				if(validar_grado_multiprogramacion())
+				{
+					pasarNuevoProceso();
+				}
+
 				pthread_mutex_unlock(&mutex_multiprog);
 		break;
 	}
@@ -509,6 +506,22 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 
 }
 
+void pasarNuevoProceso()
+{
+	t_suse_thread* thread = list_get(new_queue,0);
+	bool buscador(t_process* p)
+	{
+		return p->PROCESS_ID == thread->procesoId;
+	}
+	if(thread != 0)
+	{
+		t_process* process = list_find(configuracion_suse.process,buscador);
+		nuevo_a_listo(thread,process->PROCESS_ID);
+	}
+}
+
+
+
 bool validar_grado_multiprogramacion()
 {
 	log_info(logger, "Validando grado de multiprogramacion...\n");
@@ -563,7 +576,7 @@ int obtener_proximo_ejecutar(t_process* process){
 	struct timeval aux;
 	double tiempo;
 	gettimeofday(&aux,NULL);
-
+	tiempo = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
 	t_suse_thread* exec_actual = process->EXEC_THREAD;
 
 	if(exec_actual != 0)
@@ -572,7 +585,6 @@ int obtener_proximo_ejecutar(t_process* process){
 
 		if(aux2 != 0)
 		{
-			tiempo = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
 			exec_actual->duracionRafaga = tiempo - aux2;
 		}
 
@@ -581,6 +593,10 @@ int obtener_proximo_ejecutar(t_process* process){
 	ordenar_cola_listos(process->READY_LIST);
 
 	t_suse_thread *next_ULT = list_get(process->READY_LIST, 0); // TODO: Si no funciona hacemos una bool que haga return thread != null; va a retornar el primero q haya
+	if(next_ULT == 0)
+	{
+		log_info(logger,"No hay procesos para ejecutar");
+	}
 	int next_tid = next_ULT->tid;
 	log_info(logger, "El proximo ULT a ejecutar es %d", next_tid);
 
@@ -663,20 +679,20 @@ void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem){
 	serializar_int(buffer, &desp, resultado);
 	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
-	liberar_paquete(paquete_recibido);
-
 }
 
 void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 
 	esperar_handshake(socket_actual, paquete_signal_sem, cop_signal_sem);
-	log_info(logger, "Recibiendo el semaforo para decrementar \n");
+	log_info(logger, "Recibiendo el semaforo para incrementar...\n");
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
 	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
+
+	log_info(logger,"Recibi el semaforo %s para incrementar...\n",sem);
 
 	pthread_mutex_lock(&mutex_semaforos);
 	int resultado = incrementar_semaforo(tid, sem);
@@ -699,12 +715,12 @@ void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 int desbloquear_hilos_semaforo(char* sem){
 
 	bool buscador_sem_name(t_suse_semaforos* semaforo){
-		return semaforo->NAME == sem;
+		return strings_equal(semaforo->NAME,sem);
 	}
 
-
-
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, buscador_sem_name);
+	if(semaforo->VALUE <= 0)
+	{
 
 	if(list_get(semaforo->BLOCKED_LIST, 0) == NULL){
 		return 0;
@@ -724,13 +740,14 @@ int desbloquear_hilos_semaforo(char* sem){
 
 	list_remove(semaforo->BLOCKED_LIST,0);
 
+	}
 	return 0;
 }
 
 int incrementar_semaforo(uint32_t tid, char* sem){
 
 	bool comparador(t_suse_semaforos* semaforo){
-		return semaforo->NAME == sem;
+		return strings_equal(semaforo->NAME,sem);
 	}
 
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, comparador);
@@ -756,15 +773,19 @@ int incrementar_semaforo(uint32_t tid, char* sem){
 int decrementar_semaforo(int socket_actual,int tid, char* sem_name){
 
 	bool comparador(t_suse_semaforos* semaforo){
-		return semaforo->NAME == sem_name;
+		return strings_equal(semaforo->NAME,sem_name);
 	}
 
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, comparador);
 
-	if(semaforo == NULL){
-			log_info(logger,"El semaforo no existe\n");
-			return -1;
-		}
+	if(semaforo == NULL)
+	{
+		log_info(logger,"El semaforo no existe\n");
+		return -1;
+	}
+
+	log_info(logger,"El valor actual del semaforo es %d",semaforo->VALUE);
+
 	if(semaforo->VALUE <= 0)
 	{
 
@@ -987,9 +1008,7 @@ void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semafo
 
 	thread->estado = E_BLOCKED;
 
-	pthread_mutex_lock(&mutex_semaforos);
 	list_add(semaforo->BLOCKED_LIST,thread);
-	pthread_mutex_unlock(&mutex_semaforos);
 
 	pthread_mutex_lock(&mutex_blocked_queue);
 	list_add(blocked_queue,thread);

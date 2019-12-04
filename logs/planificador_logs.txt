@@ -7960,3 +7960,3659 @@
 
 [INFO] 20:27:38:526 SUSE logs/(26159:26204): El semaforo no existe
 
+[INFO] 18:44:50:464 SUSE logs/(3720:3720): Inicializando SUSE. 
+
+[INFO] 18:44:50:469 SUSE logs/(3720:3720): Levantando archivo de configuracion de SUSE 
+
+[INFO] 18:44:50:469 SUSE logs/(3720:3720): Archivo de configuracion levantado. 
+
+[INFO] 18:44:50:469 SUSE logs/(3720:3720): Inicializando semaforos 
+
+[INFO] 18:44:50:469 SUSE logs/(3720:3720): Iniciando servidor... 
+
+[INFO] 18:44:50:469 SUSE logs/(3720:3720): SUSE esperando conexiones...
+
+[INFO] 18:44:52:782 SUSE logs/(3720:3720): Recibi una nueva conexion del socket 5. 
+
+[INFO] 18:44:52:783 SUSE logs/(3720:3720): Creando hilo para atender al proceso 5. 
+
+[INFO] 18:44:52:784 SUSE logs/(3720:3720): Cree el hilo para el proceso 5
+[INFO] 18:44:52:787 SUSE logs/(3720:3720): SUSE esperando conexiones...
+
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): Esperando handshake en suse_create...
+
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): Recibi el ULT 0 del proceso 5 
+
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): Validando si es el main thread o ULT comun 
+
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): El proceso 5 es nuevo 
+
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): Proceso creado con id 5 
+
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): Creando ULT 0
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): ULT creado con id 0 
+
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): El thread 0 paso de new a execute 
+
+[INFO] 18:44:57:83 SUSE logs/(3720:3733): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 18:44:57:877 SUSE logs/(3720:3733): Esperando handshake en suse_create...
+
+[INFO] 18:44:57:877 SUSE logs/(3720:3733): Recibi el ULT 1 del proceso 5 
+
+[INFO] 18:44:57:877 SUSE logs/(3720:3733): Validando si es el main thread o ULT comun 
+
+[INFO] 18:44:57:877 SUSE logs/(3720:3733): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:44:57:877 SUSE logs/(3720:3733): Creando ULT 1
+[INFO] 18:44:57:877 SUSE logs/(3720:3733): ULT creado con id 1 
+
+[INFO] 18:44:57:877 SUSE logs/(3720:3733): El grado de multiprogramacion es 1 
+
+[INFO] 18:44:57:877 SUSE logs/(3720:3733): Validando grado de multiprogramacion...
+
+[INFO] 18:44:57:877 SUSE logs/(3720:3733): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 18:44:58:676 SUSE logs/(3720:3733): Esperando handshake en suse_create...
+
+[INFO] 18:44:58:676 SUSE logs/(3720:3733): Recibi el ULT 2 del proceso 5 
+
+[INFO] 18:44:58:676 SUSE logs/(3720:3733): Validando si es el main thread o ULT comun 
+
+[INFO] 18:44:58:676 SUSE logs/(3720:3733): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:44:58:676 SUSE logs/(3720:3733): Creando ULT 2
+[INFO] 18:44:58:677 SUSE logs/(3720:3733): ULT creado con id 2 
+
+[INFO] 18:44:58:677 SUSE logs/(3720:3733): El grado de multiprogramacion es 2 
+
+[INFO] 18:44:58:677 SUSE logs/(3720:3733): Validando grado de multiprogramacion...
+
+[INFO] 18:44:58:677 SUSE logs/(3720:3733): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 18:44:59:275 SUSE logs/(3720:3733): Esperando handshake en suse_create...
+
+[INFO] 18:44:59:275 SUSE logs/(3720:3733): Recibi el ULT 3 del proceso 5 
+
+[INFO] 18:44:59:275 SUSE logs/(3720:3733): Validando si es el main thread o ULT comun 
+
+[INFO] 18:44:59:275 SUSE logs/(3720:3733): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:44:59:275 SUSE logs/(3720:3733): Creando ULT 3
+[INFO] 18:44:59:275 SUSE logs/(3720:3733): ULT creado con id 3 
+
+[INFO] 18:44:59:275 SUSE logs/(3720:3733): El grado de multiprogramacion es 3 
+
+[INFO] 18:44:59:275 SUSE logs/(3720:3733): Validando grado de multiprogramacion...
+
+[INFO] 18:44:59:275 SUSE logs/(3720:3733): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 18:44:59:867 SUSE logs/(3720:3733): Esperando handshake en suse_create...
+
+[INFO] 18:44:59:868 SUSE logs/(3720:3733): Recibi el ULT 4 del proceso 5 
+
+[INFO] 18:44:59:868 SUSE logs/(3720:3733): Validando si es el main thread o ULT comun 
+
+[INFO] 18:44:59:868 SUSE logs/(3720:3733): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:44:59:868 SUSE logs/(3720:3733): Creando ULT 4
+[INFO] 18:44:59:868 SUSE logs/(3720:3733): ULT creado con id 4 
+
+[INFO] 18:44:59:868 SUSE logs/(3720:3733): El grado de multiprogramacion es 4 
+
+[INFO] 18:44:59:868 SUSE logs/(3720:3733): Validando grado de multiprogramacion...
+
+[INFO] 18:44:59:868 SUSE logs/(3720:3733): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 18:45:01:86 SUSE logs/(3720:3733): Inicio Join
+[INFO] 18:45:01:86 SUSE logs/(3720:3733): Realice el primer handshake con hilolay
+
+[INFO] 18:45:01:86 SUSE logs/(3720:3733): el socket es
+[INFO] 18:45:02:129 SUSE logs/(3720:3733): El thread 0 paso de execute a blocked 
+
+[INFO] 18:45:06:272 SUSE logs/(3720:3733): Arranco schedule_next...
+
+[INFO] 18:45:06:273 SUSE logs/(3720:3733): Recibi una peticion de suse_schedule_next 
+
+[INFO] 18:45:06:273 SUSE logs/(3720:3733): Iniciando planificacion...
+
+[INFO] 18:45:06:273 SUSE logs/(3720:3733): Estimando ULTs...
+
+[INFO] 18:45:06:273 SUSE logs/(3720:3733): Ordenando por SJF...
+[INFO] 18:45:06:273 SUSE logs/(3720:3733): El proximo ULT a ejecutar es 1
+[INFO] 18:45:06:273 SUSE logs/(3720:3733): El tid 1 paso de ready a execute
+
+[INFO] 18:45:06:273 SUSE logs/(3720:3733): Envie el next_tid 1 a SUSE
+[INFO] 18:45:17:924 SUSE logs/(3720:3733): Recibiendo el semaforo para incrementar 
+
+[INFO] 18:45:36:171 SUSE logs/(3720:3733): El semaforo no existe
+
+[INFO] 18:49:57:798 SUSE logs/(3910:3910): Inicializando SUSE. 
+
+[INFO] 18:49:57:798 SUSE logs/(3910:3910): Levantando archivo de configuracion de SUSE 
+
+[INFO] 18:49:57:798 SUSE logs/(3910:3910): Archivo de configuracion levantado. 
+
+[INFO] 18:49:57:798 SUSE logs/(3910:3910): Inicializando semaforos 
+
+[INFO] 18:49:57:798 SUSE logs/(3910:3910): Iniciando servidor... 
+
+[INFO] 18:49:57:798 SUSE logs/(3910:3910): SUSE esperando conexiones...
+
+[INFO] 18:50:00:334 SUSE logs/(3910:3910): Recibi una nueva conexion del socket 5. 
+
+[INFO] 18:50:00:337 SUSE logs/(3910:3910): Creando hilo para atender al proceso 5. 
+
+[INFO] 18:50:00:340 SUSE logs/(3910:3910): Cree el hilo para el proceso 5
+[INFO] 18:50:00:342 SUSE logs/(3910:3910): SUSE esperando conexiones...
+
+[INFO] 18:50:03:524 SUSE logs/(3910:4163): Esperando handshake en suse_create...
+
+[INFO] 18:50:03:525 SUSE logs/(3910:4163): Recibi el ULT 0 del proceso 5 
+
+[INFO] 18:50:03:525 SUSE logs/(3910:4163): Validando si es el main thread o ULT comun 
+
+[INFO] 18:50:03:525 SUSE logs/(3910:4163): El proceso 5 es nuevo 
+
+[INFO] 18:50:03:525 SUSE logs/(3910:4163): Proceso creado con id 5 
+
+[INFO] 18:50:03:525 SUSE logs/(3910:4163): Creando ULT 0
+[INFO] 18:50:03:525 SUSE logs/(3910:4163): ULT creado con id 0 
+
+[INFO] 18:50:03:525 SUSE logs/(3910:4163): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 18:50:03:525 SUSE logs/(3910:4163): El thread 0 paso de new a execute 
+
+[INFO] 18:50:03:525 SUSE logs/(3910:4163): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 18:50:04:445 SUSE logs/(3910:4163): Esperando handshake en suse_create...
+
+[INFO] 18:50:04:445 SUSE logs/(3910:4163): Recibi el ULT 1 del proceso 5 
+
+[INFO] 18:50:04:446 SUSE logs/(3910:4163): Validando si es el main thread o ULT comun 
+
+[INFO] 18:50:04:446 SUSE logs/(3910:4163): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:50:04:446 SUSE logs/(3910:4163): Creando ULT 1
+[INFO] 18:50:04:446 SUSE logs/(3910:4163): ULT creado con id 1 
+
+[INFO] 18:50:04:446 SUSE logs/(3910:4163): El grado de multiprogramacion es 1 
+
+[INFO] 18:50:04:446 SUSE logs/(3910:4163): Validando grado de multiprogramacion...
+
+[INFO] 18:50:04:446 SUSE logs/(3910:4163): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 18:50:05:23 SUSE logs/(3910:4163): Esperando handshake en suse_create...
+
+[INFO] 18:50:05:23 SUSE logs/(3910:4163): Recibi el ULT 2 del proceso 5 
+
+[INFO] 18:50:05:23 SUSE logs/(3910:4163): Validando si es el main thread o ULT comun 
+
+[INFO] 18:50:05:24 SUSE logs/(3910:4163): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:50:05:24 SUSE logs/(3910:4163): Creando ULT 2
+[INFO] 18:50:05:24 SUSE logs/(3910:4163): ULT creado con id 2 
+
+[INFO] 18:50:05:24 SUSE logs/(3910:4163): El grado de multiprogramacion es 2 
+
+[INFO] 18:50:05:24 SUSE logs/(3910:4163): Validando grado de multiprogramacion...
+
+[INFO] 18:50:05:24 SUSE logs/(3910:4163): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 18:50:05:825 SUSE logs/(3910:4163): Esperando handshake en suse_create...
+
+[INFO] 18:50:05:825 SUSE logs/(3910:4163): Recibi el ULT 3 del proceso 5 
+
+[INFO] 18:50:05:825 SUSE logs/(3910:4163): Validando si es el main thread o ULT comun 
+
+[INFO] 18:50:05:825 SUSE logs/(3910:4163): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:50:05:825 SUSE logs/(3910:4163): Creando ULT 3
+[INFO] 18:50:05:826 SUSE logs/(3910:4163): ULT creado con id 3 
+
+[INFO] 18:50:05:826 SUSE logs/(3910:4163): El grado de multiprogramacion es 3 
+
+[INFO] 18:50:05:826 SUSE logs/(3910:4163): Validando grado de multiprogramacion...
+
+[INFO] 18:50:05:826 SUSE logs/(3910:4163): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 18:50:06:612 SUSE logs/(3910:4163): Esperando handshake en suse_create...
+
+[INFO] 18:50:06:612 SUSE logs/(3910:4163): Recibi el ULT 4 del proceso 5 
+
+[INFO] 18:50:06:612 SUSE logs/(3910:4163): Validando si es el main thread o ULT comun 
+
+[INFO] 18:50:06:612 SUSE logs/(3910:4163): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:50:06:612 SUSE logs/(3910:4163): Creando ULT 4
+[INFO] 18:50:06:612 SUSE logs/(3910:4163): ULT creado con id 4 
+
+[INFO] 18:50:06:612 SUSE logs/(3910:4163): El grado de multiprogramacion es 4 
+
+[INFO] 18:50:06:612 SUSE logs/(3910:4163): Validando grado de multiprogramacion...
+
+[INFO] 18:50:06:612 SUSE logs/(3910:4163): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 18:50:07:431 SUSE logs/(3910:4163): Inicio Join
+[INFO] 18:50:07:431 SUSE logs/(3910:4163): Realice el primer handshake con hilolay
+
+[INFO] 18:50:07:431 SUSE logs/(3910:4163): el socket es
+[INFO] 18:50:07:643 SUSE logs/(3910:4163): El thread 0 paso de execute a blocked 
+
+[INFO] 18:50:10:958 SUSE logs/(3910:4163): Arranco schedule_next...
+
+[INFO] 18:50:10:959 SUSE logs/(3910:4163): Recibi una peticion de suse_schedule_next 
+
+[INFO] 18:50:10:959 SUSE logs/(3910:4163): Iniciando planificacion...
+
+[INFO] 18:50:10:959 SUSE logs/(3910:4163): Estimando ULTs...
+
+[INFO] 18:50:10:959 SUSE logs/(3910:4163): Ordenando por SJF...
+[INFO] 18:50:10:959 SUSE logs/(3910:4163): El proximo ULT a ejecutar es 1
+[INFO] 18:50:10:959 SUSE logs/(3910:4163): El tid 1 paso de ready a execute
+
+[INFO] 18:50:10:959 SUSE logs/(3910:4163): Envie el next_tid 1 a SUSE
+[INFO] 18:50:14:866 SUSE logs/(3910:4163): Recibiendo el semaforo para incrementar 
+
+[INFO] 18:56:58:461 SUSE logs/(4589:4589): Inicializando SUSE. 
+
+[INFO] 18:56:58:462 SUSE logs/(4589:4589): Levantando archivo de configuracion de SUSE 
+
+[INFO] 18:56:58:462 SUSE logs/(4589:4589): Archivo de configuracion levantado. 
+
+[INFO] 18:56:58:462 SUSE logs/(4589:4589): Inicializando semaforos 
+
+[INFO] 18:56:58:462 SUSE logs/(4589:4589): Iniciando servidor... 
+
+[INFO] 18:56:58:462 SUSE logs/(4589:4589): SUSE esperando conexiones...
+
+[INFO] 18:57:00:564 SUSE logs/(4589:4589): Recibi una nueva conexion del socket 5. 
+
+[INFO] 18:57:00:564 SUSE logs/(4589:4589): Creando hilo para atender al proceso 5. 
+
+[INFO] 18:57:00:565 SUSE logs/(4589:4589): Cree el hilo para el proceso 5
+[INFO] 18:57:00:567 SUSE logs/(4589:4589): SUSE esperando conexiones...
+
+[INFO] 18:57:03:30 SUSE logs/(4589:4602): Esperando handshake en suse_create...
+
+[INFO] 18:57:03:30 SUSE logs/(4589:4602): Recibi el ULT 0 del proceso 5 
+
+[INFO] 18:57:03:31 SUSE logs/(4589:4602): Validando si es el main thread o ULT comun 
+
+[INFO] 18:57:03:31 SUSE logs/(4589:4602): El proceso 5 es nuevo 
+
+[INFO] 18:57:03:31 SUSE logs/(4589:4602): Proceso creado con id 5 
+
+[INFO] 18:57:03:31 SUSE logs/(4589:4602): Creando ULT 0
+[INFO] 18:57:03:31 SUSE logs/(4589:4602): ULT creado con id 0 
+
+[INFO] 18:57:03:31 SUSE logs/(4589:4602): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 18:57:03:31 SUSE logs/(4589:4602): El thread 0 paso de new a execute 
+
+[INFO] 18:57:03:31 SUSE logs/(4589:4602): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 18:57:03:539 SUSE logs/(4589:4602): Esperando handshake en suse_create...
+
+[INFO] 18:57:03:540 SUSE logs/(4589:4602): Recibi el ULT 1 del proceso 5 
+
+[INFO] 18:57:03:541 SUSE logs/(4589:4602): Validando si es el main thread o ULT comun 
+
+[INFO] 18:57:03:541 SUSE logs/(4589:4602): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:57:03:541 SUSE logs/(4589:4602): Creando ULT 1
+[INFO] 18:57:03:541 SUSE logs/(4589:4602): ULT creado con id 1 
+
+[INFO] 18:57:03:541 SUSE logs/(4589:4602): El grado de multiprogramacion es 1 
+
+[INFO] 18:57:03:541 SUSE logs/(4589:4602): Validando grado de multiprogramacion...
+
+[INFO] 18:57:03:541 SUSE logs/(4589:4602): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 18:57:04:569 SUSE logs/(4589:4602): Esperando handshake en suse_create...
+
+[INFO] 18:57:04:569 SUSE logs/(4589:4602): Recibi el ULT 2 del proceso 5 
+
+[INFO] 18:57:04:569 SUSE logs/(4589:4602): Validando si es el main thread o ULT comun 
+
+[INFO] 18:57:04:569 SUSE logs/(4589:4602): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:57:04:569 SUSE logs/(4589:4602): Creando ULT 2
+[INFO] 18:57:04:569 SUSE logs/(4589:4602): ULT creado con id 2 
+
+[INFO] 18:57:04:569 SUSE logs/(4589:4602): El grado de multiprogramacion es 2 
+
+[INFO] 18:57:04:569 SUSE logs/(4589:4602): Validando grado de multiprogramacion...
+
+[INFO] 18:57:04:569 SUSE logs/(4589:4602): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 18:57:05:133 SUSE logs/(4589:4602): Esperando handshake en suse_create...
+
+[INFO] 18:57:05:134 SUSE logs/(4589:4602): Recibi el ULT 3 del proceso 5 
+
+[INFO] 18:57:05:134 SUSE logs/(4589:4602): Validando si es el main thread o ULT comun 
+
+[INFO] 18:57:05:134 SUSE logs/(4589:4602): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:57:05:134 SUSE logs/(4589:4602): Creando ULT 3
+[INFO] 18:57:05:134 SUSE logs/(4589:4602): ULT creado con id 3 
+
+[INFO] 18:57:05:134 SUSE logs/(4589:4602): El grado de multiprogramacion es 3 
+
+[INFO] 18:57:05:134 SUSE logs/(4589:4602): Validando grado de multiprogramacion...
+
+[INFO] 18:57:05:134 SUSE logs/(4589:4602): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 18:57:05:502 SUSE logs/(4589:4602): Esperando handshake en suse_create...
+
+[INFO] 18:57:05:503 SUSE logs/(4589:4602): Recibi el ULT 4 del proceso 5 
+
+[INFO] 18:57:05:503 SUSE logs/(4589:4602): Validando si es el main thread o ULT comun 
+
+[INFO] 18:57:05:503 SUSE logs/(4589:4602): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:57:05:503 SUSE logs/(4589:4602): Creando ULT 4
+[INFO] 18:57:05:503 SUSE logs/(4589:4602): ULT creado con id 4 
+
+[INFO] 18:57:05:503 SUSE logs/(4589:4602): El grado de multiprogramacion es 4 
+
+[INFO] 18:57:05:503 SUSE logs/(4589:4602): Validando grado de multiprogramacion...
+
+[INFO] 18:57:05:503 SUSE logs/(4589:4602): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 18:57:06:148 SUSE logs/(4589:4602): Inicio Join
+[INFO] 18:57:06:148 SUSE logs/(4589:4602): Realice el primer handshake con hilolay
+
+[INFO] 18:57:06:148 SUSE logs/(4589:4602): el socket es
+[INFO] 18:57:06:339 SUSE logs/(4589:4602): El thread 0 paso de execute a blocked 
+
+[INFO] 18:57:07:893 SUSE logs/(4589:4602): Arranco schedule_next...
+
+[INFO] 18:57:07:894 SUSE logs/(4589:4602): Recibi una peticion de suse_schedule_next 
+
+[INFO] 18:57:07:894 SUSE logs/(4589:4602): Iniciando planificacion...
+
+[INFO] 18:57:07:894 SUSE logs/(4589:4602): Estimando ULTs...
+
+[INFO] 18:57:07:894 SUSE logs/(4589:4602): Ordenando por SJF...
+[INFO] 18:57:07:894 SUSE logs/(4589:4602): El proximo ULT a ejecutar es 1
+[INFO] 18:57:07:894 SUSE logs/(4589:4602): El tid 1 paso de ready a execute
+
+[INFO] 18:57:07:894 SUSE logs/(4589:4602): Envie el next_tid 1 a SUSE
+[INFO] 18:57:10:523 SUSE logs/(4589:4602): Recibiendo el semaforo para incrementar 
+
+[INFO] 18:58:58:765 SUSE logs/(4802:4802): Inicializando SUSE. 
+
+[INFO] 18:58:58:766 SUSE logs/(4802:4802): Levantando archivo de configuracion de SUSE 
+
+[INFO] 18:58:58:766 SUSE logs/(4802:4802): Archivo de configuracion levantado. 
+
+[INFO] 18:58:58:766 SUSE logs/(4802:4802): Inicializando semaforos 
+
+[INFO] 18:58:58:766 SUSE logs/(4802:4802): Iniciando servidor... 
+
+[INFO] 18:58:58:766 SUSE logs/(4802:4802): SUSE esperando conexiones...
+
+[INFO] 18:59:01:457 SUSE logs/(4802:4802): Recibi una nueva conexion del socket 5. 
+
+[INFO] 18:59:01:458 SUSE logs/(4802:4802): Creando hilo para atender al proceso 5. 
+
+[INFO] 18:59:01:458 SUSE logs/(4802:4802): Cree el hilo para el proceso 5
+[INFO] 18:59:01:459 SUSE logs/(4802:4802): SUSE esperando conexiones...
+
+[INFO] 18:59:03:532 SUSE logs/(4802:4815): Esperando handshake en suse_create...
+
+[INFO] 18:59:03:532 SUSE logs/(4802:4815): Recibi el ULT 0 del proceso 5 
+
+[INFO] 18:59:03:532 SUSE logs/(4802:4815): Validando si es el main thread o ULT comun 
+
+[INFO] 18:59:03:532 SUSE logs/(4802:4815): El proceso 5 es nuevo 
+
+[INFO] 18:59:03:532 SUSE logs/(4802:4815): Proceso creado con id 5 
+
+[INFO] 18:59:03:532 SUSE logs/(4802:4815): Creando ULT 0
+[INFO] 18:59:03:532 SUSE logs/(4802:4815): ULT creado con id 0 
+
+[INFO] 18:59:03:532 SUSE logs/(4802:4815): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 18:59:03:533 SUSE logs/(4802:4815): El thread 0 paso de new a execute 
+
+[INFO] 18:59:03:533 SUSE logs/(4802:4815): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 18:59:03:915 SUSE logs/(4802:4815): Esperando handshake en suse_create...
+
+[INFO] 18:59:03:916 SUSE logs/(4802:4815): Recibi el ULT 1 del proceso 5 
+
+[INFO] 18:59:03:916 SUSE logs/(4802:4815): Validando si es el main thread o ULT comun 
+
+[INFO] 18:59:03:916 SUSE logs/(4802:4815): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:59:03:916 SUSE logs/(4802:4815): Creando ULT 1
+[INFO] 18:59:03:916 SUSE logs/(4802:4815): ULT creado con id 1 
+
+[INFO] 18:59:03:916 SUSE logs/(4802:4815): El grado de multiprogramacion es 1 
+
+[INFO] 18:59:03:916 SUSE logs/(4802:4815): Validando grado de multiprogramacion...
+
+[INFO] 18:59:03:916 SUSE logs/(4802:4815): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 18:59:04:620 SUSE logs/(4802:4815): Esperando handshake en suse_create...
+
+[INFO] 18:59:04:620 SUSE logs/(4802:4815): Recibi el ULT 2 del proceso 5 
+
+[INFO] 18:59:04:620 SUSE logs/(4802:4815): Validando si es el main thread o ULT comun 
+
+[INFO] 18:59:04:620 SUSE logs/(4802:4815): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:59:04:620 SUSE logs/(4802:4815): Creando ULT 2
+[INFO] 18:59:04:620 SUSE logs/(4802:4815): ULT creado con id 2 
+
+[INFO] 18:59:04:620 SUSE logs/(4802:4815): El grado de multiprogramacion es 2 
+
+[INFO] 18:59:04:620 SUSE logs/(4802:4815): Validando grado de multiprogramacion...
+
+[INFO] 18:59:04:620 SUSE logs/(4802:4815): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 18:59:05:162 SUSE logs/(4802:4815): Esperando handshake en suse_create...
+
+[INFO] 18:59:05:163 SUSE logs/(4802:4815): Recibi el ULT 3 del proceso 5 
+
+[INFO] 18:59:05:163 SUSE logs/(4802:4815): Validando si es el main thread o ULT comun 
+
+[INFO] 18:59:05:163 SUSE logs/(4802:4815): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:59:05:163 SUSE logs/(4802:4815): Creando ULT 3
+[INFO] 18:59:05:163 SUSE logs/(4802:4815): ULT creado con id 3 
+
+[INFO] 18:59:05:163 SUSE logs/(4802:4815): El grado de multiprogramacion es 3 
+
+[INFO] 18:59:05:163 SUSE logs/(4802:4815): Validando grado de multiprogramacion...
+
+[INFO] 18:59:05:163 SUSE logs/(4802:4815): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 18:59:05:555 SUSE logs/(4802:4815): Esperando handshake en suse_create...
+
+[INFO] 18:59:05:556 SUSE logs/(4802:4815): Recibi el ULT 4 del proceso 5 
+
+[INFO] 18:59:05:556 SUSE logs/(4802:4815): Validando si es el main thread o ULT comun 
+
+[INFO] 18:59:05:556 SUSE logs/(4802:4815): El proceso 5 ya tiene un main_thread 
+
+[INFO] 18:59:05:556 SUSE logs/(4802:4815): Creando ULT 4
+[INFO] 18:59:05:556 SUSE logs/(4802:4815): ULT creado con id 4 
+
+[INFO] 18:59:05:556 SUSE logs/(4802:4815): El grado de multiprogramacion es 4 
+
+[INFO] 18:59:05:556 SUSE logs/(4802:4815): Validando grado de multiprogramacion...
+
+[INFO] 18:59:05:556 SUSE logs/(4802:4815): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 18:59:07:200 SUSE logs/(4802:4815): Inicio Join
+[INFO] 18:59:07:200 SUSE logs/(4802:4815): Realice el primer handshake con hilolay
+
+[INFO] 18:59:07:200 SUSE logs/(4802:4815): el socket es
+[INFO] 18:59:07:370 SUSE logs/(4802:4815): El thread 0 paso de execute a blocked 
+
+[INFO] 18:59:09:103 SUSE logs/(4802:4815): Arranco schedule_next...
+
+[INFO] 18:59:09:103 SUSE logs/(4802:4815): Recibi una peticion de suse_schedule_next 
+
+[INFO] 18:59:09:103 SUSE logs/(4802:4815): Iniciando planificacion...
+
+[INFO] 18:59:09:103 SUSE logs/(4802:4815): Estimando ULTs...
+
+[INFO] 18:59:09:104 SUSE logs/(4802:4815): Ordenando por SJF...
+[INFO] 18:59:09:104 SUSE logs/(4802:4815): El proximo ULT a ejecutar es 1
+[INFO] 18:59:09:104 SUSE logs/(4802:4815): El tid 1 paso de ready a execute
+
+[INFO] 18:59:09:104 SUSE logs/(4802:4815): Envie el next_tid 1 a SUSE
+[INFO] 18:59:13:492 SUSE logs/(4802:4815): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:00:16:928 SUSE logs/(4916:4916): Inicializando SUSE. 
+
+[INFO] 19:00:16:928 SUSE logs/(4916:4916): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:00:16:928 SUSE logs/(4916:4916): Archivo de configuracion levantado. 
+
+[INFO] 19:00:16:928 SUSE logs/(4916:4916): Inicializando semaforos 
+
+[INFO] 19:00:16:929 SUSE logs/(4916:4916): Iniciando servidor... 
+
+[INFO] 19:00:16:929 SUSE logs/(4916:4916): SUSE esperando conexiones...
+
+[INFO] 19:00:19:398 SUSE logs/(4916:4916): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:00:19:399 SUSE logs/(4916:4916): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:00:19:399 SUSE logs/(4916:4916): Cree el hilo para el proceso 5
+[INFO] 19:00:19:401 SUSE logs/(4916:4916): SUSE esperando conexiones...
+
+[INFO] 19:00:21:519 SUSE logs/(4916:4990): Esperando handshake en suse_create...
+
+[INFO] 19:00:21:520 SUSE logs/(4916:4990): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:00:21:520 SUSE logs/(4916:4990): Validando si es el main thread o ULT comun 
+
+[INFO] 19:00:21:520 SUSE logs/(4916:4990): El proceso 5 es nuevo 
+
+[INFO] 19:00:21:520 SUSE logs/(4916:4990): Proceso creado con id 5 
+
+[INFO] 19:00:21:520 SUSE logs/(4916:4990): Creando ULT 0
+[INFO] 19:00:21:520 SUSE logs/(4916:4990): ULT creado con id 0 
+
+[INFO] 19:00:21:520 SUSE logs/(4916:4990): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:00:21:520 SUSE logs/(4916:4990): El thread 0 paso de new a execute 
+
+[INFO] 19:00:21:520 SUSE logs/(4916:4990): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:00:22:338 SUSE logs/(4916:4990): Esperando handshake en suse_create...
+
+[INFO] 19:00:22:339 SUSE logs/(4916:4990): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:00:22:339 SUSE logs/(4916:4990): Validando si es el main thread o ULT comun 
+
+[INFO] 19:00:22:339 SUSE logs/(4916:4990): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:00:22:339 SUSE logs/(4916:4990): Creando ULT 1
+[INFO] 19:00:22:339 SUSE logs/(4916:4990): ULT creado con id 1 
+
+[INFO] 19:00:22:339 SUSE logs/(4916:4990): El grado de multiprogramacion es 1 
+
+[INFO] 19:00:22:339 SUSE logs/(4916:4990): Validando grado de multiprogramacion...
+
+[INFO] 19:00:22:339 SUSE logs/(4916:4990): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:00:23:904 SUSE logs/(4916:4990): Esperando handshake en suse_create...
+
+[INFO] 19:00:23:904 SUSE logs/(4916:4990): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:00:23:904 SUSE logs/(4916:4990): Validando si es el main thread o ULT comun 
+
+[INFO] 19:00:23:904 SUSE logs/(4916:4990): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:00:23:904 SUSE logs/(4916:4990): Creando ULT 2
+[INFO] 19:00:23:904 SUSE logs/(4916:4990): ULT creado con id 2 
+
+[INFO] 19:00:23:904 SUSE logs/(4916:4990): El grado de multiprogramacion es 2 
+
+[INFO] 19:00:23:904 SUSE logs/(4916:4990): Validando grado de multiprogramacion...
+
+[INFO] 19:00:23:904 SUSE logs/(4916:4990): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:00:24:3 SUSE logs/(4916:4990): Esperando handshake en suse_create...
+
+[INFO] 19:00:24:4 SUSE logs/(4916:4990): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:00:24:4 SUSE logs/(4916:4990): Validando si es el main thread o ULT comun 
+
+[INFO] 19:00:24:4 SUSE logs/(4916:4990): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:00:24:4 SUSE logs/(4916:4990): Creando ULT 3
+[INFO] 19:00:24:4 SUSE logs/(4916:4990): ULT creado con id 3 
+
+[INFO] 19:00:24:4 SUSE logs/(4916:4990): El grado de multiprogramacion es 3 
+
+[INFO] 19:00:24:4 SUSE logs/(4916:4990): Validando grado de multiprogramacion...
+
+[INFO] 19:00:24:4 SUSE logs/(4916:4990): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:00:25:391 SUSE logs/(4916:4990): Esperando handshake en suse_create...
+
+[INFO] 19:00:25:391 SUSE logs/(4916:4990): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:00:25:391 SUSE logs/(4916:4990): Validando si es el main thread o ULT comun 
+
+[INFO] 19:00:25:391 SUSE logs/(4916:4990): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:00:25:391 SUSE logs/(4916:4990): Creando ULT 4
+[INFO] 19:00:25:391 SUSE logs/(4916:4990): ULT creado con id 4 
+
+[INFO] 19:00:25:391 SUSE logs/(4916:4990): El grado de multiprogramacion es 4 
+
+[INFO] 19:00:25:391 SUSE logs/(4916:4990): Validando grado de multiprogramacion...
+
+[INFO] 19:00:25:391 SUSE logs/(4916:4990): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:00:26:280 SUSE logs/(4916:4990): Inicio Join
+[INFO] 19:00:26:280 SUSE logs/(4916:4990): Realice el primer handshake con hilolay
+
+[INFO] 19:00:26:280 SUSE logs/(4916:4990): el socket es
+[INFO] 19:00:26:550 SUSE logs/(4916:4990): El thread 0 paso de execute a blocked 
+
+[INFO] 19:00:27:745 SUSE logs/(4916:4990): Arranco schedule_next...
+
+[INFO] 19:00:27:745 SUSE logs/(4916:4990): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:00:27:745 SUSE logs/(4916:4990): Iniciando planificacion...
+
+[INFO] 19:00:27:745 SUSE logs/(4916:4990): Estimando ULTs...
+
+[INFO] 19:00:27:745 SUSE logs/(4916:4990): Ordenando por SJF...
+[INFO] 19:00:27:745 SUSE logs/(4916:4990): El proximo ULT a ejecutar es 1
+[INFO] 19:00:27:745 SUSE logs/(4916:4990): El tid 1 paso de ready a execute
+
+[INFO] 19:00:27:746 SUSE logs/(4916:4990): Envie el next_tid 1 a SUSE
+[INFO] 19:00:30:74 SUSE logs/(4916:4990): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:02:06:524 SUSE logs/(5120:5120): Inicializando SUSE. 
+
+[INFO] 19:02:06:524 SUSE logs/(5120:5120): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:02:06:524 SUSE logs/(5120:5120): Archivo de configuracion levantado. 
+
+[INFO] 19:02:06:524 SUSE logs/(5120:5120): Inicializando semaforos 
+
+[INFO] 19:02:06:524 SUSE logs/(5120:5120): Iniciando servidor... 
+
+[INFO] 19:02:06:525 SUSE logs/(5120:5120): SUSE esperando conexiones...
+
+[INFO] 19:02:10:390 SUSE logs/(5120:5120): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:02:10:390 SUSE logs/(5120:5120): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:02:10:391 SUSE logs/(5120:5120): Cree el hilo para el proceso 5
+[INFO] 19:02:10:393 SUSE logs/(5120:5120): SUSE esperando conexiones...
+
+[INFO] 19:02:12:709 SUSE logs/(5120:5195): Esperando handshake en suse_create...
+
+[INFO] 19:02:12:709 SUSE logs/(5120:5195): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:02:12:709 SUSE logs/(5120:5195): Validando si es el main thread o ULT comun 
+
+[INFO] 19:02:12:709 SUSE logs/(5120:5195): El proceso 5 es nuevo 
+
+[INFO] 19:02:12:709 SUSE logs/(5120:5195): Proceso creado con id 5 
+
+[INFO] 19:02:12:709 SUSE logs/(5120:5195): Creando ULT 0
+[INFO] 19:02:12:710 SUSE logs/(5120:5195): ULT creado con id 0 
+
+[INFO] 19:02:12:710 SUSE logs/(5120:5195): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:02:12:710 SUSE logs/(5120:5195): El thread 0 paso de new a execute 
+
+[INFO] 19:02:12:710 SUSE logs/(5120:5195): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:02:13:263 SUSE logs/(5120:5195): Esperando handshake en suse_create...
+
+[INFO] 19:02:13:263 SUSE logs/(5120:5195): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:02:13:263 SUSE logs/(5120:5195): Validando si es el main thread o ULT comun 
+
+[INFO] 19:02:13:263 SUSE logs/(5120:5195): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:02:13:263 SUSE logs/(5120:5195): Creando ULT 1
+[INFO] 19:02:13:263 SUSE logs/(5120:5195): ULT creado con id 1 
+
+[INFO] 19:02:13:263 SUSE logs/(5120:5195): El grado de multiprogramacion es 1 
+
+[INFO] 19:02:13:264 SUSE logs/(5120:5195): Validando grado de multiprogramacion...
+
+[INFO] 19:02:13:264 SUSE logs/(5120:5195): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:02:13:919 SUSE logs/(5120:5195): Esperando handshake en suse_create...
+
+[INFO] 19:02:13:919 SUSE logs/(5120:5195): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:02:13:919 SUSE logs/(5120:5195): Validando si es el main thread o ULT comun 
+
+[INFO] 19:02:13:919 SUSE logs/(5120:5195): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:02:13:919 SUSE logs/(5120:5195): Creando ULT 2
+[INFO] 19:02:13:919 SUSE logs/(5120:5195): ULT creado con id 2 
+
+[INFO] 19:02:13:919 SUSE logs/(5120:5195): El grado de multiprogramacion es 2 
+
+[INFO] 19:02:13:919 SUSE logs/(5120:5195): Validando grado de multiprogramacion...
+
+[INFO] 19:02:13:919 SUSE logs/(5120:5195): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:02:14:492 SUSE logs/(5120:5195): Esperando handshake en suse_create...
+
+[INFO] 19:02:14:493 SUSE logs/(5120:5195): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:02:14:493 SUSE logs/(5120:5195): Validando si es el main thread o ULT comun 
+
+[INFO] 19:02:14:493 SUSE logs/(5120:5195): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:02:14:493 SUSE logs/(5120:5195): Creando ULT 3
+[INFO] 19:02:14:493 SUSE logs/(5120:5195): ULT creado con id 3 
+
+[INFO] 19:02:14:493 SUSE logs/(5120:5195): El grado de multiprogramacion es 3 
+
+[INFO] 19:02:14:493 SUSE logs/(5120:5195): Validando grado de multiprogramacion...
+
+[INFO] 19:02:14:493 SUSE logs/(5120:5195): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:02:14:921 SUSE logs/(5120:5195): Esperando handshake en suse_create...
+
+[INFO] 19:02:14:922 SUSE logs/(5120:5195): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:02:14:922 SUSE logs/(5120:5195): Validando si es el main thread o ULT comun 
+
+[INFO] 19:02:14:922 SUSE logs/(5120:5195): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:02:14:922 SUSE logs/(5120:5195): Creando ULT 4
+[INFO] 19:02:14:922 SUSE logs/(5120:5195): ULT creado con id 4 
+
+[INFO] 19:02:14:922 SUSE logs/(5120:5195): El grado de multiprogramacion es 4 
+
+[INFO] 19:02:14:922 SUSE logs/(5120:5195): Validando grado de multiprogramacion...
+
+[INFO] 19:02:14:922 SUSE logs/(5120:5195): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:02:15:784 SUSE logs/(5120:5195): Inicio Join
+[INFO] 19:02:15:784 SUSE logs/(5120:5195): Realice el primer handshake con hilolay
+
+[INFO] 19:02:15:784 SUSE logs/(5120:5195): el socket es
+[INFO] 19:02:15:951 SUSE logs/(5120:5195): El thread 0 paso de execute a blocked 
+
+[INFO] 19:02:16:332 SUSE logs/(5120:5195): Arranco schedule_next...
+
+[INFO] 19:02:16:332 SUSE logs/(5120:5195): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:02:16:332 SUSE logs/(5120:5195): Iniciando planificacion...
+
+[INFO] 19:02:16:332 SUSE logs/(5120:5195): Estimando ULTs...
+
+[INFO] 19:02:16:332 SUSE logs/(5120:5195): Ordenando por SJF...
+[INFO] 19:02:16:332 SUSE logs/(5120:5195): El proximo ULT a ejecutar es 1
+[INFO] 19:02:16:332 SUSE logs/(5120:5195): El tid 1 paso de ready a execute
+
+[INFO] 19:02:16:333 SUSE logs/(5120:5195): Envie el next_tid 1 a SUSE
+[INFO] 19:04:58:910 SUSE logs/(5460:5460): Inicializando SUSE. 
+
+[INFO] 19:04:58:911 SUSE logs/(5460:5460): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:04:58:911 SUSE logs/(5460:5460): Archivo de configuracion levantado. 
+
+[INFO] 19:04:58:911 SUSE logs/(5460:5460): Inicializando semaforos 
+
+[INFO] 19:04:58:911 SUSE logs/(5460:5460): Iniciando servidor... 
+
+[INFO] 19:04:58:911 SUSE logs/(5460:5460): SUSE esperando conexiones...
+
+[INFO] 19:05:11:485 SUSE logs/(5460:5460): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:05:11:486 SUSE logs/(5460:5460): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:05:11:486 SUSE logs/(5460:5460): Cree el hilo para el proceso 5
+[INFO] 19:05:11:488 SUSE logs/(5460:5460): SUSE esperando conexiones...
+
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): Esperando handshake en suse_create...
+
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): Validando si es el main thread o ULT comun 
+
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): El proceso 5 es nuevo 
+
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): Proceso creado con id 5 
+
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): Creando ULT 0
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): ULT creado con id 0 
+
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): El thread 0 paso de new a execute 
+
+[INFO] 19:05:14:36 SUSE logs/(5460:5565): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:05:14:731 SUSE logs/(5460:5565): Esperando handshake en suse_create...
+
+[INFO] 19:05:14:732 SUSE logs/(5460:5565): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:05:14:732 SUSE logs/(5460:5565): Validando si es el main thread o ULT comun 
+
+[INFO] 19:05:14:732 SUSE logs/(5460:5565): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:05:14:732 SUSE logs/(5460:5565): Creando ULT 1
+[INFO] 19:05:14:732 SUSE logs/(5460:5565): ULT creado con id 1 
+
+[INFO] 19:05:14:732 SUSE logs/(5460:5565): El grado de multiprogramacion es 1 
+
+[INFO] 19:05:14:732 SUSE logs/(5460:5565): Validando grado de multiprogramacion...
+
+[INFO] 19:05:14:732 SUSE logs/(5460:5565): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:05:15:353 SUSE logs/(5460:5565): Esperando handshake en suse_create...
+
+[INFO] 19:05:15:353 SUSE logs/(5460:5565): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:05:15:353 SUSE logs/(5460:5565): Validando si es el main thread o ULT comun 
+
+[INFO] 19:05:15:353 SUSE logs/(5460:5565): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:05:15:354 SUSE logs/(5460:5565): Creando ULT 2
+[INFO] 19:05:15:354 SUSE logs/(5460:5565): ULT creado con id 2 
+
+[INFO] 19:05:15:354 SUSE logs/(5460:5565): El grado de multiprogramacion es 2 
+
+[INFO] 19:05:15:354 SUSE logs/(5460:5565): Validando grado de multiprogramacion...
+
+[INFO] 19:05:15:354 SUSE logs/(5460:5565): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:05:16:181 SUSE logs/(5460:5565): Esperando handshake en suse_create...
+
+[INFO] 19:05:16:182 SUSE logs/(5460:5565): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:05:16:182 SUSE logs/(5460:5565): Validando si es el main thread o ULT comun 
+
+[INFO] 19:05:16:183 SUSE logs/(5460:5565): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:05:16:183 SUSE logs/(5460:5565): Creando ULT 3
+[INFO] 19:05:16:183 SUSE logs/(5460:5565): ULT creado con id 3 
+
+[INFO] 19:05:16:183 SUSE logs/(5460:5565): El grado de multiprogramacion es 3 
+
+[INFO] 19:05:16:183 SUSE logs/(5460:5565): Validando grado de multiprogramacion...
+
+[INFO] 19:05:16:183 SUSE logs/(5460:5565): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:05:16:625 SUSE logs/(5460:5565): Esperando handshake en suse_create...
+
+[INFO] 19:05:16:625 SUSE logs/(5460:5565): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:05:16:625 SUSE logs/(5460:5565): Validando si es el main thread o ULT comun 
+
+[INFO] 19:05:16:626 SUSE logs/(5460:5565): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:05:16:626 SUSE logs/(5460:5565): Creando ULT 4
+[INFO] 19:05:16:626 SUSE logs/(5460:5565): ULT creado con id 4 
+
+[INFO] 19:05:16:626 SUSE logs/(5460:5565): El grado de multiprogramacion es 4 
+
+[INFO] 19:05:16:626 SUSE logs/(5460:5565): Validando grado de multiprogramacion...
+
+[INFO] 19:05:16:626 SUSE logs/(5460:5565): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:05:17:334 SUSE logs/(5460:5565): Inicio Join
+[INFO] 19:05:17:335 SUSE logs/(5460:5565): Realice el primer handshake con hilolay
+
+[INFO] 19:05:17:335 SUSE logs/(5460:5565): el socket es
+[INFO] 19:05:17:574 SUSE logs/(5460:5565): El thread 0 paso de execute a blocked 
+
+[INFO] 19:05:18:809 SUSE logs/(5460:5565): Arranco schedule_next...
+
+[INFO] 19:05:18:809 SUSE logs/(5460:5565): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:05:18:809 SUSE logs/(5460:5565): Iniciando planificacion...
+
+[INFO] 19:05:18:809 SUSE logs/(5460:5565): Estimando ULTs...
+
+[INFO] 19:05:18:809 SUSE logs/(5460:5565): Ordenando por SJF...
+[INFO] 19:05:18:809 SUSE logs/(5460:5565): El proximo ULT a ejecutar es 1
+[INFO] 19:05:18:809 SUSE logs/(5460:5565): El tid 1 paso de ready a execute
+
+[INFO] 19:05:18:809 SUSE logs/(5460:5565): Envie el next_tid 1 a SUSE
+[INFO] 19:05:22:971 SUSE logs/(5460:5565): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:06:48:592 SUSE logs/(5861:5861): Inicializando SUSE. 
+
+[INFO] 19:06:48:593 SUSE logs/(5861:5861): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:06:48:593 SUSE logs/(5861:5861): Archivo de configuracion levantado. 
+
+[INFO] 19:06:48:593 SUSE logs/(5861:5861): Inicializando semaforos 
+
+[INFO] 19:06:48:593 SUSE logs/(5861:5861): Iniciando servidor... 
+
+[INFO] 19:06:48:593 SUSE logs/(5861:5861): SUSE esperando conexiones...
+
+[INFO] 19:06:55:700 SUSE logs/(5861:5861): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:06:55:700 SUSE logs/(5861:5861): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:06:55:701 SUSE logs/(5861:5861): Cree el hilo para el proceso 5
+[INFO] 19:06:55:703 SUSE logs/(5861:5861): SUSE esperando conexiones...
+
+[INFO] 19:06:58:417 SUSE logs/(5861:5879): Esperando handshake en suse_create...
+
+[INFO] 19:06:58:418 SUSE logs/(5861:5879): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:06:58:418 SUSE logs/(5861:5879): Validando si es el main thread o ULT comun 
+
+[INFO] 19:06:58:418 SUSE logs/(5861:5879): El proceso 5 es nuevo 
+
+[INFO] 19:06:58:418 SUSE logs/(5861:5879): Proceso creado con id 5 
+
+[INFO] 19:06:58:418 SUSE logs/(5861:5879): Creando ULT 0
+[INFO] 19:06:58:418 SUSE logs/(5861:5879): ULT creado con id 0 
+
+[INFO] 19:06:58:418 SUSE logs/(5861:5879): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:06:58:418 SUSE logs/(5861:5879): El thread 0 paso de new a execute 
+
+[INFO] 19:06:58:418 SUSE logs/(5861:5879): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:06:58:983 SUSE logs/(5861:5879): Esperando handshake en suse_create...
+
+[INFO] 19:06:58:983 SUSE logs/(5861:5879): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:06:58:983 SUSE logs/(5861:5879): Validando si es el main thread o ULT comun 
+
+[INFO] 19:06:58:983 SUSE logs/(5861:5879): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:06:58:983 SUSE logs/(5861:5879): Creando ULT 1
+[INFO] 19:06:58:983 SUSE logs/(5861:5879): ULT creado con id 1 
+
+[INFO] 19:06:58:983 SUSE logs/(5861:5879): El grado de multiprogramacion es 1 
+
+[INFO] 19:06:58:983 SUSE logs/(5861:5879): Validando grado de multiprogramacion...
+
+[INFO] 19:06:58:983 SUSE logs/(5861:5879): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:06:59:710 SUSE logs/(5861:5879): Esperando handshake en suse_create...
+
+[INFO] 19:06:59:710 SUSE logs/(5861:5879): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:06:59:710 SUSE logs/(5861:5879): Validando si es el main thread o ULT comun 
+
+[INFO] 19:06:59:710 SUSE logs/(5861:5879): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:06:59:710 SUSE logs/(5861:5879): Creando ULT 2
+[INFO] 19:06:59:710 SUSE logs/(5861:5879): ULT creado con id 2 
+
+[INFO] 19:06:59:710 SUSE logs/(5861:5879): El grado de multiprogramacion es 2 
+
+[INFO] 19:06:59:710 SUSE logs/(5861:5879): Validando grado de multiprogramacion...
+
+[INFO] 19:06:59:710 SUSE logs/(5861:5879): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:07:00:67 SUSE logs/(5861:5879): Esperando handshake en suse_create...
+
+[INFO] 19:07:00:67 SUSE logs/(5861:5879): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:07:00:68 SUSE logs/(5861:5879): Validando si es el main thread o ULT comun 
+
+[INFO] 19:07:00:68 SUSE logs/(5861:5879): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:07:00:68 SUSE logs/(5861:5879): Creando ULT 3
+[INFO] 19:07:00:68 SUSE logs/(5861:5879): ULT creado con id 3 
+
+[INFO] 19:07:00:68 SUSE logs/(5861:5879): El grado de multiprogramacion es 3 
+
+[INFO] 19:07:00:68 SUSE logs/(5861:5879): Validando grado de multiprogramacion...
+
+[INFO] 19:07:00:68 SUSE logs/(5861:5879): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:07:00:476 SUSE logs/(5861:5879): Esperando handshake en suse_create...
+
+[INFO] 19:07:00:476 SUSE logs/(5861:5879): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:07:00:476 SUSE logs/(5861:5879): Validando si es el main thread o ULT comun 
+
+[INFO] 19:07:00:476 SUSE logs/(5861:5879): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:07:00:476 SUSE logs/(5861:5879): Creando ULT 4
+[INFO] 19:07:00:476 SUSE logs/(5861:5879): ULT creado con id 4 
+
+[INFO] 19:07:00:476 SUSE logs/(5861:5879): El grado de multiprogramacion es 4 
+
+[INFO] 19:07:00:476 SUSE logs/(5861:5879): Validando grado de multiprogramacion...
+
+[INFO] 19:07:00:476 SUSE logs/(5861:5879): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:07:00:860 SUSE logs/(5861:5879): Inicio Join
+[INFO] 19:07:00:860 SUSE logs/(5861:5879): Realice el primer handshake con hilolay
+
+[INFO] 19:07:00:861 SUSE logs/(5861:5879): el socket es
+[INFO] 19:07:01:334 SUSE logs/(5861:5879): El thread 0 paso de execute a blocked 
+
+[INFO] 19:07:01:833 SUSE logs/(5861:5879): Arranco schedule_next...
+
+[INFO] 19:07:01:833 SUSE logs/(5861:5879): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:07:01:833 SUSE logs/(5861:5879): Iniciando planificacion...
+
+[INFO] 19:07:01:833 SUSE logs/(5861:5879): Estimando ULTs...
+
+[INFO] 19:07:01:833 SUSE logs/(5861:5879): Ordenando por SJF...
+[INFO] 19:07:01:833 SUSE logs/(5861:5879): El proximo ULT a ejecutar es 1
+[INFO] 19:07:01:833 SUSE logs/(5861:5879): El tid 1 paso de ready a execute
+
+[INFO] 19:07:01:833 SUSE logs/(5861:5879): Envie el next_tid 1 a SUSE
+[INFO] 19:07:04:631 SUSE logs/(5861:5879): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:13:29:167 SUSE logs/(6210:6210): Inicializando SUSE. 
+
+[INFO] 19:13:29:168 SUSE logs/(6210:6210): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:13:29:168 SUSE logs/(6210:6210): Archivo de configuracion levantado. 
+
+[INFO] 19:13:29:168 SUSE logs/(6210:6210): Inicializando semaforos 
+
+[INFO] 19:13:29:168 SUSE logs/(6210:6210): Iniciando servidor... 
+
+[INFO] 19:13:29:168 SUSE logs/(6210:6210): SUSE esperando conexiones...
+
+[INFO] 19:13:36:344 SUSE logs/(6210:6210): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:13:36:345 SUSE logs/(6210:6210): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:13:36:346 SUSE logs/(6210:6210): Cree el hilo para el proceso 5
+[INFO] 19:13:36:349 SUSE logs/(6210:6210): SUSE esperando conexiones...
+
+[INFO] 19:13:38:711 SUSE logs/(6210:6285): Esperando handshake en suse_create...
+
+[INFO] 19:13:38:711 SUSE logs/(6210:6285): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:13:38:712 SUSE logs/(6210:6285): Validando si es el main thread o ULT comun 
+
+[INFO] 19:13:38:712 SUSE logs/(6210:6285): El proceso 5 es nuevo 
+
+[INFO] 19:13:38:712 SUSE logs/(6210:6285): Proceso creado con id 5 
+
+[INFO] 19:13:38:712 SUSE logs/(6210:6285): Creando ULT 0
+[INFO] 19:13:38:712 SUSE logs/(6210:6285): ULT creado con id 0 
+
+[INFO] 19:13:38:712 SUSE logs/(6210:6285): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:13:38:712 SUSE logs/(6210:6285): El thread 0 paso de new a execute 
+
+[INFO] 19:13:38:712 SUSE logs/(6210:6285): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:13:39:45 SUSE logs/(6210:6285): Esperando handshake en suse_create...
+
+[INFO] 19:13:39:46 SUSE logs/(6210:6285): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:13:39:46 SUSE logs/(6210:6285): Validando si es el main thread o ULT comun 
+
+[INFO] 19:13:39:46 SUSE logs/(6210:6285): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:13:39:46 SUSE logs/(6210:6285): Creando ULT 1
+[INFO] 19:13:39:46 SUSE logs/(6210:6285): ULT creado con id 1 
+
+[INFO] 19:13:39:46 SUSE logs/(6210:6285): El grado de multiprogramacion es 1 
+
+[INFO] 19:13:39:46 SUSE logs/(6210:6285): Validando grado de multiprogramacion...
+
+[INFO] 19:13:39:46 SUSE logs/(6210:6285): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:13:39:717 SUSE logs/(6210:6285): Esperando handshake en suse_create...
+
+[INFO] 19:13:39:717 SUSE logs/(6210:6285): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:13:39:717 SUSE logs/(6210:6285): Validando si es el main thread o ULT comun 
+
+[INFO] 19:13:39:717 SUSE logs/(6210:6285): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:13:39:717 SUSE logs/(6210:6285): Creando ULT 2
+[INFO] 19:13:39:717 SUSE logs/(6210:6285): ULT creado con id 2 
+
+[INFO] 19:13:39:717 SUSE logs/(6210:6285): El grado de multiprogramacion es 2 
+
+[INFO] 19:13:39:717 SUSE logs/(6210:6285): Validando grado de multiprogramacion...
+
+[INFO] 19:13:39:718 SUSE logs/(6210:6285): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:13:40:96 SUSE logs/(6210:6285): Esperando handshake en suse_create...
+
+[INFO] 19:13:40:96 SUSE logs/(6210:6285): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:13:40:96 SUSE logs/(6210:6285): Validando si es el main thread o ULT comun 
+
+[INFO] 19:13:40:96 SUSE logs/(6210:6285): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:13:40:96 SUSE logs/(6210:6285): Creando ULT 3
+[INFO] 19:13:40:96 SUSE logs/(6210:6285): ULT creado con id 3 
+
+[INFO] 19:13:40:96 SUSE logs/(6210:6285): El grado de multiprogramacion es 3 
+
+[INFO] 19:13:40:96 SUSE logs/(6210:6285): Validando grado de multiprogramacion...
+
+[INFO] 19:13:40:96 SUSE logs/(6210:6285): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:13:40:454 SUSE logs/(6210:6285): Esperando handshake en suse_create...
+
+[INFO] 19:13:40:455 SUSE logs/(6210:6285): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:13:40:455 SUSE logs/(6210:6285): Validando si es el main thread o ULT comun 
+
+[INFO] 19:13:40:455 SUSE logs/(6210:6285): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:13:40:455 SUSE logs/(6210:6285): Creando ULT 4
+[INFO] 19:13:40:455 SUSE logs/(6210:6285): ULT creado con id 4 
+
+[INFO] 19:13:40:455 SUSE logs/(6210:6285): El grado de multiprogramacion es 4 
+
+[INFO] 19:13:40:455 SUSE logs/(6210:6285): Validando grado de multiprogramacion...
+
+[INFO] 19:13:40:455 SUSE logs/(6210:6285): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:13:40:804 SUSE logs/(6210:6285): Inicio Join
+[INFO] 19:13:40:804 SUSE logs/(6210:6285): Realice el primer handshake con hilolay
+
+[INFO] 19:13:40:804 SUSE logs/(6210:6285): el socket es
+[INFO] 19:13:41:347 SUSE logs/(6210:6285): El thread 0 paso de execute a blocked 
+
+[INFO] 19:13:41:666 SUSE logs/(6210:6285): Arranco schedule_next...
+
+[INFO] 19:13:41:666 SUSE logs/(6210:6285): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:13:41:666 SUSE logs/(6210:6285): Iniciando planificacion...
+
+[INFO] 19:13:41:666 SUSE logs/(6210:6285): Estimando ULTs...
+
+[INFO] 19:13:41:666 SUSE logs/(6210:6285): Ordenando por SJF...
+[INFO] 19:13:41:666 SUSE logs/(6210:6285): El proximo ULT a ejecutar es 1
+[INFO] 19:13:41:666 SUSE logs/(6210:6285): El tid 1 paso de ready a execute
+
+[INFO] 19:13:41:666 SUSE logs/(6210:6285): Envie el next_tid 1 a SUSE
+[INFO] 19:13:44:738 SUSE logs/(6210:6285): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:15:08:626 SUSE logs/(6411:6411): Inicializando SUSE. 
+
+[INFO] 19:15:08:626 SUSE logs/(6411:6411): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:15:08:627 SUSE logs/(6411:6411): Archivo de configuracion levantado. 
+
+[INFO] 19:15:08:627 SUSE logs/(6411:6411): Inicializando semaforos 
+
+[INFO] 19:15:08:627 SUSE logs/(6411:6411): Iniciando servidor... 
+
+[INFO] 19:15:08:627 SUSE logs/(6411:6411): SUSE esperando conexiones...
+
+[INFO] 19:15:13:608 SUSE logs/(6411:6411): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:15:13:608 SUSE logs/(6411:6411): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:15:13:609 SUSE logs/(6411:6411): Cree el hilo para el proceso 5
+[INFO] 19:15:13:611 SUSE logs/(6411:6411): SUSE esperando conexiones...
+
+[INFO] 19:15:16:872 SUSE logs/(6411:6486): Esperando handshake en suse_create...
+
+[INFO] 19:15:16:873 SUSE logs/(6411:6486): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:15:16:873 SUSE logs/(6411:6486): Validando si es el main thread o ULT comun 
+
+[INFO] 19:15:16:873 SUSE logs/(6411:6486): El proceso 5 es nuevo 
+
+[INFO] 19:15:16:873 SUSE logs/(6411:6486): Proceso creado con id 5 
+
+[INFO] 19:15:16:873 SUSE logs/(6411:6486): Creando ULT 0
+[INFO] 19:15:16:873 SUSE logs/(6411:6486): ULT creado con id 0 
+
+[INFO] 19:15:16:873 SUSE logs/(6411:6486): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:15:16:873 SUSE logs/(6411:6486): El thread 0 paso de new a execute 
+
+[INFO] 19:15:16:873 SUSE logs/(6411:6486): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:15:17:562 SUSE logs/(6411:6486): Esperando handshake en suse_create...
+
+[INFO] 19:15:17:562 SUSE logs/(6411:6486): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:15:17:562 SUSE logs/(6411:6486): Validando si es el main thread o ULT comun 
+
+[INFO] 19:15:17:562 SUSE logs/(6411:6486): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:15:17:562 SUSE logs/(6411:6486): Creando ULT 1
+[INFO] 19:15:17:562 SUSE logs/(6411:6486): ULT creado con id 1 
+
+[INFO] 19:15:17:562 SUSE logs/(6411:6486): El grado de multiprogramacion es 1 
+
+[INFO] 19:15:17:562 SUSE logs/(6411:6486): Validando grado de multiprogramacion...
+
+[INFO] 19:15:17:562 SUSE logs/(6411:6486): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:15:18:103 SUSE logs/(6411:6486): Esperando handshake en suse_create...
+
+[INFO] 19:15:18:103 SUSE logs/(6411:6486): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:15:18:103 SUSE logs/(6411:6486): Validando si es el main thread o ULT comun 
+
+[INFO] 19:15:18:103 SUSE logs/(6411:6486): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:15:18:103 SUSE logs/(6411:6486): Creando ULT 2
+[INFO] 19:15:18:103 SUSE logs/(6411:6486): ULT creado con id 2 
+
+[INFO] 19:15:18:103 SUSE logs/(6411:6486): El grado de multiprogramacion es 2 
+
+[INFO] 19:15:18:103 SUSE logs/(6411:6486): Validando grado de multiprogramacion...
+
+[INFO] 19:15:18:103 SUSE logs/(6411:6486): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:15:18:657 SUSE logs/(6411:6486): Esperando handshake en suse_create...
+
+[INFO] 19:15:18:657 SUSE logs/(6411:6486): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:15:18:657 SUSE logs/(6411:6486): Validando si es el main thread o ULT comun 
+
+[INFO] 19:15:18:657 SUSE logs/(6411:6486): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:15:18:657 SUSE logs/(6411:6486): Creando ULT 3
+[INFO] 19:15:18:658 SUSE logs/(6411:6486): ULT creado con id 3 
+
+[INFO] 19:15:18:658 SUSE logs/(6411:6486): El grado de multiprogramacion es 3 
+
+[INFO] 19:15:18:658 SUSE logs/(6411:6486): Validando grado de multiprogramacion...
+
+[INFO] 19:15:18:658 SUSE logs/(6411:6486): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:15:19:237 SUSE logs/(6411:6486): Esperando handshake en suse_create...
+
+[INFO] 19:15:19:237 SUSE logs/(6411:6486): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:15:19:237 SUSE logs/(6411:6486): Validando si es el main thread o ULT comun 
+
+[INFO] 19:15:19:237 SUSE logs/(6411:6486): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:15:19:237 SUSE logs/(6411:6486): Creando ULT 4
+[INFO] 19:15:19:237 SUSE logs/(6411:6486): ULT creado con id 4 
+
+[INFO] 19:15:19:237 SUSE logs/(6411:6486): El grado de multiprogramacion es 4 
+
+[INFO] 19:15:19:237 SUSE logs/(6411:6486): Validando grado de multiprogramacion...
+
+[INFO] 19:15:19:238 SUSE logs/(6411:6486): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:15:20:217 SUSE logs/(6411:6486): Inicio Join
+[INFO] 19:15:20:217 SUSE logs/(6411:6486): Realice el primer handshake con hilolay
+
+[INFO] 19:15:20:217 SUSE logs/(6411:6486): el socket es
+[INFO] 19:15:20:411 SUSE logs/(6411:6486): El thread 0 paso de execute a blocked 
+
+[INFO] 19:15:20:711 SUSE logs/(6411:6486): Arranco schedule_next...
+
+[INFO] 19:15:20:712 SUSE logs/(6411:6486): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:15:20:712 SUSE logs/(6411:6486): Iniciando planificacion...
+
+[INFO] 19:15:20:712 SUSE logs/(6411:6486): Estimando ULTs...
+
+[INFO] 19:15:20:712 SUSE logs/(6411:6486): Ordenando por SJF...
+[INFO] 19:15:20:712 SUSE logs/(6411:6486): El proximo ULT a ejecutar es 1
+[INFO] 19:15:20:712 SUSE logs/(6411:6486): El tid 1 paso de ready a execute
+
+[INFO] 19:15:20:712 SUSE logs/(6411:6486): Envie el next_tid 1 a SUSE
+[INFO] 19:15:23:126 SUSE logs/(6411:6486): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:16:29:527 SUSE logs/(6607:6607): Inicializando SUSE. 
+
+[INFO] 19:16:29:529 SUSE logs/(6607:6607): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:16:29:529 SUSE logs/(6607:6607): Archivo de configuracion levantado. 
+
+[INFO] 19:16:29:529 SUSE logs/(6607:6607): Inicializando semaforos 
+
+[INFO] 19:16:29:529 SUSE logs/(6607:6607): Iniciando servidor... 
+
+[INFO] 19:16:29:529 SUSE logs/(6607:6607): SUSE esperando conexiones...
+
+[INFO] 19:16:34:177 SUSE logs/(6607:6607): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:16:34:177 SUSE logs/(6607:6607): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:16:34:178 SUSE logs/(6607:6607): Cree el hilo para el proceso 5
+[INFO] 19:16:34:179 SUSE logs/(6607:6607): SUSE esperando conexiones...
+
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): Esperando handshake en suse_create...
+
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): Validando si es el main thread o ULT comun 
+
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): El proceso 5 es nuevo 
+
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): Proceso creado con id 5 
+
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): Creando ULT 0
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): ULT creado con id 0 
+
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): El thread 0 paso de new a execute 
+
+[INFO] 19:16:36:541 SUSE logs/(6607:6681): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:16:37:539 SUSE logs/(6607:6681): Esperando handshake en suse_create...
+
+[INFO] 19:16:37:539 SUSE logs/(6607:6681): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:16:37:539 SUSE logs/(6607:6681): Validando si es el main thread o ULT comun 
+
+[INFO] 19:16:37:539 SUSE logs/(6607:6681): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:16:37:539 SUSE logs/(6607:6681): Creando ULT 1
+[INFO] 19:16:37:539 SUSE logs/(6607:6681): ULT creado con id 1 
+
+[INFO] 19:16:37:539 SUSE logs/(6607:6681): El grado de multiprogramacion es 1 
+
+[INFO] 19:16:37:539 SUSE logs/(6607:6681): Validando grado de multiprogramacion...
+
+[INFO] 19:16:37:539 SUSE logs/(6607:6681): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:16:37:878 SUSE logs/(6607:6681): Esperando handshake en suse_create...
+
+[INFO] 19:16:37:878 SUSE logs/(6607:6681): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:16:37:878 SUSE logs/(6607:6681): Validando si es el main thread o ULT comun 
+
+[INFO] 19:16:37:878 SUSE logs/(6607:6681): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:16:37:878 SUSE logs/(6607:6681): Creando ULT 2
+[INFO] 19:16:37:879 SUSE logs/(6607:6681): ULT creado con id 2 
+
+[INFO] 19:16:37:879 SUSE logs/(6607:6681): El grado de multiprogramacion es 2 
+
+[INFO] 19:16:37:879 SUSE logs/(6607:6681): Validando grado de multiprogramacion...
+
+[INFO] 19:16:37:879 SUSE logs/(6607:6681): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:16:38:381 SUSE logs/(6607:6681): Esperando handshake en suse_create...
+
+[INFO] 19:16:38:381 SUSE logs/(6607:6681): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:16:38:381 SUSE logs/(6607:6681): Validando si es el main thread o ULT comun 
+
+[INFO] 19:16:38:381 SUSE logs/(6607:6681): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:16:38:381 SUSE logs/(6607:6681): Creando ULT 3
+[INFO] 19:16:38:381 SUSE logs/(6607:6681): ULT creado con id 3 
+
+[INFO] 19:16:38:381 SUSE logs/(6607:6681): El grado de multiprogramacion es 3 
+
+[INFO] 19:16:38:381 SUSE logs/(6607:6681): Validando grado de multiprogramacion...
+
+[INFO] 19:16:38:381 SUSE logs/(6607:6681): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:16:38:730 SUSE logs/(6607:6681): Esperando handshake en suse_create...
+
+[INFO] 19:16:38:730 SUSE logs/(6607:6681): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:16:38:730 SUSE logs/(6607:6681): Validando si es el main thread o ULT comun 
+
+[INFO] 19:16:38:730 SUSE logs/(6607:6681): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:16:38:730 SUSE logs/(6607:6681): Creando ULT 4
+[INFO] 19:16:38:730 SUSE logs/(6607:6681): ULT creado con id 4 
+
+[INFO] 19:16:38:730 SUSE logs/(6607:6681): El grado de multiprogramacion es 4 
+
+[INFO] 19:16:38:730 SUSE logs/(6607:6681): Validando grado de multiprogramacion...
+
+[INFO] 19:16:38:730 SUSE logs/(6607:6681): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:16:39:542 SUSE logs/(6607:6681): Inicio Join
+[INFO] 19:16:39:542 SUSE logs/(6607:6681): Realice el primer handshake con hilolay
+
+[INFO] 19:16:39:542 SUSE logs/(6607:6681): el socket es
+[INFO] 19:16:39:702 SUSE logs/(6607:6681): El thread 0 paso de execute a blocked 
+
+[INFO] 19:16:40:781 SUSE logs/(6607:6681): Arranco schedule_next...
+
+[INFO] 19:16:40:782 SUSE logs/(6607:6681): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:16:40:782 SUSE logs/(6607:6681): Iniciando planificacion...
+
+[INFO] 19:16:40:782 SUSE logs/(6607:6681): Estimando ULTs...
+
+[INFO] 19:16:40:782 SUSE logs/(6607:6681): Ordenando por SJF...
+[INFO] 19:16:40:782 SUSE logs/(6607:6681): El proximo ULT a ejecutar es 1
+[INFO] 19:16:40:782 SUSE logs/(6607:6681): El tid 1 paso de ready a execute
+
+[INFO] 19:16:40:782 SUSE logs/(6607:6681): Envie el next_tid 1 a SUSE
+[INFO] 19:16:43:193 SUSE logs/(6607:6681): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:29:46:345 SUSE logs/(7087:7087): Inicializando SUSE. 
+
+[INFO] 19:29:46:345 SUSE logs/(7087:7087): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:29:46:345 SUSE logs/(7087:7087): Archivo de configuracion levantado. 
+
+[INFO] 19:29:46:345 SUSE logs/(7087:7087): Inicializando semaforos 
+
+[INFO] 19:29:46:345 SUSE logs/(7087:7087): Iniciando servidor... 
+
+[INFO] 19:29:46:345 SUSE logs/(7087:7087): SUSE esperando conexiones...
+
+[INFO] 19:30:14:816 SUSE logs/(7087:7087): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:30:14:817 SUSE logs/(7087:7087): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:30:14:818 SUSE logs/(7087:7087): Cree el hilo para el proceso 5
+[INFO] 19:30:14:819 SUSE logs/(7087:7087): SUSE esperando conexiones...
+
+[INFO] 19:30:18:378 SUSE logs/(7087:7296): Esperando handshake en suse_create...
+
+[INFO] 19:30:18:378 SUSE logs/(7087:7296): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:30:18:378 SUSE logs/(7087:7296): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:18:379 SUSE logs/(7087:7296): El proceso 5 es nuevo 
+
+[INFO] 19:30:18:379 SUSE logs/(7087:7296): Proceso creado con id 5 
+
+[INFO] 19:30:18:379 SUSE logs/(7087:7296): Creando ULT 0
+[INFO] 19:30:18:379 SUSE logs/(7087:7296): ULT creado con id 0 
+
+[INFO] 19:30:18:379 SUSE logs/(7087:7296): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:30:18:379 SUSE logs/(7087:7296): El thread 0 paso de new a execute 
+
+[INFO] 19:30:18:379 SUSE logs/(7087:7296): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:30:18:950 SUSE logs/(7087:7296): Esperando handshake en suse_create...
+
+[INFO] 19:30:18:950 SUSE logs/(7087:7296): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:30:18:950 SUSE logs/(7087:7296): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:18:951 SUSE logs/(7087:7296): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:30:18:951 SUSE logs/(7087:7296): Creando ULT 1
+[INFO] 19:30:18:951 SUSE logs/(7087:7296): ULT creado con id 1 
+
+[INFO] 19:30:18:951 SUSE logs/(7087:7296): El grado de multiprogramacion es 1 
+
+[INFO] 19:30:18:951 SUSE logs/(7087:7296): Validando grado de multiprogramacion...
+
+[INFO] 19:30:18:951 SUSE logs/(7087:7296): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:30:19:511 SUSE logs/(7087:7296): Esperando handshake en suse_create...
+
+[INFO] 19:30:19:512 SUSE logs/(7087:7296): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:30:19:512 SUSE logs/(7087:7296): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:19:512 SUSE logs/(7087:7296): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:30:19:512 SUSE logs/(7087:7296): Creando ULT 2
+[INFO] 19:30:19:512 SUSE logs/(7087:7296): ULT creado con id 2 
+
+[INFO] 19:30:19:512 SUSE logs/(7087:7296): El grado de multiprogramacion es 2 
+
+[INFO] 19:30:19:512 SUSE logs/(7087:7296): Validando grado de multiprogramacion...
+
+[INFO] 19:30:19:512 SUSE logs/(7087:7296): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:30:19:949 SUSE logs/(7087:7296): Esperando handshake en suse_create...
+
+[INFO] 19:30:19:950 SUSE logs/(7087:7296): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:30:19:950 SUSE logs/(7087:7296): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:19:950 SUSE logs/(7087:7296): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:30:19:950 SUSE logs/(7087:7296): Creando ULT 3
+[INFO] 19:30:19:950 SUSE logs/(7087:7296): ULT creado con id 3 
+
+[INFO] 19:30:19:950 SUSE logs/(7087:7296): El grado de multiprogramacion es 3 
+
+[INFO] 19:30:19:950 SUSE logs/(7087:7296): Validando grado de multiprogramacion...
+
+[INFO] 19:30:19:950 SUSE logs/(7087:7296): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:30:20:327 SUSE logs/(7087:7296): Esperando handshake en suse_create...
+
+[INFO] 19:30:20:327 SUSE logs/(7087:7296): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:30:20:327 SUSE logs/(7087:7296): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:20:327 SUSE logs/(7087:7296): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:30:20:327 SUSE logs/(7087:7296): Creando ULT 4
+[INFO] 19:30:20:327 SUSE logs/(7087:7296): ULT creado con id 4 
+
+[INFO] 19:30:20:327 SUSE logs/(7087:7296): El grado de multiprogramacion es 4 
+
+[INFO] 19:30:20:327 SUSE logs/(7087:7296): Validando grado de multiprogramacion...
+
+[INFO] 19:30:20:327 SUSE logs/(7087:7296): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:30:20:717 SUSE logs/(7087:7296): Inicio Join
+[INFO] 19:30:20:717 SUSE logs/(7087:7296): Realice el primer handshake con hilolay
+
+[INFO] 19:30:20:717 SUSE logs/(7087:7296): el socket es
+[INFO] 19:30:20:930 SUSE logs/(7087:7296): El thread 0 paso de execute a blocked 
+
+[INFO] 19:30:23:376 SUSE logs/(7087:7296): Arranco schedule_next...
+
+[INFO] 19:30:23:377 SUSE logs/(7087:7296): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:30:23:377 SUSE logs/(7087:7296): Iniciando planificacion...
+
+[INFO] 19:30:23:377 SUSE logs/(7087:7296): Estimando ULTs...
+
+[INFO] 19:30:23:377 SUSE logs/(7087:7296): Ordenando por SJF...
+[INFO] 19:30:23:377 SUSE logs/(7087:7296): El proximo ULT a ejecutar es 1
+[INFO] 19:30:23:377 SUSE logs/(7087:7296): El tid 1 paso de ready a execute
+
+[INFO] 19:30:23:377 SUSE logs/(7087:7296): Envie el next_tid 1 a SUSE
+[INFO] 19:30:24:159 SUSE logs/(7087:7296): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:30:24:159 SUSE logs/(7087:7296): El semaforo no existe
+
+[INFO] 19:30:39:166 SUSE logs/(7405:7405): Inicializando SUSE. 
+
+[INFO] 19:30:39:166 SUSE logs/(7405:7405): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:30:39:166 SUSE logs/(7405:7405): Archivo de configuracion levantado. 
+
+[INFO] 19:30:39:166 SUSE logs/(7405:7405): Inicializando semaforos 
+
+[INFO] 19:30:39:166 SUSE logs/(7405:7405): Iniciando servidor... 
+
+[INFO] 19:30:39:167 SUSE logs/(7405:7405): SUSE esperando conexiones...
+
+[INFO] 19:30:41:45 SUSE logs/(7405:7405): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:30:41:45 SUSE logs/(7405:7405): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:30:41:46 SUSE logs/(7405:7405): Cree el hilo para el proceso 5
+[INFO] 19:30:41:47 SUSE logs/(7405:7405): SUSE esperando conexiones...
+
+[INFO] 19:30:43:288 SUSE logs/(7405:7423): Esperando handshake en suse_create...
+
+[INFO] 19:30:43:289 SUSE logs/(7405:7423): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:30:43:289 SUSE logs/(7405:7423): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:43:289 SUSE logs/(7405:7423): El proceso 5 es nuevo 
+
+[INFO] 19:30:43:289 SUSE logs/(7405:7423): Proceso creado con id 5 
+
+[INFO] 19:30:43:289 SUSE logs/(7405:7423): Creando ULT 0
+[INFO] 19:30:43:289 SUSE logs/(7405:7423): ULT creado con id 0 
+
+[INFO] 19:30:43:289 SUSE logs/(7405:7423): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:30:43:289 SUSE logs/(7405:7423): El thread 0 paso de new a execute 
+
+[INFO] 19:30:43:289 SUSE logs/(7405:7423): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:30:43:640 SUSE logs/(7405:7423): Esperando handshake en suse_create...
+
+[INFO] 19:30:43:640 SUSE logs/(7405:7423): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:30:43:640 SUSE logs/(7405:7423): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:43:640 SUSE logs/(7405:7423): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:30:43:640 SUSE logs/(7405:7423): Creando ULT 1
+[INFO] 19:30:43:641 SUSE logs/(7405:7423): ULT creado con id 1 
+
+[INFO] 19:30:43:641 SUSE logs/(7405:7423): El grado de multiprogramacion es 1 
+
+[INFO] 19:30:43:641 SUSE logs/(7405:7423): Validando grado de multiprogramacion...
+
+[INFO] 19:30:43:641 SUSE logs/(7405:7423): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:30:44:329 SUSE logs/(7405:7423): Esperando handshake en suse_create...
+
+[INFO] 19:30:44:329 SUSE logs/(7405:7423): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:30:44:330 SUSE logs/(7405:7423): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:44:330 SUSE logs/(7405:7423): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:30:44:330 SUSE logs/(7405:7423): Creando ULT 2
+[INFO] 19:30:44:330 SUSE logs/(7405:7423): ULT creado con id 2 
+
+[INFO] 19:30:44:330 SUSE logs/(7405:7423): El grado de multiprogramacion es 2 
+
+[INFO] 19:30:44:330 SUSE logs/(7405:7423): Validando grado de multiprogramacion...
+
+[INFO] 19:30:44:330 SUSE logs/(7405:7423): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:30:44:906 SUSE logs/(7405:7423): Esperando handshake en suse_create...
+
+[INFO] 19:30:44:906 SUSE logs/(7405:7423): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:30:44:906 SUSE logs/(7405:7423): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:44:906 SUSE logs/(7405:7423): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:30:44:906 SUSE logs/(7405:7423): Creando ULT 3
+[INFO] 19:30:44:906 SUSE logs/(7405:7423): ULT creado con id 3 
+
+[INFO] 19:30:44:906 SUSE logs/(7405:7423): El grado de multiprogramacion es 3 
+
+[INFO] 19:30:44:906 SUSE logs/(7405:7423): Validando grado de multiprogramacion...
+
+[INFO] 19:30:44:906 SUSE logs/(7405:7423): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:30:45:877 SUSE logs/(7405:7423): Esperando handshake en suse_create...
+
+[INFO] 19:30:45:877 SUSE logs/(7405:7423): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:30:45:877 SUSE logs/(7405:7423): Validando si es el main thread o ULT comun 
+
+[INFO] 19:30:45:877 SUSE logs/(7405:7423): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:30:45:877 SUSE logs/(7405:7423): Creando ULT 4
+[INFO] 19:30:45:877 SUSE logs/(7405:7423): ULT creado con id 4 
+
+[INFO] 19:30:45:877 SUSE logs/(7405:7423): El grado de multiprogramacion es 4 
+
+[INFO] 19:30:45:877 SUSE logs/(7405:7423): Validando grado de multiprogramacion...
+
+[INFO] 19:30:45:877 SUSE logs/(7405:7423): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:30:46:892 SUSE logs/(7405:7423): Inicio Join
+[INFO] 19:30:46:892 SUSE logs/(7405:7423): Realice el primer handshake con hilolay
+
+[INFO] 19:30:46:892 SUSE logs/(7405:7423): el socket es
+[INFO] 19:30:47:346 SUSE logs/(7405:7423): El thread 0 paso de execute a blocked 
+
+[INFO] 19:30:49:253 SUSE logs/(7405:7423): Arranco schedule_next...
+
+[INFO] 19:30:49:253 SUSE logs/(7405:7423): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:30:49:253 SUSE logs/(7405:7423): Iniciando planificacion...
+
+[INFO] 19:30:49:253 SUSE logs/(7405:7423): Estimando ULTs...
+
+[INFO] 19:30:49:253 SUSE logs/(7405:7423): Ordenando por SJF...
+[INFO] 19:30:49:253 SUSE logs/(7405:7423): El proximo ULT a ejecutar es 1
+[INFO] 19:30:49:253 SUSE logs/(7405:7423): El tid 1 paso de ready a execute
+
+[INFO] 19:30:49:253 SUSE logs/(7405:7423): Envie el next_tid 1 a SUSE
+[INFO] 19:30:52:258 SUSE logs/(7405:7423): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:31:17:970 SUSE logs/(7405:7423): El semaforo no existe
+
+[INFO] 19:31:43:93 SUSE logs/(7526:7526): Inicializando SUSE. 
+
+[INFO] 19:31:46:522 SUSE logs/(7526:7526): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:32:32:656 SUSE logs/(7526:7526): Archivo de configuracion levantado. 
+
+[INFO] 19:32:35:644 SUSE logs/(7526:7526): Inicializando semaforos 
+
+[INFO] 19:33:19:386 SUSE logs/(7526:7526): Iniciando servidor... 
+
+[INFO] 19:33:19:386 SUSE logs/(7526:7526): SUSE esperando conexiones...
+
+[INFO] 19:33:22:987 SUSE logs/(7526:7526): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:33:22:987 SUSE logs/(7526:7526): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:33:22:988 SUSE logs/(7526:7526): Cree el hilo para el proceso 5
+[INFO] 19:33:22:992 SUSE logs/(7526:7526): SUSE esperando conexiones...
+
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): Esperando handshake en suse_create...
+
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): Validando si es el main thread o ULT comun 
+
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): El proceso 5 es nuevo 
+
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): Proceso creado con id 5 
+
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): Creando ULT 0
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): ULT creado con id 0 
+
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): El thread 0 paso de new a execute 
+
+[INFO] 19:33:26:678 SUSE logs/(7526:7624): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:33:27:222 SUSE logs/(7526:7624): Esperando handshake en suse_create...
+
+[INFO] 19:33:27:222 SUSE logs/(7526:7624): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:33:27:222 SUSE logs/(7526:7624): Validando si es el main thread o ULT comun 
+
+[INFO] 19:33:27:222 SUSE logs/(7526:7624): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:33:27:222 SUSE logs/(7526:7624): Creando ULT 1
+[INFO] 19:33:27:222 SUSE logs/(7526:7624): ULT creado con id 1 
+
+[INFO] 19:33:27:222 SUSE logs/(7526:7624): El grado de multiprogramacion es 1 
+
+[INFO] 19:33:27:222 SUSE logs/(7526:7624): Validando grado de multiprogramacion...
+
+[INFO] 19:33:27:222 SUSE logs/(7526:7624): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:33:27:742 SUSE logs/(7526:7624): Esperando handshake en suse_create...
+
+[INFO] 19:33:27:742 SUSE logs/(7526:7624): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:33:27:742 SUSE logs/(7526:7624): Validando si es el main thread o ULT comun 
+
+[INFO] 19:33:27:742 SUSE logs/(7526:7624): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:33:27:742 SUSE logs/(7526:7624): Creando ULT 2
+[INFO] 19:33:27:742 SUSE logs/(7526:7624): ULT creado con id 2 
+
+[INFO] 19:33:27:742 SUSE logs/(7526:7624): El grado de multiprogramacion es 2 
+
+[INFO] 19:33:27:742 SUSE logs/(7526:7624): Validando grado de multiprogramacion...
+
+[INFO] 19:33:27:742 SUSE logs/(7526:7624): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:33:28:66 SUSE logs/(7526:7624): Esperando handshake en suse_create...
+
+[INFO] 19:33:28:67 SUSE logs/(7526:7624): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:33:28:67 SUSE logs/(7526:7624): Validando si es el main thread o ULT comun 
+
+[INFO] 19:33:28:67 SUSE logs/(7526:7624): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:33:28:67 SUSE logs/(7526:7624): Creando ULT 3
+[INFO] 19:33:28:67 SUSE logs/(7526:7624): ULT creado con id 3 
+
+[INFO] 19:33:28:67 SUSE logs/(7526:7624): El grado de multiprogramacion es 3 
+
+[INFO] 19:33:28:67 SUSE logs/(7526:7624): Validando grado de multiprogramacion...
+
+[INFO] 19:33:28:67 SUSE logs/(7526:7624): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:33:28:408 SUSE logs/(7526:7624): Esperando handshake en suse_create...
+
+[INFO] 19:33:28:409 SUSE logs/(7526:7624): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:33:28:409 SUSE logs/(7526:7624): Validando si es el main thread o ULT comun 
+
+[INFO] 19:33:28:409 SUSE logs/(7526:7624): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:33:28:409 SUSE logs/(7526:7624): Creando ULT 4
+[INFO] 19:33:28:409 SUSE logs/(7526:7624): ULT creado con id 4 
+
+[INFO] 19:33:28:409 SUSE logs/(7526:7624): El grado de multiprogramacion es 4 
+
+[INFO] 19:33:28:409 SUSE logs/(7526:7624): Validando grado de multiprogramacion...
+
+[INFO] 19:33:28:409 SUSE logs/(7526:7624): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:33:29:348 SUSE logs/(7526:7624): Inicio Join
+[INFO] 19:33:29:348 SUSE logs/(7526:7624): Realice el primer handshake con hilolay
+
+[INFO] 19:33:29:348 SUSE logs/(7526:7624): el socket es
+[INFO] 19:33:29:534 SUSE logs/(7526:7624): El thread 0 paso de execute a blocked 
+
+[INFO] 19:33:30:987 SUSE logs/(7526:7624): Arranco schedule_next...
+
+[INFO] 19:33:30:987 SUSE logs/(7526:7624): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:33:30:987 SUSE logs/(7526:7624): Iniciando planificacion...
+
+[INFO] 19:33:30:987 SUSE logs/(7526:7624): Estimando ULTs...
+
+[INFO] 19:33:30:987 SUSE logs/(7526:7624): Ordenando por SJF...
+[INFO] 19:33:30:987 SUSE logs/(7526:7624): El proximo ULT a ejecutar es 1
+[INFO] 19:33:30:987 SUSE logs/(7526:7624): El tid 1 paso de ready a execute
+
+[INFO] 19:33:30:987 SUSE logs/(7526:7624): Envie el next_tid 1 a SUSE
+[INFO] 19:33:34:156 SUSE logs/(7526:7624): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:35:44:319 SUSE logs/(7840:7840): Inicializando SUSE. 
+
+[INFO] 19:35:47:219 SUSE logs/(7840:7840): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:35:51:351 SUSE logs/(7840:7840): Archivo de configuracion levantado. 
+
+[INFO] 19:35:53:141 SUSE logs/(7840:7840): Inicializando semaforos 
+
+[INFO] 19:37:17:582 SUSE logs/(8038:8038): Inicializando SUSE. 
+
+[INFO] 19:37:19:115 SUSE logs/(8038:8038): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:37:19:115 SUSE logs/(8038:8038): Archivo de configuracion levantado. 
+
+[INFO] 19:37:19:115 SUSE logs/(8038:8038): Inicializando semaforos 
+
+[INFO] 19:37:19:115 SUSE logs/(8038:8038): Iniciando servidor... 
+
+[INFO] 19:37:19:115 SUSE logs/(8038:8038): SUSE esperando conexiones...
+
+[INFO] 19:37:22:832 SUSE logs/(8038:8038): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:37:22:832 SUSE logs/(8038:8038): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:37:22:836 SUSE logs/(8038:8038): Cree el hilo para el proceso 5
+[INFO] 19:37:22:839 SUSE logs/(8038:8038): SUSE esperando conexiones...
+
+[INFO] 19:37:25:231 SUSE logs/(8038:8053): Esperando handshake en suse_create...
+
+[INFO] 19:37:25:232 SUSE logs/(8038:8053): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:37:25:232 SUSE logs/(8038:8053): Validando si es el main thread o ULT comun 
+
+[INFO] 19:37:25:232 SUSE logs/(8038:8053): El proceso 5 es nuevo 
+
+[INFO] 19:37:25:232 SUSE logs/(8038:8053): Proceso creado con id 5 
+
+[INFO] 19:37:25:232 SUSE logs/(8038:8053): Creando ULT 0
+[INFO] 19:37:25:232 SUSE logs/(8038:8053): ULT creado con id 0 
+
+[INFO] 19:37:25:232 SUSE logs/(8038:8053): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:37:25:232 SUSE logs/(8038:8053): El thread 0 paso de new a execute 
+
+[INFO] 19:37:25:232 SUSE logs/(8038:8053): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:37:25:587 SUSE logs/(8038:8053): Esperando handshake en suse_create...
+
+[INFO] 19:37:25:587 SUSE logs/(8038:8053): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:37:25:587 SUSE logs/(8038:8053): Validando si es el main thread o ULT comun 
+
+[INFO] 19:37:25:587 SUSE logs/(8038:8053): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:37:25:587 SUSE logs/(8038:8053): Creando ULT 1
+[INFO] 19:37:25:587 SUSE logs/(8038:8053): ULT creado con id 1 
+
+[INFO] 19:37:25:587 SUSE logs/(8038:8053): El grado de multiprogramacion es 1 
+
+[INFO] 19:37:25:587 SUSE logs/(8038:8053): Validando grado de multiprogramacion...
+
+[INFO] 19:37:25:587 SUSE logs/(8038:8053): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:37:25:936 SUSE logs/(8038:8053): Esperando handshake en suse_create...
+
+[INFO] 19:37:25:936 SUSE logs/(8038:8053): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:37:25:936 SUSE logs/(8038:8053): Validando si es el main thread o ULT comun 
+
+[INFO] 19:37:25:936 SUSE logs/(8038:8053): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:37:25:936 SUSE logs/(8038:8053): Creando ULT 2
+[INFO] 19:37:25:936 SUSE logs/(8038:8053): ULT creado con id 2 
+
+[INFO] 19:37:25:936 SUSE logs/(8038:8053): El grado de multiprogramacion es 2 
+
+[INFO] 19:37:25:936 SUSE logs/(8038:8053): Validando grado de multiprogramacion...
+
+[INFO] 19:37:25:936 SUSE logs/(8038:8053): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:37:26:292 SUSE logs/(8038:8053): Esperando handshake en suse_create...
+
+[INFO] 19:37:26:292 SUSE logs/(8038:8053): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:37:26:292 SUSE logs/(8038:8053): Validando si es el main thread o ULT comun 
+
+[INFO] 19:37:26:292 SUSE logs/(8038:8053): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:37:26:292 SUSE logs/(8038:8053): Creando ULT 3
+[INFO] 19:37:26:292 SUSE logs/(8038:8053): ULT creado con id 3 
+
+[INFO] 19:37:26:292 SUSE logs/(8038:8053): El grado de multiprogramacion es 3 
+
+[INFO] 19:37:26:292 SUSE logs/(8038:8053): Validando grado de multiprogramacion...
+
+[INFO] 19:37:26:292 SUSE logs/(8038:8053): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:37:26:818 SUSE logs/(8038:8053): Esperando handshake en suse_create...
+
+[INFO] 19:37:26:818 SUSE logs/(8038:8053): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:37:26:818 SUSE logs/(8038:8053): Validando si es el main thread o ULT comun 
+
+[INFO] 19:37:26:818 SUSE logs/(8038:8053): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:37:26:818 SUSE logs/(8038:8053): Creando ULT 4
+[INFO] 19:37:26:818 SUSE logs/(8038:8053): ULT creado con id 4 
+
+[INFO] 19:37:26:818 SUSE logs/(8038:8053): El grado de multiprogramacion es 4 
+
+[INFO] 19:37:26:818 SUSE logs/(8038:8053): Validando grado de multiprogramacion...
+
+[INFO] 19:37:26:818 SUSE logs/(8038:8053): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:37:27:478 SUSE logs/(8038:8053): Inicio Join
+[INFO] 19:37:27:478 SUSE logs/(8038:8053): Realice el primer handshake con hilolay
+
+[INFO] 19:37:27:479 SUSE logs/(8038:8053): el socket es
+[INFO] 19:37:27:954 SUSE logs/(8038:8053): El thread 0 paso de execute a blocked 
+
+[INFO] 19:37:28:705 SUSE logs/(8038:8053): Arranco schedule_next...
+
+[INFO] 19:37:28:705 SUSE logs/(8038:8053): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:37:28:705 SUSE logs/(8038:8053): Iniciando planificacion...
+
+[INFO] 19:37:28:705 SUSE logs/(8038:8053): Estimando ULTs...
+
+[INFO] 19:37:28:705 SUSE logs/(8038:8053): Ordenando por SJF...
+[INFO] 19:37:28:705 SUSE logs/(8038:8053): El proximo ULT a ejecutar es 1
+[INFO] 19:37:28:705 SUSE logs/(8038:8053): El tid 1 paso de ready a execute
+
+[INFO] 19:37:28:705 SUSE logs/(8038:8053): Envie el next_tid 1 a SUSE
+[INFO] 19:37:30:941 SUSE logs/(8038:8053): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:37:47:876 SUSE logs/(8138:8138): Inicializando SUSE. 
+
+[INFO] 19:37:48:427 SUSE logs/(8138:8138): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:37:48:427 SUSE logs/(8138:8138): Archivo de configuracion levantado. 
+
+[INFO] 19:37:48:427 SUSE logs/(8138:8138): Inicializando semaforos 
+
+[INFO] 19:37:48:427 SUSE logs/(8138:8138): Iniciando servidor... 
+
+[INFO] 19:37:48:427 SUSE logs/(8138:8138): SUSE esperando conexiones...
+
+[INFO] 19:37:55:551 SUSE logs/(8138:8138): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:37:55:551 SUSE logs/(8138:8138): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:37:55:552 SUSE logs/(8138:8138): Cree el hilo para el proceso 5
+[INFO] 19:37:55:553 SUSE logs/(8138:8138): SUSE esperando conexiones...
+
+[INFO] 19:37:58:361 SUSE logs/(8138:8157): Esperando handshake en suse_create...
+
+[INFO] 19:37:58:362 SUSE logs/(8138:8157): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:37:58:362 SUSE logs/(8138:8157): Validando si es el main thread o ULT comun 
+
+[INFO] 19:37:58:362 SUSE logs/(8138:8157): El proceso 5 es nuevo 
+
+[INFO] 19:37:58:362 SUSE logs/(8138:8157): Proceso creado con id 5 
+
+[INFO] 19:37:58:362 SUSE logs/(8138:8157): Creando ULT 0
+[INFO] 19:37:58:362 SUSE logs/(8138:8157): ULT creado con id 0 
+
+[INFO] 19:37:58:362 SUSE logs/(8138:8157): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:37:58:362 SUSE logs/(8138:8157): El thread 0 paso de new a execute 
+
+[INFO] 19:37:58:362 SUSE logs/(8138:8157): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:37:58:901 SUSE logs/(8138:8157): Esperando handshake en suse_create...
+
+[INFO] 19:37:58:901 SUSE logs/(8138:8157): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:37:58:901 SUSE logs/(8138:8157): Validando si es el main thread o ULT comun 
+
+[INFO] 19:37:58:901 SUSE logs/(8138:8157): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:37:58:901 SUSE logs/(8138:8157): Creando ULT 1
+[INFO] 19:37:58:901 SUSE logs/(8138:8157): ULT creado con id 1 
+
+[INFO] 19:37:58:901 SUSE logs/(8138:8157): El grado de multiprogramacion es 1 
+
+[INFO] 19:37:58:901 SUSE logs/(8138:8157): Validando grado de multiprogramacion...
+
+[INFO] 19:37:58:901 SUSE logs/(8138:8157): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:37:59:422 SUSE logs/(8138:8157): Esperando handshake en suse_create...
+
+[INFO] 19:37:59:429 SUSE logs/(8138:8157): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:37:59:429 SUSE logs/(8138:8157): Validando si es el main thread o ULT comun 
+
+[INFO] 19:37:59:429 SUSE logs/(8138:8157): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:37:59:429 SUSE logs/(8138:8157): Creando ULT 2
+[INFO] 19:37:59:429 SUSE logs/(8138:8157): ULT creado con id 2 
+
+[INFO] 19:37:59:429 SUSE logs/(8138:8157): El grado de multiprogramacion es 2 
+
+[INFO] 19:37:59:429 SUSE logs/(8138:8157): Validando grado de multiprogramacion...
+
+[INFO] 19:37:59:429 SUSE logs/(8138:8157): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:37:59:769 SUSE logs/(8138:8157): Esperando handshake en suse_create...
+
+[INFO] 19:37:59:769 SUSE logs/(8138:8157): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:37:59:769 SUSE logs/(8138:8157): Validando si es el main thread o ULT comun 
+
+[INFO] 19:37:59:769 SUSE logs/(8138:8157): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:37:59:769 SUSE logs/(8138:8157): Creando ULT 3
+[INFO] 19:37:59:769 SUSE logs/(8138:8157): ULT creado con id 3 
+
+[INFO] 19:37:59:769 SUSE logs/(8138:8157): El grado de multiprogramacion es 3 
+
+[INFO] 19:37:59:769 SUSE logs/(8138:8157): Validando grado de multiprogramacion...
+
+[INFO] 19:37:59:770 SUSE logs/(8138:8157): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:38:00:121 SUSE logs/(8138:8157): Esperando handshake en suse_create...
+
+[INFO] 19:38:00:121 SUSE logs/(8138:8157): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:38:00:121 SUSE logs/(8138:8157): Validando si es el main thread o ULT comun 
+
+[INFO] 19:38:00:121 SUSE logs/(8138:8157): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:38:00:121 SUSE logs/(8138:8157): Creando ULT 4
+[INFO] 19:38:00:121 SUSE logs/(8138:8157): ULT creado con id 4 
+
+[INFO] 19:38:00:121 SUSE logs/(8138:8157): El grado de multiprogramacion es 4 
+
+[INFO] 19:38:00:121 SUSE logs/(8138:8157): Validando grado de multiprogramacion...
+
+[INFO] 19:38:00:121 SUSE logs/(8138:8157): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:38:00:788 SUSE logs/(8138:8157): Inicio Join
+[INFO] 19:38:00:788 SUSE logs/(8138:8157): Realice el primer handshake con hilolay
+
+[INFO] 19:38:00:788 SUSE logs/(8138:8157): el socket es
+[INFO] 19:38:00:990 SUSE logs/(8138:8157): El thread 0 paso de execute a blocked 
+
+[INFO] 19:38:02:163 SUSE logs/(8138:8157): Arranco schedule_next...
+
+[INFO] 19:38:02:163 SUSE logs/(8138:8157): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:38:02:163 SUSE logs/(8138:8157): Iniciando planificacion...
+
+[INFO] 19:38:02:163 SUSE logs/(8138:8157): Estimando ULTs...
+
+[INFO] 19:38:02:163 SUSE logs/(8138:8157): Ordenando por SJF...
+[INFO] 19:38:02:163 SUSE logs/(8138:8157): El proximo ULT a ejecutar es 1
+[INFO] 19:38:02:163 SUSE logs/(8138:8157): El tid 1 paso de ready a execute
+
+[INFO] 19:38:02:163 SUSE logs/(8138:8157): Envie el next_tid 1 a SUSE
+[INFO] 19:38:03:469 SUSE logs/(8138:8157): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:38:19:71 SUSE logs/(8244:8244): Inicializando SUSE. 
+
+[INFO] 19:38:19:525 SUSE logs/(8244:8244): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:38:19:525 SUSE logs/(8244:8244): Archivo de configuracion levantado. 
+
+[INFO] 19:38:19:525 SUSE logs/(8244:8244): Inicializando semaforos 
+
+[INFO] 19:38:19:525 SUSE logs/(8244:8244): Iniciando servidor... 
+
+[INFO] 19:38:19:525 SUSE logs/(8244:8244): SUSE esperando conexiones...
+
+[INFO] 19:38:23:80 SUSE logs/(8244:8244): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:38:23:80 SUSE logs/(8244:8244): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:38:23:81 SUSE logs/(8244:8244): Cree el hilo para el proceso 5
+[INFO] 19:38:23:83 SUSE logs/(8244:8244): SUSE esperando conexiones...
+
+[INFO] 19:38:27:442 SUSE logs/(8244:8259): Esperando handshake en suse_create...
+
+[INFO] 19:38:27:443 SUSE logs/(8244:8259): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:38:27:443 SUSE logs/(8244:8259): Validando si es el main thread o ULT comun 
+
+[INFO] 19:38:27:443 SUSE logs/(8244:8259): El proceso 5 es nuevo 
+
+[INFO] 19:38:27:443 SUSE logs/(8244:8259): Proceso creado con id 5 
+
+[INFO] 19:38:27:443 SUSE logs/(8244:8259): Creando ULT 0
+[INFO] 19:38:27:443 SUSE logs/(8244:8259): ULT creado con id 0 
+
+[INFO] 19:38:27:443 SUSE logs/(8244:8259): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:38:27:443 SUSE logs/(8244:8259): El thread 0 paso de new a execute 
+
+[INFO] 19:38:27:443 SUSE logs/(8244:8259): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:38:27:800 SUSE logs/(8244:8259): Esperando handshake en suse_create...
+
+[INFO] 19:38:27:800 SUSE logs/(8244:8259): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:38:27:800 SUSE logs/(8244:8259): Validando si es el main thread o ULT comun 
+
+[INFO] 19:38:27:800 SUSE logs/(8244:8259): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:38:27:800 SUSE logs/(8244:8259): Creando ULT 1
+[INFO] 19:38:27:800 SUSE logs/(8244:8259): ULT creado con id 1 
+
+[INFO] 19:38:27:800 SUSE logs/(8244:8259): El grado de multiprogramacion es 1 
+
+[INFO] 19:38:27:800 SUSE logs/(8244:8259): Validando grado de multiprogramacion...
+
+[INFO] 19:38:27:800 SUSE logs/(8244:8259): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:38:28:370 SUSE logs/(8244:8259): Esperando handshake en suse_create...
+
+[INFO] 19:38:28:370 SUSE logs/(8244:8259): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:38:28:370 SUSE logs/(8244:8259): Validando si es el main thread o ULT comun 
+
+[INFO] 19:38:28:370 SUSE logs/(8244:8259): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:38:28:370 SUSE logs/(8244:8259): Creando ULT 2
+[INFO] 19:38:28:370 SUSE logs/(8244:8259): ULT creado con id 2 
+
+[INFO] 19:38:28:370 SUSE logs/(8244:8259): El grado de multiprogramacion es 2 
+
+[INFO] 19:38:28:370 SUSE logs/(8244:8259): Validando grado de multiprogramacion...
+
+[INFO] 19:38:28:370 SUSE logs/(8244:8259): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:38:28:917 SUSE logs/(8244:8259): Esperando handshake en suse_create...
+
+[INFO] 19:38:28:917 SUSE logs/(8244:8259): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:38:28:917 SUSE logs/(8244:8259): Validando si es el main thread o ULT comun 
+
+[INFO] 19:38:28:917 SUSE logs/(8244:8259): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:38:28:917 SUSE logs/(8244:8259): Creando ULT 3
+[INFO] 19:38:28:917 SUSE logs/(8244:8259): ULT creado con id 3 
+
+[INFO] 19:38:28:917 SUSE logs/(8244:8259): El grado de multiprogramacion es 3 
+
+[INFO] 19:38:28:917 SUSE logs/(8244:8259): Validando grado de multiprogramacion...
+
+[INFO] 19:38:28:917 SUSE logs/(8244:8259): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:38:30:166 SUSE logs/(8244:8259): Esperando handshake en suse_create...
+
+[INFO] 19:38:30:166 SUSE logs/(8244:8259): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:38:30:166 SUSE logs/(8244:8259): Validando si es el main thread o ULT comun 
+
+[INFO] 19:38:30:166 SUSE logs/(8244:8259): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:38:30:166 SUSE logs/(8244:8259): Creando ULT 4
+[INFO] 19:38:30:166 SUSE logs/(8244:8259): ULT creado con id 4 
+
+[INFO] 19:38:30:166 SUSE logs/(8244:8259): El grado de multiprogramacion es 4 
+
+[INFO] 19:38:30:166 SUSE logs/(8244:8259): Validando grado de multiprogramacion...
+
+[INFO] 19:38:30:166 SUSE logs/(8244:8259): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:38:31:295 SUSE logs/(8244:8259): Inicio Join
+[INFO] 19:38:31:295 SUSE logs/(8244:8259): Realice el primer handshake con hilolay
+
+[INFO] 19:38:31:296 SUSE logs/(8244:8259): el socket es
+[INFO] 19:38:31:931 SUSE logs/(8244:8259): El thread 0 paso de execute a blocked 
+
+[INFO] 19:38:33:559 SUSE logs/(8244:8259): Arranco schedule_next...
+
+[INFO] 19:38:33:559 SUSE logs/(8244:8259): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:38:33:560 SUSE logs/(8244:8259): Iniciando planificacion...
+
+[INFO] 19:38:33:560 SUSE logs/(8244:8259): Estimando ULTs...
+
+[INFO] 19:38:33:560 SUSE logs/(8244:8259): Ordenando por SJF...
+[INFO] 19:38:33:560 SUSE logs/(8244:8259): El proximo ULT a ejecutar es 1
+[INFO] 19:38:33:560 SUSE logs/(8244:8259): El tid 1 paso de ready a execute
+
+[INFO] 19:38:33:560 SUSE logs/(8244:8259): Envie el next_tid 1 a SUSE
+[INFO] 19:38:35:901 SUSE logs/(8244:8259): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:39:51:175 SUSE logs/(8447:8447): Inicializando SUSE. 
+
+[INFO] 19:39:51:175 SUSE logs/(8447:8447): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:39:51:176 SUSE logs/(8447:8447): Archivo de configuracion levantado. 
+
+[INFO] 19:39:51:176 SUSE logs/(8447:8447): Inicializando semaforos 
+
+[INFO] 19:39:51:176 SUSE logs/(8447:8447): Iniciando servidor... 
+
+[INFO] 19:39:51:176 SUSE logs/(8447:8447): SUSE esperando conexiones...
+
+[INFO] 19:39:53:519 SUSE logs/(8447:8447): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:39:53:523 SUSE logs/(8447:8447): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:39:53:525 SUSE logs/(8447:8447): Cree el hilo para el proceso 5
+[INFO] 19:39:53:527 SUSE logs/(8447:8447): SUSE esperando conexiones...
+
+[INFO] 19:39:55:666 SUSE logs/(8447:8465): Esperando handshake en suse_create...
+
+[INFO] 19:39:55:666 SUSE logs/(8447:8465): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:39:55:666 SUSE logs/(8447:8465): Validando si es el main thread o ULT comun 
+
+[INFO] 19:39:55:666 SUSE logs/(8447:8465): El proceso 5 es nuevo 
+
+[INFO] 19:39:55:666 SUSE logs/(8447:8465): Proceso creado con id 5 
+
+[INFO] 19:39:55:667 SUSE logs/(8447:8465): Creando ULT 0
+[INFO] 19:39:55:667 SUSE logs/(8447:8465): ULT creado con id 0 
+
+[INFO] 19:39:55:667 SUSE logs/(8447:8465): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:39:55:667 SUSE logs/(8447:8465): El thread 0 paso de new a execute 
+
+[INFO] 19:39:55:667 SUSE logs/(8447:8465): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:39:56:8 SUSE logs/(8447:8465): Esperando handshake en suse_create...
+
+[INFO] 19:39:56:8 SUSE logs/(8447:8465): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:39:56:8 SUSE logs/(8447:8465): Validando si es el main thread o ULT comun 
+
+[INFO] 19:39:56:8 SUSE logs/(8447:8465): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:39:56:8 SUSE logs/(8447:8465): Creando ULT 1
+[INFO] 19:39:56:8 SUSE logs/(8447:8465): ULT creado con id 1 
+
+[INFO] 19:39:56:8 SUSE logs/(8447:8465): El grado de multiprogramacion es 1 
+
+[INFO] 19:39:56:8 SUSE logs/(8447:8465): Validando grado de multiprogramacion...
+
+[INFO] 19:39:56:8 SUSE logs/(8447:8465): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:39:56:361 SUSE logs/(8447:8465): Esperando handshake en suse_create...
+
+[INFO] 19:39:56:362 SUSE logs/(8447:8465): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:39:56:363 SUSE logs/(8447:8465): Validando si es el main thread o ULT comun 
+
+[INFO] 19:39:56:363 SUSE logs/(8447:8465): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:39:56:363 SUSE logs/(8447:8465): Creando ULT 2
+[INFO] 19:39:56:363 SUSE logs/(8447:8465): ULT creado con id 2 
+
+[INFO] 19:39:56:363 SUSE logs/(8447:8465): El grado de multiprogramacion es 2 
+
+[INFO] 19:39:56:363 SUSE logs/(8447:8465): Validando grado de multiprogramacion...
+
+[INFO] 19:39:56:363 SUSE logs/(8447:8465): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:39:57:61 SUSE logs/(8447:8465): Esperando handshake en suse_create...
+
+[INFO] 19:39:57:62 SUSE logs/(8447:8465): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:39:57:62 SUSE logs/(8447:8465): Validando si es el main thread o ULT comun 
+
+[INFO] 19:39:57:62 SUSE logs/(8447:8465): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:39:57:62 SUSE logs/(8447:8465): Creando ULT 3
+[INFO] 19:39:57:62 SUSE logs/(8447:8465): ULT creado con id 3 
+
+[INFO] 19:39:57:62 SUSE logs/(8447:8465): El grado de multiprogramacion es 3 
+
+[INFO] 19:39:57:62 SUSE logs/(8447:8465): Validando grado de multiprogramacion...
+
+[INFO] 19:39:57:62 SUSE logs/(8447:8465): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:39:57:618 SUSE logs/(8447:8465): Esperando handshake en suse_create...
+
+[INFO] 19:39:57:619 SUSE logs/(8447:8465): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:39:57:619 SUSE logs/(8447:8465): Validando si es el main thread o ULT comun 
+
+[INFO] 19:39:57:619 SUSE logs/(8447:8465): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:39:57:619 SUSE logs/(8447:8465): Creando ULT 4
+[INFO] 19:39:57:619 SUSE logs/(8447:8465): ULT creado con id 4 
+
+[INFO] 19:39:57:619 SUSE logs/(8447:8465): El grado de multiprogramacion es 4 
+
+[INFO] 19:39:57:619 SUSE logs/(8447:8465): Validando grado de multiprogramacion...
+
+[INFO] 19:39:57:619 SUSE logs/(8447:8465): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:39:58:327 SUSE logs/(8447:8465): Inicio Join
+[INFO] 19:39:58:328 SUSE logs/(8447:8465): Realice el primer handshake con hilolay
+
+[INFO] 19:39:58:328 SUSE logs/(8447:8465): el socket es
+[INFO] 19:39:58:904 SUSE logs/(8447:8465): El thread 0 paso de execute a blocked 
+
+[INFO] 19:39:59:899 SUSE logs/(8447:8465): Arranco schedule_next...
+
+[INFO] 19:39:59:899 SUSE logs/(8447:8465): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:39:59:899 SUSE logs/(8447:8465): Iniciando planificacion...
+
+[INFO] 19:39:59:899 SUSE logs/(8447:8465): Estimando ULTs...
+
+[INFO] 19:39:59:899 SUSE logs/(8447:8465): Ordenando por SJF...
+[INFO] 19:39:59:899 SUSE logs/(8447:8465): El proximo ULT a ejecutar es 1
+[INFO] 19:39:59:899 SUSE logs/(8447:8465): El tid 1 paso de ready a execute
+
+[INFO] 19:39:59:899 SUSE logs/(8447:8465): Envie el next_tid 1 a SUSE
+[INFO] 19:40:08:38 SUSE logs/(8447:8465): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:40:18:807 SUSE logs/(8545:8545): Inicializando SUSE. 
+
+[INFO] 19:40:18:808 SUSE logs/(8545:8545): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:40:18:808 SUSE logs/(8545:8545): Archivo de configuracion levantado. 
+
+[INFO] 19:40:18:808 SUSE logs/(8545:8545): Inicializando semaforos 
+
+[INFO] 19:40:18:808 SUSE logs/(8545:8545): Iniciando servidor... 
+
+[INFO] 19:40:18:808 SUSE logs/(8545:8545): SUSE esperando conexiones...
+
+[INFO] 19:40:21:37 SUSE logs/(8545:8545): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:40:21:38 SUSE logs/(8545:8545): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:40:21:38 SUSE logs/(8545:8545): Cree el hilo para el proceso 5
+[INFO] 19:40:21:40 SUSE logs/(8545:8545): SUSE esperando conexiones...
+
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): Esperando handshake en suse_create...
+
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): Validando si es el main thread o ULT comun 
+
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): El proceso 5 es nuevo 
+
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): Proceso creado con id 5 
+
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): Creando ULT 0
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): ULT creado con id 0 
+
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): El thread 0 paso de new a execute 
+
+[INFO] 19:40:23:855 SUSE logs/(8545:8558): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:40:24:544 SUSE logs/(8545:8558): Esperando handshake en suse_create...
+
+[INFO] 19:40:24:545 SUSE logs/(8545:8558): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:40:24:545 SUSE logs/(8545:8558): Validando si es el main thread o ULT comun 
+
+[INFO] 19:40:24:545 SUSE logs/(8545:8558): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:40:24:545 SUSE logs/(8545:8558): Creando ULT 1
+[INFO] 19:40:24:545 SUSE logs/(8545:8558): ULT creado con id 1 
+
+[INFO] 19:40:24:545 SUSE logs/(8545:8558): El grado de multiprogramacion es 1 
+
+[INFO] 19:40:24:545 SUSE logs/(8545:8558): Validando grado de multiprogramacion...
+
+[INFO] 19:40:24:545 SUSE logs/(8545:8558): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:40:25:88 SUSE logs/(8545:8558): Esperando handshake en suse_create...
+
+[INFO] 19:40:25:88 SUSE logs/(8545:8558): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:40:25:88 SUSE logs/(8545:8558): Validando si es el main thread o ULT comun 
+
+[INFO] 19:40:25:88 SUSE logs/(8545:8558): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:40:25:88 SUSE logs/(8545:8558): Creando ULT 2
+[INFO] 19:40:25:88 SUSE logs/(8545:8558): ULT creado con id 2 
+
+[INFO] 19:40:25:88 SUSE logs/(8545:8558): El grado de multiprogramacion es 2 
+
+[INFO] 19:40:25:88 SUSE logs/(8545:8558): Validando grado de multiprogramacion...
+
+[INFO] 19:40:25:88 SUSE logs/(8545:8558): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:40:25:461 SUSE logs/(8545:8558): Esperando handshake en suse_create...
+
+[INFO] 19:40:25:461 SUSE logs/(8545:8558): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:40:25:461 SUSE logs/(8545:8558): Validando si es el main thread o ULT comun 
+
+[INFO] 19:40:25:461 SUSE logs/(8545:8558): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:40:25:461 SUSE logs/(8545:8558): Creando ULT 3
+[INFO] 19:40:25:461 SUSE logs/(8545:8558): ULT creado con id 3 
+
+[INFO] 19:40:25:461 SUSE logs/(8545:8558): El grado de multiprogramacion es 3 
+
+[INFO] 19:40:25:461 SUSE logs/(8545:8558): Validando grado de multiprogramacion...
+
+[INFO] 19:40:25:461 SUSE logs/(8545:8558): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:40:25:860 SUSE logs/(8545:8558): Esperando handshake en suse_create...
+
+[INFO] 19:40:25:860 SUSE logs/(8545:8558): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:40:25:860 SUSE logs/(8545:8558): Validando si es el main thread o ULT comun 
+
+[INFO] 19:40:25:860 SUSE logs/(8545:8558): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:40:25:860 SUSE logs/(8545:8558): Creando ULT 4
+[INFO] 19:40:25:860 SUSE logs/(8545:8558): ULT creado con id 4 
+
+[INFO] 19:40:25:860 SUSE logs/(8545:8558): El grado de multiprogramacion es 4 
+
+[INFO] 19:40:25:860 SUSE logs/(8545:8558): Validando grado de multiprogramacion...
+
+[INFO] 19:40:25:860 SUSE logs/(8545:8558): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:40:26:222 SUSE logs/(8545:8558): Inicio Join
+[INFO] 19:40:26:222 SUSE logs/(8545:8558): Realice el primer handshake con hilolay
+
+[INFO] 19:40:26:222 SUSE logs/(8545:8558): el socket es
+[INFO] 19:40:26:397 SUSE logs/(8545:8558): El thread 0 paso de execute a blocked 
+
+[INFO] 19:40:28:360 SUSE logs/(8545:8558): Arranco schedule_next...
+
+[INFO] 19:40:28:360 SUSE logs/(8545:8558): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:40:28:360 SUSE logs/(8545:8558): Iniciando planificacion...
+
+[INFO] 19:40:28:360 SUSE logs/(8545:8558): Estimando ULTs...
+
+[INFO] 19:40:28:360 SUSE logs/(8545:8558): Ordenando por SJF...
+[INFO] 19:40:28:360 SUSE logs/(8545:8558): El proximo ULT a ejecutar es 1
+[INFO] 19:40:28:360 SUSE logs/(8545:8558): El tid 1 paso de ready a execute
+
+[INFO] 19:40:28:360 SUSE logs/(8545:8558): Envie el next_tid 1 a SUSE
+[INFO] 19:40:29:520 SUSE logs/(8545:8558): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:41:49:935 SUSE logs/(8696:8696): Inicializando SUSE. 
+
+[INFO] 19:41:49:935 SUSE logs/(8696:8696): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:41:49:935 SUSE logs/(8696:8696): Archivo de configuracion levantado. 
+
+[INFO] 19:41:49:935 SUSE logs/(8696:8696): Inicializando semaforos 
+
+[INFO] 19:41:49:935 SUSE logs/(8696:8696): Iniciando servidor... 
+
+[INFO] 19:41:49:935 SUSE logs/(8696:8696): SUSE esperando conexiones...
+
+[INFO] 19:41:53:87 SUSE logs/(8696:8696): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:41:53:87 SUSE logs/(8696:8696): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:41:53:88 SUSE logs/(8696:8696): Cree el hilo para el proceso 5
+[INFO] 19:41:53:88 SUSE logs/(8696:8696): SUSE esperando conexiones...
+
+[INFO] 19:42:48:564 SUSE logs/(8696:8709): Esperando handshake en suse_create...
+
+[INFO] 19:42:48:564 SUSE logs/(8696:8709): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:42:48:564 SUSE logs/(8696:8709): Validando si es el main thread o ULT comun 
+
+[INFO] 19:42:48:564 SUSE logs/(8696:8709): El proceso 5 es nuevo 
+
+[INFO] 19:42:48:564 SUSE logs/(8696:8709): Proceso creado con id 5 
+
+[INFO] 19:42:48:565 SUSE logs/(8696:8709): Creando ULT 0
+[INFO] 19:42:48:565 SUSE logs/(8696:8709): ULT creado con id 0 
+
+[INFO] 19:42:48:565 SUSE logs/(8696:8709): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:42:48:565 SUSE logs/(8696:8709): El thread 0 paso de new a execute 
+
+[INFO] 19:42:48:565 SUSE logs/(8696:8709): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:42:49:608 SUSE logs/(8696:8709): Esperando handshake en suse_create...
+
+[INFO] 19:42:49:608 SUSE logs/(8696:8709): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:42:49:608 SUSE logs/(8696:8709): Validando si es el main thread o ULT comun 
+
+[INFO] 19:42:49:608 SUSE logs/(8696:8709): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:42:49:609 SUSE logs/(8696:8709): Creando ULT 1
+[INFO] 19:42:49:609 SUSE logs/(8696:8709): ULT creado con id 1 
+
+[INFO] 19:42:49:609 SUSE logs/(8696:8709): El grado de multiprogramacion es 1 
+
+[INFO] 19:42:49:609 SUSE logs/(8696:8709): Validando grado de multiprogramacion...
+
+[INFO] 19:42:49:609 SUSE logs/(8696:8709): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:42:49:947 SUSE logs/(8696:8709): Esperando handshake en suse_create...
+
+[INFO] 19:42:49:947 SUSE logs/(8696:8709): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:42:49:948 SUSE logs/(8696:8709): Validando si es el main thread o ULT comun 
+
+[INFO] 19:42:49:948 SUSE logs/(8696:8709): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:42:49:948 SUSE logs/(8696:8709): Creando ULT 2
+[INFO] 19:42:49:948 SUSE logs/(8696:8709): ULT creado con id 2 
+
+[INFO] 19:42:49:948 SUSE logs/(8696:8709): El grado de multiprogramacion es 2 
+
+[INFO] 19:42:49:948 SUSE logs/(8696:8709): Validando grado de multiprogramacion...
+
+[INFO] 19:42:49:948 SUSE logs/(8696:8709): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:42:50:316 SUSE logs/(8696:8709): Esperando handshake en suse_create...
+
+[INFO] 19:42:50:317 SUSE logs/(8696:8709): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:42:50:317 SUSE logs/(8696:8709): Validando si es el main thread o ULT comun 
+
+[INFO] 19:42:50:317 SUSE logs/(8696:8709): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:42:50:317 SUSE logs/(8696:8709): Creando ULT 3
+[INFO] 19:42:50:317 SUSE logs/(8696:8709): ULT creado con id 3 
+
+[INFO] 19:42:50:317 SUSE logs/(8696:8709): El grado de multiprogramacion es 3 
+
+[INFO] 19:42:50:318 SUSE logs/(8696:8709): Validando grado de multiprogramacion...
+
+[INFO] 19:42:50:318 SUSE logs/(8696:8709): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:42:50:679 SUSE logs/(8696:8709): Esperando handshake en suse_create...
+
+[INFO] 19:42:50:679 SUSE logs/(8696:8709): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:42:50:679 SUSE logs/(8696:8709): Validando si es el main thread o ULT comun 
+
+[INFO] 19:42:50:679 SUSE logs/(8696:8709): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:42:50:679 SUSE logs/(8696:8709): Creando ULT 4
+[INFO] 19:42:50:679 SUSE logs/(8696:8709): ULT creado con id 4 
+
+[INFO] 19:42:50:679 SUSE logs/(8696:8709): El grado de multiprogramacion es 4 
+
+[INFO] 19:42:50:679 SUSE logs/(8696:8709): Validando grado de multiprogramacion...
+
+[INFO] 19:42:50:679 SUSE logs/(8696:8709): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:42:51:782 SUSE logs/(8696:8709): Inicio Join
+[INFO] 19:42:51:782 SUSE logs/(8696:8709): Realice el primer handshake con hilolay
+
+[INFO] 19:42:51:783 SUSE logs/(8696:8709): el socket es
+[INFO] 19:42:52:463 SUSE logs/(8696:8709): El thread 0 paso de execute a blocked 
+
+[INFO] 19:42:53:529 SUSE logs/(8696:8709): Arranco schedule_next...
+
+[INFO] 19:42:53:530 SUSE logs/(8696:8709): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:42:53:530 SUSE logs/(8696:8709): Iniciando planificacion...
+
+[INFO] 19:42:53:530 SUSE logs/(8696:8709): Estimando ULTs...
+
+[INFO] 19:42:53:530 SUSE logs/(8696:8709): Ordenando por SJF...
+[INFO] 19:42:53:530 SUSE logs/(8696:8709): El proximo ULT a ejecutar es 1
+[INFO] 19:42:53:530 SUSE logs/(8696:8709): El tid 1 paso de ready a execute
+
+[INFO] 19:42:53:530 SUSE logs/(8696:8709): Envie el next_tid 1 a SUSE
+[INFO] 19:42:56:616 SUSE logs/(8696:8709): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:44:46:627 SUSE logs/(8911:8911): Inicializando SUSE. 
+
+[INFO] 19:44:46:627 SUSE logs/(8911:8911): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:44:46:627 SUSE logs/(8911:8911): Archivo de configuracion levantado. 
+
+[INFO] 19:44:46:627 SUSE logs/(8911:8911): Inicializando semaforos 
+
+[INFO] 19:44:46:627 SUSE logs/(8911:8911): Iniciando servidor... 
+
+[INFO] 19:44:46:628 SUSE logs/(8911:8911): SUSE esperando conexiones...
+
+[INFO] 19:44:49:75 SUSE logs/(8911:8911): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:44:49:75 SUSE logs/(8911:8911): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:44:49:76 SUSE logs/(8911:8911): Cree el hilo para el proceso 5
+[INFO] 19:44:49:77 SUSE logs/(8911:8911): SUSE esperando conexiones...
+
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): Esperando handshake en suse_create...
+
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): Validando si es el main thread o ULT comun 
+
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): El proceso 5 es nuevo 
+
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): Proceso creado con id 5 
+
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): Creando ULT 0
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): ULT creado con id 0 
+
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): El thread 0 paso de new a execute 
+
+[INFO] 19:44:51:475 SUSE logs/(8911:8962): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:44:51:845 SUSE logs/(8911:8962): Esperando handshake en suse_create...
+
+[INFO] 19:44:51:846 SUSE logs/(8911:8962): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:44:51:846 SUSE logs/(8911:8962): Validando si es el main thread o ULT comun 
+
+[INFO] 19:44:51:846 SUSE logs/(8911:8962): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:44:51:846 SUSE logs/(8911:8962): Creando ULT 1
+[INFO] 19:44:51:846 SUSE logs/(8911:8962): ULT creado con id 1 
+
+[INFO] 19:44:51:846 SUSE logs/(8911:8962): El grado de multiprogramacion es 1 
+
+[INFO] 19:44:51:846 SUSE logs/(8911:8962): Validando grado de multiprogramacion...
+
+[INFO] 19:44:51:846 SUSE logs/(8911:8962): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:44:52:203 SUSE logs/(8911:8962): Esperando handshake en suse_create...
+
+[INFO] 19:44:52:204 SUSE logs/(8911:8962): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:44:52:204 SUSE logs/(8911:8962): Validando si es el main thread o ULT comun 
+
+[INFO] 19:44:52:204 SUSE logs/(8911:8962): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:44:52:204 SUSE logs/(8911:8962): Creando ULT 2
+[INFO] 19:44:52:204 SUSE logs/(8911:8962): ULT creado con id 2 
+
+[INFO] 19:44:52:204 SUSE logs/(8911:8962): El grado de multiprogramacion es 2 
+
+[INFO] 19:44:52:204 SUSE logs/(8911:8962): Validando grado de multiprogramacion...
+
+[INFO] 19:44:52:204 SUSE logs/(8911:8962): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:44:52:959 SUSE logs/(8911:8962): Esperando handshake en suse_create...
+
+[INFO] 19:44:52:959 SUSE logs/(8911:8962): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:44:52:959 SUSE logs/(8911:8962): Validando si es el main thread o ULT comun 
+
+[INFO] 19:44:52:960 SUSE logs/(8911:8962): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:44:52:960 SUSE logs/(8911:8962): Creando ULT 3
+[INFO] 19:44:52:960 SUSE logs/(8911:8962): ULT creado con id 3 
+
+[INFO] 19:44:52:960 SUSE logs/(8911:8962): El grado de multiprogramacion es 3 
+
+[INFO] 19:44:52:960 SUSE logs/(8911:8962): Validando grado de multiprogramacion...
+
+[INFO] 19:44:52:960 SUSE logs/(8911:8962): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:44:53:534 SUSE logs/(8911:8962): Esperando handshake en suse_create...
+
+[INFO] 19:44:53:534 SUSE logs/(8911:8962): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:44:53:534 SUSE logs/(8911:8962): Validando si es el main thread o ULT comun 
+
+[INFO] 19:44:53:534 SUSE logs/(8911:8962): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:44:53:534 SUSE logs/(8911:8962): Creando ULT 4
+[INFO] 19:44:53:534 SUSE logs/(8911:8962): ULT creado con id 4 
+
+[INFO] 19:44:53:534 SUSE logs/(8911:8962): El grado de multiprogramacion es 4 
+
+[INFO] 19:44:53:534 SUSE logs/(8911:8962): Validando grado de multiprogramacion...
+
+[INFO] 19:44:53:534 SUSE logs/(8911:8962): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:44:53:918 SUSE logs/(8911:8962): Inicio Join
+[INFO] 19:44:53:918 SUSE logs/(8911:8962): Realice el primer handshake con hilolay
+
+[INFO] 19:44:53:918 SUSE logs/(8911:8962): el socket es
+[INFO] 19:44:56:32 SUSE logs/(8911:8962): El thread 0 paso de execute a blocked 
+
+[INFO] 19:44:57:497 SUSE logs/(8911:8962): Arranco schedule_next...
+
+[INFO] 19:44:57:497 SUSE logs/(8911:8962): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:44:57:497 SUSE logs/(8911:8962): Iniciando planificacion...
+
+[INFO] 19:44:57:497 SUSE logs/(8911:8962): Estimando ULTs...
+
+[INFO] 19:44:57:497 SUSE logs/(8911:8962): Ordenando por SJF...
+[INFO] 19:44:57:497 SUSE logs/(8911:8962): El proximo ULT a ejecutar es 1
+[INFO] 19:44:57:497 SUSE logs/(8911:8962): El tid 1 paso de ready a execute
+
+[INFO] 19:44:57:497 SUSE logs/(8911:8962): Envie el next_tid 1 a SUSE
+[INFO] 19:44:59:603 SUSE logs/(8911:8962): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:48:19:834 SUSE logs/(9216:9216): Inicializando SUSE. 
+
+[INFO] 19:48:19:834 SUSE logs/(9216:9216): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:48:19:834 SUSE logs/(9216:9216): Archivo de configuracion levantado. 
+
+[INFO] 19:48:19:834 SUSE logs/(9216:9216): Inicializando semaforos 
+
+[INFO] 19:48:19:834 SUSE logs/(9216:9216): Iniciando servidor... 
+
+[INFO] 19:48:19:834 SUSE logs/(9216:9216): SUSE esperando conexiones...
+
+[INFO] 19:48:22:173 SUSE logs/(9216:9216): Recibi una nueva conexion del socket 5. 
+
+[INFO] 19:48:22:174 SUSE logs/(9216:9216): Creando hilo para atender al proceso 5. 
+
+[INFO] 19:48:22:174 SUSE logs/(9216:9216): Cree el hilo para el proceso 5
+[INFO] 19:48:22:175 SUSE logs/(9216:9216): SUSE esperando conexiones...
+
+[INFO] 19:48:24:582 SUSE logs/(9216:9234): Esperando handshake en suse_create...
+
+[INFO] 19:48:24:582 SUSE logs/(9216:9234): Recibi el ULT 0 del proceso 5 
+
+[INFO] 19:48:24:582 SUSE logs/(9216:9234): Validando si es el main thread o ULT comun 
+
+[INFO] 19:48:24:582 SUSE logs/(9216:9234): El proceso 5 es nuevo 
+
+[INFO] 19:48:24:582 SUSE logs/(9216:9234): Proceso creado con id 5 
+
+[INFO] 19:48:24:582 SUSE logs/(9216:9234): Creando ULT 0
+[INFO] 19:48:24:583 SUSE logs/(9216:9234): ULT creado con id 0 
+
+[INFO] 19:48:24:583 SUSE logs/(9216:9234): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 19:48:24:583 SUSE logs/(9216:9234): El thread 0 paso de new a execute 
+
+[INFO] 19:48:24:583 SUSE logs/(9216:9234): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 19:48:24:939 SUSE logs/(9216:9234): Esperando handshake en suse_create...
+
+[INFO] 19:48:24:940 SUSE logs/(9216:9234): Recibi el ULT 1 del proceso 5 
+
+[INFO] 19:48:24:940 SUSE logs/(9216:9234): Validando si es el main thread o ULT comun 
+
+[INFO] 19:48:24:940 SUSE logs/(9216:9234): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:48:24:940 SUSE logs/(9216:9234): Creando ULT 1
+[INFO] 19:48:24:940 SUSE logs/(9216:9234): ULT creado con id 1 
+
+[INFO] 19:48:24:941 SUSE logs/(9216:9234): El grado de multiprogramacion es 1 
+
+[INFO] 19:48:24:941 SUSE logs/(9216:9234): Validando grado de multiprogramacion...
+
+[INFO] 19:48:24:941 SUSE logs/(9216:9234): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 19:48:25:501 SUSE logs/(9216:9234): Esperando handshake en suse_create...
+
+[INFO] 19:48:25:501 SUSE logs/(9216:9234): Recibi el ULT 2 del proceso 5 
+
+[INFO] 19:48:25:501 SUSE logs/(9216:9234): Validando si es el main thread o ULT comun 
+
+[INFO] 19:48:25:502 SUSE logs/(9216:9234): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:48:25:502 SUSE logs/(9216:9234): Creando ULT 2
+[INFO] 19:48:25:502 SUSE logs/(9216:9234): ULT creado con id 2 
+
+[INFO] 19:48:25:502 SUSE logs/(9216:9234): El grado de multiprogramacion es 2 
+
+[INFO] 19:48:25:502 SUSE logs/(9216:9234): Validando grado de multiprogramacion...
+
+[INFO] 19:48:25:502 SUSE logs/(9216:9234): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 19:48:26:87 SUSE logs/(9216:9234): Esperando handshake en suse_create...
+
+[INFO] 19:48:26:87 SUSE logs/(9216:9234): Recibi el ULT 3 del proceso 5 
+
+[INFO] 19:48:26:87 SUSE logs/(9216:9234): Validando si es el main thread o ULT comun 
+
+[INFO] 19:48:26:87 SUSE logs/(9216:9234): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:48:26:87 SUSE logs/(9216:9234): Creando ULT 3
+[INFO] 19:48:26:87 SUSE logs/(9216:9234): ULT creado con id 3 
+
+[INFO] 19:48:26:87 SUSE logs/(9216:9234): El grado de multiprogramacion es 3 
+
+[INFO] 19:48:26:87 SUSE logs/(9216:9234): Validando grado de multiprogramacion...
+
+[INFO] 19:48:26:87 SUSE logs/(9216:9234): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 19:48:26:449 SUSE logs/(9216:9234): Esperando handshake en suse_create...
+
+[INFO] 19:48:26:449 SUSE logs/(9216:9234): Recibi el ULT 4 del proceso 5 
+
+[INFO] 19:48:26:449 SUSE logs/(9216:9234): Validando si es el main thread o ULT comun 
+
+[INFO] 19:48:26:449 SUSE logs/(9216:9234): El proceso 5 ya tiene un main_thread 
+
+[INFO] 19:48:26:449 SUSE logs/(9216:9234): Creando ULT 4
+[INFO] 19:48:26:449 SUSE logs/(9216:9234): ULT creado con id 4 
+
+[INFO] 19:48:26:450 SUSE logs/(9216:9234): El grado de multiprogramacion es 4 
+
+[INFO] 19:48:26:450 SUSE logs/(9216:9234): Validando grado de multiprogramacion...
+
+[INFO] 19:48:26:450 SUSE logs/(9216:9234): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 19:48:26:780 SUSE logs/(9216:9234): Inicio Join
+[INFO] 19:48:26:780 SUSE logs/(9216:9234): Realice el primer handshake con hilolay
+
+[INFO] 19:48:26:780 SUSE logs/(9216:9234): el socket es
+[INFO] 19:48:26:953 SUSE logs/(9216:9234): El thread 0 paso de execute a blocked 
+
+[INFO] 19:48:27:281 SUSE logs/(9216:9234): Arranco schedule_next...
+
+[INFO] 19:48:27:281 SUSE logs/(9216:9234): Recibi una peticion de suse_schedule_next 
+
+[INFO] 19:48:27:281 SUSE logs/(9216:9234): Iniciando planificacion...
+
+[INFO] 19:48:27:281 SUSE logs/(9216:9234): Estimando ULTs...
+
+[INFO] 19:48:27:281 SUSE logs/(9216:9234): Ordenando por SJF...
+[INFO] 19:48:27:281 SUSE logs/(9216:9234): El proximo ULT a ejecutar es 1
+[INFO] 19:48:27:281 SUSE logs/(9216:9234): El tid 1 paso de ready a execute
+
+[INFO] 19:48:27:281 SUSE logs/(9216:9234): Envie el next_tid 1 a SUSE
+[INFO] 19:48:28:262 SUSE logs/(9216:9234): Recibiendo el semaforo para incrementar 
+
+[INFO] 19:48:32:712 SUSE logs/(9216:9234): El valor actual del semaforo es 134560064
+[INFO] 19:49:42:389 SUSE logs/(9334:9334): Inicializando SUSE. 
+
+[INFO] 19:49:44:267 SUSE logs/(9334:9334): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:52:00:181 SUSE logs/(9334:9334): Archivo de configuracion levantado. 
+
+[INFO] 19:52:02:648 SUSE logs/(9334:9334): Inicializando semaforos 
+
+[INFO] 19:53:18:244 SUSE logs/(9575:9575): Inicializando SUSE. 
+
+[INFO] 19:53:20:223 SUSE logs/(9575:9575): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:53:24:727 SUSE logs/(9575:9575): Archivo de configuracion levantado. 
+
+[INFO] 19:53:26:650 SUSE logs/(9575:9575): Inicializando semaforos 
+
+[INFO] 19:56:30:799 SUSE logs/(9738:9738): Inicializando SUSE. 
+
+[INFO] 19:56:32:246 SUSE logs/(9738:9738): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:56:36:569 SUSE logs/(9738:9738): Archivo de configuracion levantado. 
+
+[INFO] 19:56:38:326 SUSE logs/(9738:9738): Inicializando semaforos 
+
+[INFO] 19:57:58:5 SUSE logs/(9982:9982): Inicializando SUSE. 
+
+[INFO] 19:57:59:6 SUSE logs/(9982:9982): Levantando archivo de configuracion de SUSE 
+
+[INFO] 19:58:05:240 SUSE logs/(9982:9982): Archivo de configuracion levantado. 
+
+[INFO] 19:58:07:122 SUSE logs/(9982:9982): Inicializando semaforos 
+
+[INFO] 20:07:42:803 SUSE logs/(10693:10693): Inicializando SUSE. 
+
+[INFO] 20:07:43:250 SUSE logs/(10693:10693): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:07:44:59 SUSE logs/(10693:10693): Archivo de configuracion levantado. 
+
+[INFO] 20:07:45:404 SUSE logs/(10693:10693): Inicializando semaforos 
+
+[INFO] 20:09:35:675 SUSE logs/(10894:10894): Inicializando SUSE. 
+
+[INFO] 20:09:35:904 SUSE logs/(10894:10894): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:09:36:442 SUSE logs/(10894:10894): Archivo de configuracion levantado. 
+
+[INFO] 20:09:37:581 SUSE logs/(10894:10894): Inicializando semaforos 
+
+[INFO] 20:10:28:960 SUSE logs/(11040:11040): Inicializando SUSE. 
+
+[INFO] 20:10:29:240 SUSE logs/(11040:11040): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:10:29:916 SUSE logs/(11040:11040): Archivo de configuracion levantado. 
+
+[INFO] 20:10:32:15 SUSE logs/(11040:11040): Inicializando semaforos 
+
+[INFO] 20:11:24:433 SUSE logs/(11192:11192): Inicializando SUSE. 
+
+[INFO] 20:11:24:621 SUSE logs/(11192:11192): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:11:24:773 SUSE logs/(11192:11192): Archivo de configuracion levantado. 
+
+[INFO] 20:11:26:759 SUSE logs/(11192:11192): Inicializando semaforos 
+
+[INFO] 20:12:11:134 SUSE logs/(11327:11327): Inicializando SUSE. 
+
+[INFO] 20:12:11:555 SUSE logs/(11327:11327): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:12:12:56 SUSE logs/(11327:11327): Archivo de configuracion levantado. 
+
+[INFO] 20:12:13:176 SUSE logs/(11327:11327): Inicializando semaforos 
+
+[INFO] 20:14:56:97 SUSE logs/(11565:11565): Inicializando SUSE. 
+
+[INFO] 20:14:56:248 SUSE logs/(11565:11565): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:14:56:747 SUSE logs/(11565:11565): Archivo de configuracion levantado. 
+
+[INFO] 20:14:58:313 SUSE logs/(11565:11565): Inicializando semaforos 
+
+[INFO] 20:16:45:748 SUSE logs/(11809:11809): Inicializando SUSE. 
+
+[INFO] 20:16:45:748 SUSE logs/(11809:11809): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:16:45:748 SUSE logs/(11809:11809): Archivo de configuracion levantado. 
+
+[INFO] 20:16:47:228 SUSE logs/(11809:11809): Inicializando semaforos 
+
+[INFO] 20:16:47:228 SUSE logs/(11809:11809): Iniciando servidor... 
+
+[INFO] 20:16:47:228 SUSE logs/(11809:11809): SUSE esperando conexiones...
+
+[INFO] 20:16:51:895 SUSE logs/(11809:11809): Recibi una nueva conexion del socket 5. 
+
+[INFO] 20:16:51:895 SUSE logs/(11809:11809): Creando hilo para atender al proceso 5. 
+
+[INFO] 20:16:51:896 SUSE logs/(11809:11809): Cree el hilo para el proceso 5
+[INFO] 20:16:51:898 SUSE logs/(11809:11809): SUSE esperando conexiones...
+
+[INFO] 20:16:54:527 SUSE logs/(11809:11835): Esperando handshake en suse_create...
+
+[INFO] 20:16:54:528 SUSE logs/(11809:11835): Recibi el ULT 0 del proceso 5 
+
+[INFO] 20:16:54:528 SUSE logs/(11809:11835): Validando si es el main thread o ULT comun 
+
+[INFO] 20:16:54:528 SUSE logs/(11809:11835): El proceso 5 es nuevo 
+
+[INFO] 20:16:54:528 SUSE logs/(11809:11835): Proceso creado con id 5 
+
+[INFO] 20:16:54:528 SUSE logs/(11809:11835): Creando ULT 0
+[INFO] 20:16:54:528 SUSE logs/(11809:11835): ULT creado con id 0 
+
+[INFO] 20:16:54:528 SUSE logs/(11809:11835): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 20:16:54:528 SUSE logs/(11809:11835): El thread 0 paso de new a execute 
+
+[INFO] 20:16:54:528 SUSE logs/(11809:11835): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 20:16:54:895 SUSE logs/(11809:11835): Esperando handshake en suse_create...
+
+[INFO] 20:16:54:895 SUSE logs/(11809:11835): Recibi el ULT 1 del proceso 5 
+
+[INFO] 20:16:54:896 SUSE logs/(11809:11835): Validando si es el main thread o ULT comun 
+
+[INFO] 20:16:54:896 SUSE logs/(11809:11835): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:16:54:896 SUSE logs/(11809:11835): Creando ULT 1
+[INFO] 20:16:54:896 SUSE logs/(11809:11835): ULT creado con id 1 
+
+[INFO] 20:16:54:896 SUSE logs/(11809:11835): El grado de multiprogramacion es 1 
+
+[INFO] 20:16:54:896 SUSE logs/(11809:11835): Validando grado de multiprogramacion...
+
+[INFO] 20:16:54:896 SUSE logs/(11809:11835): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 20:16:55:628 SUSE logs/(11809:11835): Esperando handshake en suse_create...
+
+[INFO] 20:16:55:629 SUSE logs/(11809:11835): Recibi el ULT 2 del proceso 5 
+
+[INFO] 20:16:55:629 SUSE logs/(11809:11835): Validando si es el main thread o ULT comun 
+
+[INFO] 20:16:55:629 SUSE logs/(11809:11835): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:16:55:629 SUSE logs/(11809:11835): Creando ULT 2
+[INFO] 20:16:55:629 SUSE logs/(11809:11835): ULT creado con id 2 
+
+[INFO] 20:16:55:629 SUSE logs/(11809:11835): El grado de multiprogramacion es 2 
+
+[INFO] 20:16:55:629 SUSE logs/(11809:11835): Validando grado de multiprogramacion...
+
+[INFO] 20:16:55:629 SUSE logs/(11809:11835): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 20:16:56:10 SUSE logs/(11809:11835): Esperando handshake en suse_create...
+
+[INFO] 20:16:56:11 SUSE logs/(11809:11835): Recibi el ULT 3 del proceso 5 
+
+[INFO] 20:16:56:11 SUSE logs/(11809:11835): Validando si es el main thread o ULT comun 
+
+[INFO] 20:16:56:11 SUSE logs/(11809:11835): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:16:56:11 SUSE logs/(11809:11835): Creando ULT 3
+[INFO] 20:16:56:11 SUSE logs/(11809:11835): ULT creado con id 3 
+
+[INFO] 20:16:56:11 SUSE logs/(11809:11835): El grado de multiprogramacion es 3 
+
+[INFO] 20:16:56:11 SUSE logs/(11809:11835): Validando grado de multiprogramacion...
+
+[INFO] 20:16:56:11 SUSE logs/(11809:11835): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 20:16:56:384 SUSE logs/(11809:11835): Esperando handshake en suse_create...
+
+[INFO] 20:16:56:384 SUSE logs/(11809:11835): Recibi el ULT 4 del proceso 5 
+
+[INFO] 20:16:56:385 SUSE logs/(11809:11835): Validando si es el main thread o ULT comun 
+
+[INFO] 20:16:56:385 SUSE logs/(11809:11835): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:16:56:385 SUSE logs/(11809:11835): Creando ULT 4
+[INFO] 20:16:56:385 SUSE logs/(11809:11835): ULT creado con id 4 
+
+[INFO] 20:16:56:385 SUSE logs/(11809:11835): El grado de multiprogramacion es 4 
+
+[INFO] 20:16:56:385 SUSE logs/(11809:11835): Validando grado de multiprogramacion...
+
+[INFO] 20:16:56:385 SUSE logs/(11809:11835): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 20:16:56:751 SUSE logs/(11809:11835): Inicio Join
+[INFO] 20:16:56:751 SUSE logs/(11809:11835): Realice el primer handshake con hilolay
+
+[INFO] 20:16:56:751 SUSE logs/(11809:11835): el socket es
+[INFO] 20:16:57:938 SUSE logs/(11809:11835): El thread 0 paso de execute a blocked 
+
+[INFO] 20:16:58:275 SUSE logs/(11809:11835): Arranco schedule_next...
+
+[INFO] 20:16:58:275 SUSE logs/(11809:11835): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:16:58:275 SUSE logs/(11809:11835): Iniciando planificacion...
+
+[INFO] 20:16:58:275 SUSE logs/(11809:11835): Estimando ULTs...
+
+[INFO] 20:16:58:275 SUSE logs/(11809:11835): Ordenando por SJF...
+[INFO] 20:16:58:275 SUSE logs/(11809:11835): El proximo ULT a ejecutar es 1
+[INFO] 20:16:58:275 SUSE logs/(11809:11835): El tid 1 paso de ready a execute
+
+[INFO] 20:16:58:276 SUSE logs/(11809:11835): Envie el next_tid 1 a SUSE
+[INFO] 20:17:00:976 SUSE logs/(11809:11835): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:17:07:775 SUSE logs/(11809:11835): El valor actual del semaforo es 0
+[INFO] 20:21:19:405 SUSE logs/(12163:12163): Inicializando SUSE. 
+
+[INFO] 20:21:19:405 SUSE logs/(12163:12163): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:21:19:405 SUSE logs/(12163:12163): Archivo de configuracion levantado. 
+
+[INFO] 20:21:23:738 SUSE logs/(12163:12163): Inicializando semaforos 
+
+[INFO] 20:21:23:738 SUSE logs/(12163:12163): Iniciando servidor... 
+
+[INFO] 20:21:23:739 SUSE logs/(12163:12163): SUSE esperando conexiones...
+
+[INFO] 20:21:25:954 SUSE logs/(12163:12163): Recibi una nueva conexion del socket 5. 
+
+[INFO] 20:21:25:954 SUSE logs/(12163:12163): Creando hilo para atender al proceso 5. 
+
+[INFO] 20:21:25:955 SUSE logs/(12163:12163): Cree el hilo para el proceso 5
+[INFO] 20:21:25:957 SUSE logs/(12163:12163): SUSE esperando conexiones...
+
+[INFO] 20:21:29:833 SUSE logs/(12163:12196): Esperando handshake en suse_create...
+
+[INFO] 20:21:29:833 SUSE logs/(12163:12196): Recibi el ULT 0 del proceso 5 
+
+[INFO] 20:21:29:833 SUSE logs/(12163:12196): Validando si es el main thread o ULT comun 
+
+[INFO] 20:21:29:833 SUSE logs/(12163:12196): El proceso 5 es nuevo 
+
+[INFO] 20:21:29:833 SUSE logs/(12163:12196): Proceso creado con id 5 
+
+[INFO] 20:21:29:833 SUSE logs/(12163:12196): Creando ULT 0
+[INFO] 20:21:29:833 SUSE logs/(12163:12196): ULT creado con id 0 
+
+[INFO] 20:21:29:833 SUSE logs/(12163:12196): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 20:22:32:305 SUSE logs/(12163:12196): El thread 0 paso de new a execute 
+
+[INFO] 20:22:35:381 SUSE logs/(12163:12196): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 20:22:36:950 SUSE logs/(12163:12196): Esperando handshake en suse_create...
+
+[INFO] 20:22:36:950 SUSE logs/(12163:12196): Recibi el ULT 1 del proceso 5 
+
+[INFO] 20:22:36:950 SUSE logs/(12163:12196): Validando si es el main thread o ULT comun 
+
+[INFO] 20:22:36:950 SUSE logs/(12163:12196): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:22:36:950 SUSE logs/(12163:12196): Creando ULT 1
+[INFO] 20:22:36:950 SUSE logs/(12163:12196): ULT creado con id 1 
+
+[INFO] 20:22:36:950 SUSE logs/(12163:12196): El grado de multiprogramacion es 1 
+
+[INFO] 20:22:36:950 SUSE logs/(12163:12196): Validando grado de multiprogramacion...
+
+[INFO] 20:22:36:950 SUSE logs/(12163:12196): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 20:22:38:557 SUSE logs/(12163:12196): Esperando handshake en suse_create...
+
+[INFO] 20:22:38:557 SUSE logs/(12163:12196): Recibi el ULT 2 del proceso 5 
+
+[INFO] 20:22:38:557 SUSE logs/(12163:12196): Validando si es el main thread o ULT comun 
+
+[INFO] 20:22:38:557 SUSE logs/(12163:12196): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:22:38:557 SUSE logs/(12163:12196): Creando ULT 2
+[INFO] 20:22:38:557 SUSE logs/(12163:12196): ULT creado con id 2 
+
+[INFO] 20:22:38:558 SUSE logs/(12163:12196): El grado de multiprogramacion es 2 
+
+[INFO] 20:22:38:558 SUSE logs/(12163:12196): Validando grado de multiprogramacion...
+
+[INFO] 20:22:38:558 SUSE logs/(12163:12196): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 20:22:39:697 SUSE logs/(12163:12196): Esperando handshake en suse_create...
+
+[INFO] 20:22:39:698 SUSE logs/(12163:12196): Recibi el ULT 3 del proceso 5 
+
+[INFO] 20:22:39:698 SUSE logs/(12163:12196): Validando si es el main thread o ULT comun 
+
+[INFO] 20:22:39:698 SUSE logs/(12163:12196): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:22:39:698 SUSE logs/(12163:12196): Creando ULT 3
+[INFO] 20:22:39:698 SUSE logs/(12163:12196): ULT creado con id 3 
+
+[INFO] 20:22:39:698 SUSE logs/(12163:12196): El grado de multiprogramacion es 3 
+
+[INFO] 20:22:39:698 SUSE logs/(12163:12196): Validando grado de multiprogramacion...
+
+[INFO] 20:22:39:698 SUSE logs/(12163:12196): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 20:22:40:508 SUSE logs/(12163:12196): Esperando handshake en suse_create...
+
+[INFO] 20:22:40:509 SUSE logs/(12163:12196): Recibi el ULT 4 del proceso 5 
+
+[INFO] 20:22:40:509 SUSE logs/(12163:12196): Validando si es el main thread o ULT comun 
+
+[INFO] 20:22:40:509 SUSE logs/(12163:12196): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:22:40:509 SUSE logs/(12163:12196): Creando ULT 4
+[INFO] 20:22:40:509 SUSE logs/(12163:12196): ULT creado con id 4 
+
+[INFO] 20:22:40:509 SUSE logs/(12163:12196): El grado de multiprogramacion es 4 
+
+[INFO] 20:22:40:509 SUSE logs/(12163:12196): Validando grado de multiprogramacion...
+
+[INFO] 20:22:40:509 SUSE logs/(12163:12196): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 20:22:42:724 SUSE logs/(12163:12196): Inicio Join
+[INFO] 20:22:42:724 SUSE logs/(12163:12196): Realice el primer handshake con hilolay
+
+[INFO] 20:22:42:724 SUSE logs/(12163:12196): el socket es
+[INFO] 20:23:48:196 SUSE logs/(12163:12196): El thread 0 paso de execute a blocked 
+
+[INFO] 20:23:59:569 SUSE logs/(12163:12196): Arranco schedule_next...
+
+[INFO] 20:24:09:396 SUSE logs/(12163:12196): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:24:11:252 SUSE logs/(12163:12196): Iniciando planificacion...
+
+[INFO] 20:24:29:631 SUSE logs/(12163:12196): Estimando ULTs...
+
+[INFO] 20:24:29:631 SUSE logs/(12163:12196): Ordenando por SJF...
+[INFO] 20:24:33:763 SUSE logs/(12163:12196): El proximo ULT a ejecutar es 1
+[INFO] 20:24:35:135 SUSE logs/(12163:12196): El tid 1 paso de ready a execute
+
+[INFO] 20:25:50:951 SUSE logs/(12514:12514): Inicializando SUSE. 
+
+[INFO] 20:25:50:951 SUSE logs/(12514:12514): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:25:50:952 SUSE logs/(12514:12514): Archivo de configuracion levantado. 
+
+[INFO] 20:25:50:952 SUSE logs/(12514:12514): Inicializando semaforos 
+
+[INFO] 20:25:50:952 SUSE logs/(12514:12514): Iniciando servidor... 
+
+[INFO] 20:25:50:952 SUSE logs/(12514:12514): SUSE esperando conexiones...
+
+[INFO] 20:25:53:68 SUSE logs/(12514:12514): Recibi una nueva conexion del socket 5. 
+
+[INFO] 20:25:53:68 SUSE logs/(12514:12514): Creando hilo para atender al proceso 5. 
+
+[INFO] 20:25:53:69 SUSE logs/(12514:12514): Cree el hilo para el proceso 5
+[INFO] 20:25:53:70 SUSE logs/(12514:12514): SUSE esperando conexiones...
+
+[INFO] 20:25:55:36 SUSE logs/(12514:12527): Esperando handshake en suse_create...
+
+[INFO] 20:25:55:36 SUSE logs/(12514:12527): Recibi el ULT 0 del proceso 5 
+
+[INFO] 20:25:55:36 SUSE logs/(12514:12527): Validando si es el main thread o ULT comun 
+
+[INFO] 20:25:55:36 SUSE logs/(12514:12527): El proceso 5 es nuevo 
+
+[INFO] 20:25:55:37 SUSE logs/(12514:12527): Proceso creado con id 5 
+
+[INFO] 20:25:55:37 SUSE logs/(12514:12527): Creando ULT 0
+[INFO] 20:25:55:37 SUSE logs/(12514:12527): ULT creado con id 0 
+
+[INFO] 20:25:55:37 SUSE logs/(12514:12527): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 20:25:58:638 SUSE logs/(12514:12527): El thread 0 paso de new a execute 
+
+[INFO] 20:25:58:638 SUSE logs/(12514:12527): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 20:26:00:116 SUSE logs/(12514:12527): Esperando handshake en suse_create...
+
+[INFO] 20:26:00:116 SUSE logs/(12514:12527): Recibi el ULT 1 del proceso 5 
+
+[INFO] 20:26:00:116 SUSE logs/(12514:12527): Validando si es el main thread o ULT comun 
+
+[INFO] 20:26:00:116 SUSE logs/(12514:12527): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:26:00:116 SUSE logs/(12514:12527): Creando ULT 1
+[INFO] 20:26:00:116 SUSE logs/(12514:12527): ULT creado con id 1 
+
+[INFO] 20:26:00:116 SUSE logs/(12514:12527): El grado de multiprogramacion es 1 
+
+[INFO] 20:26:00:116 SUSE logs/(12514:12527): Validando grado de multiprogramacion...
+
+[INFO] 20:26:00:116 SUSE logs/(12514:12527): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 20:26:01:226 SUSE logs/(12514:12527): Esperando handshake en suse_create...
+
+[INFO] 20:26:01:227 SUSE logs/(12514:12527): Recibi el ULT 2 del proceso 5 
+
+[INFO] 20:26:01:227 SUSE logs/(12514:12527): Validando si es el main thread o ULT comun 
+
+[INFO] 20:26:01:227 SUSE logs/(12514:12527): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:26:01:227 SUSE logs/(12514:12527): Creando ULT 2
+[INFO] 20:26:01:227 SUSE logs/(12514:12527): ULT creado con id 2 
+
+[INFO] 20:26:01:227 SUSE logs/(12514:12527): El grado de multiprogramacion es 2 
+
+[INFO] 20:26:01:227 SUSE logs/(12514:12527): Validando grado de multiprogramacion...
+
+[INFO] 20:26:01:227 SUSE logs/(12514:12527): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 20:26:02:19 SUSE logs/(12514:12527): Esperando handshake en suse_create...
+
+[INFO] 20:26:02:19 SUSE logs/(12514:12527): Recibi el ULT 3 del proceso 5 
+
+[INFO] 20:26:02:20 SUSE logs/(12514:12527): Validando si es el main thread o ULT comun 
+
+[INFO] 20:26:02:20 SUSE logs/(12514:12527): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:26:02:20 SUSE logs/(12514:12527): Creando ULT 3
+[INFO] 20:26:02:20 SUSE logs/(12514:12527): ULT creado con id 3 
+
+[INFO] 20:26:02:20 SUSE logs/(12514:12527): El grado de multiprogramacion es 3 
+
+[INFO] 20:26:02:20 SUSE logs/(12514:12527): Validando grado de multiprogramacion...
+
+[INFO] 20:26:02:20 SUSE logs/(12514:12527): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 20:26:02:804 SUSE logs/(12514:12527): Esperando handshake en suse_create...
+
+[INFO] 20:26:02:804 SUSE logs/(12514:12527): Recibi el ULT 4 del proceso 5 
+
+[INFO] 20:26:02:804 SUSE logs/(12514:12527): Validando si es el main thread o ULT comun 
+
+[INFO] 20:26:02:804 SUSE logs/(12514:12527): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:26:02:804 SUSE logs/(12514:12527): Creando ULT 4
+[INFO] 20:26:02:804 SUSE logs/(12514:12527): ULT creado con id 4 
+
+[INFO] 20:26:02:804 SUSE logs/(12514:12527): El grado de multiprogramacion es 4 
+
+[INFO] 20:26:02:804 SUSE logs/(12514:12527): Validando grado de multiprogramacion...
+
+[INFO] 20:26:02:804 SUSE logs/(12514:12527): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 20:26:03:676 SUSE logs/(12514:12527): Inicio Join
+[INFO] 20:26:03:676 SUSE logs/(12514:12527): Realice el primer handshake con hilolay
+
+[INFO] 20:26:03:677 SUSE logs/(12514:12527): el socket es
+[INFO] 20:26:08:624 SUSE logs/(12514:12527): El thread 0 paso de execute a blocked 
+
+[INFO] 20:26:10:807 SUSE logs/(12514:12527): Arranco schedule_next...
+
+[INFO] 20:26:10:808 SUSE logs/(12514:12527): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:26:10:808 SUSE logs/(12514:12527): Iniciando planificacion...
+
+[INFO] 20:26:22:733 SUSE logs/(12514:12527): Estimando ULTs...
+
+[INFO] 20:26:22:734 SUSE logs/(12514:12527): Ordenando por SJF...
+[INFO] 20:26:24:861 SUSE logs/(12514:12527): El proximo ULT a ejecutar es 1
+[INFO] 20:26:25:233 SUSE logs/(12514:12527): El tid 1 paso de ready a execute
+
+[INFO] 20:26:37:730 SUSE logs/(12514:12527): Envie el next_tid 1 a SUSE
+[INFO] 20:26:46:74 SUSE logs/(12514:12527): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:26:55:951 SUSE logs/(12514:12527): El valor actual del semaforo es 0
+[INFO] 20:27:36:875 SUSE logs/(12514:12527): El thread 1 paso de execute a blocked por semaforo afinado 
+
+[INFO] 20:28:49:987 SUSE logs/(12811:12811): Inicializando SUSE. 
+
+[INFO] 20:28:49:987 SUSE logs/(12811:12811): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:28:49:987 SUSE logs/(12811:12811): Archivo de configuracion levantado. 
+
+[INFO] 20:28:49:987 SUSE logs/(12811:12811): Inicializando semaforos 
+
+[INFO] 20:28:49:987 SUSE logs/(12811:12811): Iniciando servidor... 
+
+[INFO] 20:28:49:987 SUSE logs/(12811:12811): SUSE esperando conexiones...
+
+[INFO] 20:28:54:677 SUSE logs/(12811:12811): Recibi una nueva conexion del socket 5. 
+
+[INFO] 20:28:54:677 SUSE logs/(12811:12811): Creando hilo para atender al proceso 5. 
+
+[INFO] 20:28:54:678 SUSE logs/(12811:12811): Cree el hilo para el proceso 5
+[INFO] 20:28:54:680 SUSE logs/(12811:12811): SUSE esperando conexiones...
+
+[INFO] 20:28:58:93 SUSE logs/(12811:12830): Esperando handshake en suse_create...
+
+[INFO] 20:28:58:94 SUSE logs/(12811:12830): Recibi el ULT 0 del proceso 5 
+
+[INFO] 20:28:58:94 SUSE logs/(12811:12830): Validando si es el main thread o ULT comun 
+
+[INFO] 20:28:58:94 SUSE logs/(12811:12830): El proceso 5 es nuevo 
+
+[INFO] 20:28:58:94 SUSE logs/(12811:12830): Proceso creado con id 5 
+
+[INFO] 20:28:58:94 SUSE logs/(12811:12830): Creando ULT 0
+[INFO] 20:28:58:94 SUSE logs/(12811:12830): ULT creado con id 0 
+
+[INFO] 20:28:58:94 SUSE logs/(12811:12830): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 20:28:58:521 SUSE logs/(12811:12830): El thread 0 paso de new a execute 
+
+[INFO] 20:28:58:521 SUSE logs/(12811:12830): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 20:28:59:209 SUSE logs/(12811:12830): Esperando handshake en suse_create...
+
+[INFO] 20:28:59:210 SUSE logs/(12811:12830): Recibi el ULT 1 del proceso 5 
+
+[INFO] 20:28:59:210 SUSE logs/(12811:12830): Validando si es el main thread o ULT comun 
+
+[INFO] 20:28:59:210 SUSE logs/(12811:12830): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:28:59:210 SUSE logs/(12811:12830): Creando ULT 1
+[INFO] 20:28:59:210 SUSE logs/(12811:12830): ULT creado con id 1 
+
+[INFO] 20:28:59:210 SUSE logs/(12811:12830): El grado de multiprogramacion es 1 
+
+[INFO] 20:28:59:210 SUSE logs/(12811:12830): Validando grado de multiprogramacion...
+
+[INFO] 20:28:59:210 SUSE logs/(12811:12830): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 20:28:59:558 SUSE logs/(12811:12830): Esperando handshake en suse_create...
+
+[INFO] 20:28:59:559 SUSE logs/(12811:12830): Recibi el ULT 2 del proceso 5 
+
+[INFO] 20:28:59:559 SUSE logs/(12811:12830): Validando si es el main thread o ULT comun 
+
+[INFO] 20:28:59:559 SUSE logs/(12811:12830): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:28:59:559 SUSE logs/(12811:12830): Creando ULT 2
+[INFO] 20:28:59:559 SUSE logs/(12811:12830): ULT creado con id 2 
+
+[INFO] 20:28:59:559 SUSE logs/(12811:12830): El grado de multiprogramacion es 2 
+
+[INFO] 20:28:59:559 SUSE logs/(12811:12830): Validando grado de multiprogramacion...
+
+[INFO] 20:28:59:559 SUSE logs/(12811:12830): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 20:28:59:907 SUSE logs/(12811:12830): Esperando handshake en suse_create...
+
+[INFO] 20:28:59:907 SUSE logs/(12811:12830): Recibi el ULT 3 del proceso 5 
+
+[INFO] 20:28:59:907 SUSE logs/(12811:12830): Validando si es el main thread o ULT comun 
+
+[INFO] 20:28:59:907 SUSE logs/(12811:12830): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:28:59:907 SUSE logs/(12811:12830): Creando ULT 3
+[INFO] 20:28:59:908 SUSE logs/(12811:12830): ULT creado con id 3 
+
+[INFO] 20:28:59:908 SUSE logs/(12811:12830): El grado de multiprogramacion es 3 
+
+[INFO] 20:28:59:908 SUSE logs/(12811:12830): Validando grado de multiprogramacion...
+
+[INFO] 20:28:59:908 SUSE logs/(12811:12830): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 20:29:00:284 SUSE logs/(12811:12830): Esperando handshake en suse_create...
+
+[INFO] 20:29:00:285 SUSE logs/(12811:12830): Recibi el ULT 4 del proceso 5 
+
+[INFO] 20:29:00:285 SUSE logs/(12811:12830): Validando si es el main thread o ULT comun 
+
+[INFO] 20:29:00:285 SUSE logs/(12811:12830): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:29:00:285 SUSE logs/(12811:12830): Creando ULT 4
+[INFO] 20:29:00:285 SUSE logs/(12811:12830): ULT creado con id 4 
+
+[INFO] 20:29:00:285 SUSE logs/(12811:12830): El grado de multiprogramacion es 4 
+
+[INFO] 20:29:00:285 SUSE logs/(12811:12830): Validando grado de multiprogramacion...
+
+[INFO] 20:29:00:285 SUSE logs/(12811:12830): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 20:29:00:618 SUSE logs/(12811:12830): Inicio Join
+[INFO] 20:29:00:619 SUSE logs/(12811:12830): Realice el primer handshake con hilolay
+
+[INFO] 20:29:00:619 SUSE logs/(12811:12830): el socket es
+[INFO] 20:29:02:418 SUSE logs/(12811:12830): El thread 0 paso de execute a blocked 
+
+[INFO] 20:29:07:242 SUSE logs/(12811:12830): Arranco schedule_next...
+
+[INFO] 20:29:07:242 SUSE logs/(12811:12830): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:29:07:242 SUSE logs/(12811:12830): Iniciando planificacion...
+
+[INFO] 20:29:08:137 SUSE logs/(12811:12830): Estimando ULTs...
+
+[INFO] 20:29:08:137 SUSE logs/(12811:12830): Ordenando por SJF...
+[INFO] 20:29:08:137 SUSE logs/(12811:12830): El proximo ULT a ejecutar es 1
+[INFO] 20:29:08:137 SUSE logs/(12811:12830): El tid 1 paso de ready a execute
+
+[INFO] 20:29:08:137 SUSE logs/(12811:12830): Envie el next_tid 1 a SUSE
+[INFO] 20:29:11:445 SUSE logs/(12811:12830): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:29:14:45 SUSE logs/(12811:12830): El valor actual del semaforo es 0
+[INFO] 20:29:14:45 SUSE logs/(12811:12830): El thread 1 paso de execute a blocked por semaforo afinado 
+
+[INFO] 20:29:22:620 SUSE logs/(12811:12830): Arranco schedule_next...
+
+[INFO] 20:29:26:689 SUSE logs/(12811:12830): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:29:32:346 SUSE logs/(12811:12830): Iniciando planificacion...
+
+[INFO] 20:29:58:255 SUSE logs/(12811:12830): Estimando ULTs...
+
+[INFO] 20:29:58:256 SUSE logs/(12811:12830): Ordenando por SJF...
+[INFO] 20:30:03:280 SUSE logs/(12811:12830): El proximo ULT a ejecutar es 2
+[INFO] 20:30:05:997 SUSE logs/(12811:12830): El tid 2 paso de ready a execute
+
+[INFO] 20:30:19:295 SUSE logs/(12811:12830): Envie el next_tid 2 a SUSE
+[INFO] 20:30:46:469 SUSE logs/(12811:12830): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:30:57:825 SUSE logs/(12811:12830): El valor actual del semaforo es -1
+[INFO] 20:31:04:624 SUSE logs/(12811:12830): El thread 2 paso de execute a blocked por semaforo afinado 
+
+[INFO] 20:31:23:131 SUSE logs/(12811:12830): Arranco schedule_next...
+
+[INFO] 20:31:24:696 SUSE logs/(12811:12830): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:31:26:617 SUSE logs/(12811:12830): Iniciando planificacion...
+
+[INFO] 20:31:33:77 SUSE logs/(12811:12830): Estimando ULTs...
+
+[INFO] 20:31:33:78 SUSE logs/(12811:12830): Ordenando por SJF...
+[INFO] 20:31:35:309 SUSE logs/(12811:12830): El proximo ULT a ejecutar es 3
+[INFO] 20:31:36:216 SUSE logs/(12811:12830): El tid 3 paso de ready a execute
+
+[INFO] 20:31:39:733 SUSE logs/(12811:12830): Envie el next_tid 3 a SUSE
+[INFO] 20:31:47:522 SUSE logs/(12811:12830): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:31:56:23 SUSE logs/(12811:12830): El valor actual del semaforo es -2
+[INFO] 20:31:57:661 SUSE logs/(12811:12830): El thread 3 paso de execute a blocked por semaforo afinado 
+
+[INFO] 20:32:08:237 SUSE logs/(12811:12830): Arranco schedule_next...
+
+[INFO] 20:32:09:169 SUSE logs/(12811:12830): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:32:09:572 SUSE logs/(12811:12830): Iniciando planificacion...
+
+[INFO] 20:32:11:794 SUSE logs/(12811:12830): Estimando ULTs...
+
+[INFO] 20:32:11:794 SUSE logs/(12811:12830): Ordenando por SJF...
+[INFO] 20:32:12:543 SUSE logs/(12811:12830): El proximo ULT a ejecutar es 4
+[INFO] 20:32:12:745 SUSE logs/(12811:12830): El tid 4 paso de ready a execute
+
+[INFO] 20:32:18:32 SUSE logs/(12811:12830): Envie el next_tid 4 a SUSE
+[INFO] 20:32:28:539 SUSE logs/(12811:12830): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:32:32:319 SUSE logs/(12811:12830): El valor actual del semaforo es -3
+[INFO] 20:32:33:230 SUSE logs/(12811:12830): El thread 4 paso de execute a blocked por semaforo afinado 
+
+[INFO] 20:32:40:383 SUSE logs/(12811:12830): Arranco schedule_next...
+
+[INFO] 20:32:43:829 SUSE logs/(12811:12830): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:32:45:318 SUSE logs/(12811:12830): Iniciando planificacion...
+
+[INFO] 20:32:47:552 SUSE logs/(12811:12830): Estimando ULTs...
+
+[INFO] 20:32:47:552 SUSE logs/(12811:12830): Ordenando por SJF...
+[INFO] 20:53:04:844 SUSE logs/(14039:14039): Inicializando SUSE. 
+
+[INFO] 20:53:04:844 SUSE logs/(14039:14039): Levantando archivo de configuracion de SUSE 
+
+[INFO] 20:53:04:845 SUSE logs/(14039:14039): Archivo de configuracion levantado. 
+
+[INFO] 20:53:04:845 SUSE logs/(14039:14039): Inicializando semaforos 
+
+[INFO] 20:53:04:845 SUSE logs/(14039:14039): Iniciando servidor... 
+
+[INFO] 20:53:04:845 SUSE logs/(14039:14039): SUSE esperando conexiones...
+
+[INFO] 20:53:09:896 SUSE logs/(14039:14039): Recibi una nueva conexion del socket 5. 
+
+[INFO] 20:53:09:896 SUSE logs/(14039:14039): Creando hilo para atender al proceso 5. 
+
+[INFO] 20:53:09:897 SUSE logs/(14039:14039): Cree el hilo para el proceso 5
+[INFO] 20:53:09:897 SUSE logs/(14039:14039): SUSE esperando conexiones...
+
+[INFO] 20:53:09:907 SUSE logs/(14039:14058): Esperando handshake en suse_create...
+
+[INFO] 20:53:09:922 SUSE logs/(14039:14058): Recibi el ULT 0 del proceso 5 
+
+[INFO] 20:53:09:922 SUSE logs/(14039:14058): Validando si es el main thread o ULT comun 
+
+[INFO] 20:53:09:922 SUSE logs/(14039:14058): El proceso 5 es nuevo 
+
+[INFO] 20:53:09:922 SUSE logs/(14039:14058): Proceso creado con id 5 
+
+[INFO] 20:53:09:922 SUSE logs/(14039:14058): Creando ULT 0
+[INFO] 20:53:09:922 SUSE logs/(14039:14058): ULT creado con id 0 
+
+[INFO] 20:53:09:923 SUSE logs/(14039:14058): Validando si puedo poner a ejecutar el main thread... 
+
+[INFO] 20:53:09:923 SUSE logs/(14039:14058): El thread 0 paso de new a execute 
+
+[INFO] 20:53:09:923 SUSE logs/(14039:14058): El thread 0 del proceso 5 esta ejecutando 
+
+[INFO] 20:53:09:962 SUSE logs/(14039:14058): Esperando handshake en suse_create...
+
+[INFO] 20:53:09:962 SUSE logs/(14039:14058): Recibi el ULT 1 del proceso 5 
+
+[INFO] 20:53:09:962 SUSE logs/(14039:14058): Validando si es el main thread o ULT comun 
+
+[INFO] 20:53:09:962 SUSE logs/(14039:14058): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:53:09:962 SUSE logs/(14039:14058): Creando ULT 1
+[INFO] 20:53:09:963 SUSE logs/(14039:14058): ULT creado con id 1 
+
+[INFO] 20:53:09:963 SUSE logs/(14039:14058): El grado de multiprogramacion es 1 
+
+[INFO] 20:53:09:963 SUSE logs/(14039:14058): Validando grado de multiprogramacion...
+
+[INFO] 20:53:09:963 SUSE logs/(14039:14058): El ULT 1 del proceso 5 esta en ready 
+
+[INFO] 20:53:09:1 SUSE logs/(14039:14058): Esperando handshake en suse_create...
+
+[INFO] 20:53:09:1 SUSE logs/(14039:14058): Recibi el ULT 2 del proceso 5 
+
+[INFO] 20:53:09:1 SUSE logs/(14039:14058): Validando si es el main thread o ULT comun 
+
+[INFO] 20:53:09:1 SUSE logs/(14039:14058): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:53:09:1 SUSE logs/(14039:14058): Creando ULT 2
+[INFO] 20:53:09:1 SUSE logs/(14039:14058): ULT creado con id 2 
+
+[INFO] 20:53:09:1 SUSE logs/(14039:14058): El grado de multiprogramacion es 2 
+
+[INFO] 20:53:09:1 SUSE logs/(14039:14058): Validando grado de multiprogramacion...
+
+[INFO] 20:53:09:2 SUSE logs/(14039:14058): El ULT 2 del proceso 5 esta en ready 
+
+[INFO] 20:53:10:41 SUSE logs/(14039:14058): Esperando handshake en suse_create...
+
+[INFO] 20:53:10:41 SUSE logs/(14039:14058): Recibi el ULT 3 del proceso 5 
+
+[INFO] 20:53:10:41 SUSE logs/(14039:14058): Validando si es el main thread o ULT comun 
+
+[INFO] 20:53:10:41 SUSE logs/(14039:14058): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:53:10:41 SUSE logs/(14039:14058): Creando ULT 3
+[INFO] 20:53:10:41 SUSE logs/(14039:14058): ULT creado con id 3 
+
+[INFO] 20:53:10:41 SUSE logs/(14039:14058): El grado de multiprogramacion es 3 
+
+[INFO] 20:53:10:42 SUSE logs/(14039:14058): Validando grado de multiprogramacion...
+
+[INFO] 20:53:10:42 SUSE logs/(14039:14058): El ULT 3 del proceso 5 esta en ready 
+
+[INFO] 20:53:10:82 SUSE logs/(14039:14058): Esperando handshake en suse_create...
+
+[INFO] 20:53:10:82 SUSE logs/(14039:14058): Recibi el ULT 4 del proceso 5 
+
+[INFO] 20:53:10:82 SUSE logs/(14039:14058): Validando si es el main thread o ULT comun 
+
+[INFO] 20:53:10:82 SUSE logs/(14039:14058): El proceso 5 ya tiene un main_thread 
+
+[INFO] 20:53:10:82 SUSE logs/(14039:14058): Creando ULT 4
+[INFO] 20:53:10:82 SUSE logs/(14039:14058): ULT creado con id 4 
+
+[INFO] 20:53:10:82 SUSE logs/(14039:14058): El grado de multiprogramacion es 4 
+
+[INFO] 20:53:10:82 SUSE logs/(14039:14058): Validando grado de multiprogramacion...
+
+[INFO] 20:53:10:82 SUSE logs/(14039:14058): El ULT 4 del proceso 5 esta en ready 
+
+[INFO] 20:53:10:126 SUSE logs/(14039:14058): Inicio Join
+[INFO] 20:53:10:126 SUSE logs/(14039:14058): Realice el primer handshake con hilolay
+
+[INFO] 20:53:10:126 SUSE logs/(14039:14058): el socket es
+[INFO] 20:53:10:126 SUSE logs/(14039:14058): El thread 0 paso de execute a blocked 
+
+[INFO] 20:53:10:126 SUSE logs/(14039:14058): Arranco schedule_next...
+
+[INFO] 20:53:10:126 SUSE logs/(14039:14058): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:53:10:127 SUSE logs/(14039:14058): Iniciando planificacion...
+
+[INFO] 20:53:10:130 SUSE logs/(14039:14058): Estimando ULTs...
+
+[INFO] 20:53:10:130 SUSE logs/(14039:14058): Ordenando por SJF...
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): El proximo ULT a ejecutar es 1
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): El tid 1 paso de ready a execute
+
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): Envie el next_tid 1 a SUSE
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): El valor actual del semaforo es 0
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): El thread 1 paso de execute a blocked por semaforo afinado 
+
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): Arranco schedule_next...
+
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): Iniciando planificacion...
+
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): Estimando ULTs...
+
+[INFO] 20:53:10:131 SUSE logs/(14039:14058): Ordenando por SJF...
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): El proximo ULT a ejecutar es 2
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): El tid 2 paso de ready a execute
+
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): Envie el next_tid 2 a SUSE
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): El valor actual del semaforo es -1
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): El thread 2 paso de execute a blocked por semaforo afinado 
+
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): Arranco schedule_next...
+
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): Iniciando planificacion...
+
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): Estimando ULTs...
+
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): Ordenando por SJF...
+[INFO] 20:53:10:132 SUSE logs/(14039:14058): El proximo ULT a ejecutar es 3
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): El tid 3 paso de ready a execute
+
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): Envie el next_tid 3 a SUSE
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): El valor actual del semaforo es -2
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): El thread 3 paso de execute a blocked por semaforo afinado 
+
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): Arranco schedule_next...
+
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): Iniciando planificacion...
+
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): Estimando ULTs...
+
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): Ordenando por SJF...
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): El proximo ULT a ejecutar es 4
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): El tid 4 paso de ready a execute
+
+[INFO] 20:53:10:133 SUSE logs/(14039:14058): Envie el next_tid 4 a SUSE
+[INFO] 20:53:10:134 SUSE logs/(14039:14058): Recibiendo el semaforo para incrementar 
+
+[INFO] 20:53:10:134 SUSE logs/(14039:14058): El valor actual del semaforo es -3
+[INFO] 20:53:10:134 SUSE logs/(14039:14058): El thread 4 paso de execute a blocked por semaforo afinado 
+
+[INFO] 20:53:10:134 SUSE logs/(14039:14058): Arranco schedule_next...
+
+[INFO] 20:53:10:134 SUSE logs/(14039:14058): Recibi una peticion de suse_schedule_next 
+
+[INFO] 20:53:10:134 SUSE logs/(14039:14058): Iniciando planificacion...
+
+[INFO] 20:53:10:134 SUSE logs/(14039:14058): Estimando ULTs...
+
+[INFO] 20:53:10:134 SUSE logs/(14039:14058): Ordenando por SJF...
+[INFO] 20:53:10:134 SUSE logs/(14039:14058): No hay procesos para ejecutar

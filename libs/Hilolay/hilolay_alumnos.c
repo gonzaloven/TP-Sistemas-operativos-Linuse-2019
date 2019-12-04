@@ -18,6 +18,7 @@ typedef struct hilolay_operations {
 } hilolay_operations;
 
 hilolay_operations *main_ops;
+
 typedef struct hilolay_alumno_configuracion {
 	char* SUSE_IP;
 	char* SUSE_PORT; //Era int, lo paso a char* como lo pide la funcion de conectar_a
@@ -27,23 +28,10 @@ hilolay_alumnos_configuracion * configuracion_hilolay;
 
 un_socket socket_suse;
 
-//	char* log_path = "../logs/hilolay_alumnos_logs.txt";
-//	t_log* logger = log_create(log_path, "Hilolay Alumnos Logs", 1, 1);
-
 void conectar_con_suse() {
 	socket_suse = conectar_a("127.0.0.1", "5002");
 	printf("Me conecte con SUSE por el socket %d. \n", socket_suse);
-/*
-	int tamanio_buffer = sizeof(int);
-	void * buffer = malloc(tamanio_buffer);
-	int desp = 0;
-	int valor = 0;
 
-	serializar_int(buffer, &desp, valor);
-	enviar(socket_suse, cop_handshake_hilolay_suse, tamanio_buffer, buffer);
-
-	printf("Envie un mensaje (0) a SUSE. \n");
-	*/
 }
 
 int suse_create(int master_thread){ //todo revisar el master thread
@@ -116,6 +104,10 @@ int suse_schedule_next(){
 }
 
 int suse_close(int tid){
+	printf("Ejecutando suse_close... \n");
+	bool respuesta = realizar_handshake(socket_suse,cop_close_tid);
+	printf("handshake realizado... \n");
+
 	int tamanio_buffer = sizeof(int);
 	void * buffer = malloc(tamanio_buffer);
 	int desplazamiento = 0;
@@ -163,15 +155,15 @@ int suse_join(int tid)
 
 int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructura agregar hilo + semaforos del mismo
 
-	printf("Ejecutando suse_join... \n");
+	printf("Ejecutando suse_wait del semaforo %s.. \n",sem_name);
 	bool respuesta = realizar_handshake(socket_suse,cop_wait_sem);
 	printf("handshake realizado... \n");
 
-	int tamanio_buffer = sizeof(int) + sizeof(char*); //TODO: aca esta el error, cuando esta solo int tira error, cuando le puse + char* no tiro error, pero no mando bien el nombre.. Fijate si sabes como se hace?
+	int tamanio_buffer = sizeof(int)*2 + size_of_string(sem_name);
 	void * buffer = malloc(tamanio_buffer);
 	int desplazamiento = 0;
 	serializar_int(buffer, &desplazamiento, tid);
-	serializar_valor(sem_name,buffer,&desplazamiento); //todo ver si el sem_name va con & o no
+	serializar_valor(sem_name,buffer,&desplazamiento);
 	enviar(socket_suse, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
 //	log_info(logger, "Enviando a hacer un wait del sem %s", sem_name);
@@ -188,11 +180,11 @@ int suse_wait(int tid, char *sem_name){ //todo desde suse en la estructura agreg
 
 int suse_signal(int tid, char *sem_name){
 
-	printf("Ejecutando suse_join... \n");
+	printf("Ejecutando suse_signal... \n");
 	bool respuesta = realizar_handshake(socket_suse,cop_signal_sem);
 	printf("handshake realizado... \n");
 
-	int tamanio_buffer = sizeof(int);
+	int tamanio_buffer = sizeof(int)*2 + size_of_string(sem_name);
 	void * buffer = malloc(tamanio_buffer);
 	int desplazamiento = 0;
 

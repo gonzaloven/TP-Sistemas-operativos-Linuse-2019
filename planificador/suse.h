@@ -19,8 +19,8 @@ typedef struct suse_configuration
 	char* LISTEN_PORT;
 	int METRICS_TIMER;
 	char** SEM_IDS;
-	char ** SEM_INIT;
-	char ** SEM_MAX;
+	char** SEM_INIT;
+	char** SEM_MAX;
 	double ALPHA_SJF;
 	int MAX_MULTIPROG;
 	t_list * process;
@@ -57,6 +57,8 @@ int close_tid(int tid, int socket_actual);
 void handle_close_tid(un_socket socket_actual, t_paquete* received_packet);
 
 void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem);
+
+void pasarNuevoProceso();
 
 int i_thread = 0;
 pthread_t threads[20];
