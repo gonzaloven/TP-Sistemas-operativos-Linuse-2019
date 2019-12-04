@@ -249,28 +249,6 @@ int dame_nro_frame_reemplazado(){
 	}
 }
 
-
-//Esta funcion esta al dope
-/* 
-void free_page(page *pag)
-{
-	heap_metadata* metadata;
-
-	for(int curr_frame_num=0; curr_frame_num < TOTAL_FRAME_NUM; curr_frame_num++)
-	{	
-		if (pag->fr == (MAIN_MEMORY + curr_frame_num))
-		{
-			BITMAP[curr_frame_num] = 0;
-			metadata = (heap_metadata*) (MAIN_MEMORY + curr_frame_num * PAGE_SIZE);
-			metadata->is_free = true;
-			pag->is_present = true;
-			pag->is_used = true;
-			pag->is_modify = false;			
-			pag->fr = NULL;
-		}
-	}	
-}*/
-
 void metricas_por_socket_conectado(uint32_t pid){
 	int nro_prog = search_program(pid);
 	program *prog = list_get(program_list, nro_prog);
@@ -323,7 +301,25 @@ heap_metadata* proxima_metadata(int paginaABuscar, int offset, segment* segmento
 
 		if (paginaSiguiente == NULL) return NULL;
 
-		metadataSiguiente = (heap_metadata*) ((paginaSiguiente->fr) + offsetDentroDeLaPagina);
+		heap_metadata* proximaMetadata = (heap_metadata*) ((paginaSiguiente->fr) + offsetDentroDeLaPagina);
+
+		if((offsetDentroDeLaPagina + METADATA_SIZE) > PAGE_SIZE){
+			heap_metadata metadataCopia;
+
+			page* proximaPagina = list_get(segmento->page_table, (paginaABuscar + cantidadDePaginasAMoverme + 1));
+			void* punteroAlFrameSiguiente = proximaPagina->fr;
+			int tamanioMetadataCortada = (PAGE_SIZE) - offsetDentroDeLaPagina;
+
+			memcpy(&metadataCopia, proximaMetadata, tamanioMetadataCortada);
+			memcpy((void*)(&metadataCopia) + 2, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
+
+			memcpy(proximaMetadata, &metadataCopia, tamanioMetadataCortada);
+			memcpy(punteroAlFrameSiguiente, (void*)(&metadataCopia) + 2, METADATA_SIZE - tamanioMetadataCortada);
+
+			metadataSiguiente = proximaMetadata;
+		}else{
+			metadataSiguiente = proximaMetadata;
+		}
 
 		log_debug(debug_logger, "Metadata siguiente tiene: size: %d, is_free: %d",
 								metadataSiguiente->size,
@@ -366,7 +362,25 @@ heap_metadata* metadata_siguiente(int paginaABuscar, int offset, int *cantidadDe
 
 		if (paginaSiguiente == NULL) return NULL;
 
-		metadataSiguiente = (heap_metadata*) ((paginaSiguiente->fr) + *offsetDentroDeLaPagina);
+		heap_metadata* proximaMetadata = (heap_metadata*) ((paginaSiguiente->fr) + *offsetDentroDeLaPagina);
+
+		if((*offsetDentroDeLaPagina + METADATA_SIZE) > PAGE_SIZE){
+			heap_metadata metadataCopia;
+
+			page* proximaPagina = list_get(segmento->page_table, (paginaABuscar + cantidadDePaginasAMoverme + 1));
+			void* punteroAlFrameSiguiente = proximaPagina->fr;
+			int tamanioMetadataCortada = (PAGE_SIZE) - *offsetDentroDeLaPagina;
+
+			memcpy(&metadataCopia, proximaMetadata, tamanioMetadataCortada);
+			memcpy((void*)(&metadataCopia) + 2, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
+
+			memcpy(proximaMetadata, &metadataCopia, tamanioMetadataCortada);
+			memcpy(punteroAlFrameSiguiente, (void*)(&metadataCopia) + 2, METADATA_SIZE - tamanioMetadataCortada);
+
+			metadataSiguiente = proximaMetadata;
+		}else{
+			metadataSiguiente = proximaMetadata;
+		}
 
 		log_debug(debug_logger, "Metadata siguiente tiene: size: %d, is_free: %d",
 								metadataSiguiente->size,
@@ -504,8 +518,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		nro_seg = segment_with_free_space(prog, total_size);
 		segmentoConEspacio = list_get(prog->segment_table, nro_seg);
 
-		log_debug(debug_logger, "El segmento tiene %d paginas en su tabla de paginas", segmentoConEspacio->page_table->elements_count);
-
 		direccionLogicaMetadataLibre = proxima_metadata_libre(0, 0, segmentoConEspacio, total_size, 0, 0);
 
 		log_debug(debug_logger, "La direccion logica de la metadata donde voy a allocar esta en ---> %d", direccionLogicaMetadataLibre);
@@ -515,31 +527,32 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		//Alloco aca
 
 		int sizeAnterior = metadataBuscada->size;
-		log_debug(debug_logger, "size de la metadata que estoy buscando ---> %d", sizeAnterior);
 
 		metadataBuscada->is_free = 0;
 		metadataBuscada->size = size;
+
+		log_debug(debug_logger, "Nuevo size de la metadata ---> %d", metadataBuscada->size);
 
 		int paginaDeLaMetadataLibre = floor((direccionLogicaMetadataLibre - segmentoConEspacio->base) / PAGE_SIZE);
 		int offset = (direccionLogicaMetadataLibre - segmentoConEspacio->base) % PAGE_SIZE;
 
 		metadataFinal = proxima_metadata(paginaDeLaMetadataLibre, offset, segmentoConEspacio);
 
-		if((offset + 5) > PAGE_SIZE){
+		if((offset + METADATA_SIZE) > PAGE_SIZE){
 			heap_metadata metadataCopia;
 
 			page* proximaPagina = list_get(segmentoConEspacio->page_table, (paginaDeLaMetadataLibre + 1));
 			void* punteroAlFrameSiguiente = proximaPagina->fr;
 			int tamanioMetadataCortada = (PAGE_SIZE) - offset;
 
-			memcpy(&metadata, metadataFinal, tamanioMetadataCortada);
-			memcpy((void*)(&metadata) + 2, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
+			memcpy(&metadataCopia, metadataFinal, tamanioMetadataCortada);
+			memcpy((void*)(&metadataCopia) + 2, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
 
 			metadataCopia.is_free = 1;
 			metadataCopia.size = sizeAnterior - total_size;
 
-			memcpy(metadataFinal, &metadata, tamanioMetadataCortada);
-			memcpy(punteroAlFrameSiguiente, (void*)(&metadata) + 2, METADATA_SIZE - tamanioMetadataCortada);
+			memcpy(metadataFinal, &metadataCopia, tamanioMetadataCortada);
+			memcpy(punteroAlFrameSiguiente, (void*)(&metadataCopia) + 2, METADATA_SIZE - tamanioMetadataCortada);
 			log_debug(debug_logger, "La metadata final tiene ---> %d", metadataFinal->size);
 		}else{
 			metadataFinal->is_free = 1;
@@ -603,7 +616,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		page* primeraPagina = list_get(segmentoNuevo->page_table, 0);
 
-		log_debug(debug_logger, "Lmite del segmento nuevo ----> %d", segmentoNuevo->limit);
+		log_debug(debug_logger, "Limite del segmento nuevo ----> %d", segmentoNuevo->limit);
 
 		heap_metadata* primerMetadata = (primeraPagina->fr);
 
@@ -616,8 +629,9 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	metricas_por_socket_conectado(pid);
 	number_of_free_frames();
 
-	log_debug(debug_logger, "direccionLogicaMetadataLibre: %d", direccionLogicaMetadataLibre);
 	int direccionLogicaFinal = direccionLogicaMetadataLibre + METADATA_SIZE;
+	log_debug(debug_logger, "Direccion logica final del MALLOC ----> %d", direccionLogicaFinal);
+
 
 	return direccionLogicaFinal;
 }
@@ -644,19 +658,17 @@ int segment_with_free_space(program *prog, int size)
 			primerMetadata = (heap_metadata *) (primerPagina->fr);
 			metadataActual = primerMetadata;
 
-			log_debug(debug_logger, "la primer metadata tiene: is_free = %d, size = %d", metadataActual->is_free, metadataActual->size);
-
 			if(!metadataActual->is_free){
 				int direccionLogicaMetadataLibre = proxima_metadata_libre(0, 0, segmentoActual, size, 0, 0);
 
 				if(direccionLogicaMetadataLibre != -1){
 					metadataActual = buscar_metadata_por_direccion(direccionLogicaMetadataLibre, segmentoActual);
-					log_debug(debug_logger, "Encontramos al segmento %d con una metadata de %d de size", i, metadataActual->size);
+					log_debug(debug_logger, "Encontramos que el segmento %d tiene una metadata de %d de size", i, metadataActual->size);
 					return i;
 				}
 
 			}else if(metadataActual->size >= size){
-				log_debug(debug_logger, "Encontramos al segmento %d con una metadata de %d de size", i, metadataActual->size);
+				log_debug(debug_logger, "Encontramos que el segmento %d tiene una metadata de %d de size", i, metadataActual->size);
 				return i;
 			}
 		}
