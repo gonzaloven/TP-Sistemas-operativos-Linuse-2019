@@ -1,7 +1,11 @@
 # Prerequisites
 *.d
-*.cproject
-*.xml
+
+#Some of these are related to eclipse. So i keep them out of my repo
+.cproject
+.dep/
+.project
+.settings/
 
 # Object files
 *.o
