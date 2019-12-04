@@ -164,7 +164,7 @@ uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid);
 */
 int memory_unmap(uint32_t dir, uint32_t pid);
 
-int proxima_metadata_libre(int paginaABuscar, int offset, segment* segmento);
+int proxima_metadata_libre(int paginaABuscar, int offset, segment* segmento, int size, int cantidadDePaginasMovidas, int offsetTotalMovido);
 
 segment* ultimo_segmento_programa(program *prog);
 
