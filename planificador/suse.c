@@ -196,6 +196,8 @@ void handle_conection_suse(un_socket socket_actual)
 			case cop_suse_join:
 				handle_suse_join(socket_actual,paquete_recibido);
 				break;
+//			default: NO ANDA BIEN, ME TERMINA TODO EL PROCESO. HAY Q ARREGLARLO
+//				pthread_exit(NULL);
 
 			}
 
@@ -371,7 +373,6 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 
 
 int close_tid(int tid, int socket_actual){
-
 	bool find_process_by_id(t_process* process)
 	{
 		return process->PROCESS_ID == socket_actual;
@@ -385,11 +386,16 @@ int close_tid(int tid, int socket_actual){
 	t_process* process = list_find(configuracion_suse.process,find_process_by_id);
 	t_suse_thread* thread = list_find(process->ULTS,find_thread_by_tid);
 
-	if(thread == NULL)
+	if(thread->tid == 0)
 	{
 		log_info(logger, "Recibi un close para el ULT %d\n", tid);
 		list_destroy_and_destroy_elements(process->ULTS, free);
-		list_remove_and_destroy_element(configuracion_suse.process, process, free);
+		bool destructor(t_process* p)
+		{
+			return p->PROCESS_ID == socket_actual;
+		}
+
+		list_remove_and_destroy_by_condition(configuracion_suse.process, destructor, free);
 		int resultado = close(socket_actual);
 		return resultado;
 	}
@@ -490,7 +496,6 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 			t_process* process = list_find(configuracion_suse.process,buscador);
 
 			bloqueado_a_listo(thread_joiner,process);
-			configuracion_suse.ACTUAL_MULTIPROG ++;
 		}
 		else
 		{
@@ -587,6 +592,7 @@ int obtener_proximo_ejecutar(t_process* process){
 		{
 			exec_actual->duracionRafaga = tiempo - aux2;
 		}
+		ejecucion_a_listo(exec_actual,process->PROCESS_ID);
 
 	}
 
@@ -596,6 +602,7 @@ int obtener_proximo_ejecutar(t_process* process){
 	if(next_ULT == 0)
 	{
 		log_info(logger,"No hay procesos para ejecutar");
+		return -1;
 	}
 	int next_tid = next_ULT->tid;
 	log_info(logger, "El proximo ULT a ejecutar es %d", next_tid);
@@ -707,8 +714,6 @@ void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 	serializar_int(buffer, &desp, resultado);
 	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
-	liberar_paquete(paquete_recibido);
-
 }
 
 //todo definir que le pasas, si un char* o un t_sem*
@@ -719,7 +724,7 @@ int desbloquear_hilos_semaforo(char* sem){
 	}
 
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, buscador_sem_name);
-	if(semaforo->VALUE <= 0)
+	if(semaforo->VALUE > 0)
 	{
 
 	if(list_get(semaforo->BLOCKED_LIST, 0) == NULL){
