@@ -177,7 +177,7 @@ page* page_with_free_size(int size, bool is_first_page, bool is_last_page, int t
 	{	
 		if (curr_frame_num == TOTAL_FRAME_NUM){
 			log_debug(debug_logger, "Nos quedamos sin frames libres, aplicando algoritmo de reemplazo");
-			curr_frame_num = dame_nro_frame_reemplazado();						
+			//curr_frame_num = dame_nro_frame_reemplazado();
 		}
 
 		if (BITMAP[curr_frame_num])
@@ -205,7 +205,6 @@ page* page_with_free_size(int size, bool is_first_page, bool is_last_page, int t
 	}	
 	//return NULL;
 }
-
 
 /*
 	Teniendo al par (U , M)
@@ -348,18 +347,17 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	{	//Si su ultimo segmento es heap y tiene memoria están los frames que necesitamos
 		seg = ultimo_segmento_programa(prog);
 		seg->limit += total_pages_needed * PAGE_SIZE;		
-		log_debug(debug_logger, "Se pudo agrandar el segmento %d ", seg);
+		log_debug(debug_logger, "Se pudo agrandar el segmento %d ", seg->limit);
 
-		//busco la proxima_metadata_libre
-		page* primerPagina = list_get(segmentoActual->page_table, 0);			
-		heap_metadata* primerMetadata = (primerPagina->fr);
-		metadata = heap_metadata* proxima_metadata_libre(seg->base, primerMetadata, 1, seg){
-
-		metadata->is_free = false;
-		espacio_que_queda_alocar -= metadata->size;
-		metadata->size = size;
-
-		is_first_page = 0;
+//		//busco la proxima_metadata_libre
+//		page* primerPagina = list_get(seg->page_table, 0);
+//		heap_metadata* primerMetadata = (primerPagina->fr);
+//		metadata = proxima_metadata_libre(seg->base, primerMetadata, 0, seg);
+//		metadata->is_free = false;
+//		espacio_que_queda_alocar -= metadata->size;
+//		metadata->size = size;
+//
+//		is_first_page = 0;
 
 	}
 	else 	
@@ -373,15 +371,9 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		log_debug(debug_logger, "Se creo el segmento n°%d ", nro_seg);	
 		list_add(segment_list, seg);
 	}
-	
-		offset = seg->base + METADATA_SIZE;		
 
 		if(total_pages_needed>1){
-<<<<<<< 0822bcec6ae0dd4d3ad6429ec701e4386d8fe865
-			pag = page_with_free_size(PAGE_SIZE, true, false, size, 0);
-=======
 			pag = page_with_free_size(PAGE_SIZE,is_first_page,0,size,0);
->>>>>>> Agrego algoritmo de reemplazo
 			nro_pag = list_add(seg->page_table, pag);
 			espacio_que_queda_alocar -= PAGE_SIZE;
 
@@ -396,17 +388,14 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			list_add(seg->page_table, pag);
 		}
 		else{ // si size_total ocupa menos de una pagina
-<<<<<<< 0822bcec6ae0dd4d3ad6429ec701e4386d8fe865
-			pag = page_with_free_size(total_size, true, true, size, espacio_q_quedara_libre);
-=======
 			pag = page_with_free_size(espacio_que_queda_alocar,is_first_page,1,size,espacio_q_quedara_libre);
->>>>>>> Agrego algoritmo de reemplazo
 			nro_pag = list_add(seg->page_table, pag);
 		}
 	
 	metricas_por_socket_conectado(pid);
 	number_of_free_frames();
 
+	offset = seg->base + METADATA_SIZE;
 	logical_address = seg->base + (nro_pag * PAGE_SIZE) + offset ;
 	return logical_address;
 }
@@ -453,48 +442,50 @@ int segment_with_free_space(program *prog, int size)
 	return -1;
 }
 
-heap_metadata* metadata_siguiente(int posicionActual, heap_metadata* metadataActual, int paginaActualNumero, segment* segmento){
+heap_metadata* metadata_siguiente(int paginaABuscar, int offset, int *cantidadDePaginasAMoverme, int *offsetDentroDeLaPagina, segment* segmento){
+	page* paginaInicial = list_get(segmento->page_table, paginaABuscar);
+	heap_metadata* metadataActual = (heap_metadata*) ((paginaInicial->fr) + offset);
+
 	heap_metadata* metadataSiguiente;
 
+	int bytesAMoverme = metadataActual->size + METADATA_SIZE;
 	//Si la proxima metadata queda en otra pagina, me muevo hasta ahi
-	if((posicionActual + metadataActual->size + METADATA_SIZE) > PAGE_SIZE){
-		posicionActual += posicionActual + metadataActual->size + METADATA_SIZE;
+	if(bytesAMoverme > PAGE_SIZE){
 
-		int cantidadDePaginasAMoverme = floor(posicionActual/PAGE_SIZE);
-		int offset = (posicionActual % PAGE_SIZE);
+		cantidadDePaginasAMoverme = floor(metadataActual->size/PAGE_SIZE);
+		offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE);
 
-		paginaActualNumero += cantidadDePaginasAMoverme;
-		page* paginaSiguiente = list_get(segmento->page_table, paginaActualNumero);
+		page* paginaSiguiente = list_get(segmento->page_table, cantidadDePaginasAMoverme);
 
 		if (paginaSiguiente == NULL) return NULL;
 
-		metadataSiguiente = (paginaSiguiente->fr) + offset;
+		metadataSiguiente = (paginaSiguiente->fr) + offsetDentroDeLaPagina;
 
 	//En este caso la proxima metadata queda dentro de la misma pagina
 	}else{
-		posicionActual = metadataActual->size + METADATA_SIZE;
+		page* paginaActual = list_get(segmento->page_table, paginaABuscar);
 
-		page* paginaActual = list_get(segmento->page_table, paginaActualNumero);
-
-		metadataSiguiente = (paginaActual->fr) + posicionActual;
+		metadataSiguiente = (paginaActual->fr) + bytesAMoverme;
 	}
 
 	return metadataSiguiente;
 }
 
-/* Se fija si la siguiente metadata is_free y sino */ 
-heap_metadata* proxima_metadata_libre(int posicionActual, heap_metadata* metadataUsada, int paginaActualNumero, segment* segmento){
+//Esto cuando se usa la idea es pasarle inicialmente -> PaginaABuscar = 0, Offset = 0, Segmento = el segmento que estemos queriendo recorrer
+heap_metadata* proxima_metadata_libre(int paginaABuscar, int offset, segment* segmento){
+	int cantidadDePaginasAMoverme;
+	int offsetDentroDeLaPagina;
 	heap_metadata* metadataSiguiente;
 
-	metadataSiguiente = metadata_siguiente(posicionActual, metadataUsada, paginaActualNumero, segmento);
+	metadataSiguiente = metadata_siguiente(paginaABuscar, offset, &cantidadDePaginasAMoverme, &offsetDentroDeLaPagina, segmento);
 
-	if(metadataSiguiente == NULL)
+	if(metadataSiguiente == NULL){
 		return NULL;	
-	else if(metadataSiguiente->is_free)
+	}else if(metadataSiguiente->is_free){
 		return metadataSiguiente;
-	else
-		return proxima_metadata_libre(posicionActual, metadataSiguiente, paginaActualNumero, segmento);
-	
+	}else{
+		return proxima_metadata_libre(cantidadDePaginasAMoverme, offsetDentroDeLaPagina, segmento);
+	}
 }
 
 void compactar_en_segmento(int posicionActual, heap_metadata* metadataInicial, heap_metadata* metadataActual, int paginaActualNumero, segment* segmento){
