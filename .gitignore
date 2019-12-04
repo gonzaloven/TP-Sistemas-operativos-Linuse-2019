@@ -1,5 +1,7 @@
 # Prerequisites
 *.d
+*.cproject
+*.xml
 
 # Object files
 *.o
