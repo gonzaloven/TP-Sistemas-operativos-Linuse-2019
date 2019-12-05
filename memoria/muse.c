@@ -21,7 +21,7 @@ void muse_start_service(ConnectionHandler ch)
 {
 	muse_config = load_configuration(MUSE_CONFIG_PATH);
 	muse_logger = log_create(MUSE_LOG_PATH,"MUSE",true,LOG_LEVEL_TRACE);
-	muse_main_memory_init(muse_config->memory_size,muse_config->page_size);
+	muse_main_memory_init(muse_config->memory_size,muse_config->page_size,muse_config->swap_size);
 	server_start(muse_config->listen_port,ch);
 	//Va a funcionar hasta que le manden un ctrl+c
 }
