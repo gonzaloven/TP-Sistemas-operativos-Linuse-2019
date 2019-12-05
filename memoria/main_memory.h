@@ -68,7 +68,7 @@ typedef struct segment_s
 	uint32_t base; //base lógica
 	uint32_t limit;
 	t_list *page_table;
-	void* archivo_mapeado;
+	FILE* archivo_mapeado;
 }segment;
 
 /**
@@ -83,6 +83,14 @@ int number_of_free_frames();
 void metricas_por_socket_conectado(uint32_t pid);
 
 int busca_segmento(program *prog,uint32_t va);
+
+void* obtener_data_marco_heap(page* pagina);
+
+void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina);
+
+void agregar_frame_clock(page* page);
+
+page* ejecutar_algoritmo_clock_modificado();
 
 /**
  * Busca el process_id en program_list
@@ -164,7 +172,7 @@ uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid);
 */
 int memory_unmap(uint32_t dir, uint32_t pid);
 
-int proxima_metadata_libre(int paginaABuscar, int offset, segment* segmento, int size, int cantidadDePaginasMovidas, int offsetTotalMovido);
+int proxima_metadata_libre(int dirLogica, segment* segmentoActual);
 
 segment* ultimo_segmento_programa(program *prog);
 

@@ -13,6 +13,7 @@
 #include <math.h>
 
 #define METADATA_SIZE sizeof(struct HeapMetadata)
+#define PATH_SWAP "/utnso/tp-2019-2c-Los-Trapitos/memoria/swapfile"
 
 void *MAIN_MEMORY = NULL;
 
@@ -720,10 +721,231 @@ uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 
 }
 
+void* obtener_data_marco_heap(page* pagina){
+    if(!pagina->is_present && number_of_free_frames() == 0){
+        page* page_mm = ejecutar_algoritmo_clock_modificado();
+
+        void* buffer_page_mm = malloc(PAGE_SIZE);
+        void* buffer_page_swap = malloc(PAGE_SIZE);
+
+        memcpy(buffer_page_mm,MAIN_MEMORY + ((int)page_mm->fr * PAGE_SIZE),PAGE_SIZE);
+
+        FILE* archivo_swap = fopen(PATH_SWAP,"r+");
+
+        fseek(archivo_swap,(int) pagina->fr * PAGE_SIZE,SEEK_SET);
+        fread(buffer_page_swap,PAGE_SIZE,1,archivo_swap);
+        fseek(archivo_swap,(int) pagina->fr * PAGE_SIZE,SEEK_SET);
+        fwrite(buffer_page_mm,PAGE_SIZE,1,archivo_swap);
+
+        memcpy(MAIN_MEMORY + ((int)page_mm->fr * PAGE_SIZE),buffer_page_swap,PAGE_SIZE);
+
+        page_mm->is_present = 0;
+        page_mm->fr = pagina->fr;
+
+        page* sacarFrame = page_with_free_size();
+        pagina->fr = sacarFrame->fr;
+        pagina->is_present = 1;
+        pagina->is_used = 1;
+
+        agregar_frame_clock(pagina); // ESTA NO ESTA HECHA ---------
+
+        free(buffer_page_mm);
+        free(buffer_page_swap);
+        fclose(archivo_swap);
+    }
+    else if(!pagina->is_present && number_of_free_frames() > 0){
+        void* buffer_page_swap = malloc(PAGE_SIZE);
+
+        FILE* archivo_swap = fopen(PATH_SWAP,"r+");
+
+        fseek(archivo_swap,(int)pagina->fr * PAGE_SIZE,SEEK_SET);
+        fread(buffer_page_swap,PAGE_SIZE,1,archivo_swap);
+
+        page* sacarFrame = page_with_free_size();
+        pagina->fr = sacarFrame->fr;
+        pagina->is_present = 1;
+        pagina->is_used = 1;
+
+        memcpy(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),buffer_page_swap,PAGE_SIZE);
+
+        agregar_frame_clock(pagina);
+
+        free(buffer_page_swap);
+        fclose(archivo_swap);
+    }
+
+    return (char*) MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE);
+}
+
+page* ejecutar_algoritmo_clock_modificado(){return NULL;}
+
+void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
+    if(!pagina->is_present && number_of_free_frames() == 0){
+        page* page_mm = ejecutar_algoritmo_clock_modificado(); // ESTA FUNCTION FALTA ---------------
+
+        void* buffer_page_mm = malloc(PAGE_SIZE);
+        void* buffer_page_mmap = malloc(PAGE_SIZE);
+        page* sacarFrame = page_with_free_size();
+        int frame_libre = (int)sacarFrame->fr;
+
+        memcpy(buffer_page_mm,MAIN_MEMORY + ((int)page_mm->fr * PAGE_SIZE),PAGE_SIZE);
+
+        FILE* archivo_swap = fopen(PATH_SWAP,"r+");
+
+        fseek(archivo_swap,frame_libre * PAGE_SIZE,SEEK_SET);
+        fwrite(buffer_page_mm,PAGE_SIZE,1,archivo_swap);
+
+        page_mm->fr = sacarFrame->fr;
+        page_mm->is_present = 0;
+
+        sacarFrame = page_with_free_size();
+        pagina->fr = sacarFrame->fr;
+        pagina->is_present = 1;
+        pagina->is_used = 1;
+
+        if((nro_pagina * PAGE_SIZE) <= segmento->limit){
+            fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
+
+            int bytes_a_leer = (int)fmin(PAGE_SIZE,((nro_pagina * PAGE_SIZE) + PAGE_SIZE) - segmento->limit);
+
+            fread(buffer_page_mmap,bytes_a_leer,1,segmento->archivo_mapeado);
+            memcpy(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),buffer_page_mmap,bytes_a_leer);
+
+            if(PAGE_SIZE > bytes_a_leer)
+                memset(MAIN_MEMORY + ((int)pagina->fr * bytes_a_leer),'\0',PAGE_SIZE - bytes_a_leer);
+        }
+        else{
+            // el primer byte a leer supera el tamano del archivo
+            memset(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),'\0',PAGE_SIZE);
+        }
+
+        agregar_frame_clock(pagina);
+
+        free(buffer_page_mm);
+        free(buffer_page_mmap);
+        fclose(archivo_swap);
+    }
+    else if(!pagina->is_present && number_of_free_frames() > 0){
+        void* buffer_page_mmap = malloc(PAGE_SIZE);
+
+        page* sacarFrame = page_with_free_size();
+        pagina->fr = sacarFrame->fr;
+        pagina->is_present = 1;
+        pagina->is_used = 1;
+
+        fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
+        fread(buffer_page_mmap,PAGE_SIZE,1,segmento->archivo_mapeado);
+
+        memcpy(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),buffer_page_mmap,PAGE_SIZE);
+
+        agregar_frame_clock(pagina);
+
+        free(buffer_page_mmap);
+    }
+
+    return (char*) MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE);
+}
+
+void agregar_frame_clock(page* page){}
+
 //Copia n bytes de LIBMUSE a MUSE
 uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 {
+	page* paginaObtenida;
+	int numProg = search_program(pid);
+	program* program = list_get(program_list, numProg);
+	log_debug(debug_logger, "El programa del pedido es %d", numProg);
+
+	int numSeg = busca_segmento(program, dst);
+	segment* segment = list_get(program->segment_table, numSeg);
+
+	if(segment == NULL){
+		// no se encontro el segmento, tiene que tirar seg fault
+		log_debug(debug_logger, "Se busco el segmento %d, pero no se encontro", numSeg);
+		return -1;
+	}else{
+		log_debug(debug_logger, "El segmento a escribir es %d", numSeg);
+	}
+
+	int numPage = floor((dst - segment->base) / PAGE_SIZE);
+
+	int offset = (dst - segment->base) % PAGE_SIZE;
+
+	log_debug(debug_logger, "La pagina a escribir es %d - Con offset %d", numPage, offset);
+
+	int posicion_recorrida = offset - METADATA_SIZE;
+
+	//calculo la cantidad de paginas necesarias que tiene que escribir
+	int cantidad_paginas_necesarias = (int)ceil((double)(offset + n) / PAGE_SIZE);
+
+	//me fijo si la metadata no se encuentra en esta pagina y si el seg es heap
+	if(segment->is_heap && (posicion_recorrida < 0)){
+		//tengo que obtener la pagina anterior para manejar la metadata
+		int cant_pag_aux = (int)ceil((double)abs(posicion_recorrida)/PAGE_SIZE);
+		cantidad_paginas_necesarias += cant_pag_aux;
+		numPage -= cant_pag_aux;
+		posicion_recorrida = (cant_pag_aux * PAGE_SIZE) + offset - METADATA_SIZE;
+	}
+
+	//controlo que la cantidad de paginas necesarias no supere a las reales, se podria psar por el ceil pero no deberia.
+	cantidad_paginas_necesarias = (int)fmin((float)cantidad_paginas_necesarias, list_size(segment->page_table));
+	log_debug(debug_logger, "Cantidad de paginas necesarias para leer la data %d", cantidad_paginas_necesarias);
+
+	void* buffer = malloc(cantidad_paginas_necesarias * PAGE_SIZE);
+	void* datos;
+	heap_metadata metadata;
+
+	for(int i = 0; i < cantidad_paginas_necesarias; i++){
+		paginaObtenida = list_get(segment->page_table, numPage + i);
+		if(segment->is_heap){
+			datos = obtener_data_marco_heap(paginaObtenida);
+		}else{
+			datos = obtener_data_marco_mmap(segment, paginaObtenida, numPage + i);
+		}
+
+		memcpy(buffer + (PAGE_SIZE * i), datos, PAGE_SIZE);
+	}
+
+	if(segment->is_heap){
+        // obtengo la metadata
+        memcpy(&metadata.is_free,buffer + posicion_recorrida,sizeof(bool));
+        posicion_recorrida += sizeof(bool);
+        memcpy(&metadata.size,buffer + posicion_recorrida,sizeof(uint32_t));
+        posicion_recorrida += sizeof(uint32_t);
+
+        if(!metadata.is_free && (metadata.size >= n)){
+            memcpy(buffer + posicion_recorrida,src,n);
+
+            // vuelvo a cargar los datos al upcm
+            for(int x=0; x<cantidad_paginas_necesarias;x++){
+            	paginaObtenida = list_get(segment->page_table,x + numPage);
+                datos = obtener_data_marco_heap(paginaObtenida);
+                memcpy(datos,buffer + PAGE_SIZE * x, PAGE_SIZE);
+            }
+        }
+        else{
+        	log_debug(debug_logger, "Posicion invalida, no se pudo realizar la copia");
+            return -1;
+        }
+	}else{
+		if((offset + (cantidad_paginas_necesarias * PAGE_SIZE)) >= n){
+			memcpy(buffer + offset,src,n);
+
+		                // vuelvo a cargar los datos al upcm
+			for(int x=0; x<cantidad_paginas_necesarias;x++){
+				paginaObtenida = list_get(segment->page_table,x + numPage);
+				datos = obtener_data_marco_mmap(segment,paginaObtenida,x + numPage);
+				memcpy(datos,buffer + PAGE_SIZE * x,PAGE_SIZE);
+			}
+		}else{
+		 	// no puedo almacenar los datos pq ingreso a una posicion invalida
+			log_debug(debug_logger, "Posicion invalida, no se pudo realizar la copia");
+			return -1;
+		 }
+	}
+
 	int direccionFisicaBuscada = buscar_direccion_fisica(dst, n, pid);
+
 	memcpy((void*) direccionFisicaBuscada, src, n);
 	
 	return dst;
