@@ -304,7 +304,7 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	log_info(logger, "Recibi el ULT %d del proceso %d \n", tid, socket_actual);
 	log_info(logger, "Validando si es el main thread o ULT comun \n");
 
-	if(list_size(configuracion_suse.process) != 0  && process->PROCESS_ID > 0 /*list_find(configuracion_suse.process,find_process_by_id)*/){
+	if(list_size(configuracion_suse.process) != 0  && process != 0){
 		log_info(logger, "El proceso %d ya tiene un main_thread \n", socket_actual);
 		handle_ULT_create(process, tid);
 	}
