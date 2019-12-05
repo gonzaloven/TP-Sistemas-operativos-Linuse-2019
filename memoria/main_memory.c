@@ -25,6 +25,7 @@ void *MAIN_MEMORY = NULL;
 
 t_list *program_list = NULL;
 t_list *segment_list = NULL;
+t_list *lista_archivos_mmap = NULL;
 t_log *metricas_logger = NULL;
 t_log *debug_logger = NULL;
 
@@ -45,6 +46,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
 	PAGE_SIZE = page_size;
+	lista_archivos_mmap = list_create();
 
 	MAIN_MEMORY = (void *) malloc(memory_size); // aka UPCM
 
@@ -811,37 +813,6 @@ segment* ultimo_segmento_programa(program *prog){
 	return seg;
 }
 
-void crear_nuevo_segmento_mmap(size_t length, void* map, uint32_t pid){
-	segment* seg;
-	page* pag;
-	seg = (segment *) malloc(sizeof(segment));
-	seg->is_heap = false;
-	seg->page_table = list_create();
-	//seg->base = (ultimo_segmento_programa(pid)->limit+1);
-	seg->limit = (seg->base) + length;
-
-	int nro_pag;
-	int total_pages_needed;
-
-	total_pages_needed = (length / PAGE_SIZE) + ((length % PAGE_SIZE) != 0); // ceil(length / PAGE_SIZE);
-
-	//vamos a pedir todo el resto de paginas que necesitemos
-	for(int i=0 ; i < total_pages_needed ; i++ )
-	{
-		pag = (page *) malloc(sizeof(page));
-		pag->is_used = true;
-		pag->is_modify = false;
-		pag->is_present = false;
-		nro_pag = list_add(seg->page_table, pag);
-	}
-
-	seg->archivo_mapeado = map;
-
-	//list_add(prog->segment_list, seg);
-	list_add(segment_list, seg);
-
-}
-
 int busca_segmento(program *prog, uint32_t va)
 {
 	int i=0;
@@ -1150,25 +1121,186 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	return dst;
 }
 
+int igualArchivo(archivoMMAP* archivo_mmap, int fileDescriptor) {
+	struct stat stat1, stat2;
+	if((fstat(fileDescriptor, &stat1) < 0) || (fstat(fileno(archivo_mmap->archivo), &stat2) < 0)){
+	    return -1;
+	}
+	return (stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino);
+}
+
+archivoMMAP* buscar_archivo_mmap(int fd_archivo){
+	return list_find(lista_archivos_mmap,(void*) igualArchivo);
+}
+
+
+void agregar_archivo_mmap(FILE* archivoAAgregar, int pid, t_list* tabla_paginas){
+	archivoMMAP* nuevoArchivoMMAP = malloc(sizeof(archivoMMAP));
+
+	nuevoArchivoMMAP->archivo = archivoAAgregar;
+	nuevoArchivoMMAP->programas = list_create();
+	list_add(nuevoArchivoMMAP->programas, pid);
+	nuevoArchivoMMAP->tabla_paginas = tabla_paginas;
+
+	list_add(lista_archivos_mmap, nuevoArchivoMMAP);
+}
+
+int crear_nuevo_segmento_mmap(size_t length, uint32_t pid){
+	int nro_prog = search_program(pid);
+	program* prog = list_get(program_list, nro_prog);
+
+	segment* seg;
+	page* pag;
+	seg = (segment *) malloc(sizeof(segment));
+	seg->is_heap = false;
+	seg->page_table = list_create();
+	seg->limit = 0;
+	int nro_pag;
+	int total_pages_needed;
+
+	int numeroDeSegmentos = list_size(prog->segment_table);
+
+	if(numeroDeSegmentos > 0){
+		segment* ultimoSegmento = list_get(prog->segment_table, numeroDeSegmentos - 1);
+		seg->base = ultimoSegmento->limit + 1;
+	}else{
+		seg->base = 0;
+	}
+
+	list_add(prog->segment_table, seg);
+
+	total_pages_needed = (length / PAGE_SIZE) + ((length % PAGE_SIZE) != 0); // ceil(length / PAGE_SIZE);
+
+	//vamos a pedir todo el resto de paginas que necesitemos
+	for(int i=0 ; i < total_pages_needed ; i++ )
+	{
+		pag = (page *) malloc(sizeof(page));
+		pag->is_used = true;
+		pag->is_modify = false;
+		pag->is_present = false;
+		nro_pag = list_add(seg->page_table, pag);
+		seg->limit += PAGE_SIZE;
+	}
+
+	log_debug(debug_logger, "Limite del segmento nuevo ----> %d", seg->limit);
+
+	return seg->base;
+}
+
+int obtener_tamanio_archivo(int fileDescriptor){
+	struct stat st;
+	fstat(fileDescriptor, &st);
+	return st.st_size;
+}
+
 // Apalancándonos en el mismo mecanismo que permite el swapping de páginas,
 // la funcionalidad de memoria compartida que proveerá MUSE (a través de sus 
 // funciones de muse_map) se realizará sobre un archivo compartido, en vez 
 // del archivo de swap. Esta distinción deberá estar plasmada en la tabla de segmentos.
-uint32_t memory_map(char *path, size_t length, int flags, uint32_t pid)
+uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 {
-	/* Idea Original:*/
-	int file_descriptor = open(path, O_RDONLY);
- 	void* map = mmap(NULL, length, PROT_NONE, flags, file_descriptor, 0);
- 	printf(map, length);
+	int nro_prog;
+	program* prog;
+	segment* segmentoNuevo;
+	int direccionDelSegmento;
 
-	crear_nuevo_segmento_mmap(length,map,pid); 
+	if((nro_prog = search_program(pid)) == -1)
+	{
+		prog = (program *) malloc(sizeof(program));
+		prog->pid = pid;
+		prog->segment_table = list_create();
+		nro_prog = list_add(program_list, prog);
+		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", nro_prog);
+	}
 
-	return *(int*) map; 
+	FILE* archivoAMapear = fopen(path,"r+");
 
-	// How does mmap works:
-	// mmap() creates a new mapping in the virtual address space of the calling process.
-	// addr specifies address for the file, length specifies the length of the mapping 
-	// void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset); 
+	if(archivoAMapear == NULL){
+
+		log_debug(debug_logger, "El archivo no existe, lo creo");
+		archivoAMapear = fopen(path,"w+");
+		log_debug(debug_logger, "path recibido: %s", path);
+
+		if(archivoAMapear == NULL){
+			log_error(debug_logger, "No se pudo crear el archivo");
+		}
+		void* bufferArchivoVacio = malloc(length);
+		memset(bufferArchivoVacio,'\0',length);
+		fwrite(bufferArchivoVacio,length,1,archivoAMapear);
+		fclose(archivoAMapear);
+		free(bufferArchivoVacio);
+
+		archivoAMapear = fopen(path,"r+");
+	}
+
+	int fileDescriptorArchivo = fileno(archivoAMapear);
+	archivoMMAP* archivoMMAPEncontrado = buscar_archivo_mmap(fileDescriptorArchivo);
+
+	switch(flag){
+		case MAP_SHARED:
+			log_debug(debug_logger, "la flag de MAP es: Map shared");
+			if(archivoMMAPEncontrado == NULL){
+				log_debug(debug_logger, "Es la primera vez que se mapea este archivo");
+				// todavia no mapeamos el archivo
+				direccionDelSegmento = crear_nuevo_segmento_mmap(length, pid);
+
+				int nroSegmentoNuevo = busca_segmento(prog, direccionDelSegmento);
+				segmentoNuevo = list_get(prog->segment_table, nroSegmentoNuevo);
+
+				segmentoNuevo->archivo_mapeado = archivoAMapear;
+				segmentoNuevo->tam_archivo_mmap = obtener_tamanio_archivo(fileDescriptorArchivo);
+
+				agregar_archivo_mmap(archivoAMapear, pid, segmentoNuevo->page_table);
+
+				// AGREGAR MEMSET DE \0 AL FINAL DEL ARCHIVO SI ES NECESARIO EXTENDER
+			}
+			else{
+				// el archivo ya fue mapeado
+				direccionDelSegmento = crear_nuevo_segmento_mmap(length, pid);
+
+				int nroSegmentoNuevo = busca_segmento(prog, direccionDelSegmento);
+				segmentoNuevo = list_get(prog->segment_table, nroSegmentoNuevo);
+
+				segmentoNuevo->page_table = archivoMMAPEncontrado->tabla_paginas;
+				segmentoNuevo->archivo_mapeado = archivoMMAPEncontrado->archivo;
+				segmentoNuevo->tam_archivo_mmap = obtener_tamanio_archivo(fileDescriptorArchivo);
+
+				list_add(archivoMMAPEncontrado->programas, pid);
+				fclose(archivoAMapear);
+			}
+			segmentoNuevo->tipo_map = 1;
+			break;
+		case MAP_PRIVATE:
+			log_debug(debug_logger, "la flag de MAP es: Map private");
+			direccionDelSegmento = crear_nuevo_segmento_mmap(length, pid);
+			log_debug(debug_logger, "direccion del segmento ----> %d", direccionDelSegmento);
+
+			int nroSegmentoNuevo = busca_segmento(prog, direccionDelSegmento);
+			segmentoNuevo = list_get(prog->segment_table, nroSegmentoNuevo);
+
+			segmentoNuevo->tam_archivo_mmap = obtener_tamanio_archivo(fileDescriptorArchivo);
+
+			if(archivoMMAPEncontrado == NULL){
+				// todavia no mapeamos el archivo
+				segmentoNuevo->archivo_mapeado = archivoAMapear;
+				agregar_archivo_mmap(archivoAMapear, pid, NULL);
+			}
+			else{
+				// el archivo ya fue mapeado
+				segmentoNuevo->archivo_mapeado = archivoMMAPEncontrado->archivo;
+				list_add(archivoMMAPEncontrado->programas, pid);
+				fclose(archivoAMapear);
+			}
+			segmentoNuevo->tipo_map = 0;
+			break;
+	}
+
+	///Para testear
+
+
+
+
+	return 0;
 }
 
 /* mapea el archivo swap integramente */
