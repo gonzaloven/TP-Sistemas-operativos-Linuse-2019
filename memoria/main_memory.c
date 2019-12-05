@@ -286,16 +286,15 @@ heap_metadata* proxima_metadata(int paginaABuscar, int offset, segment* segmento
 
 	int bytesAMoverme = metadataActual->size + METADATA_SIZE;
 	//Si la proxima metadata queda en otra pagina, me muevo hasta ahi
-	if(bytesAMoverme > PAGE_SIZE){
+	if(bytesAMoverme >= PAGE_SIZE){
 
 		int cantidadDePaginasAMoverme = floor(bytesAMoverme/PAGE_SIZE);
 		int offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE) + offset;
 
-		if(offsetDentroDeLaPagina > 31){
+		if(offsetDentroDeLaPagina > (PAGE_SIZE - 1)){
 			offsetDentroDeLaPagina -= PAGE_SIZE;
 			cantidadDePaginasAMoverme += 1;
 		}
-
 
 		log_debug(debug_logger, "Tengo que buscar: paginasAMoverme: %d, offsetdentrodePagina: %d, estoy en la pagina: %d, offset: %d",
 				cantidadDePaginasAMoverme,
@@ -321,13 +320,7 @@ heap_metadata* proxima_metadata(int paginaABuscar, int offset, segment* segmento
 	}else{
 		page* paginaActual = list_get(segmento->page_table, paginaABuscar);
 
-		int bytesRestantesEnLaPagina = PAGE_SIZE - offset;
-
-		if((bytesRestantesEnLaPagina - bytesAMoverme) >= METADATA_SIZE){
-			metadataSiguiente = (heap_metadata*) ((paginaActual->fr) + bytesAMoverme + offset);
-		}else{
-			return NULL;
-		}
+		metadataSiguiente = (heap_metadata*) ((paginaActual->fr) + bytesAMoverme + offset);
 	}
 		return metadataSiguiente;
 }
@@ -340,12 +333,12 @@ heap_metadata* metadata_siguiente(int paginaABuscar, int offset, int *cantidadDe
 
 	int bytesAMoverme = metadataActual->size + METADATA_SIZE;
 	//Si la proxima metadata queda en otra pagina, me muevo hasta ahi
-	if(bytesAMoverme > PAGE_SIZE){
+	if(bytesAMoverme >= PAGE_SIZE){
 
 		*cantidadDePaginasAMoverme = floor(bytesAMoverme/PAGE_SIZE);
 		*offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE) + offset;
 
-		if(*offsetDentroDeLaPagina > 31){
+		if(*offsetDentroDeLaPagina > (PAGE_SIZE - 1)){
 			*offsetDentroDeLaPagina -= PAGE_SIZE;
 			*cantidadDePaginasAMoverme += 1;
 		}
@@ -374,53 +367,30 @@ heap_metadata* metadata_siguiente(int paginaABuscar, int offset, int *cantidadDe
 	}else{
 		page* paginaActual = list_get(segmento->page_table, paginaABuscar);
 
-		int bytesRestantesEnLaPagina = PAGE_SIZE - offset;
-
-		if((bytesRestantesEnLaPagina - bytesAMoverme) >= METADATA_SIZE){
-			metadataSiguiente = (heap_metadata*) ((paginaActual->fr) + bytesAMoverme + offset);
-			*offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE);
-		}else{
-			return NULL;
-		}
+		metadataSiguiente = (heap_metadata*) ((paginaActual->fr) + bytesAMoverme + offset);
+		*offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE);
 	}
 
 	return metadataSiguiente;
 }
 
-int tiene_un_siguiente(heap_metadata* metadataActual, int paginaABuscar, int offset, segment* segmento){
-	heap_metadata* metadataSiguiente;
-	int cantidadDePaginasAMoverme = 0;
-	int offsetDentroDeLaPagina = 0;
 
-	metadataSiguiente = metadata_siguiente(paginaABuscar, offset, &cantidadDePaginasAMoverme, &offsetDentroDeLaPagina, segmento);
+int ultima_metadata_segmento(int dirLogica, int pid){
+	int nro_prog = search_program(pid);
+	program *prog = list_get(program_list, nro_prog);
 
-	if(metadataSiguiente == NULL){
-		return 0;
+	int nro_segmento = busca_segmento(prog, dirLogica);
+	segment* segmentoActual = list_get(prog->segment_table, nro_segmento);
+	heap_metadata* metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
+
+	int dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
+
+	if(dirLogicaSiguienteMetadata == segmentoActual->limit){
+		return dirLogica;
 	}
-
-	return 1;
-}
-
-int ultima_metadata_segmento(int paginaABuscar, int offset, segment* segmento, int cantidadDePaginasMovidas, int offsetTotalMovido){
-	int cantidadDePaginasAMoverme = 0;
-	int offsetDentroDeLaPagina = 0;
-	heap_metadata* metadataSiguiente;
-
-	metadataSiguiente = metadata_siguiente(paginaABuscar, offset, &cantidadDePaginasAMoverme, &offsetDentroDeLaPagina, segmento);
-
-	paginaABuscar = cantidadDePaginasAMoverme;
-	offset = offsetDentroDeLaPagina;
-
-	cantidadDePaginasMovidas += paginaABuscar;
-	offsetTotalMovido += offset;
-
-	if(!tiene_un_siguiente(metadataSiguiente, cantidadDePaginasAMoverme, offsetDentroDeLaPagina, segmento)){
-		int direccionLogicaMetadataLibre = cantidadDePaginasMovidas * PAGE_SIZE + offsetTotalMovido;
-		return direccionLogicaMetadataLibre;
-	}else{
-		return ultima_metadata_segmento(cantidadDePaginasAMoverme, offsetDentroDeLaPagina, segmento, cantidadDePaginasMovidas, offsetTotalMovido);
+	else{
+		return ultima_metadata_segmento(dirLogicaSiguienteMetadata, pid);
 	}
-
 }
 
 //Esto cuando se usa la idea es pasarle inicialmente -> PaginaABuscar = 0, Offset = 0, Segmento = el segmento que estemos queriendo recorrer
@@ -554,7 +524,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		//Busco la ultima metadata que deberia estar libre y la agrando
 		heap_metadata* ultimaMetadata;
 
-		int direccionLogicaUltimaMetadata = ultima_metadata_segmento(0, 0, segmentoAAgrandar, 0, 0);
+		int direccionLogicaUltimaMetadata = ultima_metadata_segmento(segmentoAAgrandar->base, pid);
 
 		ultimaMetadata = buscar_metadata_por_direccion(direccionLogicaUltimaMetadata, segmentoAAgrandar);
 
