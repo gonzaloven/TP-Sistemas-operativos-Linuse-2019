@@ -145,6 +145,10 @@ uint32_t muse_invoke_function(Function *function,uint32_t pid)
 			log_debug(muse_logger,"Unmap called");
 			func_ret = memory_unmap(function->args[0].value.val_u32,pid);
 			break;
+		case FUNCTION_MUSE_CLOSE:
+			log_debug(muse_logger,"Close called");
+			func_ret = memory_close(pid);
+			break;
 		default:
 			log_error(muse_logger,"Unknown function");
 			func_ret = 0;

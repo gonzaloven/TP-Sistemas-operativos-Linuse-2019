@@ -249,6 +249,23 @@ int dame_nro_frame_reemplazado(){
 	}
 }
 
+//TODO
+void memory_close(uint32_t pid){
+	int nro_prog = search_program(pid);
+
+	//deberia sacarlo de la lista
+	program *prog = list_get(program_list, nro_prog);
+
+	//liberar su tabla de segmentos
+	prog->segment_table;
+
+	//liberar la tabla de paginas de cada segmento
+
+	//liberar todos los frames usados
+
+	//liberar archivos mmapeados que no sean shared
+}
+
 void metricas_por_socket_conectado(uint32_t pid){
 	int nro_prog = search_program(pid);
 	program *prog = list_get(program_list, nro_prog);
