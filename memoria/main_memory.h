@@ -12,9 +12,9 @@
 #include <unistd.h>
 #include <math.h>
 
-//#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
+#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
-#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
+//#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 /**
  * @struct program_s   
@@ -74,7 +74,7 @@ typedef struct segment_s
 /**
  * @param memory_size y @param page_size salen del archivo config
  */
-void muse_main_memory_init(int memory_size, int page_size);
+void muse_main_memory_init(int memory_size, int page_size, int swap_size);
 
 void muse_main_memory_stop();
 
@@ -176,6 +176,12 @@ int proxima_metadata_libre(int dirLogica, segment* segmentoActual);
 
 segment* ultimo_segmento_programa(program *prog);
 
-//xq no se que problema tenía math.h
+int dame_nro_frame_reemplazado();
+
+int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento);
+
+int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame);
+
+int frame_swap_libre();
 
 #endif

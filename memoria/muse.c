@@ -21,7 +21,7 @@ void muse_start_service(ConnectionHandler ch)
 {
 	muse_config = load_configuration(MUSE_CONFIG_PATH);
 	muse_logger = log_create(MUSE_LOG_PATH,"MUSE",true,LOG_LEVEL_TRACE);
-	muse_main_memory_init(muse_config->memory_size,muse_config->page_size);
+	muse_main_memory_init(muse_config->memory_size,muse_config->page_size,muse_config->swap_size);
 	server_start(muse_config->listen_port,ch);
 	//Va a funcionar hasta que le manden un ctrl+c
 }
@@ -144,6 +144,10 @@ uint32_t muse_invoke_function(Function *function,uint32_t pid)
 		case FUNCTION_UNMAP:
 			log_debug(muse_logger,"Unmap called");
 			func_ret = memory_unmap(function->args[0].value.val_u32,pid);
+			break;
+		case FUNCTION_MUSE_CLOSE:
+			log_debug(muse_logger,"Close called");
+			func_ret = memory_close(pid);
 			break;
 		default:
 			log_error(muse_logger,"Unknown function");

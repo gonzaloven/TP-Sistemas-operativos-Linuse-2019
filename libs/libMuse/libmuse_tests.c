@@ -55,7 +55,13 @@ int main(int argc,char *argv[])
 	return 0;
 }
 void imprimir(int alocados, int dir){
-	printf("La direccion_vir de los %d bytes reservados es %d(dec),	%s(bin)\n", alocados, dir, byte_to_binary(dir));
+	printf("La direccion_vir de los %d 	bytes reservados es %d(dec),	%s(bin)\n", alocados, dir, byte_to_binary(dir));
+}
+
+void alocar_y_mostrar(int size)
+{
+	int	dir = muse_alloc(size);
+	imprimir(size, dir);
 }
 
 void foo1(){
@@ -73,19 +79,35 @@ void foo1(){
 		printf("Se libero la direccion logica %d\n",dir);
 		muse_free(dir2);
 		printf("Se libero la direccion logica %d\n",dir2);
+
+		int dir5 = muse_alloc(50);
+		imprimir(50, dir5);
+
 		muse_free(dir3);
 		printf("Se libero la direccion logica %d\n",dir3);
 		muse_free(dir4);
 		printf("Se libero la direccion logica %d\n",dir4);
+
+		int dir6 = muse_alloc(20);
+		imprimir(20, dir6);
 
 		muse_close();
 }	
 
 void foo2()
 {
-	int dir4 = muse_alloc(20);
-	imprimir(20, dir4);
+	alocar_y_mostrar(10);
+	alocar_y_mostrar(30);
+	alocar_y_mostrar(10);
+	alocar_y_mostrar(500);
+	alocar_y_mostrar(1000);
+	alocar_y_mostrar(1000);
+	alocar_y_mostrar(1000);
+	alocar_y_mostrar(500);
+	alocar_y_mostrar(63);
+	alocar_y_mostrar(32);
 }
+
 
 void foo3(){
 	

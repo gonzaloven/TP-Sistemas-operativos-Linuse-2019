@@ -46,8 +46,23 @@ int call(Function *function)
 
 void muse_close()
 {
-	close(MASTER_SOCKET);
-	return;
+	Function function;
+	Arg arg; //argumento
+
+	arg.type = VAR_UINT32;
+	arg.size = sizeof(uint32_t);
+	arg.value.val_u32 = 1;
+
+	function.type = FUNCTION_MUSE_CLOSE;
+	function.num_args = 1;
+	function.args[0] = arg;
+
+	///Hay que hacer que libere todo tambien de ese programa
+	int result = call(&function);
+
+	if(result != -1){
+		close(MASTER_SOCKET);
+	}
 }
 
 uint32_t muse_alloc(uint32_t tam)
