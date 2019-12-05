@@ -46,6 +46,7 @@ int call(Function *function)
 
 void muse_close()
 {
+	///Hay que hacer que libere todo tambien de ese programa
 	close(MASTER_SOCKET);
 	return;
 }

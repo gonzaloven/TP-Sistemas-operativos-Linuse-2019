@@ -73,10 +73,17 @@ void foo1(){
 		printf("Se libero la direccion logica %d\n",dir);
 		muse_free(dir2);
 		printf("Se libero la direccion logica %d\n",dir2);
+
+		int dir5 = muse_alloc(50);
+		imprimir(50, dir5);
+
 		muse_free(dir3);
 		printf("Se libero la direccion logica %d\n",dir3);
 		muse_free(dir4);
 		printf("Se libero la direccion logica %d\n",dir4);
+
+		int dir6 = muse_alloc(20);
+		imprimir(20, dir6);
 
 		muse_close();
 }	
