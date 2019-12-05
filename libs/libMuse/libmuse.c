@@ -138,15 +138,14 @@ int muse_cpy(uint32_t dst, void* src, int n)
 {
 	Function function;
 	Arg arg[3];	//argumento
-	uint32_t *s = (uint32_t *)src;
 
 	arg[0].type = VAR_UINT32;
 	arg[0].size = sizeof(uint32_t);
 	arg[0].value.val_u32 = dst;
 
 	arg[1].type = VAR_VOID_PTR;
-	arg[1].size = sizeof(uint32_t);
-	arg[1].value.val_u32 = *s;
+	arg[1].size = n;
+	arg[1].value.val_voidptr = src;
 
 	arg[2].type = VAR_UINT32;
 	arg[2].size = sizeof(uint32_t);

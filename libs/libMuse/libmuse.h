@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 
-#define LIBMUSE_CONFIG_PATH "../../configs/libmuse.config"
+#define LIBMUSE_CONFIG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/configs/libmuse.config"
 
 t_config *config;
 

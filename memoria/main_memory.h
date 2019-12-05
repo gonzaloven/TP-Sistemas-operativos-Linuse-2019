@@ -12,7 +12,8 @@
 #include <unistd.h>
 #include <math.h>
 
-#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
+//#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
+#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 //#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
@@ -87,10 +88,6 @@ int busca_segmento(program *prog,uint32_t va);
 void* obtener_data_marco_heap(page* pagina);
 
 void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina);
-
-void agregar_frame_clock(page* page);
-
-page* ejecutar_algoritmo_clock_modificado();
 
 /**
  * Busca el process_id en program_list

@@ -930,7 +930,7 @@ uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 
 void* obtener_data_marco_heap(page* pagina){
     if(!pagina->is_present && number_of_free_frames() == 0){
-        page* page_mm = ejecutar_algoritmo_clock_modificado();
+    	/* page* page_mm = dame_nro_frame_reemplazado();
 
         void* buffer_page_mm = malloc(PAGE_SIZE);
         void* buffer_page_swap = malloc(PAGE_SIZE);
@@ -947,18 +947,15 @@ void* obtener_data_marco_heap(page* pagina){
         memcpy(MAIN_MEMORY + ((int)page_mm->fr * PAGE_SIZE),buffer_page_swap,PAGE_SIZE);
 
         page_mm->is_present = 0;
-        page_mm->fr = pagina->fr;
+        page_mm->fr = pagina->fr;*/
 
-        page* sacarFrame = page_with_free_size();
-        pagina->fr = sacarFrame->fr;
+        /*page* sacarFrame = page_with_free_size();
+        pagina->fr = sacarFrame->fr;*/
+
+    	int numFrame = dame_nro_frame_reemplazado();
+    	pagina->fr = (void*) numFrame;
         pagina->is_present = 1;
         pagina->is_used = 1;
-
-        agregar_frame_clock(pagina); // ESTA NO ESTA HECHA ---------
-
-        free(buffer_page_mm);
-        free(buffer_page_swap);
-        fclose(archivo_swap);
     }
     else if(!pagina->is_present && number_of_free_frames() > 0){
         void* buffer_page_swap = malloc(PAGE_SIZE);
@@ -975,8 +972,6 @@ void* obtener_data_marco_heap(page* pagina){
 
         memcpy(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),buffer_page_swap,PAGE_SIZE);
 
-        agregar_frame_clock(pagina);
-
         free(buffer_page_swap);
         fclose(archivo_swap);
     }
@@ -984,11 +979,9 @@ void* obtener_data_marco_heap(page* pagina){
     return (char*) MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE);
 }
 
-page* ejecutar_algoritmo_clock_modificado(){return NULL;}
-
 void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
     if(!pagina->is_present && number_of_free_frames() == 0){
-        page* page_mm = ejecutar_algoritmo_clock_modificado(); // ESTA FUNCTION FALTA ---------------
+        /*page* page_mm = ejecutar_algoritmo_clock_modificado(); // ESTA FUNCTION FALTA ---------------
 
         void* buffer_page_mm = malloc(PAGE_SIZE);
         void* buffer_page_mmap = malloc(PAGE_SIZE);
@@ -1003,10 +996,12 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
         fwrite(buffer_page_mm,PAGE_SIZE,1,archivo_swap);
 
         page_mm->fr = sacarFrame->fr;
-        page_mm->is_present = 0;
+        page_mm->is_present = 0;*/
 
-        sacarFrame = page_with_free_size();
-        pagina->fr = sacarFrame->fr;
+    	void* buffer_page_mmap = malloc(PAGE_SIZE);
+
+    	int numFrame = dame_nro_frame_reemplazado();
+    	pagina->fr = (void*) numFrame;
         pagina->is_present = 1;
         pagina->is_used = 1;
 
@@ -1026,11 +1021,12 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
             memset(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),'\0',PAGE_SIZE);
         }
 
-        agregar_frame_clock(pagina);
+        free(buffer_page_mmap);
+/*        agregar_frame_clock(pagina);
 
         free(buffer_page_mm);
         free(buffer_page_mmap);
-        fclose(archivo_swap);
+        fclose(archivo_swap);*/
     }
     else if(!pagina->is_present && number_of_free_frames() > 0){
         void* buffer_page_mmap = malloc(PAGE_SIZE);
@@ -1045,15 +1041,11 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
 
         memcpy(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),buffer_page_mmap,PAGE_SIZE);
 
-        agregar_frame_clock(pagina);
-
         free(buffer_page_mmap);
     }
 
     return (char*) MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE);
 }
-
-void agregar_frame_clock(page* page){}
 
 //Copia n bytes de LIBMUSE a MUSE
 uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)

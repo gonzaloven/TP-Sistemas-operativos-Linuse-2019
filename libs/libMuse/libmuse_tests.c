@@ -8,6 +8,7 @@ void foo2();
 void foo3();
 void foo4();
 void foo5();
+void foo6();
 
 const char *byte_to_binary(int x)
 {
@@ -47,6 +48,8 @@ int main(int argc,char *argv[])
 			case '4': foo4();
 			break;
 			case '5': foo5();
+			break;
+			case '6': foo6();
 			break;
 			default: puts("Error");
 		}
@@ -143,4 +146,10 @@ void foo5(){
 	muse_map("hola.txt", 20, 0);
 	muse_unmap("hola.txt");
 	muse_close();
+}
+
+void foo6(){
+	int int1 = 23;
+	int int2 = muse_alloc(25);
+	muse_cpy(int2, &int1, sizeof(int));
 }
