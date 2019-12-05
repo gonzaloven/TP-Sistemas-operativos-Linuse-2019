@@ -68,8 +68,16 @@ typedef struct segment_s
 	uint32_t base; //base lógica
 	uint32_t limit;
 	t_list *page_table;
-	void* archivo_mapeado;
+	FILE* archivo_mapeado;
+	int tipo_map; //0 privado, 1 compartido
+	int tam_archivo_mmap;
 }segment;
+
+typedef struct{
+	FILE* archivo;
+	t_list* tabla_paginas;
+	t_list* programas;
+}archivoMMAP;
 
 /**
  * @param memory_size y @param page_size salen del archivo config

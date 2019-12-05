@@ -166,11 +166,12 @@ uint32_t muse_map(char *path, size_t length, int flags)
 {
 	Function function;
 	Arg arg[3];	//argumento
-	char *s = (char *)path;
+	char *s = path;
 
-	arg[0].type = VAR_CHAR_PTR;
-	arg[0].size = sizeof(uint32_t);
-	arg[0].value.val_u32 = *s;
+	function.args[0].type = VAR_CHAR_PTR;
+	function.args[0].size = strlen(path) + 1;
+	function.args[0].value.val_charptr = malloc(function.args[0].size);
+	memcpy(function.args[0].value.val_charptr, path, function.args[0].size);
 
 	arg[1].type = VAR_SIZE_T;
 	arg[1].size = sizeof(size_t);
@@ -182,7 +183,6 @@ uint32_t muse_map(char *path, size_t length, int flags)
 
 	function.type = FUNCTION_MAP;
 	function.num_args = 3;
-	function.args[0] = arg[0];
 	function.args[1] = arg[1];
 	function.args[2] = arg[2];
 
