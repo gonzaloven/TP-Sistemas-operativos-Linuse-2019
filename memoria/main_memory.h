@@ -12,9 +12,9 @@
 #include <unistd.h>
 #include <math.h>
 
-//#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
+#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
-#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
+//#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 /**
  * @struct program_s   
@@ -71,6 +71,7 @@ typedef struct segment_s
 	FILE* archivo_mapeado;
 	int tipo_map; //0 privado, 1 compartido
 	int tam_archivo_mmap;
+
 }segment;
 
 typedef struct{
@@ -82,7 +83,7 @@ typedef struct{
 /**
  * @param memory_size y @param page_size salen del archivo config
  */
-void muse_main_memory_init(int memory_size, int page_size);
+void muse_main_memory_init(int memory_size, int page_size, int swap_size);
 
 void muse_main_memory_stop();
 
@@ -91,6 +92,14 @@ int number_of_free_frames();
 void metricas_por_socket_conectado(uint32_t pid);
 
 int busca_segmento(program *prog,uint32_t va);
+
+void* obtener_data_marco_heap(page* pagina);
+
+void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina);
+
+void agregar_frame_clock(page* page);
+
+page* ejecutar_algoritmo_clock_modificado();
 
 /**
  * Busca el process_id en program_list
@@ -172,11 +181,16 @@ uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid);
 */
 int memory_unmap(uint32_t dir, uint32_t pid);
 
-//int proxima_metadata_libre(int paginaABuscar, int offset, segment* segmento, int size, int cantidadDePaginasMovidas, int offsetTotalMovido);
 int proxima_metadata_libre(int dirLogica, segment* segmentoActual);
 
 segment* ultimo_segmento_programa(program *prog);
 
-//xq no se que problema tenía math.h
+int dame_nro_frame_reemplazado();
+
+int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento);
+
+int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame);
+
+int frame_swap_libre();
 
 #endif
