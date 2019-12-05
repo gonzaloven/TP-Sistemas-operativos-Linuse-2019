@@ -499,29 +499,50 @@ int segment_with_free_space(program *prog, int size)
 	return -1;
 }
 
+bool tiene_siguiente(int direccionLogicaMetadata, segment* segmento){
+	if(direccionLogicaMetadata == segmento->limit){
+		return false;
+	}else{
+		return true;
+	}
+}
+
 //Tengo que testear si la hice bien TODO (creo que no, ya no me da el cerebro)
-void compactar_en_segmento(int direccionLogicaMetadataLibreInicial, int direccionLogicaSiguiente, int direccionLogicaSiguienteSiguiente, segment* segmento){
+void compactar_en_segmento(int direccionLogicaMetadataLibreInicial, int direccionLogicaSiguiente, segment* segmento){
+
 	heap_metadata* metadataLibreInicial = buscar_metadata_por_direccion(direccionLogicaMetadataLibreInicial, segmento);
 	log_debug(debug_logger, "Metadata inicial de %d de size", metadataLibreInicial->size);
-	heap_metadata* metadataSiguiente = buscar_metadata_por_direccion(direccionLogicaSiguiente, segmento);
-	log_debug(debug_logger, "Metadata siguiente de %d de size", metadataSiguiente->size);
-	heap_metadata* metadataSiguienteSiguiente = buscar_metadata_por_direccion(direccionLogicaSiguienteSiguiente, segmento);
-	log_debug(debug_logger, "Metadata siguiente siguiente de %d de size", metadataSiguienteSiguiente->size);
 
-	if(metadataSiguiente->is_free){
-		metadataLibreInicial->size += metadataSiguiente->size;
-		metadataSiguiente->is_free = 1;
-		int direccionSiguienteSiguienteSiguiente = direccionLogicaSiguienteSiguiente + metadataSiguienteSiguiente->size + METADATA_SIZE;
-		compactar_en_segmento(direccionLogicaMetadataLibreInicial, direccionLogicaSiguiente, direccionSiguienteSiguienteSiguiente, segmento);
+	if(!tiene_siguiente(direccionLogicaSiguiente, segmento))
+	{
+		heap_metadata* metadataSiguiente = buscar_metadata_por_direccion(direccionLogicaSiguiente, segmento);
 
-	}else{
-		direccionLogicaMetadataLibreInicial = proxima_metadata_libre(direccionLogicaSiguiente, segmento);
-		metadataLibreInicial = buscar_metadata_por_direccion(direccionLogicaMetadataLibreInicial, segmento);
-		direccionLogicaSiguiente = direccionLogicaMetadataLibreInicial + METADATA_SIZE + metadataLibreInicial->size;
-		metadataSiguiente = buscar_metadata_por_direccion(direccionLogicaSiguiente, segmento);
-		direccionLogicaSiguienteSiguiente = direccionLogicaSiguiente + METADATA_SIZE + metadataSiguiente->size;
-		compactar_en_segmento(direccionLogicaMetadataLibreInicial, direccionLogicaSiguiente, direccionLogicaSiguienteSiguiente, segmento);
+		if(metadataSiguiente->is_free){
+			metadataLibreInicial->size += metadataSiguiente->size;
+			metadataSiguiente->is_free = 1;
+		}
+	}
+	else
+	{
+		heap_metadata* metadataSiguiente = buscar_metadata_por_direccion(direccionLogicaSiguiente, segmento);
+		log_debug(debug_logger, "Metadata siguiente de %d de size", metadataSiguiente->size);
 
+		if(metadataSiguiente->is_free){
+			metadataLibreInicial->size += metadataSiguiente->size;
+			metadataSiguiente->is_free = 1;
+
+			int direccionSiguienteSiguienteSiguiente = direccionLogicaSiguiente + metadataSiguiente->size + METADATA_SIZE;
+
+			compactar_en_segmento(direccionLogicaMetadataLibreInicial, direccionSiguienteSiguienteSiguiente, segmento);
+		}else{
+			direccionLogicaMetadataLibreInicial = proxima_metadata_libre(direccionLogicaSiguiente, segmento);
+
+			metadataLibreInicial = buscar_metadata_por_direccion(direccionLogicaMetadataLibreInicial, segmento);
+
+			direccionLogicaSiguiente = direccionLogicaMetadataLibreInicial + METADATA_SIZE + metadataLibreInicial->size;
+
+			compactar_en_segmento(direccionLogicaMetadataLibreInicial, direccionLogicaSiguiente, segmento);
+		}
 	}
 }
 
@@ -538,11 +559,14 @@ void compactar_espacios_libres(program *prog){
 
 		int direccionLogicaMetadataLibre = proxima_metadata_libre(segmentoActual->base, segmentoActual);
 		heap_metadata* metadataLibreInicial = buscar_metadata_por_direccion(direccionLogicaMetadataLibre, segmentoActual);
-		int dirLogicaSiguienteMetadata = metadataLibreInicial->size + METADATA_SIZE + direccionLogicaMetadataLibre;
-		heap_metadata* metadataSiguiente = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmentoActual);
-		int dirLogicaSiguienteSiguiente = metadataSiguiente->size + METADATA_SIZE + dirLogicaSiguienteMetadata;
 
-		compactar_en_segmento(direccionLogicaMetadataLibre, dirLogicaSiguienteMetadata, dirLogicaSiguienteSiguiente, segmentoActual);
+		if(tiene_siguiente(direccionLogicaMetadataLibre, segmentoActual))
+		{
+			int dirLogicaSiguienteMetadata = metadataLibreInicial->size + METADATA_SIZE + direccionLogicaMetadataLibre;
+			heap_metadata* metadataSiguiente = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmentoActual);
+
+			compactar_en_segmento(direccionLogicaMetadataLibre, dirLogicaSiguienteMetadata, segmentoActual);
+		}
 	}
 
 }
