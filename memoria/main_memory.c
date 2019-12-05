@@ -289,13 +289,23 @@ heap_metadata* proxima_metadata(int paginaABuscar, int offset, segment* segmento
 	if(bytesAMoverme > PAGE_SIZE){
 
 		int cantidadDePaginasAMoverme = floor(bytesAMoverme/PAGE_SIZE);
-		int offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE);
+		int offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE) + offset;
+
+		if(offsetDentroDeLaPagina > 31){
+			offsetDentroDeLaPagina -= PAGE_SIZE;
+			cantidadDePaginasAMoverme += 1;
+		}
+
 
 		log_debug(debug_logger, "Tengo que buscar: paginasAMoverme: %d, offsetdentrodePagina: %d, estoy en la pagina: %d, offset: %d",
 				cantidadDePaginasAMoverme,
 				offsetDentroDeLaPagina,
 				paginaABuscar,
 				offset);
+
+		if((paginaABuscar + cantidadDePaginasAMoverme) > segmento->page_table->elements_count){
+			return NULL;
+		}
 
 		page* paginaSiguiente = list_get(segmento->page_table, paginaABuscar + cantidadDePaginasAMoverme);
 
@@ -311,10 +321,15 @@ heap_metadata* proxima_metadata(int paginaABuscar, int offset, segment* segmento
 	}else{
 		page* paginaActual = list_get(segmento->page_table, paginaABuscar);
 
-		metadataSiguiente = (heap_metadata*) ((paginaActual->fr) + bytesAMoverme);
-	}
+		int bytesRestantesEnLaPagina = PAGE_SIZE - offset;
 
-	return metadataSiguiente;
+		if((bytesRestantesEnLaPagina - bytesAMoverme) >= METADATA_SIZE){
+			metadataSiguiente = (heap_metadata*) ((paginaActual->fr) + bytesAMoverme + offset);
+		}else{
+			return NULL;
+		}
+	}
+		return metadataSiguiente;
 }
 
 heap_metadata* metadata_siguiente(int paginaABuscar, int offset, int *cantidadDePaginasAMoverme, int *offsetDentroDeLaPagina, segment* segmento){
@@ -328,7 +343,12 @@ heap_metadata* metadata_siguiente(int paginaABuscar, int offset, int *cantidadDe
 	if(bytesAMoverme > PAGE_SIZE){
 
 		*cantidadDePaginasAMoverme = floor(bytesAMoverme/PAGE_SIZE);
-		*offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE);
+		*offsetDentroDeLaPagina = (bytesAMoverme % PAGE_SIZE) + offset;
+
+		if(*offsetDentroDeLaPagina > 31){
+			*offsetDentroDeLaPagina -= PAGE_SIZE;
+			*cantidadDePaginasAMoverme += 1;
+		}
 
 		log_debug(debug_logger, "Tengo que buscar: paginasAMoverme: %d, offsetdentrodePagina: %d, estoy en la pagina: %d, offset: %d",
 				*cantidadDePaginasAMoverme,
@@ -510,14 +530,14 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			int tamanioMetadataCortada = (PAGE_SIZE) - offset;
 
 			memcpy(&metadataCopia, metadataFinal, tamanioMetadataCortada);
-			memcpy((void*)(&metadataCopia) + 2, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
+			memcpy((void*)(&metadataCopia) + tamanioMetadataCortada, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
 
 			metadataCopia.is_free = 1;
 			metadataCopia.size = sizeAnterior - total_size;
 
 			memcpy(metadataFinal, &metadataCopia, tamanioMetadataCortada);
-			memcpy(punteroAlFrameSiguiente, (void*)(&metadataCopia) + 2, METADATA_SIZE - tamanioMetadataCortada);
-			log_debug(debug_logger, "La metadata final tiene ---> %d", metadataFinal->size);
+			memcpy(punteroAlFrameSiguiente, (void*)(&metadataCopia) + tamanioMetadataCortada, METADATA_SIZE - tamanioMetadataCortada);
+			log_debug(debug_logger, "La metadata cortada tiene ---> %d", metadataFinal->size);
 		}else{
 			metadataFinal->is_free = 1;
 			metadataFinal->size = sizeAnterior - total_size;
@@ -542,7 +562,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		float cantidadDePaginasAAgrandar = ceil(((float)(total_size - sizeAnterior))/PAGE_SIZE);
 
 		ultimaMetadata->is_free = 1;
-		ultimaMetadata->size = cantidadDePaginasAAgrandar * PAGE_SIZE;
+		ultimaMetadata->size = cantidadDePaginasAAgrandar * PAGE_SIZE + sizeAnterior;
 
 		for(int i=0 ; i < cantidadDePaginasAAgrandar ; i++ )
 		{
