@@ -18,11 +18,6 @@
 
 void *MAIN_MEMORY = NULL;
 
-/*int floor(float num)
-{
-	return (int)num;
-}*/
-
 t_list *program_list = NULL;
 t_list *segment_list = NULL;
 t_list *lista_archivos_mmap = NULL;
@@ -137,14 +132,13 @@ int number_of_free_frames(){
 
 	memoria_libre = frames_libres_2 * PAGE_SIZE;
 	memoria_total = TOTAL_FRAME_NUM_SWAP * PAGE_SIZE;
-	if(frames_libres_2<32)
-		printf("Que está pasando Dr.Garcia??\n");
+
 	log_trace(metricas_logger, "Cantidad de Espacio libre en SWAP: %d / %d", memoria_libre, memoria_total);	
 	log_trace(metricas_logger, "Cantidad de Frames libres en SWAP: %d / %d", frames_libres_2, TOTAL_FRAME_NUM_SWAP);
 
 	/* FIN SWAP SPACE */
 
-	return frames_libres_1;
+	return frames_libres_1 + frames_libres_2;
 }
 
 int proximo_frame_libre(){
@@ -161,18 +155,14 @@ int frames_needed(int size_total){
 	return (size_total/PAGE_SIZE + (size_total%PAGE_SIZE != 0));
 }
 
-//is_first_page y totalsize son los valores que se usan en la 1ra pagina pedida para meter la metadata
-//is_last_page y freesize (es el espacio libre que le queda a la última pag) la usaremos para la última metadata 
-//(no, is_first_page y is_last_page no son mutuamente excluyentes)
 page* page_with_free_size(){
-	heap_metadata* metadata;
-	heap_metadata* metadata2;
+	//heap_metadata* metadata;
+	//heap_metadata* metadata2;
 
 	int curr_frame_num;
-
 	page* pag = (page *) malloc(PAGE_SIZE);
 
-	for(curr_frame_num=0; true ; curr_frame_num++)
+	for(curr_frame_num=0; true; curr_frame_num++)
 	{	
 		if (curr_frame_num == TOTAL_FRAME_NUM){
 			log_debug(debug_logger, "Nos quedamos sin frames libres, aplicando algoritmo de reemplazo");
@@ -185,8 +175,7 @@ page* page_with_free_size(){
 			pag->is_present = 1;
 			pag->is_used = 1;
 			pag->is_modify = 0;
-			pag->fr = MAIN_MEMORY + (curr_frame_num * PAGE_SIZE);
-			
+			pag->fr = MAIN_MEMORY + (curr_frame_num * PAGE_SIZE);			
 			return pag;
 		}
 	}	
@@ -221,18 +210,19 @@ int dame_nro_frame_reemplazado(){
 			for(nro_de_pag = 0; nro_de_pag < cantidad_de_paginas_en_segmento; nro_de_pag++)
 			{
 				pag = list_get(seg->page_table,nro_de_pag);
+				if (pag->is_present == false) continue;
 				U = pag->is_used;
 				M = pag->is_modify;
 				if (nro_paso == 1){
 					if (!U && !M){	
 						nro_frame = se_hace_la_vistima(pag, nro_de_pag, nro_de_segmento);
-						return (nro_frame);											
-					} 
+						return nro_frame;											
+					}
 				}
 				if (nro_paso == 2){
 					if (!U && M){
 						nro_frame = se_hace_la_vistima(pag, nro_de_pag, nro_de_segmento);
-						return (nro_frame);	
+						return nro_frame;	
 					}
 					pag->is_used = 0;
 				}			
@@ -257,14 +247,17 @@ int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento)
 	BITMAP[nro_frame_upcm] = 1; //declaro como libre ese nro de frame
 
  	nro_frame_swap = mandar_al_archivo_swap_toda_la_pagina_que_esta_en(nro_frame_upcm);
-	if (nro_frame_swap >= 0)
+
+	if (nro_frame_swap == -1)
 		log_debug(debug_logger, "Nos quedamos sin frames libres en el archivo swap");
-	else
+	else{
 		log_debug(debug_logger, "La pagina victima se mando satisfactoriamente al archivo swap");
 
- 	pag->fr = (void*)nro_frame_swap;
-	pag->is_present = false;
+		memcpy( pag->fr, &nro_frame_swap, sizeof(int));
+		pag->is_present = false;
 
+		//pag->fr = (int) nro_frame_swap;
+	}
 	return nro_frame_upcm;
 }
 
@@ -275,6 +268,7 @@ int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame)
 	int nro_frame_swap = frame_swap_libre();
 	if (nro_frame_swap != -1)
 	{
+		//memcpy(buffer, &MAIN_MEMORY[nro_frame * PAGE_SIZE], PAGE_SIZE);
 		memcpy(buffer, MAIN_MEMORY + (nro_frame * PAGE_SIZE), PAGE_SIZE);
 
 		swap_file = fopen(SWAP_PATH,"r+");
@@ -400,6 +394,10 @@ heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segme
 int ultima_metadata_segmento(int dirLogica, segment* segmentoActual){
 
 	heap_metadata* metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
+	/*if (metadataActual == 0x0){
+		log_debug(debug_logger, "La metadataActual esta apuntando a la direccion 0x0 x alguna razon");
+		return -1;
+	}*/
 
 	int dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
 
@@ -415,6 +413,11 @@ int proxima_metadata_libre_con_size(int dirLogica, segment* segmentoActual, int 
 	heap_metadata* metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
 
 	int direccionUltimaMetadata = ultima_metadata_segmento(segmentoActual->base, segmentoActual);
+
+	/*if (metadataActual == 0x0){
+		log_debug(debug_logger, "La metadataActual esta apuntando a la direccion 0x0 x alguna razon");
+		return -1;
+	}*/
 
 	int dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
 
@@ -477,7 +480,12 @@ int proxima_metadata_libre(int dirLogica, segment* segmentoActual){
 
 uint32_t memory_malloc(int size, uint32_t pid)
 {	
-	if (size <= 0) return -1;
+	if (size <= 0) return 0;
+	if (size + METADATA_SIZE > number_of_free_frames() * PAGE_SIZE){
+		log_debug(debug_logger, "No se puede maloquear tanto espacio en memoria");
+		return 0;		
+	} 
+
 	int nro_prog;
 	uint32_t nro_seg;
 	uint32_t nro_pag;
@@ -606,11 +614,11 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		segmentoNuevo->page_table = list_create();
 		segmentoNuevo->base = 0;
 		segmentoNuevo->limit = 0;
-		nro_seg = list_add(prog->segment_table,segmentoNuevo);
-		log_debug(debug_logger, "Se creo el segmento n°%d ", nro_seg);	
-		list_add(segment_list, segmentoNuevo);
+		list_add(prog->segment_table, segmentoNuevo);			
+		nro_seg = list_add(segment_list, segmentoNuevo);
+		log_debug(debug_logger, "Se creo el segmento n° %d del sistema", nro_seg);
 
-		for(int i=0 ; i < cantidadDePaginasAAgregar ; i++ )
+		for(int i=0; i < cantidadDePaginasAAgregar; i++ )
 		{
 			//log_debug(debug_logger, "Size solicitado para PAGE_WITH_FREE_SIZE: %d", PAGE_SIZE);
 			pag = page_with_free_size();
@@ -628,13 +636,12 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		primerMetadata->size = (cantidadDePaginasAAgregar * PAGE_SIZE) - METADATA_SIZE;
 
 		return memory_malloc(size, pid);
-	}
+	}	
 	
-	metricas_por_socket_conectado(pid);
-	number_of_free_frames();
-
 	int direccionLogicaFinal = direccionLogicaMetadataLibre + METADATA_SIZE;
 	log_debug(debug_logger, "Direccion logica final del MALLOC ----> %d", direccionLogicaFinal); 
+
+	metricas_por_socket_conectado(pid);
 
 	return direccionLogicaFinal;
 }
@@ -768,10 +775,7 @@ void compactar_espacios_libres(program *prog){
 				compactar_en_segmento(direccionLogicaMetadataLibre, dirLogicaSiguienteMetadata, segmentoActual);
 			}
 		}
-
-
 	}
-
 }
 
 uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
@@ -896,7 +900,6 @@ uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	memcpy(dst, (void*) direccionFisicaBuscada, numBytes);
 
 	return src;
-
 }
 
 void* obtener_data_marco_heap(page* pagina){
