@@ -6,7 +6,8 @@
         "basic.h": "c",
         "main_memory.h": "c",
         "fcntl.h": "c",
-        "list.h": "c"
+        "list.h": "c",
+        "cmath": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

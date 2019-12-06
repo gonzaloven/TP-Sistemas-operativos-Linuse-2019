@@ -414,11 +414,6 @@ int proxima_metadata_libre_con_size(int dirLogica, segment* segmentoActual, int 
 
 	int direccionUltimaMetadata = ultima_metadata_segmento(segmentoActual->base, segmentoActual);
 
-	/*if (metadataActual == 0x0){
-		log_debug(debug_logger, "La metadataActual esta apuntando a la direccion 0x0 x alguna razon");
-		return -1;
-	}*/
-
 	int dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
 
 	if(direccionUltimaMetadata == dirLogicaSiguienteMetadata){
@@ -500,17 +495,17 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	int espacio_q_quedara_libre = total_pages_needed * PAGE_SIZE - total_size;
 	int is_first_page = 1;
 	
-	log_debug(debug_logger, "Se pidieron %d bytes, + metadata = %d ", size, total_size);
+	log_debug(debug_logger, "Se pidieron %d bytes, + metadata = %d", size, total_size);
 	
-	//si el programa no está en la lista de programas agregamos el programa a la lista de programas y le creamos una nueva tabla de segmentos
+	//si el programa no está en la lista de programas, se agrega y le creamos una nueva tabla de segmentos
 	if((nro_prog = search_program(pid)) == -1)
 	{
 		prog = (program *) malloc(sizeof(program));		
 		prog->pid = pid;
 		prog->segment_table = list_create();
 		nro_prog = list_add(program_list, prog);
-		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", nro_prog);
-	}	 
+		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas", nro_prog);
+	}
 
 	prog = list_get(program_list, nro_prog);	
 	
@@ -893,7 +888,6 @@ uint32_t buscar_direccion_fisica(uint32_t direccionSolicitada, size_t bytesNeces
 	return direccionFisicaBuscada;
 }
 // Copia n bytes de MUSE a LIBMUSE
-// No se usan ni dst ni src
 uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 {
 	int direccionFisicaBuscada = buscar_direccion_fisica(src, numBytes, pid);
@@ -1136,20 +1130,20 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	return dst;
 }
 
-int igualArchivo(archivoMMAP* archivo_mmap, int fileDescriptor) {
+int igualArchivo(archivoMMAP* archivo_mapeado, int fileDescriptor) {
 	struct stat stat1, stat2;
-	if((fstat(fileDescriptor, &stat1) < 0) || (fstat(fileno(archivo_mmap->archivo), &stat2) < 0)){
+	if((fstat(fileDescriptor, &stat1) < 0) || (fstat(fileno(archivo_mapeado->archivo), &stat2) < 0)){
 	    return -1;
 	}
 	return (stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino);
 }
 
-archivoMMAP* buscar_archivo_mmap(int fd_archivo){
+archivoMMAP* buscar_archivo_mapeado(int fd_archivo){
 	return list_find(lista_archivos_mmap,(void*) igualArchivo);
 }
 
 
-void agregar_archivo_mmap(FILE* archivoAAgregar, int pid, t_list* tabla_paginas){
+void agregar_archivo_mapeado(FILE* archivoAAgregar, int pid, t_list* tabla_paginas){
 	archivoMMAP* nuevoArchivoMMAP = malloc(sizeof(archivoMMAP));
 
 	nuevoArchivoMMAP->archivo = archivoAAgregar;
@@ -1249,7 +1243,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	}
 
 	int fileDescriptorArchivo = fileno(archivoAMapear);
-	archivoMMAP* archivoMMAPEncontrado = buscar_archivo_mmap(fileDescriptorArchivo);
+	archivoMMAP* archivoMMAPEncontrado = buscar_archivo_mapeado(fileDescriptorArchivo);
 
 	switch(flag){
 		case MAP_SHARED:
@@ -1265,7 +1259,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 				segmentoNuevo->archivo_mapeado = archivoAMapear;
 				segmentoNuevo->tam_archivo_mmap = obtener_tamanio_archivo(fileDescriptorArchivo);
 
-				agregar_archivo_mmap(archivoAMapear, pid, segmentoNuevo->page_table);
+				agregar_archivo_mapeado(archivoAMapear, pid, segmentoNuevo->page_table);
 
 				// AGREGAR MEMSET DE \0 AL FINAL DEL ARCHIVO SI ES NECESARIO EXTENDER
 			}
@@ -1274,6 +1268,15 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 				direccionDelSegmento = crear_nuevo_segmento_mmap(length, pid);
 
 				int nroSegmentoNuevo = busca_segmento(prog, direccionDelSegmento);
+
+				int i;
+
+				for(i=0; i < TOTAL_FRAME_NUM; i++)
+				{	
+					if((BITMAP[i])) return i;
+				}
+
+
 				segmentoNuevo = list_get(prog->segment_table, nroSegmentoNuevo);
 
 				segmentoNuevo->page_table = archivoMMAPEncontrado->tabla_paginas;
@@ -1298,7 +1301,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 			if(archivoMMAPEncontrado == NULL){
 				// todavia no mapeamos el archivo
 				segmentoNuevo->archivo_mapeado = archivoAMapear;
-				agregar_archivo_mmap(archivoAMapear, pid, NULL);
+				agregar_archivo_mapeado(archivoAMapear, pid, NULL);
 			}
 			else{
 				// el archivo ya fue mapeado
@@ -1324,8 +1327,6 @@ char* get_file_content_from_swap(char* swapfile){
 	int fileDescriptor;
 	struct stat estadoDelFile; //declaro una estructura que guarda el estado de un archivo
 
-
-
 	fileDescriptor = open(swapfile, O_RDWR);
 		/*Chequeo de apertura del file exitosa*/
 			if (fileDescriptor==-1){
@@ -1347,13 +1348,173 @@ char* get_file_content_from_swap(char* swapfile){
 	return fileMapeado;
 }
 
-uint32_t memory_sync(uint32_t addr, size_t len, uint32_t pid)
-{
-	/*synchronize a file with a memory map*/
-	//msync(addr, len, MS_SYNC);
-	return 0;
-} 
 
+	/**
+	* Descarga una cantidad `len` de bytes y lo escribe en el archivo en el FileSystem.
+	* @param direccion Dirección a memoria mappeada.
+	* @param len Cantidad de bytes a escribir.
+	* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+	* @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
+	* @example	
+		imagine we got uint32_t map = muse_map("hola.txt", filesize, MAP_PRIVATE);		
+		so let's imagine we do the following:
+			muse_sync(map, 200)
+		so we're basicly just writing 200 bytes of "nothing" to map	
+	*/
+
+/*
+uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
+{
+	program* prog;
+	segment* seg, segmento_obtenido;
+
+	//si el programa no está en la lista de programas, se agrega y le creamos una nueva tabla de segmentos
+	if((nro_prog = search_program(pid)) == -1)
+	{
+		log_debug(debug_logger, "Que hacés pidiendo un muse_sync sin antes hacer un mmap?");
+	}
+
+	//busco que segmento tenga asignado esa direccion
+	for(int i=0; i<list_size(prog->segment_table); i++)
+	{
+		segmento_obtenido = list_get(prog->segment_table,i);
+		if((segmento_obtenido->base <= direccion) && (segmento_obtenido->limite >= direccion))
+			seg = segmento_obtenido;			
+	}
+
+	int cantidad_paginas_necesarias = ceil(len / PAGE_SIZE);
+	printf("cantidad_paginas_necesarias %d\n",cantidad_paginas_necesarias);
+
+	//segmentation fault
+	if((seg == NULL) || (cantidad_paginas_necesarias > list_size(seg->tabla_paginas)) return 2;
+
+	//error (returen -1)
+	if(!(seg->is_heap) || (direccion % PAGE_SIZE != 0)) return 3;
+
+
+	int nro_pagina_obtenida = (direccion - seg->base) / PAGE_SIZE;
+	printf("nro_pagina_obtenida: %d\n",nro_pagina_obtenida);
+
+	page* pagina_obtenida;
+	void* direccion_datos;
+	int posicion_recorrida;
+	void* buffer;
+
+	buffer = malloc(cantidad_paginas_necesarias*PAGE_SIZE);
+
+	for(int i=0; i<cantidad_paginas_necesarias; i++)
+	{
+		pagina_obtenida = list_get(seg->tabla_paginas,i + nro_pagina_obtenida);
+		direccion_datos = dame_los_datos_de_mmap(seg, pagina_obtenida, i + nro_pagina_obtenida);
+		memcpy(&buffer[PAGE_SIZE*i], direccion_datos, PAGE_SIZE);
+	}
+
+	//el primer byte a escribir no debería superar el tamaño del archivo
+	if((nro_pagina_obtenida * PAGE_SIZE) <= seg->tam_archivo_mmap)
+	{
+		fseek(seg->archivo_mapeado, nro_pagina_obtenida * PAGE_SIZE, SEEK_SET);
+		int nro_bytes = (int) fmin(len, seg->tam_archivo_mmap);
+		printf("Bytes a escribir: %d\n",nro_bytes);
+		fwrite(buffer, nro_bytes, 1, seg->archivo_mapeado);
+		free(buffer);
+		return 1;
+	}
+	free(buffer);
+	return 3;
+}
+
+void* dame_los_datos_de_mmap(segment* seg, page* pag, int nro_pagina)
+{	//
+	if(!pag->bit_presencia && !espacio_en_MAIN_MEMORY()){
+    	page* pag_memoria = ejecutar_algoritmo_clock_modificado();
+		archivo_swap = fopen(SWAP_PATH,"r+");
+
+    	void* buffer_pag_upcm = malloc(TAM_PAGINA);
+    	void* buffer_pag_mmap = malloc(TAM_PAGINA);
+    	int frame_swap_obtenido;
+
+
+		for(i=0; i < TOTAL_FRAME_NUM; i++)
+		{	
+			if((BITMAP[i])) frame_swap_obtenido = i;
+		}
+
+    	memcpy(buffer_pag_upcm,&MAIN_MEMORY[pag_memoria->frame*TAM_PAGINA],TAM_PAGINA);		
+
+		fseek(archivo_swap,frame_swap_obtenido*TAM_PAGINA,SEEK_SET);
+		fwrite(buffer_pag_upcm,TAM_PAGINA,1,archivo_swap);
+
+		pag_memoria->frame = frame_swap_obtenido;
+    	pag_memoria->bit_presencia = 0;
+
+      	pag->frame = proximo_frame_libre();
+    	pag->bit_presencia = 1;
+    	pag->bit_usado = 1;
+
+    	// si este metodo no sirve, agregar un campo length_mmap en t_segmento
+    	if((nro_pagina*TAM_PAGINA) <= seg->tam_archivo_mmap){
+    		fseek(seg->archivo_mapeado,nro_pagina*TAM_PAGINA,SEEK_SET);
+
+    		int bytes_a_leer = (int)fmin(TAM_PAGINA,((nro_pagina*TAM_PAGINA) + TAM_PAGINA) - seg->tam_archivo_mmap);
+
+    		fread(buffer_pag_mmap,bytes_a_leer,1,seg->archivo_mapeado);
+    		memcpy(&archivo_mapeado[pag->frame*TAM_PAGINA],buffer_pag_mmap,bytes_a_leer);
+
+    		if(TAM_PAGINA > bytes_a_leer)
+    			memset(&archivo_mapeado[pag->frame*bytes_a_leer],'\0',TAM_PAGINA - bytes_a_leer);
+    	}
+    	else{
+    		// el primer byte a leer supera el tamano del archivo
+    		memset(&archivo_mapeado[pag->frame*TAM_PAGINA],'\0',TAM_PAGINA);
+    	}
+
+    	agregar_frame_clock(pag);
+
+    	free(buffer_pag_upcm);
+    	free(buffer_pag_mmap);
+    	fclose(archivo_swap);
+	}
+	else if(!pag->bit_presencia && espacio_en_upcm()){
+    	void* buffer_pag_mmap = malloc(TAM_PAGINA);
+
+    	pag->frame = proximo_frame_libre();
+    	pag->bit_presencia = 1;
+    	pag->bit_usado = 1;
+
+		fseek(seg->archivo_mapeado,nro_pagina * TAM_PAGINA,SEEK_SET);
+		fread(buffer_pag_mmap, TAM_PAGINA, 1, seg->archivo_mapeado);
+
+    	memcpy(&archivo_mapeado[pag->frame*TAM_PAGINA], buffer_pag_mmap, TAM_PAGINA);
+
+    	agregar_frame_clock(pag);
+
+    	free(buffer_pag_mmap);
+	}
+
+	return (char*) archivo_mapeado + (pag->frame * TAM_PAGINA);
+}
+
+void agregar_frame_clock(page* pag){
+	
+	if(list_size(lista_clock) == cantidad_frames){
+		list_replace(lista_clock,pag->frame,pag);
+	}
+	else{
+		//list_add_in_index(lista_clock,pagina->frame,pagina);
+		list_add_in_index(lista_clock,pag->frame,pag);
+	}
+}
+
+void* convertir_de_nro_frame_a_posicion (int nro_frame)
+{
+
+}
+
+int convertir_de_posicion_a_nro_de_frame (void* posicion)
+{
+	
+}
+*/
 
 int memory_unmap(uint32_t dir, uint32_t pid)
 {
