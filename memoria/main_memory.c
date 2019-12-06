@@ -390,9 +390,6 @@ heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segme
 		metadataBuscada->size = metadataCopia.size;
 
 		return metadataBuscada;
-
-		memcpy(metadataBuscada, &metadataCopia, tamanioMetadataCortada);
-		memcpy(punteroAlFrameSiguiente, (void*)(&metadataCopia) + tamanioMetadataCortada, METADATA_SIZE - tamanioMetadataCortada);
 	}
 
 	return metadataBuscada;
@@ -551,27 +548,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		modificar_metadata(direccionLogicaMetadataFinal, segmentoConEspacio, (sizeAnterior - total_size), 1);
 		log_debug(debug_logger, "La metadata final tiene ---> %d", metadataFinal->size);
 
-//		if((offset + METADATA_SIZE) > PAGE_SIZE){
-//			heap_metadata metadataCopia;
-//
-//			page* proximaPagina = list_get(segmentoConEspacio->page_table, (paginaDeLaMetadataLibre + 1));
-//			void* punteroAlFrameSiguiente = proximaPagina->fr;
-//			int tamanioMetadataCortada = (PAGE_SIZE) - offset;
-//
-//			memcpy(&metadataCopia, metadataFinal, tamanioMetadataCortada);
-//			memcpy((void*)(&metadataCopia) + tamanioMetadataCortada, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
-//
-//			metadataCopia.is_free = 1;
-//			metadataCopia.size = sizeAnterior - total_size;
-//
-//			memcpy(metadataFinal, &metadataCopia, tamanioMetadataCortada);
-//			memcpy(punteroAlFrameSiguiente, (void*)(&metadataCopia) + tamanioMetadataCortada, METADATA_SIZE - tamanioMetadataCortada);
-//			log_debug(debug_logger, "La metadata cortada tiene ---> %d", metadataFinal->size);
-//		}else{
-//			metadataFinal->is_free = 1;
-//			metadataFinal->size = sizeAnterior - total_size;
-//
-//		}
 	}
 	//Si su ultimo segmento es heap y tiene memoria están los frames que necesitamos
 	else if (list_size(prog->segment_table)>0 && ultimo_segmento_programa(prog)->is_heap)
@@ -1138,15 +1114,11 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	return dst;
 }
 
-int igualArchivo(archivoMMAP* archivo_mapeado, int fileDescriptor) {
-	struct stat stat1, stat2;
-	if((fstat(fileDescriptor, &stat1) < 0) || (fstat(fileno(archivo_mapeado->archivo), &stat2) < 0)){
-	    return -1;
-	}
-	return (stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino);
-}
+archivoMMAP* buscar_archivo_mmap(char* path){
 
-archivoMMAP* buscar_archivo_mapeado(int fd_archivo){
+	bool igualArchivo(archivoMMAP* archivo) {
+		return !strcmp(archivo->pathArchivo, path);
+	}
 	return list_find(lista_archivos_mmap,(void*) igualArchivo);
 }
 
@@ -1185,6 +1157,7 @@ int crear_nuevo_segmento_mmap(size_t length, uint32_t pid){
 	}
 
 	list_add(prog->segment_table, seg);
+	list_add(segment_list, seg);
 
 	total_pages_needed = (length / PAGE_SIZE) + ((length % PAGE_SIZE) != 0); // ceil(length / PAGE_SIZE);
 
@@ -1204,12 +1177,6 @@ int crear_nuevo_segmento_mmap(size_t length, uint32_t pid){
 	return seg->base;
 }
 
-int obtener_tamanio_archivo(int fileDescriptor){
-	struct stat st;
-	fstat(fileDescriptor, &st);
-	return st.st_size;
-}
-
 // Apalancándonos en el mismo mecanismo que permite el swapping de páginas,
 // la funcionalidad de memoria compartida que proveerá MUSE (a través de sus 
 // funciones de muse_map) se realizará sobre un archivo compartido, en vez 
@@ -1220,6 +1187,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	program* prog;
 	segment* segmentoNuevo;
 	int direccionDelSegmento;
+	archivoMMAP* archivoMappeado;
 
 	if((nro_prog = search_program(pid)) == -1)
 	{
@@ -1230,101 +1198,56 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", nro_prog);
 	}
 
-	FILE* archivoAMapear = fopen(path,"r+");
+	log_debug(debug_logger, "path recibido: %s", path);
 
-	if(archivoAMapear == NULL){
+	archivoMappeado = buscar_archivo_mmap(path);
 
-		log_debug(debug_logger, "El archivo no existe, lo creo");
-		archivoAMapear = fopen(path,"w+");
-		log_debug(debug_logger, "path recibido: %s", path);
+	if(archivoMappeado == NULL){
+		archivoMMAP* archivoMappeadoNuevo = (archivoMMAP*)malloc(sizeof(archivoMMAP));
+		int fileDescriptor = open(path, O_RDWR, 0);
 
-		if(archivoAMapear == NULL){
-			log_error(debug_logger, "No se pudo crear el archivo");
-		}
-		void* bufferArchivoVacio = malloc(length);
-		memset(bufferArchivoVacio,'\0',length);
-		fwrite(bufferArchivoVacio,length,1,archivoAMapear);
-		fclose(archivoAMapear);
-		free(bufferArchivoVacio);
+		void* mmapArchivo = mmap(NULL, length, PROT_READ|PROT_WRITE, flag, fileDescriptor,0);
 
-		archivoAMapear = fopen(path,"r+");
+		int sizePath = strlen(path) + 1;
+		archivoMappeadoNuevo->pathArchivo = malloc(sizePath);
+		memcpy(archivoMappeadoNuevo->pathArchivo, path, sizePath);
+
+		archivoMappeadoNuevo->archivo = mmapArchivo;
+		archivoMappeadoNuevo->programas = list_create();
+		archivoMappeadoNuevo->tabla_paginas = list_create();
+		archivoMappeado = archivoMappeadoNuevo;
+
+		list_add(lista_archivos_mmap, archivoMappeado);
 	}
 
-	int fileDescriptorArchivo = fileno(archivoAMapear);
-	archivoMMAP* archivoMMAPEncontrado = buscar_archivo_mapeado(fileDescriptorArchivo);
+	direccionDelSegmento = crear_nuevo_segmento_mmap(length, pid);
+	log_debug(debug_logger, "direccion del segmento ----> %d", direccionDelSegmento);
 
-	switch(flag){
-		case MAP_SHARED:
-			log_debug(debug_logger, "la flag de MAP es: Map shared");
-			if(archivoMMAPEncontrado == NULL){
-				log_debug(debug_logger, "Es la primera vez que se mapea este archivo");
-				// todavia no mapeamos el archivo
-				direccionDelSegmento = crear_nuevo_segmento_mmap(length, pid);
+	int nroSegmentoNuevo = busca_segmento(prog, direccionDelSegmento);
 
-				int nroSegmentoNuevo = busca_segmento(prog, direccionDelSegmento);
-				segmentoNuevo = list_get(prog->segment_table, nroSegmentoNuevo);
+	segmentoNuevo = list_get(prog->segment_table, nroSegmentoNuevo);
+	segmentoNuevo->archivo_mapeado = archivoMappeado;
+	archivoMappeado->tabla_paginas = segmentoNuevo->page_table;
+	segmentoNuevo->tam_archivo_mmap = length;
 
-				segmentoNuevo->archivo_mapeado = archivoAMapear;
-				segmentoNuevo->tam_archivo_mmap = obtener_tamanio_archivo(fileDescriptorArchivo);
-
-				agregar_archivo_mapeado(archivoAMapear, pid, segmentoNuevo->page_table);
-
-				// AGREGAR MEMSET DE \0 AL FINAL DEL ARCHIVO SI ES NECESARIO EXTENDER
-			}
-			else{
-				// el archivo ya fue mapeado
-				direccionDelSegmento = crear_nuevo_segmento_mmap(length, pid);
-
-				int nroSegmentoNuevo = busca_segmento(prog, direccionDelSegmento);
-
-				int i;
-
-				for(i=0; i < TOTAL_FRAME_NUM; i++)
-				{	
-					if((BITMAP[i])) return i;
-				}
-
-
-				segmentoNuevo = list_get(prog->segment_table, nroSegmentoNuevo);
-
-				segmentoNuevo->page_table = archivoMMAPEncontrado->tabla_paginas;
-				segmentoNuevo->archivo_mapeado = archivoMMAPEncontrado->archivo;
-				segmentoNuevo->tam_archivo_mmap = obtener_tamanio_archivo(fileDescriptorArchivo);
-
-				list_add(archivoMMAPEncontrado->programas, pid);
-				fclose(archivoAMapear);
-			}
-			segmentoNuevo->tipo_map = 1;
-			break;
-		case MAP_PRIVATE:
-			log_debug(debug_logger, "la flag de MAP es: Map private");
-			direccionDelSegmento = crear_nuevo_segmento_mmap(length, pid);
-			log_debug(debug_logger, "direccion del segmento ----> %d", direccionDelSegmento);
-
-			int nroSegmentoNuevo = busca_segmento(prog, direccionDelSegmento);
-			segmentoNuevo = list_get(prog->segment_table, nroSegmentoNuevo);
-
-			segmentoNuevo->tam_archivo_mmap = obtener_tamanio_archivo(fileDescriptorArchivo);
-
-			if(archivoMMAPEncontrado == NULL){
-				// todavia no mapeamos el archivo
-				segmentoNuevo->archivo_mapeado = archivoAMapear;
-				agregar_archivo_mapeado(archivoAMapear, pid, NULL);
-			}
-			else{
-				// el archivo ya fue mapeado
-				segmentoNuevo->archivo_mapeado = archivoMMAPEncontrado->archivo;
-				list_add(archivoMMAPEncontrado->programas, pid);
-				fclose(archivoAMapear);
-			}
-			segmentoNuevo->tipo_map = 0;
-			break;
+	if(flag == MAP_SHARED){
+		log_debug(debug_logger, "La flag de MAP es: MAP_SHARED");
+		segmentoNuevo->tipo_map = 1;
+		list_add(archivoMappeado->programas, pid);
+	}else if(flag == MAP_PRIVATE){
+		log_debug(debug_logger, "La flag de MAP es: MAP_PRIVATE");
+		segmentoNuevo->tipo_map = 0;
+	}else{
+		log_debug(debug_logger, "No se reconocio la flag especificada");
+		return -1;
 	}
 
-	///Para testear
-
-
-
+	log_debug(debug_logger, "Contenido del segmento mapeado: Base: %d, is_heap: %d, Limit: %d, TamanioArchivo: %d, TipoDeMap: %d",
+			segmentoNuevo->base,
+			segmentoNuevo->is_heap,
+			segmentoNuevo->limit,
+			segmentoNuevo->tam_archivo_mmap,
+			segmentoNuevo->tipo_map);
 
 	return 0;
 }
@@ -1527,15 +1450,92 @@ int convertir_de_posicion_a_nro_de_frame (void* posicion)
 }
 */
 
+void liberar_frame(void* frame){
+	int numeroFrame = (frame - MAIN_MEMORY)/PAGE_SIZE;
+
+	BITMAP[numeroFrame] = 1;
+}
+
+void liberar_frame_swap(void* frame){
+	int numeroFrame = (frame - MAIN_MEMORY)/PAGE_SIZE;
+
+	BITMAP_SWAP_FILE[numeroFrame] = 1;
+}
+
+void eliminar_archivo_mmap(segment* segmentoABorrar){
+
+	if(segmentoABorrar->page_table != NULL){
+
+		void eliminar_pagina(page* pagina){
+			if(pagina->is_present){
+				liberar_frame(pagina->fr);
+			}
+			else if(!pagina->is_present){
+				liberar_frame_swap(pagina->fr);
+			}
+			free(pagina);
+		}
+
+		list_destroy_and_destroy_elements(segmentoABorrar->page_table,(void*) eliminar_pagina);
+	}
+}
+
 int memory_unmap(uint32_t dir, uint32_t pid)
 {
-	/* Idea Original:*/
-	void *dir2 = &dir;
-	int unmap_result = munmap(dir2, 1 << 10); //TODO: ¿¿ 1 << 10 ??
- 	if (unmap_result == 0 ) {
-		printf("Could not unmap");
-		//log_error(muse_logger,"Could not unmap");
+	int nro_prog;
+	program* prog;
+
+	if((nro_prog = search_program(pid)) == -1)
+	{
+		prog = (program *) malloc(sizeof(program));
+		prog->pid = pid;
+		prog->segment_table = list_create();
+		nro_prog = list_add(program_list, prog);
+		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", nro_prog);
+	}
+
+	prog = list_get(program_list, nro_prog);
+	int nroSegmento = busca_segmento(prog, dir);
+
+	segment* segmentoBuscado = list_get(prog->segment_table, nroSegmento);
+
+	if(segmentoBuscado == NULL){
+	log_error(debug_logger, "Segmentation fault");
 		return -1;
 	}
+	else if((segmentoBuscado->is_heap != 0) || (dir != segmentoBuscado->base)){
+	log_error(debug_logger, "No es de MMAP el segmento buscado.");
+		return -1;
+	}
+
+	archivoMMAP* archivoMapeado = segmentoBuscado->archivo_mapeado;
+	log_debug(debug_logger, "El archivo mapeado tiene: Path: %s", archivoMapeado->pathArchivo);
+
+	int igualPID(int pid) {
+		return pid == prog->pid;
+	}
+	list_remove_by_condition(archivoMapeado->programas,(void*) igualPID);
+
+	if(list_size(archivoMapeado->programas) == 0){
+		list_destroy(archivoMapeado->programas);
+		munmap(segmentoBuscado->archivo_mapeado, segmentoBuscado->tam_archivo_mmap);
+
+		log_debug(debug_logger, "Eliminando archivo MMAP");
+		bool igualArchivo(archivoMMAP* archivo) {
+				return !strcmp(archivo->pathArchivo, archivoMapeado->pathArchivo);
+		}
+		list_remove_and_destroy_by_condition(lista_archivos_mmap,(void*) igualArchivo,(void*) eliminar_archivo_mmap);
+	}
+
+	log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
+
+	list_remove(prog->segment_table, segmentoBuscado);
+
+	free(segmentoBuscado);
+
+	//destruir la tabla de paginas
+
+	log_debug(debug_logger, "Unmap terminado");
+
 	return 0;
 }
