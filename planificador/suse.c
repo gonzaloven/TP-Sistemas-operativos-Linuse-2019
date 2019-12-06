@@ -58,35 +58,35 @@ int main(void){
 	return EXIT_SUCCESS;
 }
 
-void iniciar_metricas(){
-	t_list* params = list_create();
-	nuevo_hilo(metricas, params);
-}
-
-void* metricas(void* params){
-	sleep(configuracion_suse.METRICS_TIMER);
-	char* metrics_logs;
-	metrics_logs = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/METRICAS_SUSE.txt";
-	logger_metrics = log_create(metrics_logs, "Metrics logs", 1, 1);
-
-	metricas_por_hilo();
-	metricas_por_programa();
-	metricas_sistema();
-	pthread_detach(pthread_self());
-	return NULL;
-}
-
-void metricas_sistema(){
-	log_info(logger, "Calculando metricas del sistema...\n");
-	log_info(logger, "Semaforos actuales: \n");
-
-	int cantidad_semaforos = list_size(configuracion_suse.SEM_IDS);
-
-	for(int i = 0; i < cantidad_semaforos; i++){
-
-
-	}
-}
+//void iniciar_metricas(){
+//	t_list* params = list_create();
+//	nuevo_hilo(metricas, params);
+//}
+//
+//void* metricas(void* params){
+//	sleep(configuracion_suse.METRICS_TIMER);
+//	char* metrics_logs;
+//	metrics_logs = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/METRICAS_SUSE.txt";
+//	logger_metrics = log_create(metrics_logs, "Metrics logs", 1, 1);
+//
+//	metricas_por_hilo();
+//	metricas_por_programa();
+//	metricas_sistema();
+//	pthread_detach(pthread_self());
+//	return NULL;
+//}
+//
+//void metricas_sistema(){
+//	log_info(logger, "Calculando metricas del sistema...\n");
+//	log_info(logger, "Semaforos actuales: \n");
+//
+//	int cantidad_semaforos = list_size(configuracion_suse.SEM_IDS);
+//
+//	for(int i = 0; i < cantidad_semaforos; i++){
+//
+//
+//	}
+//}
 
 
 
@@ -234,8 +234,8 @@ void handle_conection_suse(un_socket socket_actual)
 			case cop_suse_join:
 				handle_suse_join(socket_actual,paquete_recibido);
 				break;
-//			default: NO ANDA BIEN, ME TERMINA TODO EL PROCESO. HAY Q ARREGLARLO
-//				pthread_exit(NULL);
+			default:
+				atender = false;
 
 			}
 
@@ -406,6 +406,7 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 	new_thread->ejecutado_desde_estimacion = false;
 	new_thread->joinTo = list_create();
 	new_thread->joinedBy = list_create();
+	new_thread->estimacionUltimaRafaga = 0;
 	list_add(process->ULTS, new_thread);
 	list_add(new_queue, new_thread);
 	log_info(logger, "ULT creado con id %d \n", new_thread->tid);
@@ -589,7 +590,6 @@ t_process * generar_process(int process_id) {
 void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	log_info(logger, "Inicio schedule_next...\n");
 	log_info(logger, "El valor del sem_ULTs_listos es %d \n", sem_ULTs_listos.__align);
-	sem_wait(&sem_ULTs_listos);
 	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
@@ -643,8 +643,16 @@ int obtener_proximo_ejecutar(t_process* process){
 		ejecucion_a_listo(exec_actual,process->PROCESS_ID);
 
 	}
-
+	sem_wait(&sem_ULTs_listos);
 	ordenar_cola_listos(process->READY_LIST);
+
+	int count = list_size(process->READY_LIST);
+
+	for(int i = 0 ; i<count; i++)
+	{
+		t_suse_thread* th = list_get(process->READY_LIST,i);
+		log_info(logger,"El hilo %d tiene rafaga %f...\n",th->tid,th->estimacionUltimaRafaga);
+	}
 
 	t_suse_thread *next_ULT = list_get(process->READY_LIST, 0); // TODO: Si no funciona hacemos una bool que haga return thread != null; va a retornar el primero q haya
 	if(next_ULT == 0)
@@ -966,16 +974,8 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 	thread->estado = E_EXECUTE;
 	thread->ejecutado_desde_estimacion = true;
 
-	t_suse_thread* threadEjecutando = process->EXEC_THREAD;
-	if(threadEjecutando != 0)
-	{
-		ejecucion_a_listo(process->EXEC_THREAD,socket);
-	}
-
 	process->EXEC_THREAD = thread;
 	log_info(logger, "El tid %d paso de ready a execute\n", thread->tid);
-
-	sem_wait(&sem_ULTs_listos);
 }
 
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
