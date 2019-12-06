@@ -140,8 +140,9 @@ void foo4(){
 
 void foo5(){
 
-	//muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
-	muse_map("hola.txt", 26, MAP_SHARED);
+	int direccion = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
+	muse_unmap(direccion);
+	//muse_map("hola.txt", 26, MAP_SHARED);
 	//muse_unmap("hola.txt");
 	muse_close();
 }

@@ -12,9 +12,9 @@
 #include <unistd.h>
 #include <math.h>
 
-#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
+//#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
-//#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
+#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 /**
  * @struct program_s   
@@ -62,23 +62,25 @@ typedef struct page_s
  * Estructura del segmento, sabemos su espacio libre
  * un puntero a su base, uno a su limite y uno a su tabla de páginas
  */
+
+typedef struct{
+	char* pathArchivo;
+	void* archivo;
+	t_list* tabla_paginas;
+	t_list* programas;
+}__attribute__((packed)) archivoMMAP;
+
 typedef struct segment_s
 {
 	bool is_heap; //(1 is common_segment, 0 is mmap)
 	uint32_t base; //base lógica
 	uint32_t limit;
 	t_list *page_table;
-	FILE* archivo_mapeado;
+	archivoMMAP* archivo_mapeado;
 	int tipo_map; //0 privado, 1 compartido
 	int tam_archivo_mmap;
 
 }segment;
-
-typedef struct{
-	FILE* archivo;
-	t_list* tabla_paginas;
-	t_list* programas;
-}archivoMMAP;
 
 /**
  * @param memory_size y @param page_size salen del archivo config
