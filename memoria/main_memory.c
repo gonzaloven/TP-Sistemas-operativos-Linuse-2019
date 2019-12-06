@@ -1489,12 +1489,8 @@ void eliminar_archivo_mmap(segment* segmentoABorrar){
 			if(pagina->is_present){
 				liberar_frame(pagina->fr);
 			}
-			else if(!pagina->is_present){
-				liberar_frame_swap(pagina->fr);
-			}
-			free(pagina);
-		}
 
+		}
 		list_destroy_and_destroy_elements(segmentoABorrar->page_table,(void*) eliminar_pagina);
 	}
 }
@@ -1546,9 +1542,16 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 		list_remove_and_destroy_by_condition(lista_archivos_mmap,(void*) igualArchivo,(void*) eliminar_archivo_mmap);
 	}
 
+	int igualSegmento(segment* segmento){
+		log_debug(debug_logger, "la dir del segmento es: %d", &segmento);
+		log_debug(debug_logger, "la dir del segmentoBuscado es: %d", &segmentoBuscado);
+		return &segmentoBuscado == &segmento;
+	}
+	list_remove_by_condition(segment_list,(void*) igualSegmento);
+
 	log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
 
-	list_remove(prog->segment_table, segmentoBuscado);
+	list_remove(prog->segment_table, nroSegmento);
 
 	free(segmentoBuscado);
 
