@@ -11,6 +11,10 @@
 #include "message.h"
 #include "network.h"
 #include <stddef.h>
+#include "sac_handlers.h"
+#include <commons/string.h>
+#include "sac_handlers.h"
+#include <pthread.h>
 
 t_log *logger;
 
@@ -93,6 +97,12 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
  * 		O archivo fue encontrado. -EACCES archivo no es accesible*/
 
 static int sac_open(const char *path, struct fuse_file_info *fi);
+
+static int sac_opendir(const char *path, struct fuse_file_info *fi);
+
+static int sac_truncate(const char* path, off_t size);
+
+static int sac_rename(const char *path, const char *nuevoPath);
 
 // Writing functions //
 

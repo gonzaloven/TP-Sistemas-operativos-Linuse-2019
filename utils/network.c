@@ -13,7 +13,7 @@ int server_listen_connections(int listen_socket,ConnectionHandler f,ConnectionAr
 
 int server_start(int port,ConnectionHandler handler)
 {
-	server_logger = log_create("/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/server.log","SERVER",true,LOG_LEVEL_TRACE);
+	server_logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/server.log","SERVER",true,LOG_LEVEL_TRACE);
     struct sockaddr_in server_address;
 	memset(&server_address,0,sizeof(server_address));
 	server_address.sin_family = AF_INET;
@@ -121,15 +121,35 @@ ssize_t receive_packet(int socket,void *buffer,size_t buffer_size)
 	memset(buffer,0,buffer_size);
 	MessageHeader header;
 	void *cursor = buffer;
-	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t)*2;
+	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);
 	unsigned int recv_bytes = recv(socket,cursor,header_size,MSG_WAITALL);
 
 	header_decode(cursor,buffer_size,&header);
-	cursor += recv_bytes;	
+	cursor += recv_bytes;
 	recv_bytes += recv(socket,cursor,header.data_size,MSG_WAITALL);
 
 	//log_debug(server_logger,"Se recibio un paquete de %d bytes",recv_bytes);
 	
+	return recv_bytes;
+}
+
+ssize_t receive_packet_var(int socket,void** bufferReal){
+	MessageHeader header;
+	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);
+	void *buffer = malloc(header_size);
+	unsigned int recv_bytes = recv(socket,buffer,header_size,MSG_WAITALL);
+
+	header_decode(buffer,header_size,&header);
+	free(buffer);
+
+	*bufferReal = malloc(header.data_size + header_size);
+	header_encode(&header, *bufferReal, header.data_size + header_size);
+
+	void* cursor = *bufferReal;
+
+	cursor+= recv_bytes;
+	recv_bytes += recv(socket,cursor,header.data_size,MSG_WAITALL);
+
 	return recv_bytes;
 }
 
@@ -140,8 +160,9 @@ ssize_t send_packet(int socket_fd,void *buffer,size_t buffer_size)
 
 ssize_t send_message(int socket_fd,Message *msg)
 {
-	size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t)*2 + msg->header.data_size;
+	size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t) + msg->header.data_size;
 	char buffer[buffer_size];
+	memset(buffer, 0, buffer_size);
 	message_encode(msg,buffer,buffer_size);
 	return send_packet(socket_fd,buffer,buffer_size);
 	
@@ -154,4 +175,24 @@ ssize_t receive_message(int socket_fd,Message *msg)
 
 	receive_packet(socket_fd,buffer,buffer_size);
 	return message_decode(buffer,buffer_size,msg);
+}
+
+ssize_t receive_message_var(int socket_fd, Message* msg){
+	MessageHeader header;
+	unsigned int header_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t);
+	void *buffer = malloc(header_size);
+	unsigned int recv_bytes = recv(socket_fd,buffer,header_size,MSG_WAITALL);
+
+	header_decode(buffer,header_size,&header);
+	free(buffer);
+
+	char bufferReal[header.data_size + header_size];
+	header_encode(&header, bufferReal, header.data_size + header_size);
+
+	void* cursor = bufferReal;
+
+	cursor+= recv_bytes;
+	recv_bytes += recv(socket_fd,cursor,header.data_size,MSG_WAITALL);
+
+	return message_decode(bufferReal, header.data_size + header_size, msg);
 }
