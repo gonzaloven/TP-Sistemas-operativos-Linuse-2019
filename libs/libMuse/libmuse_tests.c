@@ -8,6 +8,7 @@ void foo2();
 void foo3();
 void foo4();
 void foo5();
+void foo6();
 
 const char *byte_to_binary(int x)
 {
@@ -33,7 +34,7 @@ int main(int argc,char *argv[])
 	{
 		printf("Libmuse with proccess_id = %d initialized!\n",pid);
 	
-		printf("Introduzca un nro del 1-5: ");
+		printf("Introduzca un nro del 1-6: ");
 
 		ch=getchar();
 		switch(ch) 
@@ -47,6 +48,8 @@ int main(int argc,char *argv[])
 			case '4': foo4();
 			break;
 			case '5': foo5();
+			break;
+			case '6': foo6();
 			break;
 			default: puts("Error");
 		}
@@ -144,5 +147,13 @@ void foo5(){
 	muse_unmap(direccion);
 	//muse_map("hola.txt", 26, MAP_SHARED);
 	//muse_unmap("hola.txt");
+	muse_close();
+}
+
+void foo6(){
+	int dir7 = muse_alloc(strlen("hola")+ 1);
+	imprimir(sizeof(int), dir7);
+	muse_cpy(dir7, "hola", strlen("hola")+ 1);
+
 	muse_close();
 }

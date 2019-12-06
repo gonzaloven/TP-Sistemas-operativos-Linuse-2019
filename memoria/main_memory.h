@@ -99,10 +99,6 @@ void* obtener_data_marco_heap(page* pagina);
 
 void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina);
 
-void agregar_frame_clock(page* page);
-
-page* ejecutar_algoritmo_clock_modificado();
-
 /**
  * Busca el process_id en program_list
  * @return -1 if no está, else devuelve el nro de programa en program_list

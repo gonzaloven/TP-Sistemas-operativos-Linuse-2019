@@ -128,9 +128,9 @@ uint32_t muse_invoke_function(Function *function,uint32_t pid)
 								function->args[1].value.val_u32,function->args[2].value.val_sizet,pid);
 			break;
 		case FUNCTION_COPY:
-			log_debug(muse_logger,"Copy called with args -> arg[0] %d arg[1] %d arg[2] %d",function->args[0].value.val_u32,function->args[1].value.val_u32,function->args[2].value.val_u32);
+			log_debug(muse_logger,"Copy called with args -> Memoria destino %d - Bytes a copiar %d",function->args[0].value.val_u32,function->args[2].value.val_u32);
 			func_ret = memory_cpy(function->args[0].value.val_u32,
-								&function->args[1].value.val_u32,function->args[2].value.val_u32,pid);
+								function->args[1].value.val_voidptr,function->args[2].value.val_u32,pid);
 			break;
 		case FUNCTION_MAP:
 			log_debug(muse_logger,"Map called");

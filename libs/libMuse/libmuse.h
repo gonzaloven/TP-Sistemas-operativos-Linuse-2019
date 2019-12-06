@@ -2,6 +2,7 @@
 #define LIBMUSE_H_
 
 #include <stdint.h>
+#include <string.h>
 #include <stddef.h>
 #include "network.h"
 #include <sys/types.h>
@@ -11,7 +12,7 @@
 
 #include <stdlib.h>
 
-#define LIBMUSE_CONFIG_PATH "../../configs/libmuse.config"
+#define LIBMUSE_CONFIG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/configs/libmuse.config"
 
 t_config *config;
 
