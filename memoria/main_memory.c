@@ -1466,16 +1466,6 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 		list_remove_and_destroy_by_condition(lista_archivos_mmap,(void*) igualArchivo,(void*) eliminar_archivo_mmap);
 	}
 
-	bool igualSegmento(segment* segmento) {
-		prog = list_get(program_list, nro_prog);
-		int nroSegmento = busca_segmento(prog, dir);
-
-		segmento = list_get(prog->segment_table, nroSegmento);
-
-		return segmento->base == segmentoBuscado->base && prog->pid == pid;
-	}
-	list_remove_and_destroy_by_condition(lista_archivos_mmap,(void*) igualArchivo,(void*) eliminar_archivo_mmap);
-
 	log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
 
 	list_remove(prog->segment_table, nroSegmento);
