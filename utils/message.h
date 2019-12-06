@@ -20,15 +20,25 @@ typedef enum{
 	FUNCTION_RTA_READDIR,
 	FUNCTION_OPEN,
 	FUNCTION_RTA_OPEN,
+	FUNCTION_OPENDIR,
+	FUNCTION_RTA_OPENDIR,
 	FUNCTION_READ,
 	FUNCTION_RTA_READ,
 	FUNCTION_MKNOD,
+	FUNCTION_RTA_MKNOD,
 	FUNCTION_WRITE,
+	FUNCTION_RTA_WRITE,
 	FUNCTION_UNLINK,
+	FUNCTION_RTA_UNLINK,
 	FUNCTION_MKDIR,
+	FUNCTION_RTA_MKDIR,
 	FUNCTION_RMDIR,
-	FUNCTION_OPENDIR,
-	FUNCTION_MUSE_CLOSE
+	FUNCTION_RTA_RMDIR,
+	FUNCTION_RTA_GETATTR_NODORAIZ,
+	FUNCTION_TRUNCATE,
+	FUNCTION_RTA_TRUNCATE,
+	FUNCTION_RENAME,
+	FUNCTION_RTA_RENAME
 }FuncType;
 
 typedef enum{
@@ -48,7 +58,7 @@ typedef union{
 typedef struct Arg_s
 {
 	VarType type;
-	uint16_t size;
+	uint32_t size;
 	VarValue value;
 }Arg;
 
@@ -63,7 +73,7 @@ typedef struct MessageHeader_s
 {
 	uint8_t message_type;
 	uint16_t caller_id;
-	uint16_t data_size;
+	uint32_t data_size;
 }MessageHeader;
 
 /* Main message structure for message passing. */
@@ -84,14 +94,14 @@ typedef enum{
  * do so. 
  * @param header: pointer to the message header
  * @param message_type: the type of message will contain*/
-int create_message_header(MessageHeader *header,uint8_t message_type,uint16_t caller_id,uint16_t data_size);
+int create_message_header(MessageHeader *header,uint8_t message_type,uint16_t caller_id,uint32_t data_size);
 int create_function_message(Message *msg,MessageHeader *header,Function *f);
 int create_response_message(Message *msg,MessageHeader *header,uint32_t response);
 
 /* Deserializes a message a stores it in result*/
 int message_decode(void *buffer,size_t buf_size,Message *result);
 int header_decode(void *buffer,size_t buf_size,MessageHeader *result);
-int message_function_decode(void *buffer,size_t buf_size,Message *result); 
+int message_function_decode(void *buffer,size_t buf_size,Message *result);
 int function_arg_decode(void *buffer,size_t buff_size,Arg *arg);
 
 /* Serializes a message and stores it in a buffer stream */
