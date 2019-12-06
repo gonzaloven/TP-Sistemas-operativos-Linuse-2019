@@ -150,10 +150,9 @@ void foo5(){
 }
 
 void foo6(){
-	int int1 = 23;
-	int dir7 = muse_alloc(sizeof(int));
+	int dir7 = muse_alloc(strlen("hola")+ 1);
 	imprimir(sizeof(int), dir7);
-	muse_cpy(dir7, &int1, sizeof(int));
+	muse_cpy(dir7, "hola", strlen("hola")+ 1);
 
 	muse_close();
 }

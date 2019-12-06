@@ -1083,13 +1083,17 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
         memcpy(&metadata.is_free,buffer + posicion_recorrida,sizeof(bool));
         posicion_recorrida += sizeof(bool);
 
+        //borrar, es para debugg
+        log_debug(debug_logger, "El bit de free de metadata es: %d", metadata.is_free);
+        log_debug(debug_logger, "El size de la metadata es: %d", metadata.size);
+
         if(!metadata.is_free && (metadata.size >= n)){
             memcpy(buffer + posicion_recorrida,src,n);
 
-            int verNum;
-            memcpy(&verNum, src,n);
-            //estos dos debug es para ver si le llego bien
-            log_debug(debug_logger, "El valor del source es: %d", verNum);
+            //borrar, estos dos debug es para ver si le llego bien
+            char* texto = malloc(n);
+            memcpy(texto, src,n);
+            log_debug(debug_logger, "El valor del source es: %s", texto);
             log_debug(debug_logger, "La cantidad de bytes a copiar es: %d", n);
 
             // vuelvo a cargar los datos al upcm
@@ -1120,11 +1124,10 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		 }
 	}
 
-	// esto es para debug
-	int numRes;
-	memcpy(&numRes, datos, 4);
-	log_debug(debug_logger, "Copie un %d", numRes);
-
+	// esto es para debug del test 6
+    char* texto = malloc(5);
+    memcpy(texto, datos + 5,5);
+	log_debug(debug_logger, "(SOLO FUNCIONA PARA TEST 6 EL DEBUG) Copie: %s", texto);
 	log_debug(debug_logger, "Fin memory_cpy");
 	
 	return dst;
