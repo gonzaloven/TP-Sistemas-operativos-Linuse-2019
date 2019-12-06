@@ -1369,16 +1369,17 @@ uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 	{
 		pagina_obtenida = list_get(segmento_obtenido->page_table,i + nro_pagina_obtenida);
 		direccion_datos = obtener_data_marco_mmap(segmento_obtenido, pagina_obtenida, i + nro_pagina_obtenida);
-		memcpy(&buffer[PAGE_SIZE*i], direccion_datos, PAGE_SIZE);
+		memcpy(buffer + PAGE_SIZE * i, direccion_datos, PAGE_SIZE);
 	}
 
 	//el primer byte a escribir no debería superar el tamaño del archivo
 	if((nro_pagina_obtenida * PAGE_SIZE) <= segmento_obtenido->tam_archivo_mmap)
 	{
-		fseek(segmento_obtenido->archivo_mapeado, nro_pagina_obtenida * PAGE_SIZE, SEEK_SET);
 		int nro_bytes = (int) fmin(len, segmento_obtenido->tam_archivo_mmap);
-		printf("Bytes a escribir: %d\n",nro_bytes);
-		fwrite(buffer, nro_bytes, 1, segmento_obtenido->archivo_mapeado);
+		log_debug(debug_logger, "Bytes a escribir: %d", nro_prog);
+
+		memcpy(buffer, segmento_obtenido->archivo_mapeado->archivo + nro_pagina_obtenida * PAGE_SIZE, nro_bytes);
+
 		free(buffer);
 		return 1;
 	}
