@@ -223,5 +223,9 @@ int muse_unmap(uint32_t dir)
 	function.args[0] = arg;	
 
 	int result = call(&function);
+
+	if(result == -1){
+		printf("\nSegmentation fault (Esto fue escrito con un printf, cambiar por un log error)\n");
+	}
 	return result;
 }
