@@ -2,6 +2,7 @@
 #define LIBMUSE_H_
 
 #include <stdint.h>
+#include <string.h>
 #include <stddef.h>
 #include "network.h"
 #include <sys/types.h>

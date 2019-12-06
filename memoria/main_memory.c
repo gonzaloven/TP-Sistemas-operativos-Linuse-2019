@@ -924,7 +924,7 @@ void* obtener_data_marco_heap(page* pagina){
         pagina->fr = sacarFrame->fr;*/
 
     	int numFrame = dame_nro_frame_reemplazado();
-    	pagina->fr = (void*) numFrame;
+    	pagina->fr = (void*) (MAIN_MEMORY + numFrame * PAGE_SIZE);
         pagina->is_present = 1;
         pagina->is_used = 1;
     }
@@ -933,7 +933,7 @@ void* obtener_data_marco_heap(page* pagina){
 
         FILE* archivo_swap = fopen(SWAP_PATH,"r+");
 
-        fseek(archivo_swap,(int)pagina->fr * PAGE_SIZE,SEEK_SET);
+        fseek(archivo_swap,(int)pagina->fr,SEEK_SET);
         fread(buffer_page_swap,PAGE_SIZE,1,archivo_swap);
 
         page* sacarFrame = page_with_free_size();
@@ -941,13 +941,13 @@ void* obtener_data_marco_heap(page* pagina){
         pagina->is_present = 1;
         pagina->is_used = 1;
 
-        memcpy(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),buffer_page_swap,PAGE_SIZE);
+        memcpy(pagina->fr,buffer_page_swap,PAGE_SIZE);
 
         free(buffer_page_swap);
         fclose(archivo_swap);
     }
 
-    return (char*) MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE);
+    return pagina->fr;
 }
 
 void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
@@ -982,14 +982,14 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
             int bytes_a_leer = (int)fmin(PAGE_SIZE,((nro_pagina * PAGE_SIZE) + PAGE_SIZE) - segmento->limit);
 
             fread(buffer_page_mmap,bytes_a_leer,1,segmento->archivo_mapeado);
-            memcpy(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),buffer_page_mmap,bytes_a_leer);
+            memcpy(pagina->fr,buffer_page_mmap,bytes_a_leer);
 
             if(PAGE_SIZE > bytes_a_leer)
-                memset(MAIN_MEMORY + ((int)pagina->fr * bytes_a_leer),'\0',PAGE_SIZE - bytes_a_leer);
+                memset(pagina->fr,'\0',PAGE_SIZE - bytes_a_leer);
         }
         else{
             // el primer byte a leer supera el tamano del archivo
-            memset(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),'\0',PAGE_SIZE);
+            memset(pagina->fr,'\0',PAGE_SIZE);
         }
 
         free(buffer_page_mmap);
@@ -1010,12 +1010,12 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
         fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
         fread(buffer_page_mmap,PAGE_SIZE,1,segmento->archivo_mapeado);
 
-        memcpy(MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE),buffer_page_mmap,PAGE_SIZE);
+        memcpy(pagina->fr,buffer_page_mmap,PAGE_SIZE);
 
         free(buffer_page_mmap);
     }
 
-    return (char*) MAIN_MEMORY + ((int)pagina->fr * PAGE_SIZE);
+    return pagina->fr;
 }
 
 //Copia n bytes de LIBMUSE a MUSE
@@ -1078,13 +1078,19 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 
 	if(segment->is_heap){
         // obtengo la metadata
+		memcpy(&metadata.size,buffer + posicion_recorrida,sizeof(uint32_t));
+		posicion_recorrida += sizeof(uint32_t);
         memcpy(&metadata.is_free,buffer + posicion_recorrida,sizeof(bool));
         posicion_recorrida += sizeof(bool);
-        memcpy(&metadata.size,buffer + posicion_recorrida,sizeof(uint32_t));
-        posicion_recorrida += sizeof(uint32_t);
 
         if(!metadata.is_free && (metadata.size >= n)){
             memcpy(buffer + posicion_recorrida,src,n);
+
+            int verNum;
+            memcpy(&verNum, src,n);
+            //estos dos debug es para ver si le llego bien
+            log_debug(debug_logger, "El valor del source es: %d", verNum);
+            log_debug(debug_logger, "La cantidad de bytes a copiar es: %d", n);
 
             // vuelvo a cargar los datos al upcm
             for(int x=0; x<cantidad_paginas_necesarias;x++){
@@ -1114,9 +1120,12 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		 }
 	}
 
-	int direccionFisicaBuscada = buscar_direccion_fisica(dst, n, pid);
+	// esto es para debug
+	int numRes;
+	memcpy(&numRes, datos, 4);
+	log_debug(debug_logger, "Copie un %d", numRes);
 
-	memcpy((void*) direccionFisicaBuscada, src, n);
+	log_debug(debug_logger, "Fin memory_cpy");
 	
 	return dst;
 }

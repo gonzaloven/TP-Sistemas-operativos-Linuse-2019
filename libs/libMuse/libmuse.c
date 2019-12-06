@@ -143,9 +143,10 @@ int muse_cpy(uint32_t dst, void* src, int n)
 	arg[0].size = sizeof(uint32_t);
 	arg[0].value.val_u32 = dst;
 
-	arg[1].type = VAR_VOID_PTR;
-	arg[1].size = n;
-	arg[1].value.val_voidptr = src;
+	function.args[1].type = VAR_VOID_PTR;
+	function.args[1].size = n;
+	function.args[1].value.val_voidptr = malloc(n);
+	memcpy(function.args[1].value.val_voidptr, src, n);
 
 	arg[2].type = VAR_UINT32;
 	arg[2].size = sizeof(uint32_t);
@@ -154,7 +155,6 @@ int muse_cpy(uint32_t dst, void* src, int n)
 	function.type = FUNCTION_COPY;
 	function.num_args = 3;
 	function.args[0] = arg[0];
-	function.args[1] = arg[1];
 	function.args[2] = arg[2];
 
 	int result = call(&function);

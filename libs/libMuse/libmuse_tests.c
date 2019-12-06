@@ -34,7 +34,7 @@ int main(int argc,char *argv[])
 	{
 		printf("Libmuse with proccess_id = %d initialized!\n",pid);
 	
-		printf("Introduzca un nro del 1-5: ");
+		printf("Introduzca un nro del 1-6: ");
 
 		ch=getchar();
 		switch(ch) 
@@ -151,6 +151,9 @@ void foo5(){
 
 void foo6(){
 	int int1 = 23;
-	int int2 = muse_alloc(25);
-	muse_cpy(int2, &int1, sizeof(int));
+	int dir7 = muse_alloc(sizeof(int));
+	imprimir(sizeof(int), dir7);
+	muse_cpy(dir7, &int1, sizeof(int));
+
+	muse_close();
 }
