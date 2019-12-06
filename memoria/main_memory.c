@@ -958,13 +958,14 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
         pagina->is_used = 1;
 
         if((nro_pagina * PAGE_SIZE) <= segmento->limit){
-            fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
+            //fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
 
             int bytes_a_leer = (int)fmin(PAGE_SIZE,((nro_pagina * PAGE_SIZE) + PAGE_SIZE) - segmento->limit);
 
-            fread(buffer_page_mmap,bytes_a_leer,1,segmento->archivo_mapeado);
-            memcpy(pagina->fr,buffer_page_mmap,bytes_a_leer);
+            //fread(buffer_page_mmap,bytes_a_leer,1,segmento->archivo_mapeado);
+            //memcpy(pagina->fr,buffer_page_mmap,bytes_a_leer);
 
+            memcpy(pagina->fr, segmento->archivo_mapeado->archivo + nro_pagina * PAGE_SIZE, bytes_a_leer);
             if(PAGE_SIZE > bytes_a_leer)
                 memset(pagina->fr,'\0',PAGE_SIZE - bytes_a_leer);
         }
@@ -988,10 +989,11 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
         pagina->is_present = 1;
         pagina->is_used = 1;
 
-        fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
-        fread(buffer_page_mmap,PAGE_SIZE,1,segmento->archivo_mapeado);
+        //fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
+        //fread(buffer_page_mmap,PAGE_SIZE,1,segmento->archivo_mapeado);
 
-        memcpy(pagina->fr,buffer_page_mmap,PAGE_SIZE);
+        //memcpy(pagina->fr,buffer_page_mmap,PAGE_SIZE);
+        memcpy(pagina->fr, segmento->archivo_mapeado->archivo + nro_pagina * PAGE_SIZE, PAGE_SIZE);
 
         free(buffer_page_mmap);
     }
