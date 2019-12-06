@@ -13,7 +13,6 @@
 t_log* logger;
 t_log* logger_metrics;
 char * suse_config_path = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config";
-
 int main(void){
 	char* log_file;
 	log_file = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
@@ -28,8 +27,6 @@ int main(void){
 	new_queue = list_create();
 	blocked_queue = list_create();
 	exit_queue = list_create();
-
-	sem_init(&sem_ULTs_listos, 0, 0);
 
 	pthread_mutex_init(&mutex_new_queue, NULL);
 	pthread_mutex_init(&mutex_blocked_queue, NULL);
@@ -87,8 +84,6 @@ int main(void){
 //
 //	}
 //}
-
-
 
 void init_semaforos(){
 
@@ -582,14 +577,24 @@ t_process * generar_process(int process_id) {
 	process->PROCESS_ID = process_id; //todo ver tipo de dato
 	process->ULTS = list_create();
 	process->READY_LIST = list_create();
-	//process->EXEC_THREAD = malloc(sizeof(t_suse_thread));
+	sem_init(&(process->semaforoReady),0,0);
+
 	return process;
 }
 
 
 void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	log_info(logger, "Inicio schedule_next...\n");
-	log_info(logger, "El valor del sem_ULTs_listos es %d \n", sem_ULTs_listos.__align);
+	bool comparador(t_process* p)
+	{
+		return p->PROCESS_ID == socket_actual;
+	}
+
+	t_process* process = list_find(configuracion_suse.process, comparador);
+	sem_t sem_ULTs_listos = process->semaforoReady;
+	int value;
+	sem_getvalue(&sem_ULTs_listos,&value);
+	log_info(logger, "El valor del sem_ULTs_listos es %d \n", value);
 	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
@@ -598,12 +603,7 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 
 	log_info(logger, "Recibi una peticion de suse_schedule_next \n");
 
-	bool comparador(t_process* p)
-	{
-		return p->PROCESS_ID == socket_actual;
-	}
 
-	t_process* process = list_find(configuracion_suse.process, comparador);
 
 	log_info(logger, "Iniciando planificacion...\n");
 
@@ -643,7 +643,7 @@ int obtener_proximo_ejecutar(t_process* process){
 		ejecucion_a_listo(exec_actual,process->PROCESS_ID);
 
 	}
-	sem_wait(&sem_ULTs_listos);
+	sem_wait(&(process->semaforoReady));
 	ordenar_cola_listos(process->READY_LIST);
 
 	int count = list_size(process->READY_LIST);
@@ -779,8 +779,6 @@ int desbloquear_hilos_semaforo(char* sem){
 	}
 
 	t_suse_semaforos* semaforo = list_find(configuracion_suse.semaforos, buscador_sem_name);
-	if(semaforo->VALUE > 0)
-	{
 
 	if(list_get(semaforo->BLOCKED_LIST, 0) == NULL){
 		return 0;
@@ -800,7 +798,7 @@ int desbloquear_hilos_semaforo(char* sem){
 
 	list_remove(semaforo->BLOCKED_LIST,0);
 
-	}
+
 	return 0;
 }
 
@@ -928,7 +926,7 @@ void listo_a_exit(t_suse_thread* thread,un_socket socket)
 	list_add(exit_queue,thread);
 	pthread_mutex_unlock(&mutex_exit_queue);
 
-	sem_wait(&sem_ULTs_listos);
+	sem_wait(&(process->semaforoReady));
 
 	log_info(logger, "El tid %d paso de ready a exit\n", thread->tid);
 }
@@ -1011,7 +1009,7 @@ void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
 	remover_ULT_exec(process);
 	thread->estado = E_READY;
 	list_add(process->READY_LIST,thread);
-	sem_post(&sem_ULTs_listos);
+	sem_post(&(process->semaforoReady));
 	log_info(logger, "El thread %d paso de execute a ready \n", thread->tid);
 
 }
@@ -1021,7 +1019,7 @@ void bloqueado_a_listo(t_suse_thread* thread,t_process* program)
 	eliminar_ULT_cola_actual(thread,program);
 	thread->estado = E_READY;
 	list_add(program->READY_LIST,thread);
-	sem_post(&sem_ULTs_listos);
+	sem_post(&(program->semaforoReady));
 	log_info(logger, "El thread %d paso de blocked a ready \n", thread->tid);
 }
 
@@ -1153,7 +1151,7 @@ void nuevo_a_listo(t_suse_thread* ULT, int process_id)
 	eliminar_ULT_cola_actual(ULT, program);
 	ULT->estado = E_READY;
 	configuracion_suse.ACTUAL_MULTIPROG ++;
-	sem_post(&sem_ULTs_listos);
+	sem_post(&(program->semaforoReady));
 }
 
 void remover_ULT_listo(t_suse_thread* thread,t_process* process)

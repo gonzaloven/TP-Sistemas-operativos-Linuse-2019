@@ -28,6 +28,7 @@
 #include <math.h>
 #include <pthread.h>
 #include <signal.h>
+#include <semaphore.h>
 #define MAX_LEN 128
 
 
@@ -81,6 +82,7 @@ typedef struct t_process
 	int PROCESS_ID; //esto es el numero de socket
 	t_list * READY_LIST;
 	t_suse_thread* EXEC_THREAD;
+	sem_t semaforoReady;
 } t_process;
 
 typedef struct t_suse_semaforos{
