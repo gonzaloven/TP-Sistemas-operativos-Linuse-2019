@@ -206,13 +206,15 @@ int dame_nro_frame_reemplazado(){
 		{
 			seg = list_get(segment_list,nro_de_segmento);
 			cantidad_de_paginas_en_segmento = list_size(seg->page_table);			
+			log_debug(debug_logger, "--- SEGMENTO ANALIZADO ALG REEMPLAZO: %d", nro_de_segmento);
 			
 			for(nro_de_pag = 0; nro_de_pag < cantidad_de_paginas_en_segmento; nro_de_pag++)
 			{
 				pag = list_get(seg->page_table,nro_de_pag);
-				if (pag->is_present == false) continue;
+				if (!pag->is_present) continue;
 				U = pag->is_used;
 				M = pag->is_modify;
+				log_debug(debug_logger, "Pagina analizada: %d; U = %d - M = %d", nro_de_pag, U, M);
 				if (nro_paso == 1){
 					if (!U && !M){	
 						nro_frame = se_hace_la_vistima(pag, nro_de_pag, nro_de_segmento);
@@ -253,7 +255,8 @@ int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento)
 	else{
 		log_debug(debug_logger, "La pagina victima se mando satisfactoriamente al archivo swap");
 
-		memcpy( pag->fr, &nro_frame_swap, sizeof(int));
+		int dir_disco = nro_frame_swap * PAGE_SIZE;
+		memcpy(pag->fr, &dir_disco, sizeof(int));
 		pag->is_present = false;
 
 		//pag->fr = (int) nro_frame_swap;
@@ -268,7 +271,6 @@ int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame)
 	int nro_frame_swap = frame_swap_libre();
 	if (nro_frame_swap != -1)
 	{
-		//memcpy(buffer, &MAIN_MEMORY[nro_frame * PAGE_SIZE], PAGE_SIZE);
 		memcpy(buffer, MAIN_MEMORY + (nro_frame * PAGE_SIZE), PAGE_SIZE);
 
 		swap_file = fopen(SWAP_PATH,"r+");
@@ -366,6 +368,11 @@ heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segme
 	int offset = (direccionLogica - segmentoBuscado->base) % PAGE_SIZE;
 
 	page* pagina = list_get(segmentoBuscado->page_table, paginaBuscada);
+
+	if(!pagina->is_present){
+		obtener_data_marco_heap(pagina);
+		log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
+	}
 
 	metadataBuscada = (heap_metadata*) ((pagina->fr) + offset);
 
@@ -595,6 +602,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		{
 			//log_debug(debug_logger, "Size solicitado para PAGE_WITH_FREE_SIZE: %d", PAGE_SIZE);
 			pag = page_with_free_size();
+			pag->is_used = 0; // creo que tiene que ver con esto
 			list_add(segmentoAAgrandar->page_table, pag);
 			segmentoAAgrandar->limit += PAGE_SIZE;
 		}
@@ -936,7 +944,7 @@ void* obtener_data_marco_heap(page* pagina){
 
         FILE* archivo_swap = fopen(SWAP_PATH,"r+");
 
-        fseek(archivo_swap,(int)pagina->fr,SEEK_SET);
+        fseek(archivo_swap,*(int*)pagina->fr,SEEK_SET);
         fread(buffer_page_swap,PAGE_SIZE,1,archivo_swap);
 
         page* sacarFrame = page_with_free_size();
