@@ -60,7 +60,7 @@ void handle_close_tid(un_socket socket_actual, t_paquete* received_packet);
 
 void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem);
 
-void pasarNuevoProceso();
+void obtener_ULT_ready_FIFO();
 
 int i_thread = 0;
 pthread_t threads[20];
@@ -120,6 +120,8 @@ bool validar_grado_multiprogramacion();
 void handle_main_thread_create(un_socket socket_actual, int tid);
 
 t_suse_thread* ULT_create(t_process* process, int tid);
+
+double get_time_today();
 /*
 --------------------------------------------------------
 ----------------- Variables para el Servidor -----------

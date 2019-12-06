@@ -349,8 +349,13 @@ void handle_main_thread_create(un_socket socket_actual, int tid) {
 
 	log_info(logger, "Validando si puedo poner a ejecutar el main thread... \n", configuracion_suse.ACTUAL_MULTIPROG);
 
-	nuevo_a_ejecucion(main_thread, new_process->PROCESS_ID);
-	log_info(logger, "El thread %d del proceso %d esta ejecutando \n", main_thread->tid, new_process->PROCESS_ID);
+	if(validar_grado_multiprogramacion()){
+		nuevo_a_ejecucion(main_thread, new_process->PROCESS_ID);
+		log_info(logger, "El thread %d del proceso %d esta ejecutando \n", main_thread->tid, new_process->PROCESS_ID);
+	}
+
+
+
 }
 
 t_suse_thread* ULT_create(t_process* process, int tid){
@@ -364,7 +369,6 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 	new_thread->ejecutado_desde_estimacion = false;
 	new_thread->joinTo = list_create();
 	new_thread->joinedBy = list_create();
-	//todo para agregar a new hay que chequear el grado de multiprog o no
 	list_add(process->ULTS, new_thread);
 	list_add(new_queue, new_thread);
 	log_info(logger, "ULT creado con id %d \n", new_thread->tid);
@@ -422,7 +426,7 @@ int close_tid(int tid, int socket_actual){
 			bloqueado_a_exit(thread,socket_actual);
 			if(validar_grado_multiprogramacion())
 			{
-				pasarNuevoProceso();
+				obtener_ULT_ready_FIFO();
 			}
 
 			pthread_mutex_unlock(&mutex_multiprog);
@@ -437,7 +441,7 @@ int close_tid(int tid, int socket_actual){
 			listo_a_exit(thread,socket_actual);
 			if(validar_grado_multiprogramacion())
 			{
-				pasarNuevoProceso();
+				obtener_ULT_ready_FIFO();
 			}
 
 			pthread_mutex_unlock(&mutex_multiprog);
@@ -450,7 +454,7 @@ int close_tid(int tid, int socket_actual){
 				configuracion_suse.MAX_MULTIPROG --;
 				if(validar_grado_multiprogramacion())
 				{
-					pasarNuevoProceso();
+					obtener_ULT_ready_FIFO();
 				}
 
 				pthread_mutex_unlock(&mutex_multiprog);
@@ -512,7 +516,7 @@ void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joine
 
 }
 
-void pasarNuevoProceso()
+void obtener_ULT_ready_FIFO()
 {
 	t_suse_thread* thread = list_get(new_queue,0);
 	bool buscador(t_process* p)
@@ -522,7 +526,7 @@ void pasarNuevoProceso()
 	if(thread != 0)
 	{
 		t_process* process = list_find(configuracion_suse.process,buscador);
-		nuevo_a_listo(thread,process->PROCESS_ID);
+		nuevo_a_listo(thread, process->PROCESS_ID);
 	}
 }
 
@@ -579,21 +583,25 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	liberar_paquete(paquete_recibido);
 }
 
-int obtener_proximo_ejecutar(t_process* process){
+double get_time_today(){
+	struct timeval current_time;
+	gettimeofday(&current_time,NULL);
+	return (double)(current_time.tv_sec + (double)current_time.tv_usec/1000000);
+}
 
-	struct timeval aux;
-	double tiempo;
-	gettimeofday(&aux,NULL);
-	tiempo = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
+int obtener_proximo_ejecutar(t_process* process){
+	double tiempo_actual;
+	tiempo_actual = get_time_today();
 	t_suse_thread* exec_actual = process->EXEC_THREAD;
 
 	if(exec_actual != 0)
 	{
-		double aux2 = exec_actual->duracionRafaga;
+		double rafaga_actual = exec_actual->duracionRafaga;
 
-		if(aux2 != 0)
+		//Calculo  la rafaga del hilo actual
+		if(rafaga_actual != 0)
 		{
-			exec_actual->duracionRafaga = tiempo - aux2;
+			exec_actual->duracionRafaga = tiempo_actual - rafaga_actual;
 		}
 		ejecucion_a_listo(exec_actual,process->PROCESS_ID);
 
@@ -604,15 +612,14 @@ int obtener_proximo_ejecutar(t_process* process){
 	t_suse_thread *next_ULT = list_get(process->READY_LIST, 0); // TODO: Si no funciona hacemos una bool que haga return thread != null; va a retornar el primero q haya
 	if(next_ULT == 0)
 	{
-		log_info(logger,"No hay procesos para ejecutar");
+		log_info(logger,"No hay procesos para ejecutar \n"); //Esto se soluciona con el semaforo
 		return -1;
 	}
 	int next_tid = next_ULT->tid;
 	log_info(logger, "El proximo ULT a ejecutar es %d", next_tid);
 
 	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
-	process->LAST_EXEC = next_ULT; //Esto para que sirve??
-	next_ULT->duracionRafaga = tiempo;
+	next_ULT->duracionRafaga = tiempo_actual;
 	return next_tid;
 }
 
@@ -635,9 +642,9 @@ void estimar_ULTs_listos(t_list* ready_list) {
 
 void estimar_rafaga(t_suse_thread * ULT){
 	int rafaga_anterior = ULT->duracionRafaga; //Duracion de la rafaga anterior
-	float estimacion_anterior = ULT->estimacionUltimaRafaga; // Estimacion anterior
+	double estimacion_anterior = ULT->estimacionUltimaRafaga; // Estimacion anterior
 	//todo ver si el tipo de dato esta ok
-	float estimacion = configuracion_suse.ALPHA_SJF * rafaga_anterior + (1 - configuracion_suse.ALPHA_SJF) * estimacion_anterior;
+	double estimacion = configuracion_suse.ALPHA_SJF * rafaga_anterior + (1 - configuracion_suse.ALPHA_SJF) * estimacion_anterior;
 	ULT->estimacionUltimaRafaga = estimacion;
 }
 
@@ -948,8 +955,8 @@ void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 	eliminar_ULT_cola_actual(thread, process);
 
 	thread->duracionRafaga = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
-
 	thread->estado = E_EXECUTE;
+	thread->ejecutado_desde_estimacion = true;
 	process->EXEC_THREAD = thread;
 	configuracion_suse.ACTUAL_MULTIPROG ++;
 
