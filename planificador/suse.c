@@ -37,6 +37,7 @@ int main(void){
 	pthread_mutex_init(&mutex_semaforos,NULL);
 	pthread_mutex_init(&mutex_process_list, NULL);
 
+
 	log_info(logger, "Iniciando servidor... \n");
 	iniciar_servidor();
 
@@ -545,7 +546,9 @@ t_process * generar_process(int process_id) {
 
 
 void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
-	log_info(logger, "Arranco schedule_next...\n");
+	log_info(logger, "Inicio schedule_next...\n");
+	log_info(logger, "El valor del sem_ULTs_listos es %d \n", sem_ULTs_listos.__align);
+	sem_wait(&sem_ULTs_listos);
 	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
@@ -867,11 +870,13 @@ void listo_a_exit(t_suse_thread* thread,un_socket socket)
 	pthread_mutex_unlock(&mutex_process_list);
 
 	eliminar_ULT_cola_actual(thread,process);
-	list_remove_by_condition(process->ULTS,buscadorThread);
+	list_remove_by_condition(process->ULTS,buscadorThread); //todo esto esta duplicado
 	thread->estado = E_EXIT;
 	pthread_mutex_lock(&mutex_exit_queue);
 	list_add(exit_queue,thread);
 	pthread_mutex_unlock(&mutex_exit_queue);
+
+	sem_wait(&sem_ULTs_listos);
 
 	log_info(logger, "El tid %d paso de ready a exit\n", thread->tid);
 }
@@ -904,7 +909,6 @@ void nuevo_a_exit(t_suse_thread* thread,un_socket socket_actual)
 
 void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 
-
 	bool buscador(t_process* program)
 	{
 		return program->PROCESS_ID == socket;
@@ -926,6 +930,8 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 
 	process->EXEC_THREAD = thread;
 	log_info(logger, "El tid %d paso de ready a execute\n", thread->tid);
+
+	sem_wait(&sem_ULTs_listos);
 }
 
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
@@ -961,6 +967,7 @@ void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
 	remover_ULT_exec(process);
 	thread->estado = E_READY;
 	list_add(process->READY_LIST,thread);
+	sem_post(&sem_ULTs_listos);
 	log_info(logger, "El thread %d paso de execute a ready \n", thread->tid);
 
 }
@@ -970,6 +977,7 @@ void bloqueado_a_listo(t_suse_thread* thread,t_process* program)
 	eliminar_ULT_cola_actual(thread,program);
 	thread->estado = E_READY;
 	list_add(program->READY_LIST,thread);
+	sem_post(&sem_ULTs_listos);
 	log_info(logger, "El thread %d paso de blocked a ready \n", thread->tid);
 }
 
@@ -1101,6 +1109,7 @@ void nuevo_a_listo(t_suse_thread* ULT, int process_id)
 	eliminar_ULT_cola_actual(ULT, program);
 	ULT->estado = E_READY;
 	configuracion_suse.ACTUAL_MULTIPROG ++;
+	sem_post(&sem_ULTs_listos);
 }
 
 void remover_ULT_listo(t_suse_thread* thread,t_process* process)

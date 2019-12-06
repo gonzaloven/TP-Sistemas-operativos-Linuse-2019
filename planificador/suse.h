@@ -44,6 +44,8 @@ pthread_mutex_t mutex_multiprog;
 
 pthread_mutex_t mutex_process_list;
 
+pthread_mutex_t mutex_ready_queue;
+
 sem_t sem_ULTs_listos;
 
 t_list* exit_queue;
