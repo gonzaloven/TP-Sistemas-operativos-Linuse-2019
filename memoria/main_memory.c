@@ -1326,7 +1326,8 @@ LE HABIA SACADO LO DEL CLOCK PORQUE VOS NO LO USABAS EN EL ALGORITMO, HABRIA QUE
 uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 {
 	program* prog;
-	segment* seg, segmento_obtenido;
+	segment* seg;
+	segment* segmento_obtenido;
 	int nro_prog;
 
 	//si el programa no está en la lista de programas, se agrega y le creamos una nueva tabla de segmentos
@@ -1339,21 +1340,22 @@ uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 	for(int i=0; i<list_size(prog->segment_table); i++)
 	{
 		segmento_obtenido = list_get(prog->segment_table,i);
-		if((segmento_obtenido->base <= direccion) && (segmento_obtenido->limite >= direccion)){} todoPiola=true;					
+		if((segmento_obtenido->base <= direccion) && (segmento_obtenido->limit >= direccion)) break;
+		if (i == list_size(prog->segment_table)-1) return 3;					
 	}
-	if (!todoPiola) return 3;
+	
 
 	int cantidad_paginas_necesarias = ceil(len / PAGE_SIZE);
 	printf("cantidad_paginas_necesarias %d\n",cantidad_paginas_necesarias);
 
 	//segmentation fault
-	if((seg == NULL) || (cantidad_paginas_necesarias > list_size(seg->tabla_paginas))) return 2;
+	if((segmento_obtenido == NULL) || (cantidad_paginas_necesarias > list_size(segmento_obtenido->page_table))) return 2;
 
 	//error (returen -1)
-	if(!(seg->is_heap) || (direccion % PAGE_SIZE != 0)) return 3;
+	if(!(segmento_obtenido->is_heap) || (direccion % PAGE_SIZE != 0)) return 3;
 
 
-	int nro_pagina_obtenida = (direccion - seg->base) / PAGE_SIZE;
+	int nro_pagina_obtenida = (direccion - segmento_obtenido->base) / PAGE_SIZE;
 	printf("nro_pagina_obtenida: %d\n",nro_pagina_obtenida);
 
 	page* pagina_obtenida;
@@ -1365,18 +1367,18 @@ uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 
 	for(int i=0; i<cantidad_paginas_necesarias; i++)
 	{
-		pagina_obtenida = list_get(seg->tabla_paginas,i + nro_pagina_obtenida);
-		direccion_datos = obtener_data_marco_mmap(seg, pagina_obtenida, i + nro_pagina_obtenida);
+		pagina_obtenida = list_get(segmento_obtenido->page_table,i + nro_pagina_obtenida);
+		direccion_datos = obtener_data_marco_mmap(segmento_obtenido, pagina_obtenida, i + nro_pagina_obtenida);
 		memcpy(&buffer[PAGE_SIZE*i], direccion_datos, PAGE_SIZE);
 	}
 
 	//el primer byte a escribir no debería superar el tamaño del archivo
-	if((nro_pagina_obtenida * PAGE_SIZE) <= seg->tam_archivo_mmap)
+	if((nro_pagina_obtenida * PAGE_SIZE) <= segmento_obtenido->tam_archivo_mmap)
 	{
-		fseek(seg->archivo_mapeado, nro_pagina_obtenida * PAGE_SIZE, SEEK_SET);
-		int nro_bytes = (int) fmin(len, seg->tam_archivo_mmap);
+		fseek(segmento_obtenido->archivo_mapeado, nro_pagina_obtenida * PAGE_SIZE, SEEK_SET);
+		int nro_bytes = (int) fmin(len, segmento_obtenido->tam_archivo_mmap);
 		printf("Bytes a escribir: %d\n",nro_bytes);
-		fwrite(buffer, nro_bytes, 1, seg->archivo_mapeado);
+		fwrite(buffer, nro_bytes, 1, segmento_obtenido->archivo_mapeado);
 		free(buffer);
 		return 1;
 	}

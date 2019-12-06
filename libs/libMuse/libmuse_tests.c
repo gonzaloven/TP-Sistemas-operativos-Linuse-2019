@@ -9,6 +9,7 @@ void foo3();
 void foo4();
 void foo5();
 void foo6();
+void foo7();
 
 const char *byte_to_binary(int x)
 {
@@ -51,6 +52,8 @@ int main(int argc,char *argv[])
 			break;
 			case '6': foo6();
 			break;
+			case '7': foo7();
+			break;
 			default: puts("Error");
 		}
 	}else printf("Libmuse with proccess_id = %d couldn't be initialized :(\n",pid);
@@ -66,6 +69,7 @@ void alocar_y_mostrar(int size)
 	int	dir = muse_alloc(size);
 	imprimir(size, dir);
 }
+
 
 void foo1(){
 	
@@ -154,6 +158,14 @@ void foo6(){
 	int dir7 = muse_alloc(strlen("hola")+ 1);
 	imprimir(sizeof(int), dir7);
 	muse_cpy(dir7, "hola", strlen("hola")+ 1);
+
+	muse_close();
+}
+
+void foo7(){
+	int direccion = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
+	int retorno = muse_sync(direccion, 200);
+	printf("%d", retorno);
 
 	muse_close();
 }
