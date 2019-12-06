@@ -28,8 +28,8 @@ int PAGE_SIZE = 0;
 int TOTAL_FRAME_NUM = 0;
 
 // inicializadas only for debugging reasons
-bool BITMAP[300];	
-bool BITMAP_SWAP_FILE[300];
+bool BITMAP[];
+bool BITMAP_SWAP_FILE[];
 int TOTAL_FRAME_NUM_SWAP;
 
 void muse_main_memory_init(int memory_size, int page_size, int swap_size)
@@ -1157,9 +1157,10 @@ int crear_nuevo_segmento_mmap(size_t length, uint32_t pid){
 	for(int i=0 ; i < total_pages_needed ; i++ )
 	{
 		pag = (page *) malloc(sizeof(page));
-		pag->is_used = true;
+		pag->is_used = false;
 		pag->is_modify = false;
 		pag->is_present = false;
+
 		nro_pag = list_add(seg->page_table, pag);
 		seg->limit += PAGE_SIZE;
 	}
@@ -1285,139 +1286,85 @@ char* get_file_content_from_swap(char* swapfile){
 		so we're basicly just writing 200 bytes of "nothing" to map	
 	*/
 
-/*
+
 uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 {
-	program* prog;
-	segment* seg, segmento_obtenido;
+	/*uint32_t resultado_sync = 1;
+		printf("\nInicio muse_sync\n");
 
-	//si el programa no está en la lista de programas, se agrega y le creamos una nueva tabla de segmentos
-	if((nro_prog = search_program(pid)) == -1)
-	{
-		log_debug(debug_logger, "Que hacés pidiendo un muse_sync sin antes hacer un mmap?");
-	}
+		uint32_t direccion_recibida = obtener_valor(paquete.parametros);
+		printf("direccion_recibida %d\n",direccion_recibida);
+		uint32_t length_recibido = obtener_valor(paquete.parametros);
+		printf("length_recibido %d\n",length_recibido);
 
-	//busco que segmento tenga asignado esa direccion
-	for(int i=0; i<list_size(prog->segment_table); i++)
-	{
-		segmento_obtenido = list_get(prog->segment_table,i);
-		if((segmento_obtenido->base <= direccion) && (segmento_obtenido->limite >= direccion))
-			seg = segmento_obtenido;			
-	}
+		pthread_mutex_lock(&mutex_acceso_upcm);
 
-	int cantidad_paginas_necesarias = ceil(len / PAGE_SIZE);
-	printf("cantidad_paginas_necesarias %d\n",cantidad_paginas_necesarias);
+		t_proceso* proceso_obtenido = buscar_proceso(lista_procesos,socket_muse);
+		t_segmento* segmento_obtenido = buscar_segmento(proceso_obtenido->tabla_segmentos,direccion_recibida);
 
-	//segmentation fault
-	if((seg == NULL) || (cantidad_paginas_necesarias > list_size(seg->tabla_paginas)) return 2;
+		// calculo para las paginas necesarias
+		int cantidad_paginas_necesarias = (int)ceil((double)length_recibido/TAM_PAGINA);
+		printf("cantidad_paginas_necesarias %d\n",cantidad_paginas_necesarias);
 
-	//error (returen -1)
-	if(!(seg->is_heap) || (direccion % PAGE_SIZE != 0)) return 3;
-
-
-	int nro_pagina_obtenida = (direccion - seg->base) / PAGE_SIZE;
-	printf("nro_pagina_obtenida: %d\n",nro_pagina_obtenida);
-
-	page* pagina_obtenida;
-	void* direccion_datos;
-	int posicion_recorrida;
-	void* buffer;
-
-	buffer = malloc(cantidad_paginas_necesarias*PAGE_SIZE);
-
-	for(int i=0; i<cantidad_paginas_necesarias; i++)
-	{
-		pagina_obtenida = list_get(seg->tabla_paginas,i + nro_pagina_obtenida);
-		direccion_datos = dame_los_datos_de_mmap(seg, pagina_obtenida, i + nro_pagina_obtenida);
-		memcpy(&buffer[PAGE_SIZE*i], direccion_datos, PAGE_SIZE);
-	}
-
-	//el primer byte a escribir no debería superar el tamaño del archivo
-	if((nro_pagina_obtenida * PAGE_SIZE) <= seg->tam_archivo_mmap)
-	{
-		fseek(seg->archivo_mapeado, nro_pagina_obtenida * PAGE_SIZE, SEEK_SET);
-		int nro_bytes = (int) fmin(len, seg->tam_archivo_mmap);
-		printf("Bytes a escribir: %d\n",nro_bytes);
-		fwrite(buffer, nro_bytes, 1, seg->archivo_mapeado);
-		free(buffer);
-		return 1;
-	}
-	free(buffer);
-	return 3;
-}
-
-void* dame_los_datos_de_mmap(segment* seg, page* pag, int nro_pagina)
-{	//
-	if(!pag->bit_presencia && !espacio_en_MAIN_MEMORY()){
-    	page* pag_memoria = ejecutar_algoritmo_clock_modificado();
-		archivo_swap = fopen(SWAP_PATH,"r+");
-
-    	void* buffer_pag_upcm = malloc(TAM_PAGINA);
-    	void* buffer_pag_mmap = malloc(TAM_PAGINA);
-    	int frame_swap_obtenido;
-
-
-		for(i=0; i < TOTAL_FRAME_NUM; i++)
-		{	
-			if((BITMAP[i])) frame_swap_obtenido = i;
+		if(segmento_obtenido == NULL){
+			resultado_sync = 2; // indico que debe producirse segmentation fault
+		}
+		else if(cantidad_paginas_necesarias > list_size(segmento_obtenido->tabla_paginas)){
+			resultado_sync = 2; // indico que debe producirse segmentation fault
+		}
+		else if((segmento_obtenido->tipo_segmento != SEGMENTO_MMAP) || (direccion_recibida%TAM_PAGINA != 0)){
+			resultado_sync = 3; // indico que debe retornar -1
 		}
 
-    	memcpy(buffer_pag_upcm,&MAIN_MEMORY[pag_memoria->frame*TAM_PAGINA],TAM_PAGINA);		
+		if(resultado_sync > 1){
+			// no se encontro segmento
+			t_paquete paquete_respuesta = {
+					.header = MUSE_SYNC,
+					.parametros = list_create()
+			};
 
-		fseek(archivo_swap,frame_swap_obtenido*TAM_PAGINA,SEEK_SET);
-		fwrite(buffer_pag_upcm,TAM_PAGINA,1,archivo_swap);
+			///////////////// Parametros a enviar /////////////////
+			agregar_valor(paquete_respuesta.parametros,resultado_sync);
+			enviar_paquete(paquete_respuesta,socket_muse);
+			///////////////////////////////////////////////////////
 
-		pag_memoria->frame = frame_swap_obtenido;
-    	pag_memoria->bit_presencia = 0;
+			pthread_mutex_unlock(&mutex_acceso_upcm);
 
-      	pag->frame = proximo_frame_libre();
-    	pag->bit_presencia = 1;
-    	pag->bit_usado = 1;
+			return;
+		}
 
-    	// si este metodo no sirve, agregar un campo length_mmap en t_segmento
-    	if((nro_pagina*TAM_PAGINA) <= seg->tam_archivo_mmap){
-    		fseek(seg->archivo_mapeado,nro_pagina*TAM_PAGINA,SEEK_SET);
+		int nro_pagina_obtenida = (direccion_recibida - segmento_obtenido->base) / TAM_PAGINA;
+		printf("nro_pagina_obtenida %d\n",nro_pagina_obtenida);
 
-    		int bytes_a_leer = (int)fmin(TAM_PAGINA,((nro_pagina*TAM_PAGINA) + TAM_PAGINA) - seg->tam_archivo_mmap);
+		t_pagina* pagina_obtenida;
+		void* direccion_datos;
+		int posicion_recorrida;
+		void* buffer;
 
-    		fread(buffer_pag_mmap,bytes_a_leer,1,seg->archivo_mapeado);
-    		memcpy(&archivo_mapeado[pag->frame*TAM_PAGINA],buffer_pag_mmap,bytes_a_leer);
+		buffer = malloc(cantidad_paginas_necesarias*TAM_PAGINA);
+		for(int i=0; i<cantidad_paginas_necesarias;i++){
+			pagina_obtenida = list_get(segmento_obtenido->tabla_paginas,i + nro_pagina_obtenida);
+			direccion_datos = obtener_datos_frame_mmap(segmento_obtenido,pagina_obtenida,i + nro_pagina_obtenida);
+			memcpy(&buffer[TAM_PAGINA*i],direccion_datos,TAM_PAGINA);
+		}
 
-    		if(TAM_PAGINA > bytes_a_leer)
-    			memset(&archivo_mapeado[pag->frame*bytes_a_leer],'\0',TAM_PAGINA - bytes_a_leer);
-    	}
-    	else{
-    		// el primer byte a leer supera el tamano del archivo
-    		memset(&archivo_mapeado[pag->frame*TAM_PAGINA],'\0',TAM_PAGINA);
-    	}
+		if((nro_pagina_obtenida*TAM_PAGINA) <= segmento_obtenido->tam_archivo_mmap){
+			fseek(segmento_obtenido->archivo_mmap,nro_pagina_obtenida*TAM_PAGINA,SEEK_SET);
+			int bytes_a_escribir = (int)fmin(length_recibido,segmento_obtenido->tam_archivo_mmap);
+			printf("bytes_a_escribir %d\n",bytes_a_escribir);
+			fwrite(buffer,bytes_a_escribir,1,segmento_obtenido->archivo_mmap);
+		}
+		else{
+			// el primer byte a escribir supera el tamano del archivo
+			resultado_sync = 3;
+		}
 
-    	agregar_frame_clock(pag);
-
-    	free(buffer_pag_upcm);
-    	free(buffer_pag_mmap);
-    	fclose(archivo_swap);
-	}
-	else if(!pag->bit_presencia && espacio_en_upcm()){
-    	void* buffer_pag_mmap = malloc(TAM_PAGINA);
-
-    	pag->frame = proximo_frame_libre();
-    	pag->bit_presencia = 1;
-    	pag->bit_usado = 1;
-
-		fseek(seg->archivo_mapeado,nro_pagina * TAM_PAGINA,SEEK_SET);
-		fread(buffer_pag_mmap, TAM_PAGINA, 1, seg->archivo_mapeado);
-
-    	memcpy(&archivo_mapeado[pag->frame*TAM_PAGINA], buffer_pag_mmap, TAM_PAGINA);
-
-    	agregar_frame_clock(pag);
-
-    	free(buffer_pag_mmap);
-	}
-
-	return (char*) archivo_mapeado + (pag->frame * TAM_PAGINA);
+		free(buffer);
+	return 3;*/
+	return 0;
 }
 
-void agregar_frame_clock(page* pag){
+/*void agregar_frame_clock(page* pag){
 	
 	if(list_size(lista_clock) == cantidad_frames){
 		list_replace(lista_clock,pag->frame,pag);
@@ -1436,11 +1383,13 @@ void* convertir_de_nro_frame_a_posicion (int nro_frame)
 int convertir_de_posicion_a_nro_de_frame (void* posicion)
 {
 	
-}
-*/
+}*/
+
 
 void liberar_frame(void* frame){
 	int numeroFrame = (frame - MAIN_MEMORY)/PAGE_SIZE;
+
+	log_debug(debug_logger, "Libero el frame: %d", numeroFrame);
 
 	BITMAP[numeroFrame] = 1;
 }
@@ -1448,24 +1397,25 @@ void liberar_frame(void* frame){
 void liberar_frame_swap(void* frame){
 	int numeroFrame = (frame - MAIN_MEMORY)/PAGE_SIZE;
 
+	log_debug(debug_logger, "Libero el frame: %d", numeroFrame);
+
 	BITMAP_SWAP_FILE[numeroFrame] = 1;
 }
 
-void eliminar_archivo_mmap(segment* segmentoABorrar){
+void eliminar_archivo_mmap(archivoMMAP* archivo){
 
-	if(segmentoABorrar->page_table != NULL){
+	if(archivo->tabla_paginas != NULL){
 
 		void eliminar_pagina(page* pagina){
 			if(pagina->is_present){
+				log_debug(debug_logger, "Frame a borrar: %d", pagina->fr);
 				liberar_frame(pagina->fr);
 			}
-			else if(!pagina->is_present){
-				liberar_frame_swap(pagina->fr);
-			}
+
 			free(pagina);
 		}
 
-		list_destroy_and_destroy_elements(segmentoABorrar->page_table,(void*) eliminar_pagina);
+		list_destroy_and_destroy_elements(archivo->tabla_paginas,(void*) eliminar_pagina);
 	}
 }
 
@@ -1516,9 +1466,21 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 		list_remove_and_destroy_by_condition(lista_archivos_mmap,(void*) igualArchivo,(void*) eliminar_archivo_mmap);
 	}
 
+	bool igualSegmento(segment* segmento) {
+		prog = list_get(program_list, nro_prog);
+		int nroSegmento = busca_segmento(prog, dir);
+
+		segmento = list_get(prog->segment_table, nroSegmento);
+
+		return segmento->base == segmentoBuscado->base && prog->pid == pid;
+	}
+	list_remove_and_destroy_by_condition(lista_archivos_mmap,(void*) igualArchivo,(void*) eliminar_archivo_mmap);
+
 	log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
 
-	list_remove(prog->segment_table, segmentoBuscado);
+	list_remove(prog->segment_table, nroSegmento);
+	list_destroy(segmentoBuscado->page_table);
+
 
 	free(segmentoBuscado);
 
