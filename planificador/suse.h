@@ -122,6 +122,14 @@ void handle_main_thread_create(un_socket socket_actual, int tid);
 t_suse_thread* ULT_create(t_process* process, int tid);
 
 double get_time_today();
+
+
+/////////////METRICAS/////////////
+
+void iniciar_metricas();
+
+/////////////METRICAS/////////////
+
 /*
 --------------------------------------------------------
 ----------------- Variables para el Servidor -----------

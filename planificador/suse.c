@@ -11,6 +11,7 @@
 #include "libraries.h"
 
 t_log* logger;
+t_log* logger_metrics;
 char * suse_config_path = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config";
 
 int main(void){
@@ -37,6 +38,10 @@ int main(void){
 	pthread_mutex_init(&mutex_semaforos,NULL);
 	pthread_mutex_init(&mutex_process_list, NULL);
 
+	/*
+	iniciar_metricas();
+	log_info(logger, "Iniciando metricas.. \n");
+	*/
 
 	log_info(logger, "Iniciando servidor... \n");
 	iniciar_servidor();
@@ -52,6 +57,38 @@ int main(void){
 
 	return EXIT_SUCCESS;
 }
+
+void iniciar_metricas(){
+	t_list* params = list_create();
+	nuevo_hilo(metricas, params);
+}
+
+void* metricas(void* params){
+	sleep(configuracion_suse.METRICS_TIMER);
+	char* metrics_logs;
+	metrics_logs = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/METRICAS_SUSE.txt";
+	logger_metrics = log_create(metrics_logs, "Metrics logs", 1, 1);
+
+	metricas_por_hilo();
+	metricas_por_programa();
+	metricas_sistema();
+	pthread_detach(pthread_self());
+	return NULL;
+}
+
+void metricas_sistema(){
+	log_info(logger, "Calculando metricas del sistema...\n");
+	log_info(logger, "Semaforos actuales: \n");
+
+	int cantidad_semaforos = list_size(configuracion_suse.SEM_IDS);
+
+	for(int i = 0; i < cantidad_semaforos; i++){
+
+
+	}
+}
+
+
 
 void init_semaforos(){
 
@@ -619,6 +656,7 @@ int obtener_proximo_ejecutar(t_process* process){
 	log_info(logger, "El proximo ULT a ejecutar es %d", next_tid);
 
 	listo_a_ejecucion(next_ULT, process->PROCESS_ID);
+	//Seteo la rafaga del hilo actual
 	next_ULT->duracionRafaga = tiempo_actual;
 	return next_tid;
 }
@@ -641,9 +679,8 @@ void estimar_ULTs_listos(t_list* ready_list) {
 }
 
 void estimar_rafaga(t_suse_thread * ULT){
-	int rafaga_anterior = ULT->duracionRafaga; //Duracion de la rafaga anterior
+	double rafaga_anterior = ULT->duracionRafaga; //Duracion de la rafaga anterior
 	double estimacion_anterior = ULT->estimacionUltimaRafaga; // Estimacion anterior
-	//todo ver si el tipo de dato esta ok
 	double estimacion = configuracion_suse.ALPHA_SJF * rafaga_anterior + (1 - configuracion_suse.ALPHA_SJF) * estimacion_anterior;
 	ULT->estimacionUltimaRafaga = estimacion;
 }
