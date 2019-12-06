@@ -1317,14 +1317,17 @@ char* get_file_content_from_swap(char* swapfile){
 		so we're basicly just writing 200 bytes of "nothing" to map	
 	*/
 
-uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid){return 0;}
 
-/* FIJATE QUE OBTENER_DATOS_MMAP ES LA QUE YO ADAPTE QUE ES OBTENER_DATA_MMAP O ALGO ASI, NO HACE FALTA COPIARLA DEVUELTA
- * LE HABIA SACADO LO DEL CLOCK PORQUE VOS NO LO USABAS EN EL ALGORITMO, HABRIA QUE VER PARA QUE LO USAS
+/* 
+FIJATE QUE OBTENER_DATOS_MMAP ES LA QUE YO ADAPTE QUE ES OBTENER_DATA_MMAP O ALGO ASI, NO HACE FALTA COPIARLA DEVUELTA
+LE HABIA SACADO LO DEL CLOCK PORQUE VOS NO LO USABAS EN EL ALGORITMO, HABRIA QUE VER PARA QUE LO USAS
+*/
+
 uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 {
 	program* prog;
 	segment* seg, segmento_obtenido;
+	int nro_prog;
 
 	//si el programa no está en la lista de programas, se agrega y le creamos una nueva tabla de segmentos
 	if((nro_prog = search_program(pid)) == -1)
@@ -1336,15 +1339,15 @@ uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 	for(int i=0; i<list_size(prog->segment_table); i++)
 	{
 		segmento_obtenido = list_get(prog->segment_table,i);
-		if((segmento_obtenido->base <= direccion) && (segmento_obtenido->limite >= direccion))
-			seg = segmento_obtenido;			
+		if((segmento_obtenido->base <= direccion) && (segmento_obtenido->limite >= direccion)){} todoPiola=true;					
 	}
+	if (!todoPiola) return 3;
 
 	int cantidad_paginas_necesarias = ceil(len / PAGE_SIZE);
 	printf("cantidad_paginas_necesarias %d\n",cantidad_paginas_necesarias);
 
 	//segmentation fault
-	if((seg == NULL) || (cantidad_paginas_necesarias > list_size(seg->tabla_paginas)) return 2;
+	if((seg == NULL) || (cantidad_paginas_necesarias > list_size(seg->tabla_paginas))) return 2;
 
 	//error (returen -1)
 	if(!(seg->is_heap) || (direccion % PAGE_SIZE != 0)) return 3;
@@ -1363,7 +1366,7 @@ uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 	for(int i=0; i<cantidad_paginas_necesarias; i++)
 	{
 		pagina_obtenida = list_get(seg->tabla_paginas,i + nro_pagina_obtenida);
-		direccion_datos = dame_los_datos_de_mmap(seg, pagina_obtenida, i + nro_pagina_obtenida);
+		direccion_datos = obtener_data_marco_mmap(seg, pagina_obtenida, i + nro_pagina_obtenida);
 		memcpy(&buffer[PAGE_SIZE*i], direccion_datos, PAGE_SIZE);
 	}
 
@@ -1381,6 +1384,7 @@ uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 	return 3;
 }
 
+/*
 void* dame_los_datos_de_mmap(segment* seg, page* pag, int nro_pagina)
 {	//
 	if(!pag->bit_presencia && !espacio_en_MAIN_MEMORY()){
@@ -1462,17 +1466,8 @@ void agregar_frame_clock(page* pag){
 		list_add_in_index(lista_clock,pag->frame,pag);
 	}
 }
-
-void* convertir_de_nro_frame_a_posicion (int nro_frame)
-{
-
-}
-
-int convertir_de_posicion_a_nro_de_frame (void* posicion)
-{
-	
-}
 */
+
 
 void liberar_frame(void* frame){
 	int numeroFrame = (frame - MAIN_MEMORY)/PAGE_SIZE;
