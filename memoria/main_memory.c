@@ -179,7 +179,6 @@ page* page_with_free_size(){
 			return pag;
 		}
 	}	
-	//return NULL;
 }
 
 /*
@@ -380,6 +379,8 @@ heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segme
 		heap_metadata metadataCopia;
 
 		page* proximaPagina = list_get(segmentoBuscado->page_table, (paginaBuscada + 1));
+		if(proximaPagina == NULL)
+			log_debug(debug_logger, "BOKITAAAAAAAAA");
 		void* punteroAlFrameSiguiente = proximaPagina->fr;
 		int tamanioMetadataCortada = (PAGE_SIZE) - offset;
 
@@ -573,7 +574,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		{
 			//log_debug(debug_logger, "Size solicitado para PAGE_WITH_FREE_SIZE: %d", PAGE_SIZE);
 			pag = page_with_free_size();
-			pag->is_used = 0; // creo que tiene que ver con esto
+			pag->is_used = 0;
 			list_add(segmentoAAgrandar->page_table, pag);
 			segmentoAAgrandar->limit += PAGE_SIZE;
 		}
@@ -601,6 +602,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		{
 			//log_debug(debug_logger, "Size solicitado para PAGE_WITH_FREE_SIZE: %d", PAGE_SIZE);
 			pag = page_with_free_size();
+			pag->is_used = 0;
 			list_add(segmentoNuevo->page_table, pag);
 			segmentoNuevo->limit += PAGE_SIZE;
 		}
@@ -905,6 +907,8 @@ void* obtener_data_marco_heap(page* pagina){
         pagina->fr = sacarFrame->fr;*/
 
     	int numFrame = dame_nro_frame_reemplazado();
+    	liberar_frame_swap(pagina->fr);
+    	log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap");
     	pagina->fr = (void*) (MAIN_MEMORY + numFrame * PAGE_SIZE);
         pagina->is_present = 1;
         pagina->is_used = 1;
@@ -918,6 +922,8 @@ void* obtener_data_marco_heap(page* pagina){
         fread(buffer_page_swap,PAGE_SIZE,1,archivo_swap);
 
         page* sacarFrame = page_with_free_size();
+        liberar_frame_swap(pagina->fr);
+        log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap");
         pagina->fr = sacarFrame->fr;
         pagina->is_present = 1;
         pagina->is_used = 1;
@@ -953,6 +959,8 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
     	void* buffer_page_mmap = malloc(PAGE_SIZE);
 
     	int numFrame = dame_nro_frame_reemplazado();
+    	liberar_frame_swap(pagina->fr);
+    	log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap");
     	pagina->fr = (void*) numFrame;
         pagina->is_present = 1;
         pagina->is_used = 1;
@@ -985,6 +993,8 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
         void* buffer_page_mmap = malloc(PAGE_SIZE);
 
         page* sacarFrame = page_with_free_size();
+        liberar_frame_swap(pagina->fr);
+        log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap");
         pagina->fr = sacarFrame->fr;
         pagina->is_present = 1;
         pagina->is_used = 1;
