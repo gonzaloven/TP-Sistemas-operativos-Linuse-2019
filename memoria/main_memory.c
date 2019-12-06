@@ -497,7 +497,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	if (size <= 0) return 0;
 	if (size + METADATA_SIZE > number_of_free_frames() * PAGE_SIZE){
 		log_debug(debug_logger, "No se puede maloquear tanto espacio en memoria");
-		return 0;		
+		return -1;		
 	} 
 
 	int nro_prog;
@@ -1286,57 +1286,62 @@ char* get_file_content_from_swap(char* swapfile){
 
 
 	/**
-	* Descarga una cantidad `len` de bytes y lo escribe en el archivo en el FileSystem.
+	* Descarga una cantidad `length` de bytes y lo escribe en el archivo en el FileSystem.
 	* @param direccion Dirección a memoria mappeada.
-	* @param len Cantidad de bytes a escribir.
+	* @param length Cantidad de bytes a escribir.
 	* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
-	* @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
+	* @note Si `length` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
 	* @example	
 		imagine we got uint32_t map = muse_map("hola.txt", filesize, MAP_PRIVATE);		
 		so let's imagine we do the following:
 			muse_sync(map, 200)
 		so we're basicly just writing 200 bytes of "nothing" to map	
 	*/
-
-//FIJATE QUE OBTENER_DATOS_MMAP ES LA QUE YO ADAPTE QUE ES OBTENER_DATA_MMAP O ALGO ASI, NO HACE FALTA COPIARLA DEVUELTA
-//LE HABIA SACADO LO DEL CLOCK PORQUE VOS NO LO USABAS EN EL ALGORITMO, HABRIA QUE VER PARA QUE LO USAS
-
-
-uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
+uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 {
-	/*
+	
 	program* prog;
 	segment* seg;
 	segment* segmento_obtenido;
 	int nro_prog;
 
-	//si el programa no está en la lista de programas, se agrega y le creamos una nueva tabla de segmentos
-	if((nro_prog = search_program(pid)) == -1)
-	{
+	//primero chequea que exista el programa
+	if((nro_prog = search_program(pid)) == -1){
 		log_debug(debug_logger, "Que hacés pidiendo un muse_sync sin antes hacer un mmap?");
+		return -1;
 	}
 
-	//busco que segmento tenga asignado esa direccion
+	prog = list_get(program_list, nro_prog);
+
+	//busco el segmento que tenga asignado esa direccion
 	for(int i=0; i<list_size(prog->segment_table); i++)
 	{
 		segmento_obtenido = list_get(prog->segment_table,i);
 		if((segmento_obtenido->base <= direccion) && (segmento_obtenido->limit >= direccion)) break;
-		if (i == list_size(prog->segment_table)-1) return 3;					
+		if (i == list_size(prog->segment_table)-1){
+			log_debug(debug_logger, "Error: no se encontro ningun segmento asignado a esa direccion");
+			return -1;
+		} 				
 	}
-	
 
-	int cantidad_paginas_necesarias = ceil(len / PAGE_SIZE);
-	printf("cantidad_paginas_necesarias %d\n",cantidad_paginas_necesarias);
+	int cantidad_paginas_necesarias = ceil(length / PAGE_SIZE);
+	log_debug(debug_logger, "Cantidad_paginas_necesarias %d", cantidad_paginas_necesarias);
 
 	//segmentation fault
-	if((segmento_obtenido == NULL) || (cantidad_paginas_necesarias > list_size(segmento_obtenido->page_table))) return 2;
+	if((segmento_obtenido == NULL) || (cantidad_paginas_necesarias > list_size(segmento_obtenido->page_table))){
+		log_debug(debug_logger, "Error: Segmentation Fault");
+		return -2;
+	} 
 
 	//error (returen -1)
-	if(!(segmento_obtenido->is_heap) || (direccion % PAGE_SIZE != 0)) return 3;
+	if(!(segmento_obtenido->is_heap) || (direccion % PAGE_SIZE != 0)){
+		log_debug(debug_logger, "Error: el segmento obtenido es heap o la direccion no esta al inicio de una pag");
+		return -1;
+	} 
 
-
+	//busca el nro de pagina del segmento donde está direccion
 	int nro_pagina_obtenida = (direccion - segmento_obtenido->base) / PAGE_SIZE;
-	printf("nro_pagina_obtenida: %d\n",nro_pagina_obtenida);
+	log_debug(debug_logger, "nro_pagina_obtenida: %d", nro_pagina_obtenida);
 
 	page* pagina_obtenida;
 	void* direccion_datos;
@@ -1349,22 +1354,23 @@ uint32_t memory_sync(uint32_t direccion, size_t len, uint32_t pid)
 	{
 		pagina_obtenida = list_get(segmento_obtenido->page_table,i + nro_pagina_obtenida);
 		direccion_datos = obtener_data_marco_mmap(segmento_obtenido, pagina_obtenida, i + nro_pagina_obtenida);
-		memcpy(buffer + PAGE_SIZE * i, direccion_datos, PAGE_SIZE);
+		memcpy(buffer + (PAGE_SIZE*i), direccion_datos, PAGE_SIZE);
 	}
 
 	//el primer byte a escribir no debería superar el tamaño del archivo
 	if((nro_pagina_obtenida * PAGE_SIZE) <= segmento_obtenido->tam_archivo_mmap)
 	{
-		int nro_bytes = (int) fmin(len, segmento_obtenido->tam_archivo_mmap);
-		log_debug(debug_logger, "Bytes a escribir: %d", nro_prog);
-
-		memcpy(buffer, segmento_obtenido->archivo_mapeado->archivo + nro_pagina_obtenida * PAGE_SIZE, nro_bytes);
-
+		int nro_bytes = (int) fmin(length, segmento_obtenido->tam_archivo_mmap);
+		log_debug(debug_logger, "Bytes a escribir: %d", nro_bytes);
+		memcpy(segmento_obtenido->archivo_mapeado->archivo + nro_pagina_obtenida * PAGE_SIZE, buffer, nro_bytes);
+//		fwrite(buffer, nro_bytes, 1, segmento_obtenido->archivo_mapeado);
 		free(buffer);
-		return 1;
+		return 0; //unico caso que devuelve que está todo OK
 	}
-	free(buffer);*/
-	return 3;
+	free(buffer);
+
+	log_debug(debug_logger, "Error: la direccion encontrada es mayor que el tamaño de mmap_file");
+	return -1;
 }
 
 /*void agregar_frame_clock(page* pag){
