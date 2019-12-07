@@ -1,8 +1,12 @@
+#include "server.h"
 #include "network.h"
 #include "CUnit/Basic.h"
-#include "server.h"
 
-void *handler(void *args);
+int main(int argc ,char *argv[])
+{
+	server_start_test();
+	return 0;	
+}
 
 void server_start_test()
 {
@@ -33,8 +37,4 @@ void* handler(void *args)
 	
 
 }
-int main(int argc ,char *argv[])
-{
-	server_start_test();
-	return 0;	
-}
+

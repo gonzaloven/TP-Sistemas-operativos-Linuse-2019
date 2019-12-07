@@ -47,6 +47,7 @@
 *.su
 *.idb
 *.pdb
+*.log
 
 # Kernel Module Compile Results
 *.mod*
@@ -56,3 +57,5 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+*.json
+memoria/swapfile
