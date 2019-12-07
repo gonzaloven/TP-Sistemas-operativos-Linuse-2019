@@ -60,6 +60,6 @@ echo Done
 
 #echo Creating Environment Variables
 #unset LD_LIBRARY_PATH
-#LD_LIBRARY_PATH=/home/utnso/tp-2019-2c-Los-Trapitos/libs/bin:$LD_LIBRARY_PATH
+#LD_LIBRARY_PATH=/home/utnso/workspace/tp-2019-2c-Los-Trapitos/libs/bin:$LD_LIBRARY_PATH
 #export LD_LIBRARY_PATH
 #echo Done

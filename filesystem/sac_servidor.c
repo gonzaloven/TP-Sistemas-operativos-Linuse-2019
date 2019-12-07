@@ -103,7 +103,7 @@ void configurar_server(){
 void fuse_start_service(ConnectionHandler ch)
 {
 	fuse_config = load_configuration(SAC_CONFIG_PATH);
-	fuse_logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
+	fuse_logger = log_create("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
 	configurar_server();
 	//fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
 	server_start(fuse_config->listen_port,ch);
