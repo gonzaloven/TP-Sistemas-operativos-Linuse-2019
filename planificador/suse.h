@@ -159,5 +159,4 @@ struct addrinfo hints, *ai, *p;
 */
 
 
-#endif 
-
+#endif

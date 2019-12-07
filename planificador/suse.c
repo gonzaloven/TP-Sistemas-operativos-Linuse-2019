@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include "libraries.h"
 
+//hols
 t_log* logger;
 t_log* logger_metrics;
 char * suse_config_path = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config";

@@ -32,6 +32,7 @@
 #define MAX_LEN 128
 
 
+///
 enum codigos_de_operacion {
 	codigo_error = -1,
 	codigo_healthcheck = 2,

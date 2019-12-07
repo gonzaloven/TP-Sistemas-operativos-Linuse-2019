@@ -232,4 +232,3 @@ void hilolay_init(void){
 	init_internal(&hiloops);
 	printf("Termino Init Internal \n");
 }
-

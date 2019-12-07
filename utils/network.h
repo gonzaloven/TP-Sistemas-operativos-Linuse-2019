@@ -8,6 +8,10 @@
 #include <arpa/inet.h>
 #include "message.h"
 
+//NO DEJAR ASI, ES PARA DEBUGGEAR ESTO NADA MAS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#define NETWORK_LOGGER_PATH2 "../logs/server.log"
+#define NETWORK_LOGGER_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/server.log"
+
 /* Structure for storing client connection data. */
 typedef struct ConnectionArgs_s
 {
@@ -55,6 +59,10 @@ ssize_t send_message(int socket_fd,Message *msg);
  * @param msg: the received message
  * */
 ssize_t receive_message(int socket_fd,Message *msg);
+
+ssize_t receive_message_var(int socket_fd, Message* msg);
+
+ssize_t receive_packet_var(int socket,void **bufferReal);
 
 
 
