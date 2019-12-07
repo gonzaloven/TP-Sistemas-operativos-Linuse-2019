@@ -1,6 +1,6 @@
 CC:=gcc
 TARGET:=libmuse.so
-UTILS:= ../../utils/
+UTILS:= ../../utils_suse/
 INCDIR:= -I$(UTILS)
 CFLAGS:= -c -g -fpic
 SRCS:= libmuse.c $(UTILS)network.c $(UTILS)message.c
@@ -12,7 +12,6 @@ all: libmuse
 #libmuse
 libmuse: libmuse.o
 	$(CC) -g $(LIBFLAGS) $(TARGET) libmuse.o
-	mv libmuse.so ../bin
 
 libmuse.o:makedir libmuse.c
 	$(CC) $(CFLAGS) $(INCDIR) $(SRCS)
