@@ -10,15 +10,6 @@ echo " "
 
 PLANIFICADORCONFIG="/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config"
 
-LISTEN_PORT=5002
-METRICS_TIMER=70
-MAX_MULTIPROG=15
-SEM_IDS=[solo_hiper_mega_piola, afinado]
-SEM_INIT=[1,0]
-SEM_MAX=[10, 10]
-ALPHA_SJF=0.5
-
-
 # Escribir el archivo de configuracion
 generar_configuracion(){
 	echo "Ingrese puerto de SUSE :"
