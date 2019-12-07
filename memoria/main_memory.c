@@ -157,8 +157,7 @@ int frames_needed(int size_total){
 }
 
 page* page_with_free_size(){
-	//heap_metadata* metadata;
-	//heap_metadata* metadata2;
+
 
 	int curr_frame_num;
 	page* pag = (page *) malloc(PAGE_SIZE);
@@ -865,7 +864,8 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
 
     	int numFrame = dame_nro_frame_reemplazado();
     	log_debug(debug_logger, "Paso pagina de ARCHIVO MAPPED a MEMORIA PRINCIPAL");
-    	pagina->fr = (void*) numFrame;
+    	log_debug(debug_logger, "NUM FRAME: %d",numFrame);
+    	pagina->fr = (void*) (MAIN_MEMORY + numFrame * PAGE_SIZE);
         pagina->is_present = 1;
         pagina->is_used = 1;
 
@@ -888,6 +888,7 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
 
         page* sacarFrame = page_with_free_size();
         log_debug(debug_logger, "Paso pagina de MAPPED a MEMORIA PRINCIPAL");
+        log_debug(debug_logger, "Num frame: ", (sacarFrame->fr - MAIN_MEMORY) /  PAGE_SIZE);
         pagina->fr = sacarFrame->fr;
         pagina->is_present = 1;
         pagina->is_used = 1;
@@ -1103,6 +1104,8 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 
 	log_debug(debug_logger, "PID ----> %d", pid);
 
+
+
 	if((nro_prog = search_program(pid)) == -1)
 	{
 		log_debug(debug_logger, "No lo encontre, lo creo ----> %d", pid);
@@ -1123,6 +1126,10 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	if(archivoMappeado == NULL){
 		archivoMMAP* archivoMappeadoNuevo = (archivoMMAP*)malloc(sizeof(archivoMMAP));
 		int fileDescriptor = open(path, O_RDWR, 0);
+
+		if(fileDescriptor == -1){
+			return -1;
+		}
 
 		void* mmapArchivo = mmap(NULL, length, PROT_READ|PROT_WRITE, flag, fileDescriptor,0);
 

@@ -154,7 +154,7 @@ void foo4(){
 
 void foo5(){
 
-	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola", 26, MAP_SHARED);
+	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
 	printf("La direccion es %d(dec),	%s(bin)\n", direccion1, byte_to_binary(direccion1));
 
 	muse_cpy(direccion1, "hola", strlen("hola") + 1);
