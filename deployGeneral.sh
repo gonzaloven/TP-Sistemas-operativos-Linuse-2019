@@ -43,14 +43,14 @@ cp Makefile ../linuse-tests-programs
 
 echo "Copiando hilolay_alumnos..."
 cd /home/utnso/workspace/pruebasSO2019
-cp hilolay_alumnos ../linuse-tests-programs
+cp hilolay_alumnos.c ../linuse-tests-programs
 cd ..
 
 echo "Haciendo make a todo..."
 cd /home/utnso/workspace/linuse-tests-programs/
 sudo make clean
 sudo make
-sudo all
+sudo make all
 echo "Compiled with exit code $?"
 
 cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos
