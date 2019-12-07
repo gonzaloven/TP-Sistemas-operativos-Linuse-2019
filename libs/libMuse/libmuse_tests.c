@@ -188,7 +188,7 @@ void foo7(){
 	//int direccion2 = muse_alloc(strlen(" y sigue leyendo")+ 1);
 	//imprimir(sizeof(int), direccion2);
 
-	int direccion2 = direccion1 + 15;
+	int direccion2 = direccion1 + 16;
 
 	muse_cpy(direccion2, " y sigue leyendo", strlen(" y sigue leyendo")+ 1);
 	printf("Copio \" y sigue leyendo \" en: %d(dec)\n", direccion2);
