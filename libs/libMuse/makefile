@@ -6,20 +6,15 @@ INCDIR:= -I$(UTILS)
 CFLAGS:= -g
 SRCS := libmuse_tests.c libmuse.c $(UTILS)network.c $(UTILS)message.c 
 LFLAGS := -pthread -lcommons -lm
+NAME:= libmuseex
 
-all: libmuse
+all: $(NAME).so
 
-#libmuse: libmuse.o
-#	$(CC) -g $(LIBFLAGS) $(TARGET) libmuse.o
-
-libmuse.o:makedir libmuse.c
-	$(CC) $(CFLAGS) $(INCDIR) $(SRCS)
-
-makedir:
-	mkdir -p ../bin
-
-libmuse:
-	$(CC) $(CFLAGS) $(INCDIR) $(SRCS) -o $(TARGET) $(LFLAGS)
+$(NAME).o: 
+	gcc -c -fpic -lutils_suse -lcommons -o libmuse.o libmuse.c -L ../../utils_suse/ -I ../../utils_suse/
+	
+$(NAME).so: $(NAME).o
+	gcc -shared -o libmuse.so libmuse.o
 
 clean:
 	rm -f libmuse *.o

@@ -3,7 +3,7 @@ TARGETSV:= sac_servidor
 CC := gcc
 CFLAGSCLI := -g -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=27
 CFLAGSSV := -g
-UTILS := ../utils/
+UTILS := ../utils_suse/
 INCDIR := -I$(UTILS)
 LFLAGSCLI := -lfuse -lcommons -pthread -lm
 LFLAGSSV := -lcommons -pthread -lm
