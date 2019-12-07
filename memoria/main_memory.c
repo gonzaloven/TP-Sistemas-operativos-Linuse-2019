@@ -1506,6 +1506,8 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 
 	log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
 
+	free(archivoMapeado->pathArchivo);
+
 	free(archivoMapeado);
 
 	free(segmentoBuscado);
