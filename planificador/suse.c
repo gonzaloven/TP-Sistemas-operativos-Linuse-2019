@@ -62,17 +62,132 @@ void iniciar_metricas(){
 }
 
 void* metricas(void* params){
-	sleep(configuracion_suse.METRICS_TIMER);
+
 	char* metrics_logs;
 	metrics_logs = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/METRICAS_SUSE.txt";
 	logger_metrics = log_create(metrics_logs, "Metrics logs", 1, 1);
+	while(1)
+	{
+	sleep(configuracion_suse.METRICS_TIMER);
 
-	metricas_por_hilo();
-	metricas_por_programa();
 	metricas_sistema();
+	metricas_por_programa();
+	metricas_por_hilo();
+	}
 	pthread_detach(pthread_self());
 	return NULL;
 }
+
+void metricas_por_programa()
+{
+	log_info(logger_metrics, "Calculando metricas por programa...\n");
+	int cantidadProgramas = list_size(configuracion_suse.process);
+
+	for(int i = 0; i < cantidadProgramas; i++)
+	{
+		t_process* process = list_get(configuracion_suse.process,i);
+
+		log_info(logger_metrics, "Metricas del programa %d:...\n",process->PROCESS_ID);
+
+		int news = 0;
+		int readys = 0;
+		int executing = 0;
+		int blocked = 0;
+		int exit = 0;
+
+		int cantidadHilos = list_size(process->ULTS);
+		for(int j = 0; j<cantidadHilos; i++)
+		{
+			t_suse_thread* thread = list_get(process->ULTS,j);
+
+			switch(thread->estado)
+			{
+
+			case 1:
+				readys ++;
+			break;
+			case 2:
+				executing = 1;
+			break;
+			case 3:
+				blocked ++;
+			break;
+			case 5:
+				news ++;
+			break;
+
+			}
+		}
+
+		bool buscadorNew(t_suse_thread* thread)
+		{
+			return thread->procesoId == process->PROCESS_ID;
+		}
+
+		t_list* nuevaLista = list_filter(exit_queue,buscadorNew);
+		exit = list_size(nuevaLista);
+
+		log_info(logger_metrics,"Cantidad de hilos por cola:\n");
+		log_info(logger_metrics,"En cola de new: %d...\n",news);
+		log_info(logger_metrics,"En cola de ready: %d...\n",readys);
+		log_info(logger_metrics,"En cola de execute: %d...\n",executing);
+		log_info(logger_metrics,"En cola de blocked: %d...\n",blocked);
+		log_info(logger_metrics,"En cola de exit: %d...\n",exit);
+		log_info(logger_metrics,"---------------------------------------\n");
+
+	}
+
+}
+
+
+void metricas_por_hilo()
+{
+	double tiempo = get_time_today();
+	int cantidadProcesos = list_size(configuracion_suse.process);
+
+	for(int i = 0; i < cantidadProcesos; i++)
+	{
+		t_process* process = list_get(configuracion_suse.process,1);
+		log_info(logger_metrics,"Metricas para el proceso %d: \n",process->PROCESS_ID);
+		int cantidadHilos = list_size(process->ULTS);
+
+		for(int j = 0; j < cantidadHilos; j++)
+		{
+			t_suse_thread* thread = list_get(process->ULTS,j);
+			double ejecucion = get_tiempo_ejecucion(thread,tiempo);
+			double espera = thread->tiempoDeEspera;
+			double cpu = thread->tiempoDeCpu;
+			double ejecucionTotal = get_ejecucion_total(process);
+			double porcentajeEjecucion = (ejecucionTotal / ejecucion)*100 ;
+
+			log_info(logger_metrics,"Tiempo de ejecucion para hilo %d: %f\n",thread->tid,ejecucion);
+			log_info(logger_metrics,"Tiempo de espera para hilo %d: %f\n",thread->tid,espera);
+			log_info(logger_metrics,"Tiempo de uso de CPU para hilo %d: %f\n",thread->tid,cpu);
+			log_info(logger_metrics,"Porcentaje de ejecucion para hilo %d: %f\n",thread->tid,porcentajeEjecucion);
+
+		}
+	}
+
+}
+
+double get_tiempo_ejecucion(t_suse_thread* thread, double tiempo)
+{
+	return tiempo - thread->tiempoDeEjecucion;
+}
+
+
+double get_ejecucion_total(t_process* process)
+{
+	int cantidadHilos = list_size(process->ULTS);
+	double contador = 0;
+	for(int i = 0; i < cantidadHilos; i++)
+	{
+		t_suse_thread* thread = list_get(process->ULTS,i);
+		contador += thread->tiempoDeEjecucion;
+	}
+	return contador;
+}
+
 
 void metricas_sistema(){
 	log_info(logger_metrics, "Calculando metricas del sistema...\n");
@@ -80,11 +195,17 @@ void metricas_sistema(){
 
 	int cantidad_semaforos = list_size(configuracion_suse.SEM_IDS);
 
-	for(int i = 0; i < cantidad_semaforos; i++){
-		//semaforos por nombre
+	pthread_mutex_lock(&mutex_semaforos);
+	for(int i = 0; i < cantidad_semaforos; i++)
+	{
+		t_suse_semaforos* semaforo = list_get(configuracion_suse.semaforos,i);
+		log_info(logger_metrics,"Valor actual del semaforo %s:  %d...\n",semaforo->NAME,semaforo->VALUE);
 	}
+	pthread_mutex_unlock(&mutex_semaforos);
 
-	log_info(logger_metrics, "El grado actual de multiprogramacion es de %d", configuracion_suse.ACTUAL_MULTIPROG);
+	pthread_mutex_lock(&mutex_multiprog);
+	log_info(logger_metrics, "Grado actual de multiprogramacion actual: %d", configuracion_suse.ACTUAL_MULTIPROG);
+	pthread_mutex_unlock(&mutex_multiprog);
 }
 
 void init_semaforos(){
@@ -395,6 +516,7 @@ void handle_main_thread_create(un_socket socket_actual, int tid) {
 
 t_suse_thread* ULT_create(t_process* process, int tid){
 	log_info(logger, "Creando ULT %d", tid);
+	double tiempo = get_time_today();
 
 	t_suse_thread* new_thread = malloc(sizeof(t_suse_thread));
 	new_thread->tid = tid;
@@ -405,6 +527,10 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 	new_thread->joinTo = list_create();
 	new_thread->joinedBy = list_create();
 	new_thread->estimacionUltimaRafaga = 0;
+	new_thread->tiempoDeCpu = 0;
+	new_thread->tiempoDeEspera = 0;
+	new_thread->tiempoDeEjecucion = tiempo;
+
 	list_add(process->ULTS, new_thread);
 	list_add(new_queue, new_thread);
 	log_info(logger, "ULT creado con id %d \n", new_thread->tid);
@@ -606,9 +732,6 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
 
 	log_info(logger, "Recibi una peticion de suse_schedule_next \n");
-
-
-
 	log_info(logger, "Iniciando planificacion...\n");
 
 	int next_tid = obtener_proximo_ejecutar(process);
@@ -876,6 +999,9 @@ void ejecucion_a_exit(t_suse_thread* thread, un_socket socket)
 	t_process* process = list_find(configuracion_suse.process, buscador);
 	pthread_mutex_unlock(&mutex_process_list);
 
+	double tiempo = get_time_today();
+	thread->tiempoDeCpu += (tiempo - thread->tiempoInicialEnExec);
+
 	remover_ULT_exec(process);
 	list_remove_by_condition(process->ULTS,buscadorThread);
 	thread->estado = E_EXIT;
@@ -922,6 +1048,9 @@ void listo_a_exit(t_suse_thread* thread,un_socket socket)
 	pthread_mutex_lock(&mutex_process_list);
 	t_process* process = list_find(configuracion_suse.process, buscador);
 	pthread_mutex_unlock(&mutex_process_list);
+
+	double tiempo = get_time_today();
+	thread->tiempoDeEspera += (tiempo - thread->tiempoInicialEnReady);
 
 	eliminar_ULT_cola_actual(thread,process);
 	list_remove_by_condition(process->ULTS,buscadorThread); //todo esto esta duplicado
@@ -972,6 +1101,11 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 	t_process* process = list_find(configuracion_suse.process, buscador);
 	pthread_mutex_unlock(&mutex_process_list);
 
+	double tiempo = get_time_today();
+	thread->tiempoInicialEnExec = tiempo;
+
+	thread->tiempoDeEspera += (tiempo - thread->tiempoInicialEnReady);
+
 	eliminar_ULT_cola_actual(thread,process);
 	thread->estado = E_EXECUTE;
 	thread->ejecutado_desde_estimacion = true;
@@ -993,6 +1127,9 @@ void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
 
 	eliminar_ULT_cola_actual(thread, process);
 
+	double tiempo = get_time_today();
+	thread->tiempoInicialEnExec = tiempo;
+
 	thread->duracionRafaga = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
 	thread->estado = E_EXECUTE;
 	thread->ejecutado_desde_estimacion = true;
@@ -1010,6 +1147,10 @@ void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
 
 	t_process* process = list_find(configuracion_suse.process, buscador_process_id);
 
+	double tiempo = get_time_today();
+	thread->tiempoDeCpu += (tiempo - thread->tiempoInicialEnExec);
+
+	thread->tiempoInicialEnReady = tiempo;
 	remover_ULT_exec(process);
 	thread->estado = E_READY;
 	list_add(process->READY_LIST,thread);
@@ -1020,6 +1161,8 @@ void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
 
 void bloqueado_a_listo(t_suse_thread* thread,t_process* program)
 {
+	double tiempo = get_time_today();
+	thread->tiempoInicialEnReady = tiempo;
 	eliminar_ULT_cola_actual(thread,program);
 	thread->estado = E_READY;
 	list_add(program->READY_LIST,thread);
@@ -1035,14 +1178,18 @@ void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket)
 	}
 
 	t_process* process = list_find(configuracion_suse.process, buscador_process_id);
-	t_suse_thread* th = process->EXEC_THREAD;
-	double aux2 = th->duracionRafaga;
+	//t_suse_thread* th = process->EXEC_THREAD;
+
+	double tiempo = get_time_today();
+	thread->tiempoDeCpu += (tiempo - thread->tiempoInicialEnExec);
+
+	double aux2 = thread->duracionRafaga;
 	if(aux2 > 0)
 	{
 		struct timeval aux;
 		gettimeofday(&aux,NULL);
 		double tiempo = (double)(aux.tv_sec + (double)aux.tv_usec/1000000);
-		th->duracionRafaga = tiempo - aux2;
+		thread->duracionRafaga = tiempo - aux2;
 	}
 
 
@@ -1069,6 +1216,10 @@ void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semafo
 	t_process* program = list_find(configuracion_suse.process,comparador);
 
 	t_suse_thread* thread = list_find(program->ULTS,comparadorThread);
+
+	double tiempo = get_time_today();
+	thread->tiempoDeCpu += (tiempo - thread->tiempoInicialEnExec);
+
 
 	double aux2 = thread->duracionRafaga;
 	if(aux2 > 0)
@@ -1149,6 +1300,9 @@ void nuevo_a_listo(t_suse_thread* ULT, int process_id)
 	}
 
 	t_process* program = list_find(configuracion_suse.process, comparador);
+
+	double tiempo = get_time_today();
+	ULT->tiempoInicialEnReady = tiempo;
 
 	list_add(program->READY_LIST, ULT);
 

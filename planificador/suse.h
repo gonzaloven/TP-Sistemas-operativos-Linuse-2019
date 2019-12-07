@@ -72,7 +72,8 @@ void* process_conectado_funcion_thread(void* argumentos);
 int obtener_proximo_ejecutar(t_process* process);
 
 void ordenar_cola_listos(t_list* ready_list);
-
+double get_tiempo_ejecucion(t_suse_thread* thread, double tiempo);
+double get_ejecucion_total(t_process* process);
 void estimar_ULTs_listos(t_list* ready_list);
 
 void estimar_rafaga(t_suse_thread * ULT);
@@ -122,7 +123,10 @@ void handle_main_thread_create(un_socket socket_actual, int tid);
 t_suse_thread* ULT_create(t_process* process, int tid);
 
 double get_time_today();
-
+void metricas_sistema();
+void* metricas(void* params);
+void metricas_por_programa();
+void metricas_por_hilo();
 
 /////////////METRICAS/////////////
 

@@ -74,6 +74,11 @@ typedef struct t_suse_thread{
 	bool ejecutado_desde_estimacion;
 	t_list* joinedBy;
 	t_list* joinTo;
+	double tiempoDeEjecucion;
+	double tiempoDeEspera;
+	double tiempoDeCpu;
+	double tiempoInicialEnReady;
+	double tiempoInicialEnExec;
 } t_suse_thread;
 
 typedef struct t_process
