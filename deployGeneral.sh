@@ -26,7 +26,7 @@ sudo make install
 
 cd /home/utnso/workspace/hilolay
 echo "Ingrese password para instalar Hilolay..."
-sudo make && sudo make install
+make && sudo make install
 
 cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos/utils_suse/
 echo "Ingrese password para instalar utils de SUSE..."
