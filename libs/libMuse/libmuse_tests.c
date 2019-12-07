@@ -149,6 +149,9 @@ void foo5(){
 
 	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
 	printf("La direccion es %d(dec),	%s(bin)\n", direccion1, byte_to_binary(direccion1));
+
+	muse_cpy(direccion1, "hola", strlen("hola") + 1);
+
 	int direccion2 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/holiwis", 450, MAP_PRIVATE);
 	printf("La direccion es %d(dec),	%s(bin)\n", direccion2, byte_to_binary(direccion2));
 	int direccion3 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/forrazo", 200, MAP_SHARED);
@@ -159,6 +162,11 @@ void foo5(){
 	muse_unmap(direccion2);
 	printf("Unmapeada.\n");
 	muse_unmap(direccion3);
+	printf("Unmapeada.\n");
+
+	int direccion4 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
+	printf("La direccion es %d(dec),	%s(bin)\n", direccion4, byte_to_binary(direccion4));
+	muse_unmap(direccion4);
 	printf("Unmapeada.\n");
 
 	muse_unmap(38392);
