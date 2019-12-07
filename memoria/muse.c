@@ -69,36 +69,30 @@ void* handler(void *args)
 {
 	ConnectionArgs *conna = (ConnectionArgs *)args;
 	Message msg;
-	void* buffer;
+	char buffer[5000];
 	int n=0;
 	int socket = conna->client_fd;
 	struct sockaddr_in client_address = conna->client_addr;
 	
 	log_debug(muse_logger,"A client in socket: %d has connected!",socket);
 
-	int pid;
+	int pid = NULL;
 
-	//cambiar esto
-	while((n=receive_packet_var(socket,&buffer)) > 0)
+	while((n=receive_packet(socket,buffer,1024)) > 0)
 	{
-		//log_error(muse_logger,"iteracion");
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
 			message_handler(&msg,socket);
-			//log_error(muse_logger,"El pid del programa es: %d",pid);
-			free(buffer);
+			pid = msg.header.caller_id;
+			memset(buffer, '\0', 5000);
 		}else{
-			//og_error(muse_logger,"El pid del programa es: %d parte  1b",pid);
-			liberarMemoria((Function *)&msg);
 			free(msg.data);
 			msg.data = NULL;
-			free(buffer);
 		}
-	}	
-	//log_error(muse_logger,"El pid del programa es: %d parte 2",pid);
-	//el_cliente_se_tomo_el_palo(pid);
+	}
+	if(pid != NULL)
+		el_cliente_se_tomo_el_palo(pid);
 	log_error(muse_logger,"The client in socket: %d was disconnected!",socket);
-	free(buffer);
 	close(socket);
 
 	return (void*)NULL;
