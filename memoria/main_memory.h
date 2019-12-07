@@ -11,6 +11,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <math.h>
+#include <fcntl.h> //for open() funct
+#include <sys/mman.h> //for mmap() & munmap()
+#include <sys/stat.h>
+
+#define METADATA_SIZE sizeof(struct HeapMetadata)
+
+#define SWAP_PATH "swapfile"
 
 //#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
@@ -83,9 +90,6 @@ typedef struct segment_s
 
 }segment;
 
-/**
- * @param memory_size y @param page_size salen del archivo config
- */
 void muse_main_memory_init(int memory_size, int page_size, int swap_size);
 
 void muse_main_memory_stop();
@@ -95,6 +99,8 @@ int number_of_free_frames();
 void metricas_por_socket_conectado(uint32_t pid);
 
 int busca_segmento(program *prog,uint32_t va);
+
+heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado);
 
 void* obtener_data_marco_heap(page* pagina);
 

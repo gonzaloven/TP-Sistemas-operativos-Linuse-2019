@@ -7,19 +7,9 @@
 */
 
 #include "main_memory.h"
-#include <fcntl.h> //for open() funct
-#include <sys/mman.h> //for mmap() & munmap()
-#include <sys/stat.h>
-#include <math.h>
-
-#define METADATA_SIZE sizeof(struct HeapMetadata)
-
-#define SWAP_PATH "swapfile"
 
 void *MAIN_MEMORY = NULL;
-
 t_list *program_list = NULL;
-//t_list *segment_list = NULL;
 t_list *lista_archivos_mmap = NULL;
 t_log *metricas_logger = NULL;
 t_log *debug_logger = NULL;
@@ -135,13 +125,8 @@ int search_program(uint32_t pid)
 
 void el_cliente_se_tomo_el_palo(uint32_t pid){
 	int nro_prog = search_program(pid);
-
-	//deberia sacarlo de la lista
 	program *prog = list_get(program_list, nro_prog);
-
-	//liberar su tabla de segmentos
 	int memory_leaks = prog->using_memory;
-
 	log_trace(metricas_logger, "==32085== LEAK SUMMARY: definitely lost: %d bytes", memory_leaks);	
 }
 
@@ -198,9 +183,6 @@ int frames_needed(int size_total){
 }
 
 page* page_with_free_size(){
-	//heap_metadata* metadata;
-	//heap_metadata* metadata2;
-
 	int curr_frame_num;
 	page* pag = (page *) malloc(PAGE_SIZE);
 
@@ -228,7 +210,7 @@ t_list* lista_de_segmentos(){
 	int i;
 	t_list* lista_de_segmentos = list_create();
 
-	for(i=0; i<list_size(program_list) ; i++){
+	for(i=0; i<list_size(program_list); i++){
 		prog = list_get(program_list, i);
 		list_add_all(lista_de_segmentos, prog->segment_table);
 	}
@@ -248,10 +230,6 @@ int dame_nro_frame_reemplazado(){
 	t_list *listaSeg = lista_de_segmentos();
 	
 	int cantidad_de_segmentos_totales = list_size(listaSeg);
-	
-
-	//printf("\n\nantes %d, ahora %d \n\n", cantidad_de_segmentos_totales, list_size(lista_de_segmentos()));
-
 	int cantidad_de_paginas_en_segmento;
 	int nro_de_segmento, nro_de_pag, nro_frame;
 	int nro_paso = 1;
@@ -883,7 +861,6 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 
 	compactar_espacios_libres(prog);
 
-	//Para debug
 	//listar_metadatas(seg->base, seg);
 	prog->using_memory -= viejoSize;
 
@@ -1278,18 +1255,6 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	return segmentoNuevo->base;
 }
 
-	/**
-	* Descarga una cantidad `length` de bytes y lo escribe en el archivo en el FileSystem.
-	* @param direccion Dirección a memoria mappeada.
-	* @param length Cantidad de bytes a escribir.
-	* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
-	* @note Si `length` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
-	* @example	
-		imagine we got uint32_t map = muse_map("hola.txt", filesize, MAP_PRIVATE);		
-		so let's imagine we do the following:
-			muse_sync(map, 200)
-		so we're basicly just writing 200 bytes of "nothing" to map	
-	*/
 uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 {
 	
@@ -1388,27 +1353,6 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 	log_debug(debug_logger, "Error: la direccion encontrada es mayor que el tamaño de mmap_file");
 	return -1;
 }
-
-/*void agregar_frame_clock(page* pag){
-	
-	if(list_size(lista_clock) == cantidad_frames){
-		list_replace(lista_clock,pag->frame,pag);
-	}
-	else{
-		//list_add_in_index(lista_clock,pagina->frame,pagina);
-		list_add_in_index(lista_clock,pag->frame,pag);
-	}
-}
-
-void* convertir_de_nro_frame_a_posicion (int nro_frame)
-{
-
-}
-
-int convertir_de_posicion_a_nro_de_frame (void* posicion)
-{
-	
-}*/
 
 void liberar_frame(int numeroFrame){
 	log_debug(debug_logger, "Libero el frame: %d", numeroFrame);

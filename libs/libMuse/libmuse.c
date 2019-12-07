@@ -37,11 +37,6 @@ int muse_init(int id)
 
 	PROCESS_ID = id;
 
-	/*
-	TODO: importante, en una parte de acá, debería mandarle a muse mi p_id, ya que ahora todos 
-	los programas libMuse que se están corriendo tiene p_id = 1, independientemente del socket que se conecten
-	*/
-
 	config_destroy(config);
 
 	return 0; 

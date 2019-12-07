@@ -178,8 +178,8 @@ void* muse_invoke_function(Function *function,uint32_t pid)
 	switch(function->type)
 	{
 		case FUNCTION_MALLOC:
-			log_debug(muse_logger,"Malloc called with args -> %d",function->args[0].value.val_u32);
-			func_ret = memory_malloc(function->args[0].value.val_u32,pid);//TODO put the caller_id in func
+			log_debug(muse_logger,"Malloc called with args -> %d bytes",function->args[0].value.val_u32);
+			func_ret = memory_malloc(function->args[0].value.val_u32,pid);
 			break;
 		case FUNCTION_FREE:
 			log_debug(muse_logger,"Free called");
@@ -205,7 +205,7 @@ void* muse_invoke_function(Function *function,uint32_t pid)
 			func_ret = memory_sync(function->args[0].value.val_u32,function->args[1].value.val_sizet,pid);
 			break;
 		case FUNCTION_UNMAP:
-			log_debug(muse_logger,"Unmap called -----> Direccion: %d", function->args[0].value.val_u32);
+			log_debug(muse_logger,"Unmap called with args -> Direccion: %d", function->args[0].value.val_u32);
 			func_ret = memory_unmap(function->args[0].value.val_u32, pid);
 			break;
 		default:
