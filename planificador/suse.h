@@ -1,3 +1,4 @@
+
 #ifndef SUSE_H
 #define SUSE_H
 
@@ -5,69 +6,31 @@
 #include <stdlib.h>
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/collections/list.h>
 #include <signal.h>
-#include <utils_suse/libraries.h>
 #include <semaphore.h>
 #include <pthread.h>
-
-#define SUSE_CONFIG_PATH "../configs/planificador.config"
+#include <unistd.h>
+#include <commons/string.h>
+#include <libraries.h>
+#include <stdbool.h>
 
 typedef struct suse_configuration
 {
 	char* LISTEN_PORT;
 	int METRICS_TIMER;
-	char ** SEM_ID;
-	char ** SEM_INIT;
-	char ** SEM_MAX;
-	int ALPHA_SJF;
+	char** SEM_IDS;
+	char** SEM_INIT;
+	char** SEM_MAX;
+	double ALPHA_SJF;
 	int MAX_MULTIPROG;
 	t_list * process;
 	t_list * semaforos;
-	uint32_t ACTUAL_MULTIPROG;
+	int ACTUAL_MULTIPROG;
 }suse_configuration;
-
-enum estados {
-	E_READY = 1,
-	E_EXECUTE = 2,
-	E_BLOCKED = 3,
-	E_EXIT = 4,
-	E_NEW = 5 //todo ver si es necesario
-};
-
-typedef struct {
-	int tid;
-	int estado;
-	int procesoId;
-	float duracionRafaga;
-	float estimacionUltimaRafaga;
-	bool ejecutado_desde_estimacion;
-	t_list* joinedBy;
-	t_list* joinTo;
-} t_suse_thread;
-
-typedef struct t_process
-{
-	t_list * ULTS; //Lista de t_suse_thread
-	int PROCESS_ID; //esto es el numero de socket
-	t_list * READY_LIST;
-	t_suse_thread* EXEC_THREAD;
-	t_suse_thread* LAST_EXEC;
-} t_process;
-
-typedef struct t_suse_semaforos{
-	char* NAME;
-	uint32_t INIT;
-	uint32_t MAX;
-	uint32_t VALUE;
-	t_list * BLOCKED_LIST;
-}t_suse_semaforos;
-
 
 suse_configuration configuracion_suse;
 suse_configuration get_configuracion();
-
-t_suse_thread* ULT_ejecutando = NULL; // Es un unico ULT a la vez
-t_suse_thread* ultimo_ULT_ejecutado = NULL;
 
 pthread_mutex_t mutex_new_queue;
 t_list* new_queue;
@@ -75,49 +38,102 @@ t_list* new_queue;
 pthread_mutex_t mutex_blocked_queue;
 t_list* blocked_queue;
 
+pthread_mutex_t mutex_exit_queue;
 pthread_mutex_t mutex_semaforos;
 
 pthread_mutex_t mutex_multiprog;
 
-pthread_mutex_t mutex_lista_de_process;
-t_list* lista_de_process; //todo esto serviria para ordenar fifo los programas, ver
+pthread_mutex_t mutex_process_list;
 
-sem_t sem_ULTs_listos;
+pthread_mutex_t mutex_ready_queue;
+
+//sem_t sem_ULTs_listos;
 
 t_list* exit_queue;
 
-bool validar_grado_multiprogramacion();
-
 t_process * generar_programa(int socket_hilolay);
 
-void handle_hilolay(un_socket socket_actual, t_paquete* paquete_hilolay);
+void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay);
 
-void close_tid(int tid);
+int close_tid(int tid, int socket_actual);
 
-void handle_close_tid(socket_actual,received_packet);
+void handle_close_tid(un_socket socket_actual, t_paquete* received_packet);
 
-void handle_wait_sem(socket_actual, received_packet);
+void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem);
+
+void obtener_ULT_ready_FIFO();
 
 int i_thread = 0;
 pthread_t threads[20];
 
 pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros);
 
-t_list* thread_params;
-
 void* process_conectado_funcion_thread(void* argumentos);
 
 int obtener_proximo_ejecutar(t_process* process);
 
 void ordenar_cola_listos(t_list* ready_list);
-
+double get_tiempo_ejecucion(t_suse_thread* thread, double tiempo);
+double get_ejecucion_total(t_process* process);
 void estimar_ULTs_listos(t_list* ready_list);
 
 void estimar_rafaga(t_suse_thread * ULT);
 
+void init_semaforos();
 
+bool funcion_SJF(t_suse_thread* ULT1, t_suse_thread* ULT2);
 
+void ordenar_por_sjf(t_list* ready_list);
 
+void nuevo_a_exit(t_suse_thread* thread, un_socket socket_actual);
+
+void bloqueado_a_exit(t_suse_thread* thread, un_socket socket);
+
+void listo_a_exit(t_suse_thread* thread, un_socket socket);
+
+t_process * generar_process(un_socket socket);
+
+void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid);
+
+void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem);
+
+int incrementar_semaforo(uint32_t tid, char* sem);
+
+int decrementar_semaforo(int socket_actual,int tid, char* sem_name);
+
+void ejecucion_a_exit(t_suse_thread* thread, un_socket socket);
+
+void handle_ULT_create(t_process* process, int tid);
+
+void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido);
+
+int join(un_socket socket, int tid);
+
+void desjoinear(t_process* process, t_suse_thread* thread_joineado);
+
+void desjoinear_hilo(t_suse_thread* thread_joineado, t_suse_thread* thread_joiner);
+
+void listo_a_ejecucion(t_suse_thread* thread, un_socket socket);
+
+int desbloquear_hilos_semaforo(char* sem);
+
+bool validar_grado_multiprogramacion();
+
+void handle_main_thread_create(un_socket socket_actual, int tid);
+
+t_suse_thread* ULT_create(t_process* process, int tid);
+
+double get_time_today();
+void metricas_sistema();
+void* metricas(void* params);
+void metricas_por_programa();
+void metricas_por_hilo();
+
+/////////////METRICAS/////////////
+
+void iniciar_metricas();
+
+/////////////METRICAS/////////////
 
 /*
 --------------------------------------------------------
@@ -144,5 +160,4 @@ struct addrinfo hints, *ai, *p;
 */
 
 
-#endif 
-
+#endif

@@ -1,167 +1,10 @@
 #include "libraries.h"
 
-
-pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros)
-{
-	pthread_t thread = threads[i_thread];
-	int thread_creacion = pthread_create(&thread, NULL, funcion, (void*) parametros);
-	if (thread_creacion != 0) {
-		perror("pthread_create");
-	} else {
-		i_thread++;
-	}
-	return thread;
-}
-
-void ejecutando_a_exit(t_suse_thread* thread, un_socket socket){
+//////////////////////Funciones SUSE//////////////////////
 
 
-}
+//////////////////////FIN funciones SUSE////////////////////
 
-void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
-	t_process* process = process_por_id(socket)
-	eliminar_ULT_cola_actual(thread,process);
-	thread->estado = E_EXECUTE;
-	thread->ejecutado_desde_estimacion = true;
-	//todo aca tendria que validar que si hay un hilo ya ejecutando, tengo que ponerlo en otra cola
-	process->EXEC_THREAD = thread;
-}
-
-void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
-{
-	t_process* program = configuracion_suse[socket];
-
-	eliminar_ULT_cola_actual(thread,program);
-
-	thread->estado = E_EXECUTE;
-	program->EXEC_THREAD = thread->tid;
-	configuracion_suse.ACTUAL_MULTIPROG ++;
-
-}
-
-void ejecucion_a_listo(t_suse_thread* thread, un_socket socket)
-{
-	t_process* process = configuracion_suse[socket];
-
-	eliminar_ULT_cola_actual(thread,process);
-	thread->estado = E_READY;
-	process->EXEC_THREAD = NULL;
-	list_add(process->READY_LIST,thread->tid);
-
-}
-
-void bloqueado_a_listo(t_suse_thread* thread,t_process* program)
-{
-	eliminar_ULT_cola_actual(thread,program);
-	thread->estado = E_READY;
-	list_add(program->READY_LIST,thread->tid);
-}
-
-
-void ejecucion_a_bloqueado(t_suse_thread* thread,un_socket socket)
-{
-	t_process* process = configuracion_suse[socket];
-
-	eliminar_ULT_cola_actual(thread,process);
-	thread->estado = E_BLOCKED;
-	process->EXEC_THREAD = NULL;
-	list_add(blocked_queue,thread);
-
-}
-
-void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semaforos* semaforo)
-{
-
-	t_process* program = configuracion_suse.process[socket];
-
-	t_suse_thread* thread = program->ULTS[tid];
-
-	eliminar_ULT_cola_actual(thread,program);
-
-	thread->estado = E_BLOCKED;
-
-	list_add(semaforo->BLOCKED_LIST,thread);
-	list_add(blocked_queue,thread);
-}
-
-void eliminar_ULT_cola_actual(t_suse_thread *ULT, t_process* process)
-{
-	// Lo saco de la cola actual en la que se encuentra
-
-	switch(ULT->estado)
-	{
-
-	case E_READY:
-		remover_ULT_listo(ULT,process);
-	break;
-	case E_NEW:
-		remover_ULT_nuevo(ULT);
-	break;
-	case E_EXECUTE:
-		remover_ULT_exec(process);
-	break;
-	case E_BLOCKED:
-		remover_ULT_bloqueado(ULT);
-	break;
-
-	}
-}
-
-void remover_ULT_nuevo(t_suse_thread* ULT)
-{
-	bool comparador(t_suse_thread* thread){
-		return thread->tid == ULT->tid && thread->procesoId == ULT->procesoId;
-	}
-	list_remove_by_condition(new_queue, comparador);
-}
-
-void remover_ULT_bloqueado(t_suse_thread* thread)
-{
-	bool comparador(t_suse_thread* th){
-		return th->tid == thread->tid && th->procesoId == thread->procesoId;
-	}
-
-	list_remove_by_condition(blocked_queue,comparador);
-
-}
-void remover_ULT_exec(t_process* process)
-{
-	process->EXEC_THREAD = NULL;
-
-}
-
-bool validar_grado_multiprogramacion()
-{
-
-	bool result = (configuracion_suse.ACTUAL_MULTIPROG + 1) <= (configuracion_suse.MAX_MULTIPROG);
-
-	return result;
-}
-
-void nuevo_a_listo(t_suse_thread* ULT, int process_id)
-{
-	t_process* program = list_get(configuracion_suse->process, process_id);
-
-	list_add(program->READY_LIST, ULT->tid);
-
-	eliminar_ULT_cola_actual(ULT, program);
-	ULT->estado = E_READY;
-	configuracion_suse.ACTUAL_MULTIPROG ++;
-
-}
-
-void remover_ULT_listo(t_suse_thread* thread,t_process* process)
-{
-
-	bool comparador(int tid){
-		return tid == thread->tid;
-	}
-
-	list_remove_by_condition(process->READY_LIST,comparador); //Remuevo por tid.
-
-}
-
-/*-----------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 void imprimir(char* filename){
 	FILE *fptr = NULL;
 
@@ -305,8 +148,7 @@ void enviar(un_socket socket_para_enviar, int codigo_operacion, int tamanio,
 t_paquete* recibir(un_socket socket_para_recibir) {
 
 	t_paquete * paquete_recibido = malloc(sizeof(t_paquete));
-	int retorno = 0;
-	retorno = recv(socket_para_recibir, &paquete_recibido->codigo_operacion, sizeof(int),
+	int retorno = recv(socket_para_recibir, &(paquete_recibido->codigo_operacion), sizeof(int),
 	MSG_WAITALL);
 
 	if(retorno==0){
@@ -316,10 +158,11 @@ t_paquete* recibir(un_socket socket_para_recibir) {
 		return paquete_recibido;
 
 	}
-	recv(socket_para_recibir, &paquete_recibido->tamanio, sizeof(int),
+
+	recv(socket_para_recibir, &(paquete_recibido->tamanio), sizeof(int),
 	MSG_WAITALL);
 
-	if(paquete_recibido->tamanio > 0)
+	if(1 > 0)
 	{
 		void * informacion_recibida = malloc(paquete_recibido->tamanio);
 
@@ -389,7 +232,7 @@ bool esperar_handshake(un_socket socket_del_cliente, t_paquete* inicio_del_hands
 	return resultado;
 }
 
-char get_campo_config_char(t_config* archivo_configuracion, char* nombre_campo) {
+char* get_campo_config_char(t_config* archivo_configuracion, char* nombre_campo) {
 	char* valor;
 	if(config_has_property(archivo_configuracion, nombre_campo)){
 		valor = config_get_string_value(archivo_configuracion, nombre_campo);
@@ -409,6 +252,16 @@ int get_campo_config_int(t_config* archivo_configuracion, char* nombre_campo) {
 	return NULL;
 }
 
+double get_campo_config_double(t_config* archivo_configuracion, char* nombre_campo) {
+	double valor;
+	if(config_has_property(archivo_configuracion, nombre_campo))
+	{
+		valor = config_get_double_value(archivo_configuracion, nombre_campo);
+		printf("El %s es: %f\n", nombre_campo, valor);
+		return valor;
+	}
+	return valor;
+}
 
 char* get_campo_config_string(t_config* archivo_configuracion, char* nombre_campo) {
 	char* valor;
@@ -667,10 +520,10 @@ t_list * recibir_listado_de_strings(un_socket socket) {
 	liberar_paquete(paqueteListado);
 	return listado;
 }
-
-int cantidad_entradas_necesarias(char* valor, int tamanio_entrada) {
-	return ceil((float)(size_of_string(valor) - 1) / tamanio_entrada);
-}
+//
+//int cantidad_entradas_necesarias(char* valor, int tamanio_entrada) {
+//	return ceil((float)(size_of_string(valor) - 1) / tamanio_entrada);
+//}
 
 void serializar_int(void * buffer, int * desplazamiento, int valor) {
 	memcpy(buffer + *desplazamiento, &valor, sizeof(int));
@@ -701,6 +554,10 @@ char* deserializar_string(void * buffer, int * desplazamiento) {
 	int nuevo_desplazamiento = *desplazamiento + tamanio_valor;
 	memcpy(desplazamiento, &nuevo_desplazamiento, sizeof(int));
 	return valor;
+}
+
+void serializar_valor(char* valor, void* buffer, int* desplazamiento) {
+		serializar_string(buffer, desplazamiento, valor);
 }
 
 void serializar_lista_strings(void * buffer, int * desplazamiento, t_list * lista) {
