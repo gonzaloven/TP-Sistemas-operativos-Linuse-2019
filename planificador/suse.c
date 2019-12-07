@@ -55,35 +55,36 @@ int main(void){
 	return EXIT_SUCCESS;
 }
 
-//void iniciar_metricas(){
-//	t_list* params = list_create();
-//	nuevo_hilo(metricas, params);
-//}
-//
-//void* metricas(void* params){
-//	sleep(configuracion_suse.METRICS_TIMER);
-//	char* metrics_logs;
-//	metrics_logs = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/METRICAS_SUSE.txt";
-//	logger_metrics = log_create(metrics_logs, "Metrics logs", 1, 1);
-//
-//	metricas_por_hilo();
-//	metricas_por_programa();
-//	metricas_sistema();
-//	pthread_detach(pthread_self());
-//	return NULL;
-//}
-//
-//void metricas_sistema(){
-//	log_info(logger, "Calculando metricas del sistema...\n");
-//	log_info(logger, "Semaforos actuales: \n");
-//
-//	int cantidad_semaforos = list_size(configuracion_suse.SEM_IDS);
-//
-//	for(int i = 0; i < cantidad_semaforos; i++){
-//
-//
-//	}
-//}
+void iniciar_metricas(){
+	t_list* params = list_create();
+	nuevo_hilo(metricas, params);
+}
+
+void* metricas(void* params){
+	sleep(configuracion_suse.METRICS_TIMER);
+	char* metrics_logs;
+	metrics_logs = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/METRICAS_SUSE.txt";
+	logger_metrics = log_create(metrics_logs, "Metrics logs", 1, 1);
+
+	metricas_por_hilo();
+	metricas_por_programa();
+	metricas_sistema();
+	pthread_detach(pthread_self());
+	return NULL;
+}
+
+void metricas_sistema(){
+	log_info(logger_metrics, "Calculando metricas del sistema...\n");
+	log_info(logger_metrics, "Semaforos actuales: \n");
+
+	int cantidad_semaforos = list_size(configuracion_suse.SEM_IDS);
+
+	for(int i = 0; i < cantidad_semaforos; i++){
+		//semaforos por nombre
+	}
+
+	log_info(logger_metrics, "El grado actual de multiprogramacion es de %d", configuracion_suse.ACTUAL_MULTIPROG);
+}
 
 void init_semaforos(){
 
@@ -385,9 +386,6 @@ void handle_main_thread_create(un_socket socket_actual, int tid) {
 		nuevo_a_ejecucion(main_thread, new_process->PROCESS_ID);
 		log_info(logger, "El thread %d del proceso %d esta ejecutando \n", main_thread->tid, new_process->PROCESS_ID);
 	}
-
-
-
 }
 
 t_suse_thread* ULT_create(t_process* process, int tid){
