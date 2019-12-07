@@ -89,6 +89,9 @@ uint32_t muse_alloc(uint32_t tam)
 	function.args[0] = arg;
 	
 	int result = call(&function);
+
+	if (result == -1)
+		raise(SIGSEGV);
 	
 	return result;
 }
@@ -232,6 +235,10 @@ int muse_sync(uint32_t addr, size_t len)
 	function.args[1] = arg[1];
 
 	int result = call(&function);
+	if (result == -2){
+		raise(SIGSEGV);
+		return -1;
+	}
 	return result;
 }
 
@@ -249,5 +256,9 @@ int muse_unmap(uint32_t dir)
 	function.args[0] = arg;	
 
 	int result = call(&function);
+
+	if(result == -1){
+		printf("\nSegmentation fault (Esto fue escrito con un printf, cambiar por un log error)\n");
+	}
 	return result;
 }

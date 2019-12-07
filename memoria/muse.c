@@ -173,8 +173,8 @@ void* muse_invoke_function(Function *function,uint32_t pid)
 			func_ret = memory_sync(function->args[0].value.val_u32,function->args[1].value.val_sizet,pid);
 			break;
 		case FUNCTION_UNMAP:
-			log_debug(muse_logger,"Unmap called");
-			func_ret = memory_unmap(function->args[0].value.val_u32,pid);
+			log_debug(muse_logger,"Unmap called -----> Direccion: %d", function->args[0].value.val_u32);
+			func_ret = memory_unmap(function->args[0].value.val_u32, pid);
 			break;
 		default:
 			log_error(muse_logger,"Unknown function");

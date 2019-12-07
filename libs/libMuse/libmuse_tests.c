@@ -150,10 +150,25 @@ void foo4(){
 
 void foo5(){
 
-	int direccion = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
-	muse_unmap(direccion);
-	//muse_map("hola.txt", 26, MAP_SHARED);
-	//muse_unmap("hola.txt");
+	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
+	printf("La direccion es %d(dec),	%s(bin)\n", direccion1, byte_to_binary(direccion1));
+	int direccion2 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/holiwis", 450, MAP_PRIVATE);
+	printf("La direccion es %d(dec),	%s(bin)\n", direccion2, byte_to_binary(direccion2));
+	int direccion3 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/forrazo", 200, MAP_SHARED);
+	printf("La direccion es %d(dec),	%s(bin)\n", direccion3, byte_to_binary(direccion3));
+
+	muse_unmap(direccion1);
+	printf("Unmapeada.\n");
+	muse_unmap(direccion2);
+	printf("Unmapeada.\n");
+	muse_unmap(direccion3);
+	printf("Unmapeada.\n");
+
+	muse_unmap(38392);
+	printf("Deberia haber tirado seg fault sin romperse\n");
+
+	printf("Anduvo bien, test finalizo\n");
+
 	muse_close();
 }
 
@@ -166,9 +181,13 @@ void foo6(){
 }
 
 void foo7(){
-	int direccion = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
-	int retorno = muse_sync(direccion, 200);
-	printf("%d", retorno);
+	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
+	printf("La direccion es %d(dec),	%s(bin)\n", direccion1, byte_to_binary(direccion1));
+	int direccion2 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/holiwis", 450, MAP_PRIVATE);
+	printf("La direccion es %d(dec),	%s(bin)\n", direccion2, byte_to_binary(direccion2));
+
+	int retorno = muse_sync(direccion2, 200);
+	printf("Se synqueo holiwis y el resultado fue (if 0 todo ok): %d \n", retorno);
 
 	muse_close();
 }
