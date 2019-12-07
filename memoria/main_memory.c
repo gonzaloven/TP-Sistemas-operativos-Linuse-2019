@@ -83,8 +83,8 @@ void muse_main_memory_stop()
 	free(MAIN_MEMORY);
 	remove(SWAP_PATH);
 
+	list_destroy(lista_archivos_mmap);
 	list_destroy_and_destroy_elements(program_list, (void*)destroy_program_list_elements);
-	list_destroy_and_destroy_elements(lista_archivos_mmap, (void*)destroy_archivosmmap_list_elements);
 	//list_destroy(segment_list);
 
 	log_destroy(metricas_logger);
@@ -105,6 +105,11 @@ void destroy_program_list_elements(program* prog){
 
 void destroy_segment_table_elements(segment* seg){
 	list_destroy_and_destroy_elements(seg->page_table, (void*)destroy_page_table_elements);
+	if(!seg->is_heap){
+		list_destroy(seg->archivo_mapeado->programas);
+		free(seg->archivo_mapeado->pathArchivo);
+		free(seg->archivo_mapeado);
+	}
 	free(seg);
 	seg = NULL;
 }
@@ -1054,6 +1059,8 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
         pagina->is_present = 1;
         pagina->is_used = 1;
 
+        free(sacarFrame);
+
         //fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
         //fread(buffer_page_mmap,PAGE_SIZE,1,segmento->archivo_mapeado);
 
@@ -1164,12 +1171,6 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
         if(!metadata.is_free && (metadata.size >= n)){
             memcpy(buffer + posicion_recorrida,src,n);
 
-            //borrar, estos dos debug es para ver si le llego bien
-            char* texto = malloc(n);
-            memcpy(texto, src,n);
-            log_debug(debug_logger, "El valor del source es: %s", texto);
-            log_debug(debug_logger, "La cantidad de bytes a copiar es: %d", n);
-
             // vuelvo a cargar los datos al upcm
             for(int x=0; x<cantidad_paginas_necesarias;x++){
             	paginaObtenida = list_get(segment->page_table,x + numPage);
@@ -1197,18 +1198,15 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		}else{
 		 	// no puedo almacenar los datos pq ingreso a una posicion invalida
 			log_debug(debug_logger, "Posicion invalida, no se pudo realizar la copia");
+			free(buffer);
 			return -1;
 		 }
 	}
 
 	log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 
-	char* texto = malloc(200);
-	memcpy(texto, datos, n);
-
-	log_debug(debug_logger, "Texto = %s",texto);
-
 	log_debug(debug_logger, "Fin memory_cpy");
+	free(buffer);
 	
 	return dst;
 }
