@@ -557,7 +557,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	//si el programa no está en la lista de programas, se agrega y le creamos una nueva tabla de segmentos
 	if((nro_prog = search_program(pid)) == -1)
 	{
-		prog = (program *) malloc(sizeof(program));		
+		prog = (program *) malloc(sizeof(program));
+		memset(prog, 0, sizeof(program));
 		prog->pid = pid;
 		prog->segment_table = list_create();
 		nro_prog = list_add(program_list, prog);
