@@ -154,14 +154,14 @@ void foo4(){
 
 void foo5(){
 
-	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
+	int direccion1 = muse_map("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
 	printf("La direccion es %d(dec),	%s(bin)\n", direccion1, byte_to_binary(direccion1));
 
 	muse_cpy(direccion1, "hola", strlen("hola") + 1);
 
-	int direccion2 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/holiwis", 450, MAP_PRIVATE);
+	int direccion2 = muse_map("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/memoria/holiwis", 450, MAP_PRIVATE);
 	printf("La direccion es %d(dec),	%s(bin)\n", direccion2, byte_to_binary(direccion2));
-	int direccion3 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/forrazo", 200, MAP_SHARED);
+	int direccion3 = muse_map("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/memoria/forrazo", 200, MAP_SHARED);
 	printf("La direccion es %d(dec),	%s(bin)\n", direccion3, byte_to_binary(direccion3));
 
 	muse_unmap(direccion1);
@@ -171,7 +171,7 @@ void foo5(){
 	muse_unmap(direccion3);
 	printf("Unmapeada.\n");
 
-	int direccion4 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
+	int direccion4 = muse_map("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
 	printf("La direccion es %d(dec),	%s(bin)\n", direccion4, byte_to_binary(direccion4));
 	muse_unmap(direccion4);
 	printf("Unmapeada.\n");
@@ -194,7 +194,7 @@ void foo6(){
 
 void foo7(){
 
-	// int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/putoElQueLee", 50, MAP_SHARED);
+	// int direccion1 = muse_map("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/memoria/putoElQueLee", 50, MAP_SHARED);
 	// 
 	// //int direccion2 = muse_alloc(strlen(" y sigue leyendo")+ 1);
 	// //imprimir(sizeof(int), direccion2);
@@ -204,7 +204,7 @@ void foo7(){
 	// muse_cpy(direccion1, "t", strlen(" y sigue leyendo"));
 	// printf("Copio data en la direccion: %d(dec)\n", direccion1);
 
-	int dir7 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/putoElQueLee", 350, MAP_SHARED);
+	int dir7 = muse_map("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/memoria/putoElQueLee", 350, MAP_SHARED);
 	printf("Mapeo el archivo putoElQueLee en: %d(dec)\n", dir7);
 	muse_cpy(dir7 + 5, "hola como estas todo bien xd xdx xd lol 123456 hola gola", strlen("hola como estas todo bien xd xdx xd lol 123456 hola gola")+ 1);
 

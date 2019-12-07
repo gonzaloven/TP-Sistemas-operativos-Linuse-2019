@@ -17,7 +17,7 @@
 
 //#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
-#define MUSE_LOG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/muse.log"
+#define MUSE_LOG_PATH "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 /**
  * @struct program_s   

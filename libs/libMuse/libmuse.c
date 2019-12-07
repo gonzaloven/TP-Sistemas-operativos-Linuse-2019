@@ -22,7 +22,7 @@ int tamDataFunction(Function f){
 int muse_init(int id)
 {
 	config = config_create(LIBMUSE_CONFIG_PATH);
-	logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/libmuse.log", "LIBMUSE", true, LOG_LEVEL_TRACE);
+	logger = log_create("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/libmuse.log", "LIBMUSE", true, LOG_LEVEL_TRACE);
 
 	if(config == NULL)
 	{
