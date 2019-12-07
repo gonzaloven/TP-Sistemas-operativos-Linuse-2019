@@ -53,12 +53,22 @@ cd /home/utnso/workspace/linuse-tests-programs/
 sudo make clean
 sudo make && sudo make all
 sudo make entrega
-echo "Compiled with exit code $?"
+echo "Compiled pruebas exit code $?"
+
+cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos/utils_suse
+sudo make clean
+sudo make && sudo make all
+echo "Compiled utils with exit code $?"
+
+cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos/libs/libMuse
+sudo make clean
+sudo make && sudo make all
+echo "Compiled utils with exit code $?"
 
 cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos
 sudo make clean
 sudo make && sudo make all
-echo "Compiled with exit code $?"
+echo "Compiled tp exit code $?"
 
 echo "Todo listo!!!!!"
 
