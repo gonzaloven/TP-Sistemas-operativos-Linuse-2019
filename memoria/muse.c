@@ -81,23 +81,23 @@ void* handler(void *args)
 	//cambiar esto
 	while((n=receive_packet_var(socket,&buffer)) > 0)
 	{
+		//log_error(muse_logger,"iteracion");
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
 			message_handler(&msg,socket);
-			pid = msg.header.caller_id;
-			log_debug(muse_logger,"El pid del programa es: %d aaaaaaaaaaaaaaaaa",pid);
+			//log_error(muse_logger,"El pid del programa es: %d",pid);
 			free(buffer);
 		}else{
+			//og_error(muse_logger,"El pid del programa es: %d parte  1b",pid);
 			liberarMemoria((Function *)&msg);
 			free(msg.data);
 			msg.data = NULL;
 			free(buffer);
 		}
 	}	
-
-	log_debug(muse_logger,"El pid del programa es: %d parte 2",pid);
-	el_cliente_se_tomo_el_palo(pid);
-	log_debug(muse_logger,"The client in socket: %d was disconnected!",socket);
+	//log_error(muse_logger,"El pid del programa es: %d parte 2",pid);
+	//el_cliente_se_tomo_el_palo(pid);
+	log_error(muse_logger,"The client in socket: %d was disconnected!",socket);
 	free(buffer);
 	close(socket);
 
