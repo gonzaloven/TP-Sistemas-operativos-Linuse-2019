@@ -13,6 +13,7 @@
 t_log* logger;
 t_log* logger_metrics;
 char * suse_config_path = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config";
+
 int main(void){
 	char* log_file;
 	log_file = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
@@ -305,7 +306,7 @@ int join(un_socket socket, int tid){
 	t_suse_thread* thread_executing = process->EXEC_THREAD;
 	t_suse_thread* thread_joined = list_find(process->ULTS, buscador_thread_id);
 
-	if(thread_joined == NULL)
+	if(thread_joined == 0 || thread_executing == 0)
 	{
 		return 0;
 	}
@@ -381,12 +382,12 @@ void handle_main_thread_create(un_socket socket_actual, int tid) {
 
 	log_info(logger, "Validando si puedo poner a ejecutar el main thread... \n", configuracion_suse.ACTUAL_MULTIPROG);
 
+	pthread_mutex_lock(&mutex_multiprog);
 	if(validar_grado_multiprogramacion()){
 		nuevo_a_ejecucion(main_thread, new_process->PROCESS_ID);
 		log_info(logger, "El thread %d del proceso %d esta ejecutando \n", main_thread->tid, new_process->PROCESS_ID);
 	}
-
-
+	pthread_mutex_unlock(&mutex_multiprog);
 
 }
 
@@ -455,7 +456,7 @@ int close_tid(int tid, int socket_actual){
 			pthread_mutex_lock(&mutex_blocked_queue);
 			pthread_mutex_lock(&mutex_multiprog);
 
-			configuracion_suse.MAX_MULTIPROG --;
+			configuracion_suse.ACTUAL_MULTIPROG --;
 			bloqueado_a_exit(thread,socket_actual);
 			if(validar_grado_multiprogramacion())
 			{
@@ -470,7 +471,7 @@ int close_tid(int tid, int socket_actual){
 
 			pthread_mutex_lock(&mutex_multiprog);
 
-			configuracion_suse.MAX_MULTIPROG --;
+			configuracion_suse.ACTUAL_MULTIPROG --;
 			listo_a_exit(thread,socket_actual);
 			if(validar_grado_multiprogramacion())
 			{
@@ -482,9 +483,9 @@ int close_tid(int tid, int socket_actual){
 
 		case E_EXECUTE:
 				pthread_mutex_lock(&mutex_multiprog);
-				process->EXEC_THREAD = NULL;
+				process->EXEC_THREAD = 0;
 				ejecucion_a_exit(thread,socket_actual);
-				configuracion_suse.MAX_MULTIPROG --;
+				configuracion_suse.ACTUAL_MULTIPROG --;
 				if(validar_grado_multiprogramacion())
 				{
 					obtener_ULT_ready_FIFO();
@@ -577,6 +578,7 @@ t_process * generar_process(int process_id) {
 	process->PROCESS_ID = process_id; //todo ver tipo de dato
 	process->ULTS = list_create();
 	process->READY_LIST = list_create();
+	process->EXEC_THREAD = 0;
 	sem_init(&(process->semaforoReady),0,0);
 
 	return process;
@@ -1133,7 +1135,7 @@ void remover_ULT_bloqueado(t_suse_thread* thread)
 }
 void remover_ULT_exec(t_process* process)
 {
-	process->EXEC_THREAD = NULL;
+	process->EXEC_THREAD = 0;
 
 }
 
