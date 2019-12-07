@@ -43,6 +43,11 @@ cd /home/utnso/workspace/pruebasSO2019
 cp hilolay_alumnos.c ../linuse-tests-programs
 cd ..
 
+echo "Copiando libmuse..."
+cd /home/utnso/workspace/pruebasSO2019
+cp libmuse.h ../linuse-tests-programs
+cd ..
+
 echo "Haciendo make a todo..."
 cd /home/utnso/workspace/linuse-tests-programs/
 sudo make clean
