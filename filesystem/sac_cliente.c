@@ -643,7 +643,7 @@ int main(int argc, char *argv[]){
 	//Cargando Configuraciones
 	fuse_config = load_configuration(SAC_CONFIG_PATH);
 	//Inicializando el logger
-	logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/sac_cliente.log","SAC_CLIENTE",true,LOG_LEVEL_TRACE);
+	logger = log_create("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/sac_cliente.log","SAC_CLIENTE",true,LOG_LEVEL_TRACE);
 	//Conectando al servidor
 	serverSocket = connect_to(fuse_config->ip_cliente,fuse_config->listen_port);
 

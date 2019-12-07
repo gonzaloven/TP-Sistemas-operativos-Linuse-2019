@@ -32,7 +32,7 @@
 
 //NO DEJAR ASI TODO
 #define SAC_CONFIG_PATH2 "../configs/filesystem.config"
-#define SAC_CONFIG_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/configs/filesystem.config"
+#define SAC_CONFIG_PATH "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/filesystem.config"
 
 t_dictionary * diccionarioDeMutex;
 

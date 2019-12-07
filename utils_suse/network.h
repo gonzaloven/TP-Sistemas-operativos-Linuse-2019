@@ -10,7 +10,7 @@
 
 //NO DEJAR ASI, ES PARA DEBUGGEAR ESTO NADA MAS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #define NETWORK_LOGGER_PATH2 "../logs/server.log"
-#define NETWORK_LOGGER_PATH "/home/utnso/tp-2019-2c-Los-Trapitos/logs/server.log"
+#define NETWORK_LOGGER_PATH "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/server.log"
 
 /* Structure for storing client connection data. */
 typedef struct ConnectionArgs_s

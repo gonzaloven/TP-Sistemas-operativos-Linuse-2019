@@ -9,4 +9,3 @@ clean:
 	make clean -C filesystem
 	make clean -C memoria
 	make clean -C planificador
-

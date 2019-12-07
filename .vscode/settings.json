@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "muse.h": "c",
+        "libmuse.h": "c",
+        "server.h": "c",
+        "basic.h": "c",
+        "main_memory.h": "c",
+        "fcntl.h": "c",
+        "list.h": "c",
+        "cmath": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}

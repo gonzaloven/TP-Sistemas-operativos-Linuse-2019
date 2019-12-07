@@ -26,16 +26,13 @@ sudo make install
 
 cd /home/utnso/workspace/hilolay
 echo "Ingrese password para instalar Hilolay..."
-sudo make
-sudo make install
+make && sudo make install
 
 cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos/utils_suse/
 echo "Ingrese password para instalar utils de SUSE..."
-sudo make clean
-sudo make
-sudo make all
-echo "Compiled with exit code $?"
-
+make clean
+make && make all
+echo "Compiled with exit code $?"¡
 
 echo "Copiando MakeFile de pruebas..."
 cd /home/utnso/workspace/pruebasSO2019
@@ -43,21 +40,35 @@ cp Makefile ../linuse-tests-programs
 
 echo "Copiando hilolay_alumnos..."
 cd /home/utnso/workspace/pruebasSO2019
-cp hilolay_alumnos ../linuse-tests-programs
+cp hilolay_alumnos.c ../linuse-tests-programs
 cd ..
+
+echo "Copiando libmuse..."
+cd /home/utnso/workspace/pruebasSO2019
+cp libmuse.h ../linuse-tests-programs
+cd ..
+
+cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos/utils_suse
+make clean
+make && sudo make all
+echo "Compiled utils with exit code $?"
+
+cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos/libs/libMuse
+make clean
+make && sudo make all
+echo "Compiled utils with exit code $?"
+
+cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos
+make clean
+make && sudo make all
+echo "Compiled tp exit code $?"
 
 echo "Haciendo make a todo..."
 cd /home/utnso/workspace/linuse-tests-programs/
-sudo make clean
-sudo make
-sudo all
-echo "Compiled with exit code $?"
-
-cd /home/utnso/workspace/tp-2019-2c-Los-Trapitos
-sudo make clean
-sudo make
-sudo make all
-echo "Compiled with exit code $?"
+make clean
+make && make all
+make entrega
+echo "Compiled pruebas exit code $?"
 
 echo "Todo listo!!!!!"
 
