@@ -150,7 +150,7 @@ void foo4(){
 
 void foo5(){
 
-	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
+	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola", 26, MAP_SHARED);
 	printf("La direccion es %d(dec),	%s(bin)\n", direccion1, byte_to_binary(direccion1));
 	int direccion2 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/holiwis", 450, MAP_PRIVATE);
 	printf("La direccion es %d(dec),	%s(bin)\n", direccion2, byte_to_binary(direccion2));
@@ -181,13 +181,21 @@ void foo6(){
 }
 
 void foo7(){
-	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/hola.txt", 26, MAP_SHARED);
-	printf("La direccion es %d(dec),	%s(bin)\n", direccion1, byte_to_binary(direccion1));
-	int direccion2 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/holiwis", 450, MAP_PRIVATE);
-	printf("La direccion es %d(dec),	%s(bin)\n", direccion2, byte_to_binary(direccion2));
 
-	int retorno = muse_sync(direccion2, 200);
-	printf("Se synqueo holiwis y el resultado fue (if 0 todo ok): %d \n", retorno);
+	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/putoElQueLee", 30, MAP_SHARED);
+	printf("Mapeo el archivo putoElQueLee en: %d(dec)\n", direccion1);
+
+	//int direccion2 = muse_alloc(strlen(" y sigue leyendo")+ 1);
+	//imprimir(sizeof(int), direccion2);
+
+	int direccion2 = direccion1 + 15;
+
+	muse_cpy(direccion2, " y sigue leyendo", strlen(" y sigue leyendo")+ 1);
+	printf("Copio \" y sigue leyendo \" en: %d(dec)\n", direccion2);
+
+
+	int retorno = muse_sync(direccion1, 200);
+	printf("Se synqueo putoElQueLee y el resultado fue (if 0 todo ok): %d \n", retorno);
 
 	muse_close();
 }

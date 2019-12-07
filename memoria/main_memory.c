@@ -1333,7 +1333,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 	} 
 
 	//error (returen -1)
-	if(!(segmento_obtenido->is_heap) || (direccion % PAGE_SIZE != 0)){
+	if((segmento_obtenido->is_heap) || ((direccion-(int)(direccion/PAGE_SIZE)) % PAGE_SIZE != 0)){
 		log_debug(debug_logger, "Error: el segmento obtenido es heap o la direccion no esta al inicio de una pag");
 		return -1;
 	} 
