@@ -84,11 +84,17 @@ void muse_main_memory_stop()
 	remove(SWAP_PATH);
 
 	list_destroy_and_destroy_elements(program_list, (void*)destroy_program_list_elements);
-	list_destroy(lista_archivos_mmap);
+	list_destroy_and_destroy_elements(lista_archivos_mmap, (void*)destroy_archivosmmap_list_elements);
 	//list_destroy(segment_list);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
+}
+
+void destroy_archivosmmap_list_elements(archivoMMAP* mmap){
+	list_destroy(mmap->programas);
+	free(mmap->pathArchivo);
+	free(mmap);
 }
 
 void destroy_program_list_elements(program* prog){
@@ -592,7 +598,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			}
 
 			pidEncontrada = (int)list_find(segmentoConEspacio->archivo_mapeado->programas,(void*) igualPID);
-			if(list_get(segmentoConEspacio->archivo_mapeado->programas, pid) == NULL){
+			if((void*)pidEncontrada == NULL){
 				log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
 				return -1;
 			}
@@ -1099,7 +1105,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		}
 
 		pidEncontrada = (int)list_find(segment->archivo_mapeado->programas,(void*) igualPID);
-		if(list_get(segment->archivo_mapeado->programas, pid) == NULL){
+		if((void*)pidEncontrada == NULL){
 			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
 			return -1;
 		}
@@ -1321,7 +1327,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	if(flag == MAP_SHARED){
 		log_debug(debug_logger, "La flag de MAP es: MAP_SHARED");
 		segmentoNuevo->tipo_map = 1;
-		list_add(archivoMappeado->programas, pid);
+		list_add(archivoMappeado->programas, (void*)pid);
 	}else if(flag == MAP_PRIVATE){
 		log_debug(debug_logger, "La flag de MAP es: MAP_PRIVATE");
 		segmentoNuevo->tipo_map = 0;
@@ -1428,7 +1434,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 		}
 
 		pidEncontrada = (int)list_find(segmento_obtenido->archivo_mapeado->programas,(void*) igualPID);
-		if(list_get(segmento_obtenido->archivo_mapeado->programas, pid) == NULL){
+		if((void*)pidEncontrada == NULL){
 			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
 			return -1;
 		}
@@ -1567,7 +1573,7 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 		}
 
 		pidEncontrada = (int)list_find(segmentoBuscado->archivo_mapeado->programas,(void*) igualPID);
-		if(list_get(segmentoBuscado->archivo_mapeado->programas, pid) == NULL){
+		if((void*)pidEncontrada == NULL){
 			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
 			return -1;
 		}
@@ -1657,7 +1663,7 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 		}
 
 		pidEncontrada = (int)list_find(segmento->archivo_mapeado->programas,(void*) igualPID);
-		if(list_get(segmento->archivo_mapeado->programas, pid) == NULL){
+		if((void*)pidEncontrada == NULL){
 			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
 			return (void*)-1;
 		}

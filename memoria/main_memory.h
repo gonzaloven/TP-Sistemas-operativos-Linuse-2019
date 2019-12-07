@@ -199,4 +199,6 @@ void destroy_segment_table_elements(segment* seg);
 
 void destroy_page_table_elements(page* pag);
 
+void destroy_archivosmmap_list_elements(archivoMMAP* mmap);
+
 #endif

@@ -48,11 +48,28 @@ void muse_stop_service()
 	printf("Thanks for using MUSE, goodbye!\n");
 }
 
+void liberarMemoria(Function* f){
+	switch(f->type){
+
+	case FUNCTION_GET:
+	case FUNCTION_MAP:
+		free(f->args[0].value.val_charptr);
+		f->args[0].value.val_charptr = NULL;
+		break;
+	case FUNCTION_COPY:
+		free(f->args[1].value.val_voidptr);
+		f->args[1].value.val_voidptr = NULL;
+		break;
+	default:
+		break;
+	}
+}
+
 void* handler(void *args)
 {
 	ConnectionArgs *conna = (ConnectionArgs *)args;
 	Message msg;
-	char buffer[1024];
+	void* buffer;
 	int n=0;
 	int socket = conna->client_fd;
 	struct sockaddr_in client_address = conna->client_addr;
@@ -60,17 +77,25 @@ void* handler(void *args)
 	log_debug(muse_logger,"A client in socket: %d has connected!",socket);
 
 	//cambiar esto
-	while((n=receive_packet(socket,buffer,1024)) > 0)
+	while((n=receive_packet_var(socket,&buffer)) > 0)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
 			message_handler(&msg,socket);
-			memset(buffer,'\0',1024);
+			free(buffer);
+		}else{
+
+			liberarMemoria((Function *)&msg);
+			free(msg.data);
+			msg.data = NULL;
+			free(buffer);
 		}
 	}	
 
 	log_debug(muse_logger,"The client in socket: %d was disconnected!",socket);
+	free(buffer);
 	close(socket);
+	return (void*)NULL;
 }
 
 muse_configuration *load_configuration(char *path)
