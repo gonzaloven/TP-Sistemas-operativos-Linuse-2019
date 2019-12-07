@@ -36,10 +36,10 @@ int main(void){
 	pthread_mutex_init(&mutex_semaforos,NULL);
 	pthread_mutex_init(&mutex_process_list, NULL);
 
-	/*
+
 	iniciar_metricas();
 	log_info(logger, "Iniciando metricas.. \n");
-	*/
+
 
 	log_info(logger, "Iniciando servidor... \n");
 	iniciar_servidor();
@@ -96,8 +96,10 @@ void metricas_por_programa()
 		int exit = 0;
 
 		int cantidadHilos = list_size(process->ULTS);
-		for(int j = 0; j<cantidadHilos; i++)
+		int j = 0;
+		while(j<cantidadHilos)
 		{
+
 			t_suse_thread* thread = list_get(process->ULTS,j);
 
 			switch(thread->estado)
@@ -117,6 +119,7 @@ void metricas_por_programa()
 			break;
 
 			}
+			j++;
 		}
 
 		bool buscadorNew(t_suse_thread* thread)
@@ -147,7 +150,7 @@ void metricas_por_hilo()
 
 	for(int i = 0; i < cantidadProcesos; i++)
 	{
-		t_process* process = list_get(configuracion_suse.process,1);
+		t_process* process = list_get(configuracion_suse.process,i);
 		log_info(logger_metrics,"Metricas para el proceso %d: \n",process->PROCESS_ID);
 		int cantidadHilos = list_size(process->ULTS);
 
@@ -193,7 +196,7 @@ void metricas_sistema(){
 	log_info(logger_metrics, "Calculando metricas del sistema...\n");
 	log_info(logger_metrics, "Semaforos actuales: \n");
 
-	int cantidad_semaforos = list_size(configuracion_suse.SEM_IDS);
+	int cantidad_semaforos = list_size(configuracion_suse.semaforos);
 
 	pthread_mutex_lock(&mutex_semaforos);
 	for(int i = 0; i < cantidad_semaforos; i++)
