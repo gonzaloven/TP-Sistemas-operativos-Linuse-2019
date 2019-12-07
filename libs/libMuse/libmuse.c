@@ -3,6 +3,10 @@
 int MASTER_SOCKET;
 int PROCESS_ID;
 
+pthread_mutex_t s_socket = PTHREAD_MUTEX_INITIALIZER;
+
+t_log *logger;
+
 int tamDataFunction(Function f){
 	int tamano = 0;
 	tamano+= sizeof(uint8_t);
@@ -18,6 +22,7 @@ int tamDataFunction(Function f){
 int muse_init(int id)
 {
 	config = config_create(LIBMUSE_CONFIG_PATH);
+	logger = log_create("/home/utnso/tp-2019-2c-Los-Trapitos/logs/libmuse.log", "LIBMUSE", true, LOG_LEVEL_TRACE);
 
 	if(config == NULL)
 	{
@@ -50,29 +55,24 @@ int call(Function *function)
 	create_message_header(&header,MESSAGE_CALL,PROCESS_ID,sizeof(Function));
 	create_function_message(&msg,&header,function);
 
+	pthread_mutex_lock(&s_socket);
 	send_message(MASTER_SOCKET,&msg);
+	pthread_mutex_unlock(&s_socket);
+
+	pthread_mutex_lock(&s_socket);
 	receive_message(MASTER_SOCKET,&msg);
+	pthread_mutex_unlock(&s_socket);
+
 	int *response = msg.data;
 	return *response;
 }
 
 void muse_close()
 {
-//	Function function;
-//	Arg arg; //argumento
-//
-//	arg.type = VAR_UINT32;
-//	arg.size = sizeof(uint32_t);
-//	arg.value.val_u32 = 1;
-//
-//	function.type = FUNCTION_MUSE_CLOSE;
-//	function.num_args = 1;
-//	function.args[0] = arg;
-//
-//	///Hay que hacer que libere todo tambien de ese programa
-//	int result = call(&function);
-
+	pthread_mutex_lock(&s_socket);
 	close(MASTER_SOCKET);
+	pthread_mutex_unlock(&s_socket);
+	log_destroy(logger);
 }
 
 uint32_t muse_alloc(uint32_t tam)
@@ -88,11 +88,15 @@ uint32_t muse_alloc(uint32_t tam)
 	function.num_args = 1;
 	function.args[0] = arg;
 	
+	log_info(logger,"Alloc llamado -> Size: %d", tam);
+
 	int result = call(&function);
 
 	if (result == -1)
 		raise(SIGSEGV);
 	
+	log_info(logger,"Respuesta Alloc recibida -> se alloco correctamente", tam);
+
 	return result;
 }
 
@@ -109,7 +113,12 @@ void muse_free(uint32_t dir)
 	function.num_args = 1;
 	function.args[0] = arg;	
 
+	log_info(logger,"Free llamado -> Direccion: %d", dir);
+
 	call(&function);
+
+	log_info(logger,"Respuesta Free recibida -> Se ha liberado la direccion de memoria correctamente");
+
 	return;
 }
 
@@ -131,6 +140,8 @@ int muse_get(void* dst, uint32_t src, size_t n)
 	function.args[2].size = sizeof(size_t);
 	function.args[2].value.val_sizet = n;
 
+	log_info(logger,"Get llamado -> Direccion origen: %d y Size: %d", src, n);
+
 	function.type = FUNCTION_GET;
 	function.num_args = 3;
 
@@ -140,23 +151,29 @@ int muse_get(void* dst, uint32_t src, size_t n)
 	create_message_header(&header, MESSAGE_CALL, PROCESS_ID, tamDataFunction(function));
 	create_function_message(&msg, &header, &function);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_message(MASTER_SOCKET,&msg) == -1){
 		//error no se pudo enviar
 		return -1;
 	}
+	pthread_mutex_unlock(&s_socket);
 
 	free(function.args[0].value.val_voidptr);
 
+	pthread_mutex_lock(&s_socket);
 	receive_message_var(MASTER_SOCKET, &msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* f = msg.data;
 
 	if(f->type != RTA_FUNCTION_GET){
-		// llego cualquier cosa
+		log_error(logger,"Respuesta Get recibida -> No se ha podido recibir el contenido de esa direccion");
 		return -1;
 	}
 	memcpy(dst, f->args[0].value.val_voidptr, f->args[0].size);
 	free(f->args[0].value.val_voidptr);
+
+	log_info(logger,"Respuesta Get recibida -> Se ha recibido el contenido de la direccion correctamente");
 
 	return 0;
 }
@@ -179,12 +196,21 @@ int muse_cpy(uint32_t dst, void* src, int n)
 	arg[2].size = sizeof(uint32_t);
 	arg[2].value.val_u32 = n;
 
+	log_info(logger,"Cpy llamado -> Direccion destino: %d y Size: %d", dst, n);
+
 	function.type = FUNCTION_COPY;
 	function.num_args = 3;
 	function.args[0] = arg[0];
 	function.args[2] = arg[2];
 
 	int result = call(&function);
+
+	if(result == -1){
+		raise(SIGSEGV);
+	}
+
+	log_info(logger,"Respuesta Cpy recibida -> Se copiaron %d bytes en la direccion %d", n, dst);
+
 	return result;
 }
 
@@ -212,7 +238,16 @@ uint32_t muse_map(char *path, size_t length, int flags)
 	function.args[1] = arg[1];
 	function.args[2] = arg[2];
 
-	uint32_t result = call(&function);
+	log_info(logger,"Map llamado -> Path: %s, Length: %d, Flag: %d", path, length, flags);
+
+	int result = call(&function);
+
+	if(result == -1){
+		log_error(logger,"Respuesta Map recibida -> No se ha podido realizar el mapeo");
+	}
+
+	log_info(logger,"Respuesta Map recibida -> Se ha realizado el mapeo correctamente");
+
 	return result;
 }
 
@@ -234,11 +269,16 @@ int muse_sync(uint32_t addr, size_t len)
 	function.args[0] = arg[0];
 	function.args[1] = arg[1];
 
+	log_info(logger,"Sync llamado -> Direccion: %d, Length: %d", addr, len);
+
 	int result = call(&function);
 	if (result == -2){
-		raise(SIGSEGV);
+		log_error(logger,"Respuesta Sync recibida -> No se ha podido realizar la sincronizacion");
 		return -1;
 	}
+
+	log_info(logger,"Respuesta Sync recibida -> Se ha realizado la sincronizacion correctamente");
+
 	return result;
 }
 
@@ -255,10 +295,15 @@ int muse_unmap(uint32_t dir)
 	function.num_args = 1;
 	function.args[0] = arg;	
 
+	log_info(logger,"Unmap llamado -> Direccion: %d", dir);
+
 	int result = call(&function);
 
 	if(result == -1){
-		printf("\nSegmentation fault (Esto fue escrito con un printf, cambiar por un log error)\n");
+		raise(SIGSEGV);
 	}
+
+	log_info(logger,"Respuesta Unmap recibida -> Se ha realizado la operacion correctamente");
+
 	return result;
 }
