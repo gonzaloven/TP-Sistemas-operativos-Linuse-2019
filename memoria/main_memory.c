@@ -1106,6 +1106,18 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 		archivoMappeado = archivoMappeadoNuevo;
 
 		list_add(lista_archivos_mmap, archivoMappeado);
+	}else{
+		int pidEncontrada;
+
+		int igualPID(int pid){
+			return pid == prog->pid;
+		}
+		pidEncontrada = list_find(archivoMappeado->programas,(void*) igualPID);
+
+		if(flag == MAP_PRIVATE && pidEncontrada == NULL){
+			log_error(debug_logger, "El archivo ya fue mappeado con la flag MAP_PRIVATE");
+			return -2;
+		}
 	}
 
 	log_debug(debug_logger, "programa tiene ----> %d segmentos", list_size(prog->segment_table));
@@ -1126,6 +1138,9 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	}else if(flag == MAP_PRIVATE){
 		log_debug(debug_logger, "La flag de MAP es: MAP_PRIVATE");
 		segmentoNuevo->tipo_map = 0;
+		if(list_size(archivoMappeado->programas) == 0){
+			list_add(archivoMappeado->programas, pid);
+		}
 	}else{
 		log_debug(debug_logger, "No se reconocio la flag especificada");
 		return -1;

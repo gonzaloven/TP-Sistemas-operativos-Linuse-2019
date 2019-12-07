@@ -3,6 +3,8 @@
 int MASTER_SOCKET;
 int PROCESS_ID;
 
+pthread_mutex_t s_socket = PTHREAD_MUTEX_INITIALIZER;
+
 int tamDataFunction(Function f){
 	int tamano = 0;
 	tamano+= sizeof(uint8_t);
@@ -50,29 +52,23 @@ int call(Function *function)
 	create_message_header(&header,MESSAGE_CALL,PROCESS_ID,sizeof(Function));
 	create_function_message(&msg,&header,function);
 
+	pthread_mutex_lock(&s_socket);
 	send_message(MASTER_SOCKET,&msg);
+	pthread_mutex_unlock(&s_socket);
+
+	pthread_mutex_lock(&s_socket);
 	receive_message(MASTER_SOCKET,&msg);
+	pthread_mutex_unlock(&s_socket);
+
 	int *response = msg.data;
 	return *response;
 }
 
 void muse_close()
 {
-//	Function function;
-//	Arg arg; //argumento
-//
-//	arg.type = VAR_UINT32;
-//	arg.size = sizeof(uint32_t);
-//	arg.value.val_u32 = 1;
-//
-//	function.type = FUNCTION_MUSE_CLOSE;
-//	function.num_args = 1;
-//	function.args[0] = arg;
-//
-//	///Hay que hacer que libere todo tambien de ese programa
-//	int result = call(&function);
-
+	pthread_mutex_lock(&s_socket);
 	close(MASTER_SOCKET);
+	pthread_mutex_unlock(&s_socket);
 }
 
 uint32_t muse_alloc(uint32_t tam)
@@ -140,14 +136,18 @@ int muse_get(void* dst, uint32_t src, size_t n)
 	create_message_header(&header, MESSAGE_CALL, PROCESS_ID, tamDataFunction(function));
 	create_function_message(&msg, &header, &function);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_message(MASTER_SOCKET,&msg) == -1){
 		//error no se pudo enviar
 		return -1;
 	}
+	pthread_mutex_unlock(&s_socket);
 
 	free(function.args[0].value.val_voidptr);
 
+	pthread_mutex_lock(&s_socket);
 	receive_message_var(MASTER_SOCKET, &msg);
+	pthread_mutex_unlock(&s_socket);
 
 	Function* f = msg.data;
 
@@ -213,6 +213,7 @@ uint32_t muse_map(char *path, size_t length, int flags)
 	function.args[2] = arg[2];
 
 	uint32_t result = call(&function);
+
 	return result;
 }
 
