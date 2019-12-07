@@ -24,7 +24,8 @@
 typedef struct program_s
 {
 	uint16_t pid;
-	t_list *segment_table;	
+	t_list *segment_table;
+	uint32_t using_memory;
 }program;
 
 /**
@@ -192,5 +193,8 @@ int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame);
 int frame_swap_libre();
 
 void liberar_frame_swap(void* frame);
+
+void el_cliente_se_tomo_el_palo(uint32_t pid);
+
 
 #endif

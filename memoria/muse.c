@@ -58,18 +58,25 @@ void* handler(void *args)
 	
 	log_debug(muse_logger,"A client in socket: %d has connected!",socket);
 
+	int pid;
+
 	//cambiar esto
 	while((n=receive_packet(socket,buffer,1024)) > 0)
 	{
 		if((n = message_decode(buffer,n,&msg)) > 0)
 		{
 			message_handler(&msg,socket);
+			pid = msg.header.caller_id;
 			memset(buffer,'\0',1024);
 		}
 	}	
 
+	el_cliente_se_tomo_el_palo(pid);
+
 	log_debug(muse_logger,"The client in socket: %d was disconnected!",socket);
 	close(socket);
+
+	return NULL;
 }
 
 muse_configuration *load_configuration(char *path)
