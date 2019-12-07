@@ -15,6 +15,10 @@
 #include <sys/mman.h> //for mmap() & munmap()
 #include <sys/stat.h>
 
+pthread_mutex_t mutex_bitmap_heap;
+pthread_mutex_t mutex_bitmap_mmap;
+pthread_mutex_t mutex_MM;
+
 //#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
 #define MUSE_LOG_PATH "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/muse.log"

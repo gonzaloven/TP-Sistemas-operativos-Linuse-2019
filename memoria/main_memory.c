@@ -31,6 +31,9 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	int i;
 	// heap_metadata* metadata;
 	// metadata = (heap_metadata*) malloc(METADATA_SIZE);
+	pthread_mutex_init(&mutex_bitmap_heap, NULL);
+	pthread_mutex_init(&mutex_bitmap_mmap, NULL);
+	pthread_mutex_init(&mutex_MM, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -81,7 +84,9 @@ void muse_main_memory_stop()
 	list_destroy(lista_archivos_mmap);
 	list_destroy_and_destroy_elements(program_list, (void*)destroy_program_list_elements);
 	//list_destroy(segment_list);
-
+	pthread_mutex_destroy(&mutex_bitmap_heap);
+	pthread_mutex_destroy(&mutex_bitmap_mmap);
+	pthread_mutex_destroy(&mutex_MM);
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
 }
@@ -142,10 +147,12 @@ int number_of_free_frames(){
 	int frames_libres_2 = 0;
 	int i;
 
+	pthread_mutex_lock(&mutex_bitmap_heap);
 	for(i=0; i < TOTAL_FRAME_NUM; i++)
 	{	
 		frames_libres_1 += (BITMAP[i]);
 	}
+	pthread_mutex_unlock(&mutex_bitmap_heap);
 
 	memoria_libre = frames_libres_1 * PAGE_SIZE;
 	memoria_total = TOTAL_FRAME_NUM * PAGE_SIZE;
@@ -157,10 +164,12 @@ int number_of_free_frames(){
 
 	memoria_libre = 0; 
 
+	pthread_mutex_lock(&mutex_bitmap_mmap);
 	for(i=0; i < TOTAL_FRAME_NUM_SWAP; i++)
 	{	
 		frames_libres_2 += (BITMAP_SWAP_FILE[i]);
 	}
+	pthread_mutex_unlock(&mutex_bitmap_mmap);
 
 	memoria_libre = frames_libres_2 * PAGE_SIZE;
 	memoria_total = TOTAL_FRAME_NUM_SWAP * PAGE_SIZE;
@@ -176,10 +185,12 @@ int number_of_free_frames(){
 int proximo_frame_libre(){
 	int i;
 
+	pthread_mutex_lock(&mutex_bitmap_heap);
 	for(i=0; i < TOTAL_FRAME_NUM; i++)
 	{	
 		if((BITMAP[i])) return i;
 	}
+	pthread_mutex_unlock(&mutex_bitmap_heap);
 	return -1;
 }
 
@@ -198,15 +209,22 @@ page* page_with_free_size(){
 			curr_frame_num = dame_nro_frame_reemplazado();
 		}
 
+		pthread_mutex_lock(&mutex_bitmap_heap);
 		if (BITMAP[curr_frame_num])
 		{
 			BITMAP[curr_frame_num] = 0;
 			pag->is_present = 1;
 			pag->is_used = 1;
 			pag->is_modify = 0;
-			pag->fr = MAIN_MEMORY + (curr_frame_num * PAGE_SIZE);			
+			pthread_mutex_lock(&mutex_MM);
+			pag->fr = MAIN_MEMORY + (curr_frame_num * PAGE_SIZE);
+			pthread_mutex_unlock(&mutex_MM);
+
+			pthread_mutex_unlock(&mutex_bitmap_heap);
 			return pag;
 		}
+
+		pthread_mutex_unlock(&mutex_bitmap_heap);
 	}	
 }
 
@@ -288,8 +306,12 @@ int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento)
 	int nro_frame_swap;
 
 	//Nosotros habiamos dicho que: pag->fr = MAIN_MEMORY + (curr_frame_num * PAGE_SIZE)
+	pthread_mutex_lock(&mutex_MM);
 	nro_frame_upcm = (pag->fr - MAIN_MEMORY) / PAGE_SIZE;
+	pthread_mutex_unlock(&mutex_MM);
+	pthread_mutex_lock(&mutex_bitmap_heap);
 	BITMAP[nro_frame_upcm] = 1; //declaro como libre ese nro de frame
+	pthread_mutex_unlock(&mutex_bitmap_heap);
 
  	nro_frame_swap = mandar_al_archivo_swap_toda_la_pagina_que_esta_en(nro_frame_upcm);
 
@@ -314,7 +336,9 @@ int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame)
 	int nro_frame_swap = frame_swap_libre();
 	if (nro_frame_swap != -1)
 	{
+		pthread_mutex_lock(&mutex_MM);
 		memcpy(buffer, MAIN_MEMORY + (nro_frame * PAGE_SIZE), PAGE_SIZE);
+		pthread_mutex_unlock(&mutex_MM);
 
 		swap_file = fopen(SWAP_PATH,"r+");
 
@@ -333,11 +357,14 @@ int frame_swap_libre()
 	int i;
 	for(i=0; i<TOTAL_FRAME_NUM_SWAP; i++)
 	{
+		pthread_mutex_lock(&mutex_bitmap_mmap);
 		if(BITMAP_SWAP_FILE[i])
 		{ 
 			BITMAP_SWAP_FILE[i] = 0;
+			pthread_mutex_unlock(&mutex_bitmap_mmap);
 			return i;
 		}
+		pthread_mutex_unlock(&mutex_bitmap_mmap);
 	}
 	return -1; // no hay frames libres
 }
@@ -898,7 +925,9 @@ void* obtener_data_marco_heap(page* pagina){
     	int numFrame = dame_nro_frame_reemplazado();
     	liberar_frame_swap(pagina->fr);
     	log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap");
+    	pthread_mutex_lock(&mutex_MM);
     	pagina->fr = (void*) (MAIN_MEMORY + numFrame * PAGE_SIZE);
+    	pthread_mutex_unlock(&mutex_MM);
         pagina->is_present = 1;
         pagina->is_used = 1;
     }
@@ -933,7 +962,9 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
     	int numFrame = dame_nro_frame_reemplazado();
     	log_debug(debug_logger, "Paso pagina de ARCHIVO MAPPED a MEMORIA PRINCIPAL");
     	log_debug(debug_logger, "NUM FRAME: %d",numFrame);
+    	pthread_mutex_lock(&mutex_MM);
     	pagina->fr = (void*) (MAIN_MEMORY + numFrame * PAGE_SIZE);
+    	pthread_mutex_unlock(&mutex_MM);
         pagina->is_present = 1;
         pagina->is_used = 1;
 
@@ -1371,15 +1402,20 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 void liberar_frame(int numeroFrame){
 	log_debug(debug_logger, "Libero el frame: %d", numeroFrame);
 
+	pthread_mutex_lock(&mutex_bitmap_heap);
 	BITMAP[numeroFrame] = 1;
+	pthread_mutex_unlock(&mutex_bitmap_heap);
 }
 
 void liberar_frame_swap(void* frame){
+	pthread_mutex_lock(&mutex_MM);
 	int numeroFrame = (frame - MAIN_MEMORY)/PAGE_SIZE;
-
+	pthread_mutex_unlock(&mutex_MM);
 	log_debug(debug_logger, "Libero el frame: %d", numeroFrame);
 
+	pthread_mutex_lock(&mutex_bitmap_mmap);
 	BITMAP_SWAP_FILE[numeroFrame] = 1;
+	pthread_mutex_unlock(&mutex_bitmap_mmap);
 }
 
 void eliminar_archivo_mmap(archivoMMAP* archivo){
@@ -1388,7 +1424,9 @@ void eliminar_archivo_mmap(archivoMMAP* archivo){
 
 		void eliminar_pagina(page* pagina){
 			if(pagina->is_present){
+				pthread_mutex_lock(&mutex_MM);
 				int numeroFrame = (pagina->fr - MAIN_MEMORY)/PAGE_SIZE;
+				pthread_mutex_unlock(&mutex_MM);
 				log_debug(debug_logger, "Frame a borrar: %d", numeroFrame);
 				liberar_frame(numeroFrame);
 			}
