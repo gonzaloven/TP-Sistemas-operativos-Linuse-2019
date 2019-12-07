@@ -626,6 +626,10 @@ int close_tid(int tid, int socket_actual){
 		break;
 	}
 
+	metricas_sistema();
+	metricas_por_programa();
+	metricas_por_hilo();
+
 	return 1;
 }
 
