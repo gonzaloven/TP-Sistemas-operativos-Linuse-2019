@@ -1219,6 +1219,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	{
 		log_debug(debug_logger, "No lo encontre, lo creo ----> %d", pid);
 		prog = (program *) malloc(sizeof(program));
+		memset(prog, 0, sizeof(program));
 		prog->pid = pid;
 		prog->segment_table = list_create();
 		nro_prog = list_add(program_list, prog);
