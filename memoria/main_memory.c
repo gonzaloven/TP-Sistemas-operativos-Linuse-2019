@@ -7,19 +7,13 @@
 */
 
 #include "main_memory.h"
-#include <fcntl.h> //for open() funct
-#include <sys/mman.h> //for mmap() & munmap()
-#include <sys/stat.h>
-#include <math.h>
 
 #define METADATA_SIZE sizeof(struct HeapMetadata)
 
 #define SWAP_PATH "swapfile"
 
 void *MAIN_MEMORY = NULL;
-
 t_list *program_list = NULL;
-//t_list *segment_list = NULL;
 t_list *lista_archivos_mmap = NULL;
 t_log *metricas_logger = NULL;
 t_log *debug_logger = NULL;
@@ -84,11 +78,40 @@ void muse_main_memory_stop()
 	free(MAIN_MEMORY);
 	remove(SWAP_PATH);
 
-	list_destroy(program_list);
+	list_destroy(lista_archivos_mmap);
+	list_destroy_and_destroy_elements(program_list, (void*)destroy_program_list_elements);
 	//list_destroy(segment_list);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
+}
+
+void destroy_archivosmmap_list_elements(archivoMMAP* mmap){
+	list_destroy(mmap->programas);
+	free(mmap->pathArchivo);
+	free(mmap);
+}
+
+void destroy_program_list_elements(program* prog){
+	list_destroy_and_destroy_elements(prog->segment_table, (void*)destroy_segment_table_elements);
+	free(prog);
+	prog = NULL;
+}
+
+void destroy_segment_table_elements(segment* seg){
+	list_destroy_and_destroy_elements(seg->page_table, (void*)destroy_page_table_elements);
+	if(!seg->is_heap){
+		list_destroy(seg->archivo_mapeado->programas);
+		free(seg->archivo_mapeado->pathArchivo);
+		free(seg->archivo_mapeado);
+	}
+	free(seg);
+	seg = NULL;
+}
+
+void destroy_page_table_elements(page* pag){
+	free(pag);
+	pag = NULL;
 }
 
 int search_program(uint32_t pid)
@@ -102,6 +125,14 @@ int search_program(uint32_t pid)
 		i++;
 	}
 	return -1;
+}
+
+void el_cliente_se_tomo_el_palo(uint32_t pid){
+	log_debug(debug_logger,"El pid del programa es: %d parte 3",pid);
+	int nro_prog = search_program(pid);
+	program *prog = list_get(program_list, nro_prog);
+	int memory_leaks = prog->using_memory;
+	log_trace(metricas_logger, "LEAK SUMMARY: definitely lost: %d bytes", memory_leaks);
 }
 
 int number_of_free_frames(){
@@ -157,8 +188,6 @@ int frames_needed(int size_total){
 }
 
 page* page_with_free_size(){
-
-
 	int curr_frame_num;
 	page* pag = (page *) malloc(PAGE_SIZE);
 
@@ -186,7 +215,7 @@ t_list* lista_de_segmentos(){
 	int i;
 	t_list* lista_de_segmentos = list_create();
 
-	for(i=0; i<list_size(program_list) ; i++){
+	for(i=0; i<list_size(program_list); i++){
 		prog = list_get(program_list, i);
 		list_add_all(lista_de_segmentos, prog->segment_table);
 	}
@@ -206,10 +235,6 @@ int dame_nro_frame_reemplazado(){
 	t_list *listaSeg = lista_de_segmentos();
 	
 	int cantidad_de_segmentos_totales = list_size(listaSeg);
-	
-
-	//printf("\n\nantes %d, ahora %d \n\n", cantidad_de_segmentos_totales, list_size(lista_de_segmentos()));
-
 	int cantidad_de_paginas_en_segmento;
 	int nro_de_segmento, nro_de_pag, nro_frame;
 	int nro_paso = 1;
@@ -251,6 +276,7 @@ int dame_nro_frame_reemplazado(){
 		if (nro_paso == 3)
 			nro_paso = 1;
 	}
+	list_destroy(listaSeg);
 }  
 
 //devuelve el nro de frame de la víctima & la manda al archivo swap
@@ -326,13 +352,15 @@ void metricas_por_socket_conectado(uint32_t pid){
 	int cantidad_de_segmentos_asignados = list_size(prog->segment_table);
 	int cantidad_de_segmentos_totales = list_size(listaSeg);
 
+	list_destroy(listaSeg);
+
 	log_trace(metricas_logger, "El programa n° %d tiene asignados %d de %d segmentos en el sistema", 
 			nro_prog, cantidad_de_segmentos_asignados, cantidad_de_segmentos_totales);
 	number_of_free_frames();
 }
 
 void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevoSize, int is_free){
-	heap_metadata* metadataBuscada;
+	heap_metadata* metadataBuscada = NULL;
 
 	int paginaBuscada = floor((direccionLogica - segmentoBuscado->base) / PAGE_SIZE);
 	int offset = (direccionLogica - segmentoBuscado->base) % PAGE_SIZE;
@@ -342,7 +370,7 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 	metadataBuscada = (heap_metadata*) ((pagina->fr) + offset);
 
 	if((offset + METADATA_SIZE) > PAGE_SIZE){
-		heap_metadata metadataCopia;
+		heap_metadata metadataCopia = { 0, true };
 
 		page* proximaPagina = list_get(segmentoBuscado->page_table, (paginaBuscada + 1));
 
@@ -373,10 +401,11 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 }
 
 heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado){
-	heap_metadata* metadataBuscada;
+	heap_metadata* metadataBuscada = NULL;
 
 	int paginaBuscada = floor((direccionLogica - segmentoBuscado->base) / PAGE_SIZE);
-	int offset = (direccionLogica - segmentoBuscado->base) % PAGE_SIZE;
+	int offset;
+	offset = (direccionLogica - segmentoBuscado->base) % PAGE_SIZE;
 
 	page* pagina = list_get(segmentoBuscado->page_table, paginaBuscada);
 
@@ -415,26 +444,32 @@ heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segme
 int ultima_metadata_segmento(int dirLogica, segment* segmentoActual){
 
 	heap_metadata* metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
+	int ultima_metadata;
 
-	int dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
+	int dirLogicaSiguienteMetadata;
+	dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
 
 	if(dirLogicaSiguienteMetadata == segmentoActual->limit){
 		return dirLogica;
 	}
 	else{
-		return ultima_metadata_segmento(dirLogicaSiguienteMetadata, segmentoActual);
+		ultima_metadata = ultima_metadata_segmento(dirLogicaSiguienteMetadata, segmentoActual);
+		return ultima_metadata;
 	}
 }
 
 int proxima_metadata_libre_con_size(int dirLogica, segment* segmentoActual, int size){
-	heap_metadata* metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
+	heap_metadata* metadataActual = NULL;
+	metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
 
 	int direccionUltimaMetadata = ultima_metadata_segmento(segmentoActual->base, segmentoActual);
 
-	int dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
+	int dirLogicaSiguienteMetadata;
+	dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
 
 	if(direccionUltimaMetadata == dirLogicaSiguienteMetadata){
-		heap_metadata* ultimaMetadata = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmentoActual);
+		heap_metadata* ultimaMetadata = NULL;
+		ultimaMetadata = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmentoActual);
 		if(ultimaMetadata->is_free && ultimaMetadata->size >= size){
 			return dirLogicaSiguienteMetadata;
 		}else{
@@ -451,13 +486,15 @@ int proxima_metadata_libre_con_size(int dirLogica, segment* segmentoActual, int 
 }
 
 void listar_metadatas(int dirLogica, segment* segmento){
-	heap_metadata* metadataActual = buscar_metadata_por_direccion(dirLogica, segmento);
+	heap_metadata* metadataActual = NULL;
+	metadataActual = buscar_metadata_por_direccion(dirLogica, segmento);
 
 	int direccionUltimaMetadata = ultima_metadata_segmento(segmento->base, segmento);
 	int dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
 
 	if(direccionUltimaMetadata == dirLogicaSiguienteMetadata){
-		heap_metadata* ultimaMetadata = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmento);
+		heap_metadata* ultimaMetadata = NULL;
+		ultimaMetadata = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmento);
 		log_debug(debug_logger, "Ultima metadata --> Size: %d, is_free: %d, direccionLogica: %d", metadataActual->size, metadataActual->is_free, dirLogica);
 	}
 
@@ -467,14 +504,16 @@ void listar_metadatas(int dirLogica, segment* segmento){
 }
 
 int proxima_metadata_libre(int dirLogica, segment* segmentoActual){
-	heap_metadata* metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
+	heap_metadata* metadataActual = NULL;
+	metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);	
 
 	int direccionUltimaMetadata = ultima_metadata_segmento(segmentoActual->base, segmentoActual);
 
 	int dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
 
 	if(direccionUltimaMetadata == dirLogicaSiguienteMetadata){
-		heap_metadata* ultimaMetadata = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmentoActual);
+		heap_metadata* ultimaMetadata = NULL;
+		ultimaMetadata = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmentoActual);
 		if(ultimaMetadata->is_free){
 			return dirLogicaSiguienteMetadata;
 		}else{
@@ -506,7 +545,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	int direccionLogicaMetadataLibre;
 	page *pag;
 	program *prog;
-	heap_metadata *metadata; 
+	heap_metadata *metadata = NULL; 
 	int total_size = size + METADATA_SIZE;
 	int total_pages_needed = (total_size / PAGE_SIZE) + ((total_size % PAGE_SIZE) != 0); // ceil(total_size / PAGE_SIZE)
 	int espacio_que_queda_alocar = total_size;
@@ -532,10 +571,29 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	{
 		log_debug(debug_logger, "Encontre espacio en el segmento, alloco aca");
 		segment *segmentoConEspacio;
-		heap_metadata *metadataBuscada;
+		heap_metadata *metadataBuscada = NULL;
 
 		nro_seg = segment_with_free_space(prog, total_size);
 		segmentoConEspacio = list_get(prog->segment_table, nro_seg);
+
+		if(segmentoConEspacio == NULL){
+			log_debug(debug_logger, "Segmento nulo - ERROR -");
+			return -1;
+		}
+
+		if(!segmentoConEspacio->is_heap){
+			int pidEncontrada;
+
+			int igualPID(int pid){
+			    return pid == prog->pid;
+			}
+
+			pidEncontrada = (int)list_find(segmentoConEspacio->archivo_mapeado->programas,(void*) igualPID);
+			if((void*)pidEncontrada == NULL){
+				log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+				return -1;
+			}
+		}
 
 		direccionLogicaMetadataLibre = proxima_metadata_libre_con_size(segmentoConEspacio->base, segmentoConEspacio, total_size);
 
@@ -557,7 +615,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		offset = (direccionLogicaMetadataFinal - segmentoConEspacio->base) % PAGE_SIZE;
 
-		heap_metadata *metadataFinal = buscar_metadata_por_direccion(direccionLogicaMetadataFinal, segmentoConEspacio);
+		heap_metadata *metadataFinal = NULL;
+		metadataFinal = buscar_metadata_por_direccion(direccionLogicaMetadataFinal, segmentoConEspacio);
 
 		modificar_metadata(direccionLogicaMetadataFinal, segmentoConEspacio, (sizeAnterior - total_size), 1);
 		log_debug(debug_logger, "La metadata final tiene ---> %d", metadataFinal->size);
@@ -571,7 +630,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		segmentoAAgrandar = ultimo_segmento_programa(prog);
 
 		//Busco la ultima metadata que deberia estar libre y la agrando
-		heap_metadata* ultimaMetadata;
+		heap_metadata* ultimaMetadata = NULL;
 
 		int direccionLogicaUltimaMetadata = ultima_metadata_segmento(segmentoAAgrandar->base, segmentoAAgrandar);
 
@@ -601,7 +660,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	{
 		log_debug(debug_logger, "No pude agrandar ningun segmento asi que le creo uno");
 		int cantidadDePaginasAAgregar = total_pages_needed;
-		segment *segmentoNuevo;
+		segment *segmentoNuevo = NULL;
 		segmentoNuevo = (segment *) malloc(sizeof(segment));
 		segmentoNuevo->is_heap = true;
 		segmentoNuevo->page_table = list_create();
@@ -625,7 +684,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		log_debug(debug_logger, "Limite del segmento nuevo ----> %d", segmentoNuevo->limit);
 
-		heap_metadata* primerMetadata = (primeraPagina->fr);
+		heap_metadata* primerMetadata = NULL;
+		primerMetadata = (primeraPagina->fr);
 
 		primerMetadata->is_free = 1;
 		primerMetadata->size = (cantidadDePaginasAAgregar * PAGE_SIZE) - METADATA_SIZE;
@@ -637,6 +697,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	log_debug(debug_logger, "Direccion logica final del MALLOC ----> %d", direccionLogicaFinal); 
 
 	metricas_por_socket_conectado(pid);
+
+	prog->using_memory += size;
 
 	return direccionLogicaFinal;
 }
@@ -658,7 +720,8 @@ int segment_with_free_space(program *prog, int size)
 			int direccionLogicaEncontrada = proxima_metadata_libre_con_size(segmentoActual->base, segmentoActual, size);
 
 			if(direccionLogicaEncontrada != -1){
-				heap_metadata* metadataEncontrada = buscar_metadata_por_direccion(direccionLogicaEncontrada, segmentoActual);
+				heap_metadata* metadataEncontrada = NULL;
+				metadataEncontrada = buscar_metadata_por_direccion(direccionLogicaEncontrada, segmentoActual);
 
 				log_debug(debug_logger, "Encontramos que el segmento %d tiene una metadata de %d de size", i, metadataEncontrada->size);
 				return i;
@@ -680,7 +743,8 @@ bool tiene_siguiente(int direccionLogicaMetadata, segment* segmento){
 
 void compactar_en_segmento(int direccionLogicaMetadataLibreInicial, int direccionLogicaSiguiente, segment* segmento){
 
-	heap_metadata* metadataLibreInicial = buscar_metadata_por_direccion(direccionLogicaMetadataLibreInicial, segmento);
+	heap_metadata* metadataLibreInicial = NULL;
+	metadataLibreInicial = buscar_metadata_por_direccion(direccionLogicaMetadataLibreInicial, segmento);
 	log_debug(debug_logger, "Metadata inicial de %d de size e is_free = %d", metadataLibreInicial->size, metadataLibreInicial->is_free);
 
 	int direccionUltimaMetadata = ultima_metadata_segmento(segmento->base, segmento);
@@ -688,7 +752,8 @@ void compactar_en_segmento(int direccionLogicaMetadataLibreInicial, int direccio
 	//Si no tiene siguiente (la siguiente) entonces quiere decir que es la ultima
 	if(direccionLogicaSiguiente == direccionUltimaMetadata)
 	{
-		heap_metadata* metadataSiguiente = buscar_metadata_por_direccion(direccionLogicaSiguiente, segmento);
+		heap_metadata* metadataSiguiente = NULL;
+		metadataSiguiente = buscar_metadata_por_direccion(direccionLogicaSiguiente, segmento);
 		log_debug(debug_logger, "Metadata siguiente de %d de size e is_free = %d", metadataSiguiente->size, metadataSiguiente->is_free);
 		log_debug(debug_logger, "Esta es la ultima");
 
@@ -701,13 +766,13 @@ void compactar_en_segmento(int direccionLogicaMetadataLibreInicial, int direccio
 			log_debug(debug_logger, "Metadata libre ahora tiene %d de size e is_free = %d", metadataLibreInicial->size, metadataLibreInicial->is_free);
 			int viejoSize = metadataSiguiente->size;
 			modificar_metadata(direccionLogicaSiguiente, segmento, viejoSize, 1);
-
 		}
 	}
 	else
 	{
 		//Si tiene siguiente entonces podemos seguir mas todavia
-		heap_metadata* metadataSiguiente = buscar_metadata_por_direccion(direccionLogicaSiguiente, segmento);
+		heap_metadata* metadataSiguiente = NULL;
+		metadataSiguiente = buscar_metadata_por_direccion(direccionLogicaSiguiente, segmento);
 		log_debug(debug_logger, "Metadata siguiente de %d de size e is_free = %d", metadataSiguiente->size, metadataSiguiente->is_free);
 
 		//Si esta libre la sumamos a la inicial y repetimos el proceso
@@ -752,7 +817,8 @@ void compactar_espacios_libres(program *prog){
 	int paginaActualNumero = 0;
 	int cantidadDePaginasAMoverme;
 	int i;
-	heap_metadata* metadataInicialLibre;
+	heap_metadata* metadataInicialLibre = NULL;
+	heap_metadata* metadataLibreInicial = NULL;
 
 	for(i=0; i < cantidad_de_segmentos; i++){
 		segment* segmentoActual = list_get(prog->segment_table, i);
@@ -760,7 +826,7 @@ void compactar_espacios_libres(program *prog){
 		int direccionLogicaMetadataLibre = proxima_metadata_libre(segmentoActual->base, segmentoActual);
 
 		if(direccionLogicaMetadataLibre != -1){
-			heap_metadata* metadataLibreInicial = buscar_metadata_por_direccion(direccionLogicaMetadataLibre, segmentoActual);
+			metadataLibreInicial = buscar_metadata_por_direccion(direccionLogicaMetadataLibre, segmentoActual);
 
 			if(tiene_siguiente(direccionLogicaMetadataLibre, segmentoActual))
 			{
@@ -779,7 +845,7 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 	program *prog;
 	segment *seg;
 
-	log_debug(debug_logger, "direccion virtual pedida: %d", virtual_address);
+	log_debug(debug_logger, "Direccion virtual pedida: %d", virtual_address);
 
 	prog = list_get(program_list, nro_prog);
 	int nro_seg = busca_segmento(prog,virtual_address);	
@@ -793,14 +859,15 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 
 	int direccionLogicaMetadata = virtual_address - METADATA_SIZE;
 
-	heap_metadata* metadata = buscar_metadata_por_direccion(direccionLogicaMetadata, seg);
+	heap_metadata* metadata = NULL;
+	metadata = buscar_metadata_por_direccion(direccionLogicaMetadata, seg);
 	int viejoSize = metadata->size;
 	modificar_metadata(direccionLogicaMetadata, seg, viejoSize, 1);
 
 	compactar_espacios_libres(prog);
 
-	//Para debug
 	//listar_metadatas(seg->base, seg);
+	prog->using_memory -= viejoSize;
 
 	return 0;
 }
@@ -893,6 +960,12 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
         pagina->is_present = 1;
         pagina->is_used = 1;
 
+        free(sacarFrame);
+
+        //fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
+        //fread(buffer_page_mmap,PAGE_SIZE,1,segmento->archivo_mapeado);
+
+        //memcpy(pagina->fr,buffer_page_mmap,PAGE_SIZE);
         memcpy(pagina->fr, segmento->archivo_mapeado->archivo + nro_pagina * PAGE_SIZE, PAGE_SIZE);
 
         free(buffer_page_mmap);
@@ -924,12 +997,25 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	segment* segment = list_get(prog->segment_table, numSeg);
 
 	if(segment == NULL){
-		// no se encontro el segmento, tiene que tirar seg fault
 		log_debug(debug_logger, "Se busco el segmento %d, pero no se encontro", numSeg);
 		return -1;
 	}else{
 		log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 		log_debug(debug_logger, "El segmento a escribir es %d", numSeg);
+	}
+
+	if(!segment->is_heap){
+		int pidEncontrada;
+
+		int igualPID(int pid){
+		    return pid == prog->pid;
+		}
+
+		pidEncontrada = (int)list_find(segment->archivo_mapeado->programas,(void*) igualPID);
+		if((void*)pidEncontrada == NULL){
+			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return -1;
+		}
 	}
 
 	int numPage = floor((dst - segment->base) / PAGE_SIZE);
@@ -985,12 +1071,6 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
         if(!metadata.is_free && (metadata.size >= n)){
             memcpy(buffer + posicion_recorrida,src,n);
 
-            //borrar, estos dos debug es para ver si le llego bien
-            char* texto = malloc(n);
-            memcpy(texto, src,n);
-            log_debug(debug_logger, "El valor del source es: %s", texto);
-            log_debug(debug_logger, "La cantidad de bytes a copiar es: %d", n);
-
             // vuelvo a cargar los datos al upcm
             for(int x=0; x<cantidad_paginas_necesarias;x++){
             	paginaObtenida = list_get(segment->page_table,x + numPage);
@@ -1024,18 +1104,15 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		}else{
 		 	// no puedo almacenar los datos pq ingreso a una posicion invalida
 			log_debug(debug_logger, "Posicion invalida, no se pudo realizar la copia");
+			free(buffer);
 			return -1;
 		 }
 	}
 
 	log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 
-	char* texto = malloc(200);
-	memcpy(texto, datos, n);
-
-	log_debug(debug_logger, "Texto = %s",texto);
-
 	log_debug(debug_logger, "Fin memory_cpy");
+	free(buffer);
 	
 	return dst;
 }
@@ -1097,8 +1174,8 @@ int crear_nuevo_segmento_mmap(size_t length, program* prog){
 uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 {
 	int nro_prog;
-	program* prog;
-	segment* segmentoNuevo;
+	program* prog = NULL;
+	segment* segmentoNuevo = NULL;
 	int direccionDelSegmento;
 	archivoMMAP* archivoMappeado;
 
@@ -1119,7 +1196,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 		prog = list_get(program_list, nro_prog);
 	}
 
-	log_debug(debug_logger, "path recibido: %s", path);
+	log_debug(debug_logger, "Path recibido: %s", path);
 
 	archivoMappeado = buscar_archivo_mmap(path);
 
@@ -1147,17 +1224,17 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 		int igualPID(int pid){
 			return pid == prog->pid;
 		}
-		int pidEncontrada = list_find(archivoMappeado->programas,(void*) igualPID);
+		int pidEncontrada = (int)list_find(archivoMappeado->programas,(void*) igualPID);
 
-		if(flag == MAP_PRIVATE && pidEncontrada == NULL){
+		if(flag == MAP_PRIVATE && (void*)pidEncontrada == NULL){
 			log_error(debug_logger, "El archivo ya fue mappeado con la flag MAP_PRIVATE");
 			return -2;
 		}
 	}
 
-	log_debug(debug_logger, "programa tiene ----> %d segmentos", list_size(prog->segment_table));
+	log_debug(debug_logger, "Programa tiene ----> %d segmentos", list_size(prog->segment_table));
 	direccionDelSegmento = crear_nuevo_segmento_mmap(length, prog);
-	log_debug(debug_logger, "direccion del segmento ----> %d", direccionDelSegmento);
+	log_debug(debug_logger, "Direccion del segmento ----> %d", direccionDelSegmento);
 
 	int nroSegmentoNuevo = busca_segmento(prog, direccionDelSegmento);
 
@@ -1169,7 +1246,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	if(flag == MAP_SHARED){
 		log_debug(debug_logger, "La flag de MAP es: MAP_SHARED");
 		segmentoNuevo->tipo_map = 1;
-		list_add(archivoMappeado->programas, pid);
+		list_add(archivoMappeado->programas, (void*)pid);
 	}else if(flag == MAP_PRIVATE){
 		log_debug(debug_logger, "La flag de MAP es: MAP_PRIVATE");
 		segmentoNuevo->tipo_map = 0;
@@ -1191,18 +1268,6 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	return segmentoNuevo->base;
 }
 
-	/**
-	* Descarga una cantidad `length` de bytes y lo escribe en el archivo en el FileSystem.
-	* @param direccion Dirección a memoria mappeada.
-	* @param length Cantidad de bytes a escribir.
-	* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
-	* @note Si `length` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
-	* @example	
-		imagine we got uint32_t map = muse_map("hola.txt", filesize, MAP_PRIVATE);		
-		so let's imagine we do the following:
-			muse_sync(map, 200)
-		so we're basicly just writing 200 bytes of "nothing" to map	
-	*/
 uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 {
 	
@@ -1232,6 +1297,8 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 	int numSeg = busca_segmento(prog, direccion);
 	segmento_obtenido = list_get(listaSeg, numSeg);
 
+	list_destroy(listaSeg);
+
 	int cantidad_paginas_necesarias = ceil((double)length / (double)PAGE_SIZE);
 	log_debug(debug_logger, "Cantidad_paginas_necesarias %d", cantidad_paginas_necesarias);
 
@@ -1241,6 +1308,20 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 		return -2;
 	} 
 
+	if(!segmento_obtenido->is_heap){
+		int pidEncontrada;
+
+		int igualPID(int pid){
+		    return pid == prog->pid;
+		}
+
+		pidEncontrada = (int)list_find(segmento_obtenido->archivo_mapeado->programas,(void*) igualPID);
+		if((void*)pidEncontrada == NULL){
+			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return -1;
+		}
+	}
+
 	//error (returen -1)
 	if((segmento_obtenido->is_heap) || (direccion % PAGE_SIZE) != 0){
 		log_debug(debug_logger, "Error: el segmento obtenido es heap o la direccion no esta al inicio de una pag");
@@ -1249,7 +1330,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 
 	//busca el nro de pagina del segmento donde está direccion
 	int nro_pagina_obtenida = (direccion - segmento_obtenido->base) / PAGE_SIZE;
-	log_debug(debug_logger, "nro_pagina_obtenida: %d", nro_pagina_obtenida);
+	log_debug(debug_logger, "Nro de pag obtenida: %d", nro_pagina_obtenida);
 
 	page* pagina_obtenida;
 	void* direccion_datos;
@@ -1285,27 +1366,6 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 	log_debug(debug_logger, "Error: la direccion encontrada es mayor que el tamaño de mmap_file");
 	return -1;
 }
-
-/*void agregar_frame_clock(page* pag){
-	
-	if(list_size(lista_clock) == cantidad_frames){
-		list_replace(lista_clock,pag->frame,pag);
-	}
-	else{
-		//list_add_in_index(lista_clock,pagina->frame,pagina);
-		list_add_in_index(lista_clock,pag->frame,pag);
-	}
-}
-
-void* convertir_de_nro_frame_a_posicion (int nro_frame)
-{
-
-}
-
-int convertir_de_posicion_a_nro_de_frame (void* posicion)
-{
-	
-}*/
 
 void liberar_frame(int numeroFrame){
 	log_debug(debug_logger, "Libero el frame: %d", numeroFrame);
@@ -1364,6 +1424,21 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	log_error(debug_logger, "Segmentation fault");
 		return -1;
 	}
+
+	if(!segmentoBuscado->is_heap){
+		int pidEncontrada;
+
+		int igualPID(int pid){
+		    return pid == prog->pid;
+		}
+
+		pidEncontrada = (int)list_find(segmentoBuscado->archivo_mapeado->programas,(void*) igualPID);
+		if((void*)pidEncontrada == NULL){
+			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return -1;
+		}
+	}
+
 	else if((segmentoBuscado->is_heap != 0) || (dir != segmentoBuscado->base)){
 	log_error(debug_logger, "No es de MMAP el segmento buscado.");
 		return -1;
@@ -1408,7 +1483,7 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 // Copia n bytes de MUSE a LIBMUSE
 void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 {
-	program* prog;
+	program* prog = NULL;
 
 	log_debug(debug_logger, "Direccion destino: %d", src);
 	log_debug(debug_logger, "Cantidad de bytes a leer en la direccion: %d", numBytes);
@@ -1438,6 +1513,20 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 		// ACA HABRIA QUE HACER ALGO CON EL ERROR
 		log_debug(debug_logger, "ERROR - ESTAS TRATANDO DE LEER MAS BYTES DE LOS QUE TIENE EL SEGMENTO O EL SEGMENTO NO EXISTE");
 		return (void*)-1;
+	}
+
+	if(!segmento->is_heap){
+		int pidEncontrada;
+
+		int igualPID(int pid){
+		    return pid == prog->pid;
+		}
+
+		pidEncontrada = (int)list_find(segmento->archivo_mapeado->programas,(void*) igualPID);
+		if((void*)pidEncontrada == NULL){
+			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return (void*)-1;
+		}
 	}
 
 	int numPage = floor((src - segmento->base) / PAGE_SIZE);

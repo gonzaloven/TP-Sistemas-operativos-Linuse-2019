@@ -11,6 +11,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <math.h>
+#include <fcntl.h> //for open() funct
+#include <sys/mman.h> //for mmap() & munmap()
+#include <sys/stat.h>
 
 //#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
@@ -24,7 +27,8 @@
 typedef struct program_s
 {
 	uint16_t pid;
-	t_list *segment_table;	
+	t_list *segment_table;
+	uint32_t using_memory;
 }program;
 
 /**
@@ -82,9 +86,6 @@ typedef struct segment_s
 
 }segment;
 
-/**
- * @param memory_size y @param page_size salen del archivo config
- */
 void muse_main_memory_init(int memory_size, int page_size, int swap_size);
 
 void muse_main_memory_stop();
@@ -94,6 +95,8 @@ int number_of_free_frames();
 void metricas_por_socket_conectado(uint32_t pid);
 
 int busca_segmento(program *prog,uint32_t va);
+
+heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado);
 
 void* obtener_data_marco_heap(page* pagina);
 
@@ -192,5 +195,15 @@ int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame);
 int frame_swap_libre();
 
 void liberar_frame_swap(void* frame);
+
+void destroy_program_list_elements(program* prog);
+
+void destroy_segment_table_elements(segment* seg);
+
+void destroy_page_table_elements(page* pag);
+
+void destroy_archivosmmap_list_elements(archivoMMAP* mmap);
+void el_cliente_se_tomo_el_palo(uint32_t pid);
+
 
 #endif
