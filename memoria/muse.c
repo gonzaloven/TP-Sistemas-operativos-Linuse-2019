@@ -76,6 +76,8 @@ void* handler(void *args)
 	
 	log_debug(muse_logger,"A client in socket: %d has connected!",socket);
 
+	int pid;
+
 	//cambiar esto
 	while((n=receive_packet_var(socket,&buffer)) > 0)
 	{
@@ -89,12 +91,16 @@ void* handler(void *args)
 			free(msg.data);
 			msg.data = NULL;
 			free(buffer);
+			pid = msg.header.caller_id;
 		}
 	}	
+
+	el_cliente_se_tomo_el_palo(pid);
 
 	log_debug(muse_logger,"The client in socket: %d was disconnected!",socket);
 	free(buffer);
 	close(socket);
+
 	return (void*)NULL;
 }
 

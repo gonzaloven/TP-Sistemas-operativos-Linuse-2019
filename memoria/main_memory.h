@@ -24,7 +24,8 @@
 typedef struct program_s
 {
 	uint16_t pid;
-	t_list *segment_table;	
+	t_list *segment_table;
+	uint32_t using_memory;
 }program;
 
 /**
@@ -200,5 +201,7 @@ void destroy_segment_table_elements(segment* seg);
 void destroy_page_table_elements(page* pag);
 
 void destroy_archivosmmap_list_elements(archivoMMAP* mmap);
+void el_cliente_se_tomo_el_palo(uint32_t pid);
+
 
 #endif
