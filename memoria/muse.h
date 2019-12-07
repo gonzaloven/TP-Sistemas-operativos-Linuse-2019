@@ -30,7 +30,7 @@ typedef struct muse_configuration_s
 
 uint32_t memory_close(uint32_t pid);
 
-uint32_t muse_invoke_function(Function *f,uint32_t pid);
+void* muse_invoke_function(Function *function,uint32_t pid);
 
 /* 
 Starts server,logger and loads configuration. 

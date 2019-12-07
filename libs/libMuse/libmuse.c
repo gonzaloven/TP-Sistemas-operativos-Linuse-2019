@@ -3,6 +3,18 @@
 int MASTER_SOCKET;
 int PROCESS_ID;
 
+int tamDataFunction(Function f){
+	int tamano = 0;
+	tamano+= sizeof(uint8_t);
+	tamano+= sizeof(uint8_t);
+	for(int y=0; y < f.num_args; y++){
+		tamano+= sizeof(uint8_t);
+		tamano+= sizeof(uint32_t);
+		tamano+= f.args[y].size;
+	}
+	return tamano;
+}
+
 int muse_init(int id)
 {
 	config = config_create(LIBMUSE_CONFIG_PATH);
@@ -77,6 +89,9 @@ uint32_t muse_alloc(uint32_t tam)
 	function.args[0] = arg;
 	
 	int result = call(&function);
+
+	if (result == -1)
+		raise(SIGSEGV);
 	
 	return result;
 }
@@ -102,32 +117,46 @@ int muse_get(void* dst, uint32_t src, size_t n)
 {
 	Function function;
 	Arg arg[3];
-	uint32_t *direccion = (uint32_t *)dst;
-	void* lo_que_habia_adentro_de_muse_en_src;
 
-	arg[0].type = VAR_VOID_PTR;
-	arg[0].size = sizeof(uint32_t);
-	arg[0].value.val_u32 = *direccion;
+	function.args[0].type = VAR_VOID_PTR;
+	function.args[0].size = n;
+	function.args[0].value.val_voidptr = malloc(n);
+	memcpy(function.args[0].value.val_voidptr, dst, n);
 
-	arg[1].type = VAR_UINT32;
-	arg[1].size = sizeof(uint32_t);
-	arg[1].value.val_u32 = src;
+	function.args[1].type = VAR_UINT32;
+	function.args[1].size = sizeof(uint32_t);
+	function.args[1].value.val_u32 = src;
 
-	arg[2].type = VAR_SIZE_T;
-	arg[2].size = sizeof(size_t);
-	arg[2].value.val_sizet = n;
+	function.args[2].type = VAR_SIZE_T;
+	function.args[2].size = sizeof(size_t);
+	function.args[2].value.val_sizet = n;
 
 	function.type = FUNCTION_GET;
 	function.num_args = 3;
-	function.args[0] = arg[0];
-	function.args[1] = arg[1];
-	function.args[2] = arg[2];
 
-	//*direccion = call(&function);
+	Message msg;
+	MessageHeader header;
 
-	lo_que_habia_adentro_de_muse_en_src = (void*) call(&function);
+	create_message_header(&header, MESSAGE_CALL, PROCESS_ID, tamDataFunction(function));
+	create_function_message(&msg, &header, &function);
 
-	//memcpy(dst, lo_que_habia_adentro_de_muse_en_src, n);
+	if(send_message(MASTER_SOCKET,&msg) == -1){
+		//error no se pudo enviar
+		return -1;
+	}
+
+	free(function.args[0].value.val_voidptr);
+
+	receive_message_var(MASTER_SOCKET, &msg);
+
+	Function* f = msg.data;
+
+	if(f->type != RTA_FUNCTION_GET){
+		// llego cualquier cosa
+		return -1;
+	}
+	memcpy(dst, f->args[0].value.val_voidptr, f->args[0].size);
+	free(f->args[0].value.val_voidptr);
 
 	return 0;
 }
@@ -206,6 +235,10 @@ int muse_sync(uint32_t addr, size_t len)
 	function.args[1] = arg[1];
 
 	int result = call(&function);
+	if (result == -2){
+		raise(SIGSEGV);
+		return -1;
+	}
 	return result;
 }
 

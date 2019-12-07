@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <commons/config.h>
 #include <sys/mman.h> //for mmap() & munmap()
+#include <signal.h>
 
 #include <stdlib.h>
 
