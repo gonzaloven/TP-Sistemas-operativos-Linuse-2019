@@ -8,7 +8,7 @@ echo "               Desplegando SUSE"
 echo " "
 
 
-PLANIFICADORCONFIG="/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/configPlanificador.cfg"
+PLANIFICADORCONFIG="/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config"
 
 LISTEN_PORT=5002
 METRICS_TIMER=70
