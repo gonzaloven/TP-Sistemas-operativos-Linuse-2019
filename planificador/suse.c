@@ -388,11 +388,9 @@ void handle_main_thread_create(un_socket socket_actual, int tid) {
 		nuevo_a_ejecucion(main_thread, new_process->PROCESS_ID);
 		log_info(logger, "El thread %d del proceso %d esta ejecutando \n", main_thread->tid, new_process->PROCESS_ID);
 	}
-<<<<<<< HEAD
-=======
+
 	pthread_mutex_unlock(&mutex_multiprog);
 
->>>>>>> 6c3931dfd35ed65c39fc19ac94481347ee04f496
 }
 
 t_suse_thread* ULT_create(t_process* process, int tid){
