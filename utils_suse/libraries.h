@@ -28,9 +28,11 @@
 #include <math.h>
 #include <pthread.h>
 #include <signal.h>
+#include <semaphore.h>
 #define MAX_LEN 128
 
 
+///
 enum codigos_de_operacion {
 	codigo_error = -1,
 	codigo_healthcheck = 2,
@@ -55,6 +57,50 @@ typedef struct {
 	int tamanio;
 	void * data;
 } t_paquete;
+
+enum estados {
+	E_READY = 1,
+	E_EXECUTE = 2,
+	E_BLOCKED = 3,
+	E_EXIT = 4,
+	E_NEW = 5 //todo ver si es necesario
+};
+
+typedef struct t_suse_thread{
+	int tid;
+	int estado;
+	int procesoId;
+	double duracionRafaga;
+	double estimacionUltimaRafaga;
+	bool ejecutado_desde_estimacion;
+	t_list* joinedBy;
+	t_list* joinTo;
+	double tiempoDeEjecucion;
+	double tiempoDeEspera;
+	double tiempoDeCpu;
+	double tiempoInicialEnReady;
+	double tiempoInicialEnExec;
+} t_suse_thread;
+
+typedef struct t_process
+{
+	t_list * ULTS; //Lista de t_suse_thread
+	int PROCESS_ID; //esto es el numero de socket
+	t_list * READY_LIST;
+	t_suse_thread* EXEC_THREAD;
+	sem_t semaforoReady;
+} t_process;
+
+typedef struct t_suse_semaforos{
+	char* NAME;
+	int INIT;
+	int MAX;
+	int VALUE;
+	t_list * BLOCKED_LIST;
+}t_suse_semaforos;
+
+
+void serializar_valor(char* valor, void* buffer, int* desplazamiento);
 
 
 /**	@NAME: conectar_a
@@ -110,7 +156,7 @@ bool realizar_handshake(un_socket socket_del_servidor, int cop_handshake);
 bool esperar_handshake(un_socket socket_del_cliente,
 		t_paquete* inicio_del_handshake, int cop_handshake);
 
-char get_campo_config_char(t_config* archivo_configuracion, char* nombre_campo);
+char* get_campo_config_char(t_config* archivo_configuracion, char* nombre_campo);
 
 int get_campo_config_int(t_config* archivo_configuracion, char* nombre_campo);
 
@@ -206,8 +252,7 @@ void remover_ULT_bloqueado(t_suse_thread* thread);
 
 void remover_ULT_exec(t_process* process);
 
-bool validar_grado_multiprogramacion();
-
+double get_campo_config_double(t_config* archivo_configuracion, char* nombre_campo);
 void nuevo_a_listo(t_suse_thread* ULT, int process_id);
 
 void remover_ULT_listo(t_suse_thread* thread,t_process* process);
@@ -220,6 +265,6 @@ void ejecucion_a_bloqueado_por_semaforo(int tid, un_socket socket, t_suse_semafo
 
 pthread_t nuevo_hilo(void *(* funcion ) (void *), t_list * parametros);
 
-bool validar_grado_multiprogramacion();
+
 
 #endif /* LIBRARIES_H_ */
