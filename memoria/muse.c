@@ -40,10 +40,10 @@ void muse_start_service(ConnectionHandler ch)
 
 void muse_stop_service()
 {
-	log_info(muse_logger,"SIGINT received. Shuting down!");	
-	free(muse_config);
+	log_info(muse_logger,"SIGINT received. Shuting down!");
 	log_destroy(muse_logger);
 	muse_main_memory_stop();
+	free(muse_config);
 	server_stop();
 	printf("Thanks for using MUSE, goodbye!\n");
 }
@@ -121,7 +121,7 @@ muse_configuration *load_configuration(char *path)
 void message_handler(Message *m,int socket)
 {
 	uint32_t res= 0;
-	Message msg;
+	Message msg_send;
 	MessageHeader head;
 	void* res_get;
 	switch(m->header.message_type)
@@ -138,19 +138,22 @@ void message_handler(Message *m,int socket)
 				f.args[0].value.val_voidptr = res_get;
 
 				create_message_header(&head,MESSAGE_CALL,1,tamDataFunction(f));
-				create_function_message(&msg,&head,&f);
-				send_message(socket,&msg);
+				create_function_message(&msg_send,&head,&f);
+				send_message(socket,&msg_send);
 
 			}else{
 				res = (int)muse_invoke_function((Function *)m->data,m->header.caller_id);
 				//log_trace(muse_logger,"Call received!");
-				message_free_data(m);
 
 				create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
-				create_response_message(&msg,&head,res);
-				send_message(socket,&msg);
-				message_free_data(&msg);
+				create_response_message(&msg_send,&head,res);
+				send_message(socket,&msg_send);
+				message_free_data(&msg_send);
 			}
+
+			liberarMemoria((Function *)m->data);
+			free(m->data);
+			m->data = NULL;
 
 			break;
 		default:
