@@ -1120,13 +1120,6 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		
 		if((offset + (cantidad_paginas_necesarias * PAGE_SIZE)) >= n){
 
-			char* texto = malloc(n);
-			memcpy(texto, src,n);
-			log_debug(debug_logger, "El valor del source es: %s", texto);
-			log_debug(debug_logger, "La cantidad de bytes a copiar es: %d", n);
-
-			memcpy(buffer + offset,src,n);
-
 		                // vuelvo a cargar los datos al upcm
 			for(int x=0; x<cantidad_paginas_necesarias;x++){
 				paginaObtenida = list_get(segment->page_table,x + numPage);
@@ -1512,6 +1505,8 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 				segmentoBuscado->tam_archivo_mmap);
 
 	log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
+
+	free(archivoMapeado);
 
 	free(segmentoBuscado);
 
