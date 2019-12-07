@@ -11,6 +11,7 @@ void foo5();
 void foo6();
 void foo7();
 void foo8();
+void foo9();
 
 const char *byte_to_binary(int x)
 {
@@ -56,6 +57,8 @@ int main(int argc,char *argv[])
 			case '7': foo7();
 			break;
 			case '8': foo8();
+			break;
+			case '9': foo9();
 			break;
 			default: puts("Error");
 		}
@@ -117,6 +120,7 @@ void foo2()
 	alocar_y_mostrar(63);
 	alocar_y_mostrar(32);
 }
+
 
 
 void foo3(){
@@ -182,19 +186,25 @@ void foo6(){
 
 void foo7(){
 
-	int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/putoElQueLee", 30, MAP_SHARED);
-	printf("Mapeo el archivo putoElQueLee en: %d(dec)\n", direccion1);
+	// int direccion1 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/putoElQueLee", 50, MAP_SHARED);
+	// 
+	// //int direccion2 = muse_alloc(strlen(" y sigue leyendo")+ 1);
+	// //imprimir(sizeof(int), direccion2);
 
-	//int direccion2 = muse_alloc(strlen(" y sigue leyendo")+ 1);
-	//imprimir(sizeof(int), direccion2);
+	// //int direccion2 = (direccion1 + strlen("puto el que lee"));
 
-	int direccion2 = direccion1 + 16;
+	// muse_cpy(direccion1, "t", strlen(" y sigue leyendo"));
+	// printf("Copio data en la direccion: %d(dec)\n", direccion1);
 
-	muse_cpy(direccion2, " y sigue leyendo", strlen(" y sigue leyendo")+ 1);
-	printf("Copio \" y sigue leyendo \" en: %d(dec)\n", direccion2);
+	int dir7 = muse_map("/home/utnso/tp-2019-2c-Los-Trapitos/memoria/putoElQueLee", 350, MAP_SHARED);
+	printf("Mapeo el archivo putoElQueLee en: %d(dec)\n", dir7);
+	muse_cpy(dir7 + 5, "hola como estas todo bien xd xdx xd lol 123456 hola gola", strlen("hola como estas todo bien xd xdx xd lol 123456 hola gola")+ 1);
 
+	char* verGet = malloc(strlen("hola como estas todo bien xd xdx xd lol 123456 hola gola")+ 7);
+	muse_get((void*)verGet, dir7, strlen("hola como estas todo bien xd xdx xd lol 123456 hola gola")+ 7);
+	printf("Lo leido es: %s\n", verGet);
 
-	int retorno = muse_sync(direccion1, 200);
+	int retorno = muse_sync(dir7, 350);
 	printf("Se synqueo putoElQueLee y el resultado fue (if 0 todo ok): %d \n", retorno);
 
 	muse_close();
@@ -208,4 +218,17 @@ void foo8(){
 	char* verGet = malloc(strlen("dasasddasdasdasdasadsadsdasadsdasadsadsadsadsasdadsadsdasadsadsadsadsasd")+ 1);
 	muse_get((void*)verGet, dir7, strlen("dasasddasdasdasdasadsadsdasadsdasadsadsadsadsasdadsadsdasadsadsadsadsasd")+ 1);
 	printf("Lo leido es: %s\n", verGet);
+}
+
+
+void foo9(){
+	printf("Funcion prohibida!!\n\n");
+	foo1();
+	foo2();
+	foo3();
+	foo4();
+	foo5();
+	foo6();
+	foo7();
+	foo8();
 }

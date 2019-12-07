@@ -19,7 +19,7 @@
 void *MAIN_MEMORY = NULL;
 
 t_list *program_list = NULL;
-t_list *segment_list = NULL;
+//t_list *segment_list = NULL;
 t_list *lista_archivos_mmap = NULL;
 t_log *metricas_logger = NULL;
 t_log *debug_logger = NULL;
@@ -28,8 +28,8 @@ int PAGE_SIZE = 0;
 int TOTAL_FRAME_NUM = 0;
 
 // inicializadas only for debugging reasons
-bool BITMAP[];
-bool BITMAP_SWAP_FILE[];
+bool BITMAP[5000];
+bool BITMAP_SWAP_FILE[5000];
 int TOTAL_FRAME_NUM_SWAP;
 
 void muse_main_memory_init(int memory_size, int page_size, int swap_size)
@@ -66,7 +66,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	}
 
 	program_list = list_create();
-	segment_list = list_create();
+	//segment_list = list_create();
 
 	debug_logger = log_create(MUSE_LOG_PATH,"DEBUG", true,LOG_LEVEL_TRACE);
 	metricas_logger = log_create(MUSE_LOG_PATH, "METRICAS", true, LOG_LEVEL_TRACE);
@@ -84,7 +84,7 @@ void muse_main_memory_stop()
 	remove(SWAP_PATH);
 
 	list_destroy(program_list);
-	list_destroy(segment_list);
+	//list_destroy(segment_list);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -181,6 +181,18 @@ page* page_with_free_size(){
 	}	
 }
 
+t_list* lista_de_segmentos(){
+	program* prog;
+	int i;
+	t_list* lista_de_segmentos = list_create();
+
+	for(i=0; i<list_size(program_list) ; i++){
+		prog = list_get(program_list, i);
+		list_add_all(lista_de_segmentos, prog->segment_table);
+	}
+	return lista_de_segmentos;
+}
+
 /*
 	Teniendo al par (U , M)
 	1. Se busca (0,0) avanzando el puntero pero sin poner U en 0
@@ -191,7 +203,13 @@ page* page_with_free_size(){
 
  */
 int dame_nro_frame_reemplazado(){
-	int cantidad_de_segmentos_totales = list_size(segment_list);
+	t_list *listaSeg = lista_de_segmentos();
+	
+	int cantidad_de_segmentos_totales = list_size(listaSeg);
+	
+
+	//printf("\n\nantes %d, ahora %d \n\n", cantidad_de_segmentos_totales, list_size(lista_de_segmentos()));
+
 	int cantidad_de_paginas_en_segmento;
 	int nro_de_segmento, nro_de_pag, nro_frame;
 	int nro_paso = 1;
@@ -203,7 +221,7 @@ int dame_nro_frame_reemplazado(){
 	{
 		for (nro_de_segmento = 0; nro_de_segmento < cantidad_de_segmentos_totales ; nro_de_segmento++)
 		{
-			seg = list_get(segment_list,nro_de_segmento);
+			seg = list_get(listaSeg,nro_de_segmento);
 			cantidad_de_paginas_en_segmento = list_size(seg->page_table);			
 			log_debug(debug_logger, "--- SEGMENTO ANALIZADO ALG REEMPLAZO: %d", nro_de_segmento);
 			
@@ -318,11 +336,12 @@ void memory_close(uint32_t pid){
 void metricas_por_socket_conectado(uint32_t pid){
 	int nro_prog = search_program(pid);
 	program *prog = list_get(program_list, nro_prog);
+	t_list *listaSeg = lista_de_segmentos();
 
 	int nro_de_seg;
 
 	int cantidad_de_segmentos_asignados = list_size(prog->segment_table);
-	int cantidad_de_segmentos_totales = list_size(segment_list);
+	int cantidad_de_segmentos_totales = list_size(listaSeg);
 
 	log_trace(metricas_logger, "El programa n° %d tiene asignados %d de %d segmentos en el sistema", 
 			nro_prog, cantidad_de_segmentos_asignados, cantidad_de_segmentos_totales);
@@ -496,7 +515,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 {	
 	if (size <= 0) return 0;
 	if (size + METADATA_SIZE > number_of_free_frames() * PAGE_SIZE){
-		log_debug(debug_logger, "No se puede maloquear tanto espacio en memoria");
+		log_debug(debug_logger, "Memoria llena: no se puede maloquear tanto espacio en memoria");
+		log_error(debug_logger, "Segmentation Fault");
 		return -1;		
 	} 
 
@@ -609,8 +629,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		segmentoNuevo->base = 0;
 		segmentoNuevo->limit = 0;
 		list_add(prog->segment_table, segmentoNuevo);			
-		nro_seg = list_add(segment_list, segmentoNuevo);
-		log_debug(debug_logger, "Se creo el segmento n° %d del sistema", nro_seg);
+		log_debug(debug_logger, "Se creo un segmento");
 
 		for(int i=0; i < cantidadDePaginasAAgregar; i++ )
 		{
@@ -1028,6 +1047,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		log_debug(debug_logger, "Se busco el segmento %d, pero no se encontro", numSeg);
 		return -1;
 	}else{
+		log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 		log_debug(debug_logger, "El segmento a escribir es %d", numSeg);
 	}
 
@@ -1102,6 +1122,9 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
             return -1;
         }
 	}else{
+		log_debug(debug_logger, "Offset: %d",offset);
+		log_debug(debug_logger, "Cantidad de paginas necesarias: %d",cantidad_paginas_necesarias);
+		
 		if((offset + (cantidad_paginas_necesarias * PAGE_SIZE)) >= n){
 			memcpy(buffer + offset,src,n);
 
@@ -1117,6 +1140,13 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 			return -1;
 		 }
 	}
+
+	log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
+
+	char* texto = malloc(200);
+	memcpy(texto, datos, n);
+
+	log_debug(debug_logger, "Texto = %s",texto);
 
 	log_debug(debug_logger, "Fin memory_cpy");
 	
@@ -1318,10 +1348,12 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 	}
 
 	prog = list_get(program_list, nro_prog);
+	
+	t_list *listaSeg = lista_de_segmentos();
 
 	//busco el segmento que tenga asignado esa direccion
 	int numSeg = busca_segmento(prog, direccion);
-	segmento_obtenido = list_get(segment_list, numSeg);
+	segmento_obtenido = list_get(listaSeg, numSeg);
 
 	int cantidad_paginas_necesarias = ceil((double)length / (double)PAGE_SIZE);
 	log_debug(debug_logger, "Cantidad_paginas_necesarias %d", cantidad_paginas_necesarias);
@@ -1520,7 +1552,11 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	prog = list_get(program_list, numProg);
 
 	int numSeg = busca_segmento(prog, src);
-	segment* segmento = list_get(segment_list, numSeg);
+	segment* segmento = list_get(prog->segment_table, numSeg);
+
+	log_debug(debug_logger, "Nro de segmento: %d", numSeg);
+	log_debug(debug_logger, "Base del segmento: %d", segmento->base);
+
 
 	if(segmento == NULL || (segmento->base + segmento->limit) < (src + numBytes)){
 		// ACA HABRIA QUE HACER ALGO CON EL ERROR
