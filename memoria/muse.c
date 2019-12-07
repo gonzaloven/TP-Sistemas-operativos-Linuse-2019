@@ -43,6 +43,7 @@ void muse_stop_service()
 	log_info(muse_logger,"SIGINT received. Shuting down!");	
 	free(muse_config);
 	log_destroy(muse_logger);
+	muse_main_memory_stop();
 	server_stop();
 	printf("Thanks for using MUSE, goodbye!\n");
 }

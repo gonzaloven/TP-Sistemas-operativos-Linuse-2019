@@ -83,11 +83,29 @@ void muse_main_memory_stop()
 	free(MAIN_MEMORY);
 	remove(SWAP_PATH);
 
-	list_destroy(program_list);
+	list_destroy_and_destroy_elements(program_list, (void*)destroy_program_list_elements);
+	list_destroy(lista_archivos_mmap);
 	//list_destroy(segment_list);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
+}
+
+void destroy_program_list_elements(program* prog){
+	list_destroy_and_destroy_elements(prog->segment_table, (void*)destroy_segment_table_elements);
+	free(prog);
+	prog = NULL;
+}
+
+void destroy_segment_table_elements(segment* seg){
+	list_destroy_and_destroy_elements(seg->page_table, (void*)destroy_page_table_elements);
+	free(seg);
+	seg = NULL;
+}
+
+void destroy_page_table_elements(page* pag){
+	free(pag);
+	pag = NULL;
 }
 
 int search_program(uint32_t pid)
@@ -251,6 +269,7 @@ int dame_nro_frame_reemplazado(){
 		if (nro_paso == 3)
 			nro_paso = 1;
 	}
+	list_destroy(listaSeg);
 }  
 
 //devuelve el nro de frame de la víctima & la manda al archivo swap
@@ -342,6 +361,8 @@ void metricas_por_socket_conectado(uint32_t pid){
 
 	int cantidad_de_segmentos_asignados = list_size(prog->segment_table);
 	int cantidad_de_segmentos_totales = list_size(listaSeg);
+
+	list_destroy(listaSeg);
 
 	log_trace(metricas_logger, "El programa n° %d tiene asignados %d de %d segmentos en el sistema", 
 			nro_prog, cantidad_de_segmentos_asignados, cantidad_de_segmentos_totales);
@@ -557,6 +578,25 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		nro_seg = segment_with_free_space(prog, total_size);
 		segmentoConEspacio = list_get(prog->segment_table, nro_seg);
+
+		if(segmentoConEspacio == NULL){
+			log_debug(debug_logger, "Segmento nulo - ERROR -");
+			return -1;
+		}
+
+		if(!segmentoConEspacio->is_heap){
+			int pidEncontrada;
+
+			int igualPID(int pid){
+			    return pid == prog->pid;
+			}
+
+			pidEncontrada = (int)list_find(segmentoConEspacio->archivo_mapeado->programas,(void*) igualPID);
+			if(list_get(segmentoConEspacio->archivo_mapeado->programas, pid) == NULL){
+				log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+				return -1;
+			}
+		}
 
 		direccionLogicaMetadataLibre = proxima_metadata_libre_con_size(segmentoConEspacio->base, segmentoConEspacio, total_size);
 
@@ -1051,6 +1091,20 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		log_debug(debug_logger, "El segmento a escribir es %d", numSeg);
 	}
 
+	if(!segment->is_heap){
+		int pidEncontrada;
+
+		int igualPID(int pid){
+		    return pid == prog->pid;
+		}
+
+		pidEncontrada = (int)list_find(segment->archivo_mapeado->programas,(void*) igualPID);
+		if(list_get(segment->archivo_mapeado->programas, pid) == NULL){
+			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return -1;
+		}
+	}
+
 	int numPage = floor((dst - segment->base) / PAGE_SIZE);
 
 	int offset = (dst - segment->base) % PAGE_SIZE;
@@ -1355,6 +1409,8 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 	int numSeg = busca_segmento(prog, direccion);
 	segmento_obtenido = list_get(listaSeg, numSeg);
 
+	list_destroy(listaSeg);
+
 	int cantidad_paginas_necesarias = ceil((double)length / (double)PAGE_SIZE);
 	log_debug(debug_logger, "Cantidad_paginas_necesarias %d", cantidad_paginas_necesarias);
 
@@ -1363,6 +1419,20 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 		log_debug(debug_logger, "Error: Segmentation Fault");
 		return -2;
 	} 
+
+	if(!segmento_obtenido->is_heap){
+		int pidEncontrada;
+
+		int igualPID(int pid){
+		    return pid == prog->pid;
+		}
+
+		pidEncontrada = (int)list_find(segmento_obtenido->archivo_mapeado->programas,(void*) igualPID);
+		if(list_get(segmento_obtenido->archivo_mapeado->programas, pid) == NULL){
+			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return -1;
+		}
+	}
 
 	//error (returen -1)
 	if((segmento_obtenido->is_heap) || (direccion % PAGE_SIZE) != 0){
@@ -1488,6 +1558,21 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	log_error(debug_logger, "Segmentation fault");
 		return -1;
 	}
+
+	if(!segmentoBuscado->is_heap){
+		int pidEncontrada;
+
+		int igualPID(int pid){
+		    return pid == prog->pid;
+		}
+
+		pidEncontrada = (int)list_find(segmentoBuscado->archivo_mapeado->programas,(void*) igualPID);
+		if(list_get(segmentoBuscado->archivo_mapeado->programas, pid) == NULL){
+			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return -1;
+		}
+	}
+
 	else if((segmentoBuscado->is_heap != 0) || (dir != segmentoBuscado->base)){
 	log_error(debug_logger, "No es de MMAP el segmento buscado.");
 		return -1;
@@ -1562,6 +1647,20 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 		// ACA HABRIA QUE HACER ALGO CON EL ERROR
 		log_debug(debug_logger, "ERROR - ESTAS TRATANDO DE LEER MAS BYTES DE LOS QUE TIENE LA PAGE");
 		return (void*)-1;
+	}
+
+	if(!segmento->is_heap){
+		int pidEncontrada;
+
+		int igualPID(int pid){
+		    return pid == prog->pid;
+		}
+
+		pidEncontrada = (int)list_find(segmento->archivo_mapeado->programas,(void*) igualPID);
+		if(list_get(segmento->archivo_mapeado->programas, pid) == NULL){
+			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return (void*)-1;
+		}
 	}
 
 	int numPage = floor((src - segmento->base) / PAGE_SIZE);

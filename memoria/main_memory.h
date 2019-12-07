@@ -193,4 +193,10 @@ int frame_swap_libre();
 
 void liberar_frame_swap(void* frame);
 
+void destroy_program_list_elements(program* prog);
+
+void destroy_segment_table_elements(segment* seg);
+
+void destroy_page_table_elements(page* pag);
+
 #endif
