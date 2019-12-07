@@ -136,7 +136,7 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid);
 * @param n Cantidad de bytes a copiar.
 * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
 */
-uint32_t memory_get(void *dst, uint32_t src, size_t n, uint32_t pid);
+void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid);
 
 /**
 * Copia una cantidad `n` de bytes desde una posición de memoria local a una `dst` en MUSE.

@@ -10,6 +10,7 @@ void foo4();
 void foo5();
 void foo6();
 void foo7();
+void foo8();
 
 const char *byte_to_binary(int x)
 {
@@ -35,7 +36,7 @@ int main(int argc,char *argv[])
 	{
 		printf("Libmuse with proccess_id = %d initialized!\n",pid);
 	
-		printf("Introduzca un nro del 1-6: ");
+		printf("Introduzca un nro del 1-8: ");
 
 		ch=getchar();
 		switch(ch) 
@@ -53,6 +54,8 @@ int main(int argc,char *argv[])
 			case '6': foo6();
 			break;
 			case '7': foo7();
+			break;
+			case '8': foo8();
 			break;
 			default: puts("Error");
 		}
@@ -168,4 +171,14 @@ void foo7(){
 	printf("%d", retorno);
 
 	muse_close();
+}
+
+void foo8(){
+	int dir7 = muse_alloc(strlen("dasasddasdasdasdasadsadsdasadsdasadsadsadsadsasdadsadsdasadsadsadsadsasd")+ 1);
+	imprimir(sizeof(int), dir7);
+	muse_cpy(dir7, "dasasddasdasdasdasadsadsdasadsdasadsadsadsadsasdadsadsdasadsadsadsadsasd", strlen("dasasddasdasdasdasadsadsdasadsdasadsadsadsadsasdadsadsdasadsadsadsadsasd")+ 1);
+
+	char* verGet = malloc(strlen("dasasddasdasdasdasadsadsdasadsdasadsadsadsadsasdadsadsdasadsadsadsadsasd")+ 1);
+	muse_get((void*)verGet, dir7, strlen("dasasddasdasdasdasadsadsdasadsdasadsadsadsadsasdadsadsdasadsadsadsadsasd")+ 1);
+	printf("Lo leido es: %s\n", verGet);
 }

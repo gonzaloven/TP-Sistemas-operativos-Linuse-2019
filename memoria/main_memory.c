@@ -887,14 +887,6 @@ uint32_t buscar_direccion_fisica(uint32_t direccionSolicitada, size_t bytesNeces
 
 	return direccionFisicaBuscada;
 }
-// Copia n bytes de MUSE a LIBMUSE
-uint32_t memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
-{
-	int direccionFisicaBuscada = buscar_direccion_fisica(src, numBytes, pid);
-	memcpy(dst, (void*) direccionFisicaBuscada, numBytes);
-
-	return src;
-}
 
 void* obtener_data_marco_heap(page* pagina){
     if(!pagina->is_present && number_of_free_frames() == 0){
@@ -1026,13 +1018,24 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
 //Copia n bytes de LIBMUSE a MUSE
 uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 {
+	program* prog;
 	page* paginaObtenida;
 	int numProg = search_program(pid);
-	program* program = list_get(program_list, numProg);
+
+	if((numProg = search_program(pid)) == -1)
+	{
+		prog = (program *) malloc(sizeof(prog));
+		prog->pid = pid;
+		prog->segment_table = list_create();
+		numProg = list_add(program_list, prog);
+		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", numProg);
+	}
+
+	prog = list_get(program_list, numProg);
 	log_debug(debug_logger, "El programa del pedido es %d", numProg);
 
-	int numSeg = busca_segmento(program, dst);
-	segment* segment = list_get(program->segment_table, numSeg);
+	int numSeg = busca_segmento(prog, dst);
+	segment* segment = list_get(prog->segment_table, numSeg);
 
 	if(segment == NULL){
 		// no se encontro el segmento, tiene que tirar seg fault
@@ -1129,10 +1132,6 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		 }
 	}
 
-	// esto es para debug del test 6
-    char* texto = malloc(5);
-    memcpy(texto, datos + 5,5);
-	log_debug(debug_logger, "(SOLO FUNCIONA PARA TEST 6 EL DEBUG) Copie: %s", texto);
 	log_debug(debug_logger, "Fin memory_cpy");
 	
 	return dst;
@@ -1563,4 +1562,70 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	log_debug(debug_logger, "Unmap terminado");
 
 	return 0;
+}
+
+// Copia n bytes de MUSE a LIBMUSE
+void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
+{
+	program* prog;
+
+	log_debug(debug_logger, "Direccion destino: %d", src);
+	log_debug(debug_logger, "Cantidad de bytes a leer en la direccion: %d", numBytes);
+
+	int numProg = search_program(pid);
+	log_debug(debug_logger, "Proceso que hace call a memory_get: %d", numProg);
+
+	if((numProg = search_program(pid)) == -1)
+	{
+		prog = (program *) malloc(sizeof(program));
+		prog->pid = pid;
+		prog->segment_table = list_create();
+		numProg = list_add(program_list, prog);
+		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas ", numProg);
+	}
+
+	prog = list_get(program_list, numProg);
+
+	int numSeg = busca_segmento(prog, src);
+	segment* segmento = list_get(segment_list, numSeg);
+
+	if(segmento == NULL || (segmento->base + segmento->limit) < (src + numBytes)){
+		// ACA HABRIA QUE HACER ALGO CON EL ERROR
+		log_debug(debug_logger, "ERROR - ESTAS TRATANDO DE LEER MAS BYTES DE LOS QUE TIENE LA PAGE");
+		return (void*)-1;
+	}
+
+	int numPage = floor((src - segmento->base) / PAGE_SIZE);
+	log_debug(debug_logger, "La pagina que quiero leer es: %d", numPage);
+
+	int offset = (src - segmento->base) % PAGE_SIZE;
+	log_debug(debug_logger, "El offset dentro de la pagina es: %d", numPage);
+
+	int cant_pag_necesarias = (int)ceil((double)(offset + numBytes)/ PAGE_SIZE);
+	log_debug(debug_logger, "La cantidad de paginas a leer es: %d", cant_pag_necesarias);
+
+	void* buffer = malloc(cant_pag_necesarias * PAGE_SIZE);
+	page* pagina;
+	void* datos;
+
+	//le cargo al buffer todas las paginas
+	for(int i=0; i<cant_pag_necesarias; i++){
+
+		pagina = list_get(segmento->page_table,i + numPage);
+		if(segmento->is_heap){
+			datos = obtener_data_marco_heap(pagina);
+	 	}
+	 	else{
+	 		datos = obtener_data_marco_mmap(segmento, pagina, i + numPage);
+		}
+
+	    memcpy(buffer + PAGE_SIZE * i, datos, PAGE_SIZE);
+	}
+
+	//obtengo del buffer lo que necesito (usando offset y bytes a leer)
+	memcpy(dst, buffer + offset, numBytes);
+
+	free(buffer);
+
+	return dst;
 }

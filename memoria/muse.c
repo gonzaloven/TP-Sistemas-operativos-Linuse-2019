@@ -7,6 +7,18 @@
 
 #include "muse.h"
 
+int tamDataFunction(Function f){
+	int tamano = 0;
+	tamano+= sizeof(uint8_t);
+	tamano+= sizeof(uint8_t);
+	for(int y=0; y < f.num_args; y++){
+		tamano+= sizeof(uint8_t);
+		tamano+= sizeof(uint32_t);
+		tamano+= f.args[y].size;
+	}
+	return tamano;
+}
+
 t_log *muse_logger = NULL;
 muse_configuration *muse_config = NULL;
 
@@ -85,17 +97,35 @@ void message_handler(Message *m,int socket)
 	uint32_t res= 0;
 	Message msg;
 	MessageHeader head;
+	void* res_get;
 	switch(m->header.message_type)
 	{
 		case MESSAGE_CALL:
-			res = muse_invoke_function((Function *)m->data,m->header.caller_id);
-			//log_trace(muse_logger,"Call received!");
-			message_free_data(m);
-			
-			create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
-			create_response_message(&msg,&head,res);
-			send_message(socket,&msg);
-			message_free_data(&msg);
+			if(((Function*)m->data)->type == FUNCTION_GET){
+				res_get = (void*) muse_invoke_function((Function *)m->data,m->header.caller_id);
+
+				Function f;
+				f.type = RTA_FUNCTION_GET;
+				f.num_args = 1;
+				f.args[0].type = VAR_VOID_PTR;
+				f.args[0].size = ((Function *)m->data)->args[2].value.val_u32;
+				f.args[0].value.val_voidptr = res_get;
+
+				create_message_header(&head,MESSAGE_CALL,1,tamDataFunction(f));
+				create_function_message(&msg,&head,&f);
+				send_message(socket,&msg);
+
+			}else{
+				res = (int)muse_invoke_function((Function *)m->data,m->header.caller_id);
+				//log_trace(muse_logger,"Call received!");
+				message_free_data(m);
+
+				create_message_header(&head,MESSAGE_FUNCTION_RET,2,sizeof(uint32_t));
+				create_response_message(&msg,&head,res);
+				send_message(socket,&msg);
+				message_free_data(&msg);
+			}
+
 			break;
 		default:
 			log_error(muse_logger,"Undefined message");
@@ -109,9 +139,10 @@ void message_handler(Message *m,int socket)
 function vendria a ser la funcion que libmuse quiere ejecutar, 
 pid es el process_id de libmuse
 */
-uint32_t muse_invoke_function(Function *function,uint32_t pid) 
+void* muse_invoke_function(Function *function,uint32_t pid)
 {
 	uint32_t func_ret = 0;
+	void* funcion_ret;
 	switch(function->type)
 	{
 		case FUNCTION_MALLOC:
@@ -124,7 +155,7 @@ uint32_t muse_invoke_function(Function *function,uint32_t pid)
 			break;
 		case FUNCTION_GET:
 			log_debug(muse_logger,"Get called");
-			func_ret = memory_get(function->args[0].value.val_voidptr,
+			return memory_get(function->args[0].value.val_voidptr,
 								function->args[1].value.val_u32,function->args[2].value.val_sizet,pid);
 			break;
 		case FUNCTION_COPY:
@@ -150,5 +181,5 @@ uint32_t muse_invoke_function(Function *function,uint32_t pid)
 			func_ret = 0;
 			break;
 	}
-	return func_ret;
+	return (void*)func_ret;
 }
