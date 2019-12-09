@@ -1169,21 +1169,9 @@ int crear_nuevo_segmento_mmap(size_t length, program* prog){
 		seg->base = 0;
 	}
 
-	total_pages_needed = (length / PAGE_SIZE) + ((length % PAGE_SIZE) != 0); // ceil(length / PAGE_SIZE);
+	total_pages_needed = ceil(length / PAGE_SIZE);
 
-	//vamos a pedir todas las paginas que necesitemos
-	for(int i=0 ; i < total_pages_needed ; i++ )
-	{
-		pag = (page *) malloc(sizeof(page));
-		pag->is_used = false;
-		pag->is_modify = false;
-		pag->is_present = false;
-
-		nro_pag = list_add(seg->page_table, pag);
-		seg->limit += PAGE_SIZE;
-	}
-
-	seg->limit += seg->base;
+	seg->limit = (total_pages_needed * PAGE_SIZE) + seg->base;
 
 	log_debug(debug_logger, "Limite del segmento nuevo ----> %d", seg->limit);
 	list_add(prog->segment_table, seg);
@@ -1205,8 +1193,6 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	archivoMMAP* archivoMappeado;
 
 	log_debug(debug_logger, "PID ----> %d", pid);
-
-
 
 	if((nro_prog = search_program(pid)) == -1)
 	{
@@ -1243,6 +1229,21 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 		archivoMappeadoNuevo->archivo = mmapArchivo;
 		archivoMappeadoNuevo->programas = list_create();
 		archivoMappeadoNuevo->tabla_paginas = list_create();
+
+		int total_pages_needed = ceil(length / PAGE_SIZE); // + ((length % PAGE_SIZE) != 0); //
+
+		//vamos a pedir todas las paginas que necesitemos
+		for(int i=0 ; i < total_pages_needed ; i++ )
+		{
+			page* pag;
+			pag = (page *) malloc(sizeof(page));
+			pag->is_used = false;
+			pag->is_modify = false;
+			pag->is_present = false;
+
+			list_add(archivoMappeadoNuevo->tabla_paginas, pag);
+		}
+
 		archivoMappeado = archivoMappeadoNuevo;
 
 		list_add(lista_archivos_mmap, archivoMappeado);
@@ -1266,7 +1267,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 
 	segmentoNuevo = list_get(prog->segment_table, nroSegmentoNuevo);
 	segmentoNuevo->archivo_mapeado = archivoMappeado;
-	archivoMappeado->tabla_paginas = segmentoNuevo->page_table;
+	segmentoNuevo->page_table = archivoMappeado->tabla_paginas;
 	segmentoNuevo->tam_archivo_mmap = length;
 
 	if(flag == MAP_SHARED){
