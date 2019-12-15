@@ -115,6 +115,8 @@ void destroy_segment_table_elements(segment* seg){
 }
 
 void destroy_page_table_elements(page* pag){
+	free(pag->fr);
+	pag->fr = NULL;
 	free(pag);
 	pag = NULL;
 }
@@ -200,7 +202,8 @@ int frames_needed(int size_total){
 
 page* page_with_free_size(){
 	int curr_frame_num;
-	page* pag = (page *) malloc(PAGE_SIZE);
+	page* pag = malloc(sizeof(page));
+	pag->fr = malloc(sizeof(int));
 
 	for(curr_frame_num=0; true; curr_frame_num++)
 	{	
