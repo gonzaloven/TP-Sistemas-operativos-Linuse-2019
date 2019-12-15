@@ -432,7 +432,7 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado){
 	heap_metadata* metadataBuscada = NULL;
 
-	log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
+	//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 
 	int paginaBuscada = floor((direccionLogica - segmentoBuscado->base) / PAGE_SIZE);
 	int offset;
@@ -442,7 +442,7 @@ heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segme
 
 	if(!pagina->is_present){
 		obtener_data_marco_heap(pagina);
-		log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
+		//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 	}
 
 	metadataBuscada = (heap_metadata*) ((pagina->fr) + offset);
@@ -707,7 +707,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		for(int i=0; i < cantidadDePaginasAAgregar; i++ )
 		{
-			//log_debug(debug_logger, "Size solicitado para PAGE_WITH_FREE_SIZE: %d", PAGE_SIZE);
 			pag = page_with_free_size();
 			pag->is_used = 1;
 			list_add(segmentoNuevo->page_table, pag);
