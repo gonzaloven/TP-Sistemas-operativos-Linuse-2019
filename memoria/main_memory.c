@@ -413,7 +413,7 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 
 		if(!pagina->is_present){
 			obtener_data_marco_heap(pagina);
-			log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
+			//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 		}
 		void* punteroAlFrameSiguiente = proximaPagina->fr;
 		int tamanioMetadataCortada = (PAGE_SIZE) - offset;
@@ -435,7 +435,7 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado){
 	heap_metadata* metadataBuscada = NULL;
 
-	log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
+	//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 
 	int paginaBuscada = floor((direccionLogica - segmentoBuscado->base) / PAGE_SIZE);
 	int offset;
@@ -445,7 +445,7 @@ heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segme
 
 	if(!pagina->is_present){
 		obtener_data_marco_heap(pagina);
-		log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
+		//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 	}
 
 	metadataBuscada = (heap_metadata*) ((pagina->fr) + offset);
