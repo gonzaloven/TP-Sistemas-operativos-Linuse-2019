@@ -710,7 +710,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		for(int i=0; i < cantidadDePaginasAAgregar; i++ )
 		{
-			//log_debug(debug_logger, "Size solicitado para PAGE_WITH_FREE_SIZE: %d", PAGE_SIZE);
 			pag = page_with_free_size();
 			pag->is_used = 1;
 			list_add(segmentoNuevo->page_table, pag);
@@ -770,14 +769,6 @@ int segment_with_free_space(program *prog, int size)
 	}
 	log_debug(debug_logger, "No habia ningun segmento con %d de espacio libre", size);
 	return -1;
-}
-
-bool tiene_siguiente(int direccionLogicaMetadata, segment* segmento){
-	if(direccionLogicaMetadata == segmento->limit){
-		return false;
-	}else{
-		return true;
-	}
 }
 
 void compactar_en_segmento(int direccionLogicaMetadataLibreInicial, int direccionLogicaSiguiente, segment* segmento){
@@ -859,15 +850,17 @@ void compactar_espacios_libres(program *prog){
 	heap_metadata* metadataInicialLibre = NULL;
 	heap_metadata* metadataLibreInicial = NULL;
 
+
 	for(i=0; i < cantidad_de_segmentos; i++){
 		segment* segmentoActual = list_get(prog->segment_table, i);
+		int direccionUltimaMetadata = ultima_metadata_segmento(segmentoActual->base, segmentoActual);
 
 		int direccionLogicaMetadataLibre = proxima_metadata_libre(segmentoActual->base, segmentoActual);
 
 		if(direccionLogicaMetadataLibre != -1){
 			metadataLibreInicial = buscar_metadata_por_direccion(direccionLogicaMetadataLibre, segmentoActual);
 
-			if(tiene_siguiente(direccionLogicaMetadataLibre, segmentoActual))
+			if(direccionLogicaMetadataLibre != direccionUltimaMetadata)
 			{
 				int dirLogicaSiguienteMetadata = metadataLibreInicial->size + METADATA_SIZE + direccionLogicaMetadataLibre;
 				heap_metadata* metadataSiguiente = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmentoActual);
@@ -907,6 +900,8 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 
 	//listar_metadatas(seg->base, seg);
 	prog->using_memory -= viejoSize;
+
+	log_debug(debug_logger, "Fin memory_free");
 
 	return 0;
 }
@@ -1310,6 +1305,8 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 			segmentoNuevo->tam_archivo_mmap,
 			segmentoNuevo->tipo_map);
 
+	log_debug(debug_logger, "Fin memory_map");
+
 	return segmentoNuevo->base;
 }
 
@@ -1405,6 +1402,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 
 		free(buffer);
 		msync(segmento_obtenido->archivo_mapeado->archivo, segmento_obtenido->tam_archivo_mmap, MS_SYNC);
+		log_debug(debug_logger, "Fin memory_sync");
 		return 0; //unico caso que devuelve que está OK
 	}
 	free(buffer);
@@ -1617,6 +1615,8 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	memcpy(dst, buffer + offset, numBytes);
 
 	free(buffer);
+
+	log_debug(debug_logger, "Fin memory_get");
 
 	return dst;
 }
