@@ -25,7 +25,7 @@ t_config *config;
 * @note Debido a la naturaleza centralizada de MUSE, esta función deberá 
 * definir el ID del proceso/hilo según "IP-ID".
 */
-int muse_init(int id);
+int muse_init(int id, char* ip, int puerto);
 
 /**
 * Cierra la biblioteca de MUSE.

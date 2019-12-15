@@ -19,7 +19,7 @@ int tamDataFunction(Function f){
 	return tamano;
 }
 
-int muse_init(int id)
+int muse_init(int id, char* ip, int puerto)
 {
 	config = config_create(LIBMUSE_CONFIG_PATH);
 	logger = log_create("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/libmuse.log", "LIBMUSE", true, LOG_LEVEL_TRACE);
@@ -29,11 +29,8 @@ int muse_init(int id)
 		printf("Configuration couldn't be loaded.Quitting program!\n");
 		return(-1);
 	}
-
-	char* SERVER_IP = config_get_string_value(config, "SERVER_IP");
-	int SERVER_PORT = config_get_int_value(config, "SERVER_PORT");
 	
-	MASTER_SOCKET = connect_to(SERVER_IP,SERVER_PORT);
+	MASTER_SOCKET = connect_to(ip,puerto);
 
 	PROCESS_ID = id;
 
