@@ -632,7 +632,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		segmentoConEspacio = list_get(prog->segment_table, nro_seg);
 
 		if(segmentoConEspacio == NULL){
-			log_debug(debug_logger, "Segmento nulo - ERROR -");
+			log_error(debug_logger, "Segmento nulo - ERROR -");
 			return -1;
 		}
 
@@ -645,7 +645,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 			pidEncontrada = (int)list_find(segmentoConEspacio->archivo_mapeado->programas,(void*) igualPID);
 			if((void*)pidEncontrada == NULL){
-				log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+				log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
 				return -1;
 			}
 		}
@@ -835,7 +835,7 @@ int segment_with_free_space(program *prog, int size)
 		}
 		i++;
 	}
-	log_debug(debug_logger, "No habia ningun segmento con %d de espacio libre", size);
+	log_error(debug_logger, "No habia ningun segmento con %d de espacio libre", size);
 	return -1;
 }
 
@@ -1109,7 +1109,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	segment* segment = list_get(prog->segment_table, numSeg);
 
 	if(segment == NULL){
-		log_debug(debug_logger, "Se busco el segmento %d, pero no se encontro", numSeg);
+		log_error(debug_logger, "Se busco el segmento %d, pero no se encontro", numSeg);
 		return -1;
 	}else{
 		log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
@@ -1125,7 +1125,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 
 		pidEncontrada = (int)list_find(segment->archivo_mapeado->programas,(void*) igualPID);
 		if((void*)pidEncontrada == NULL){
-			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
 			return -1;
 		}
 	}
@@ -1191,7 +1191,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
             }
         }
         else{
-        	log_debug(debug_logger, "Posicion invalida, no se pudo realizar la copia");
+        	log_error(debug_logger, "Posicion invalida, no se pudo realizar la copia");
             return -1;
         }
 	}else{
@@ -1208,7 +1208,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 			}
 		}else{
 		 	// no puedo almacenar los datos pq ingreso a una posicion invalida
-			log_debug(debug_logger, "Posicion invalida, no se pudo realizar la copia");
+			log_error(debug_logger, "Posicion invalida, no se pudo realizar la copia");
 			free(buffer);
 			return -1;
 		 }
@@ -1361,7 +1361,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 			list_add(archivoMappeado->programas, pid);
 		}
 	}else{
-		log_debug(debug_logger, "No se reconocio la flag especificada");
+		log_error(debug_logger, "No se reconocio la flag especificada");
 		return -1;
 	}
 
@@ -1413,7 +1413,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 
 	//segmentation fault
 	if((segmento_obtenido == NULL) || (cantidad_paginas_necesarias > list_size(segmento_obtenido->page_table)) || (segmento_obtenido->base + segmento_obtenido->limit) < (direccion + length)){
-		log_debug(debug_logger, "Error: Segmentation Fault");
+		log_error(debug_logger, "Error: Segmentation Fault");
 		return -2;
 	} 
 
@@ -1426,14 +1426,14 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 
 		pidEncontrada = (int)list_find(segmento_obtenido->archivo_mapeado->programas,(void*) igualPID);
 		if((void*)pidEncontrada == NULL){
-			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
 			return -1;
 		}
 	}
 
 	//error (returen -1)
 	if((segmento_obtenido->is_heap) || (direccion % PAGE_SIZE) != 0){
-		log_debug(debug_logger, "Error: el segmento obtenido es heap o la direccion no esta al inicio de una pag");
+		log_error(debug_logger, "Error: el segmento obtenido es heap o la direccion no esta al inicio de una pag");
 		return -1;
 	} 
 
@@ -1474,7 +1474,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 	}
 	free(buffer);
 
-	log_debug(debug_logger, "Error: la direccion encontrada es mayor que el tamaño de mmap_file");
+	log_error(debug_logger, "Error: la direccion encontrada es mayor que el tamaño de mmap_file");
 	return -1;
 }
 
@@ -1552,7 +1552,7 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 
 		pidEncontrada = (int)list_find(segmentoBuscado->archivo_mapeado->programas,(void*) igualPID);
 		if((void*)pidEncontrada == NULL){
-			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
 			return -1;
 		}
 	}

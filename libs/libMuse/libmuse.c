@@ -122,7 +122,7 @@ int muse_get(void* dst, uint32_t src, size_t n)
 	function.args[0].type = VAR_VOID_PTR;
 	function.args[0].size = n;
 	function.args[0].value.val_voidptr = malloc(n);
-	memcpy(function.args[0].value.val_voidptr, dst, n);
+	//memcpy(function.args[0].value.val_voidptr, dst, n);
 
 	function.args[1].type = VAR_UINT32;
 	function.args[1].size = sizeof(uint32_t);
