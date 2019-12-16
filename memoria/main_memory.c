@@ -115,7 +115,6 @@ void destroy_segment_table_elements(segment* seg){
 }
 
 void destroy_page_table_elements(page* pag){
-
 	free(pag);
 	pag = NULL;
 }
@@ -1186,6 +1185,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
             // vuelvo a cargar los datos al upcm
             for(int x=0; x<cantidad_paginas_necesarias;x++){
             	paginaObtenida = list_get(segment->page_table,x + numPage);
+            	paginaObtenida->is_modify = 1; //esto lo agregue 16/12
                 datos = obtener_data_marco_heap(paginaObtenida);
                 memcpy(datos,buffer + PAGE_SIZE * x, PAGE_SIZE);
             }
@@ -1200,9 +1200,11 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		
 		if((offset + (cantidad_paginas_necesarias * PAGE_SIZE)) >= n){
 
-		                // vuelvo a cargar los datos al upcm
+			memcpy(buffer + offset,src,n);
+		    // vuelvo a cargar los datos al upcm
 			for(int x=0; x<cantidad_paginas_necesarias;x++){
 				paginaObtenida = list_get(segment->page_table,x + numPage);
+				paginaObtenida->is_modify = 1; //esto lo agregue 16/12
 				datos = obtener_data_marco_mmap(segment,paginaObtenida,x + numPage);
 				memcpy(datos,buffer + PAGE_SIZE * x,PAGE_SIZE);
 			}
