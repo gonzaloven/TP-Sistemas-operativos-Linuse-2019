@@ -115,8 +115,7 @@ void destroy_segment_table_elements(segment* seg){
 }
 
 void destroy_page_table_elements(page* pag){
-	free(pag->fr);
-	pag->fr = NULL;
+
 	free(pag);
 	pag = NULL;
 }
@@ -203,7 +202,6 @@ int frames_needed(int size_total){
 page* page_with_free_size(){
 	int curr_frame_num;
 	page* pag = malloc(sizeof(page));
-	pag->fr = malloc(sizeof(int));
 
 	for(curr_frame_num=0; true; curr_frame_num++)
 	{	
@@ -283,12 +281,14 @@ int dame_nro_frame_reemplazado(){
 				if (nro_paso == 1){
 					if (!U && !M){	
 						nro_frame = se_hace_la_vistima(pag, nro_de_pag, nro_de_segmento);
+						list_destroy(listaSeg);
 						return nro_frame;											
 					}
 				}
 				if (nro_paso == 2){
 					if (!U && M){
 						nro_frame = se_hace_la_vistima(pag, nro_de_pag, nro_de_segmento);
+						list_destroy(listaSeg);
 						return nro_frame;	
 					}
 					pag->is_used = 0;
