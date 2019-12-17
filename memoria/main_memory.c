@@ -1645,9 +1645,8 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 
 
 	if(segmento == NULL || (segmento->base + segmento->limit) < (src + numBytes)){
-		// ACA HABRIA QUE HACER ALGO CON EL ERROR
-		log_debug(debug_logger, "ERROR - ESTAS TRATANDO DE LEER MAS BYTES DE LOS QUE TIENE EL SEGMENTO O EL SEGMENTO NO EXISTE");
-		return (void*)-1;
+		log_error(debug_logger, "ESTAS TRATANDO DE LEER MAS BYTES DE LOS QUE TIENE EL SEGMENTO O EL SEGMENTO NO EXISTE");
+		return -3;
 	}
 	log_debug(debug_logger, "Base del segmento: %d", segmento->base);
 
