@@ -164,14 +164,16 @@ int muse_get(void* dst, uint32_t src, size_t n)
 	}
 
 	if(f->type == RTA_FUNCTION_GET_ERROR){
+		log_info(logger,"Respuesta Get recibida -> ERROR");
+
 		if(f->args[0].value.val_u32 == -1)
 			log_error(logger,"Se trato de acceder a un archivo unmmaped");
 		if(f->args[0].value.val_u32 == -2)
 			log_error(logger, "El archivo mmap es privado y el programa no tiene permisos");
 		if(f->args[0].value.val_u32 == -3)
-			log_error(logger, "Estas tratando de leer mas del limite del segmento o el mismo no existe");
-
-		log_info(logger,"Respuesta Get recibida -> ERROR");
+			log_error(logger, "El segmento buscado no existe");
+		if(f->args[0].value.val_u32 == -4)
+			log_error(logger, "Estas tratando de leer mas del limite del segmento");
 
 		raise(SIGSEGV);
 	}

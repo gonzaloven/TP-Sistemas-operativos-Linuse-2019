@@ -1598,6 +1598,7 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 		list_remove_and_destroy_by_condition(lista_archivos_mmap,(void*) igualArchivo,(void*) eliminar_archivo_mmap);
 		log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
 
+		list_destroy(segmentoBuscado->page_table);
 		free(archivoMapeado->pathArchivo);
 		archivoMapeado->pathArchivo = NULL;
 	}
@@ -1642,11 +1643,16 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 
 	log_debug(debug_logger, "Nro de segmento: %d", numSeg);
 
-
-	if(segmento == NULL || (segmento->base + segmento->limit) < (src + numBytes)){
-		log_error(debug_logger, "ESTAS TRATANDO DE LEER MAS BYTES DE LOS QUE TIENE EL SEGMENTO O EL SEGMENTO NO EXISTE");
+	if(segmento == NULL){
+		log_error(debug_logger, "El segmento no existe");
 		return -3;
 	}
+
+	if((segmento->base + segmento->limit) < (src + numBytes)){
+		log_error(debug_logger, "Estas tratando de leer mas bytes de los que tiene el segmento");
+		return -4;
+	}
+
 	log_debug(debug_logger, "Base del segmento: %d", segmento->base);
 
 	if(!segmento->is_heap){
