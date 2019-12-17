@@ -1596,6 +1596,10 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 				return !strcmp(archivo->pathArchivo, archivoMapeado->pathArchivo);
 		}
 		list_remove_and_destroy_by_condition(lista_archivos_mmap,(void*) igualArchivo,(void*) eliminar_archivo_mmap);
+		log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
+
+		free(archivoMapeado->pathArchivo);
+		archivoMapeado->pathArchivo = NULL;
 	}
 
 	log_debug(debug_logger, "segmento tiene: base: %d, limite %d, is_heap: %d, tamarchivo: %d",
@@ -1604,10 +1608,6 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 				segmentoBuscado->is_heap,
 				segmentoBuscado->tam_archivo_mmap);
 
-	log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
-
-	free(archivoMapeado->pathArchivo);
-	archivoMapeado->pathArchivo = NULL;
 	free(segmentoBuscado);
 	segmentoBuscado = NULL;
 
