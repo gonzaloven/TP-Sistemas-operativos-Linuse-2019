@@ -46,9 +46,15 @@ int main(void){
 	log_info(logger, "Iniciando servidor... \n");
 	iniciar_servidor();
 
-	list_destroy(new_queue);
-	list_destroy(blocked_queue);
-	list_destroy(exit_queue);
+	void destroy_ULTsList(t_suse_thread* thread)
+	{
+		list_destroy(thread->joinedBy);
+		list_destroy(thread->joinTo);
+		free(thread);
+	}
+	list_destroy_and_destroy_elements(new_queue,destroy_ULTsList);
+	list_destroy_and_destroy_elements(blocked_queue,destroy_ULTsList);
+	list_destroy_and_destroy_elements(exit_queue,destroy_ULTsList);
 
 	pthread_mutex_destroy(&mutex_new_queue);
 	pthread_mutex_destroy(&mutex_blocked_queue);
@@ -60,9 +66,16 @@ int main(void){
 
 void iniciar_metricas(){
 	t_list* params = list_create();
-	nuevo_hilo(metricas, params);
+	nuevo_hilo(realizarMetricas, params);
 }
 
+void* realizarMetricas(void*params)
+{
+	metricas(params);
+	list_destroy(params);
+	pthread_detach(pthread_self());
+	return NULL;
+}
 void* metricas(void* params){
 
 	char* metrics_logs;
@@ -76,7 +89,6 @@ void* metricas(void* params){
 	metricas_por_programa();
 	metricas_por_hilo();
 	}
-	pthread_detach(pthread_self());
 	return NULL;
 }
 
@@ -564,13 +576,28 @@ int close_tid(int tid, int socket_actual){
 	if(thread->tid == 0)
 	{
 		log_info(logger, "Recibi un close para el ULT %d\n", tid);
-		list_destroy_and_destroy_elements(process->ULTS, free);
-		bool destructor(t_process* p)
+
+		void destroy_ULTsList(t_suse_thread* thread)
 		{
-			return p->PROCESS_ID == socket_actual;
+			list_destroy(thread->joinedBy);
+			list_destroy(thread->joinTo);
+			free(thread);
+		}
+		list_destroy_and_destroy_elements(process->ULTS, destroy_ULTsList);
+
+		bool buscarProcesoAdestruir(t_process* proceso)
+		{
+			return proceso->PROCESS_ID == socket_actual;
 		}
 
-		list_remove_and_destroy_by_condition(configuracion_suse.process, destructor, free);
+		void destroy_Process(t_process* proc)
+		{
+			list_destroy(proc->READY_LIST);
+			free(proc);
+		}
+
+		list_remove_and_destroy_by_condition(configuracion_suse.process, buscarProcesoAdestruir, destroy_Process);
+
 		int resultado = close(socket_actual);
 		return resultado;
 	}
