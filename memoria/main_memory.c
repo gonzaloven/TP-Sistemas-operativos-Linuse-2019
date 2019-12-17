@@ -1108,8 +1108,8 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	segment* segment = list_get(prog->segment_table, numSeg);
 
 	if(segment == NULL){
-		log_debug(debug_logger, "Se busco el segmento %d, pero no se encontro", numSeg);
-		return -1;
+		log_error(debug_logger, "Se busco el segmento %d, pero no se encontro", numSeg);
+		return -3;
 	}else{
 		log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 		log_debug(debug_logger, "El segmento a escribir es %d", numSeg);
@@ -1119,7 +1119,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		int pidEncontrada;
 
 		if(segment->archivo_mapeado->pathArchivo == NULL){
-			log_debug(debug_logger, "Se trata de acceder a una direccion unmapped");
+			log_error(debug_logger, "Se trata de acceder a una direccion unmapped");
 			return -1;
 		}
 
@@ -1129,8 +1129,8 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 
 		pidEncontrada = (int)list_find(segment->archivo_mapeado->programas,(void*) igualPID);
 		if((void*)pidEncontrada == NULL){
-			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
-			return -1;
+			log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return -2;
 		}
 	}
 

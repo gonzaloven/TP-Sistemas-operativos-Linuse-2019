@@ -214,6 +214,17 @@ int muse_cpy(uint32_t dst, void* src, int n)
 	int result = call(&function);
 
 	if(result == -1){
+		log_error(logger, "Se trata de acceder a una direccion unmapped");
+		raise(SIGSEGV);
+	}
+
+	if(result == -2){
+		log_error(logger, "El archivo mmap es privado y el programa no tiene permisos");
+		raise(SIGSEGV);
+	}
+
+	if(result == -3){
+		log_error(logger, "Se busco el segmento, pero no se encontro");
 		raise(SIGSEGV);
 	}
 
