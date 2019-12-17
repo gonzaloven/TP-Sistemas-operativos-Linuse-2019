@@ -158,14 +158,27 @@ int muse_get(void* dst, uint32_t src, size_t n)
 
 	Function* f = msg.data;
 
-	if(f->type != RTA_FUNCTION_GET){
+	if(f->type != RTA_FUNCTION_GET && f->type != RTA_FUNCTION_GET_ERROR){
 		log_error(logger,"Respuesta Get recibida -> No se ha podido recibir el contenido de esa direccion");
 		return -1;
 	}
-	memcpy(dst, f->args[0].value.val_voidptr, f->args[0].size);
-	free(f->args[0].value.val_voidptr);
 
-	log_info(logger,"Respuesta Get recibida -> Se ha recibido el contenido de la direccion correctamente");
+	if(f->type == RTA_FUNCTION_GET_ERROR && (f->args[0].value.val_u32 == -1 || f->args[0].value.val_u32 == -2)){
+		if(f->args[0].value.val_u32 == -1)
+			log_error(logger,"Se trato de acceder a un archivo unmmaped");
+		if(f->args[0].value.val_u32 == -2)
+			log_error(logger, "El archivo mmap es privado y el programa no tiene permisos");
+		log_info(logger,"Respuesta Get recibida -> ERROR");
+
+		raise(SIGSEGV);
+	}
+	else{
+		memcpy(dst, f->args[0].value.val_voidptr, f->args[0].size);
+		free(f->args[0].value.val_voidptr);
+		log_info(logger,"El tamaño de lo recibido es: %d", f->args[0].size);
+		log_info(logger,"Respuesta Get recibida -> Se ha recibido el contenido de la direccion correctamente");
+	}
+
 
 	return 0;
 }

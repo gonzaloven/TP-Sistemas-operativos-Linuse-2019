@@ -1118,6 +1118,11 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	if(!segment->is_heap){
 		int pidEncontrada;
 
+		if(segment->archivo_mapeado->pathArchivo == NULL){
+			log_debug(debug_logger, "Se trata de acceder a una direccion unmapped");
+			return -1;
+		}
+
 		int igualPID(int pid){
 		    return pid == prog->pid;
 		}
@@ -1302,6 +1307,14 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 			return -1;
 		}
 
+		off_t fsize;
+
+		fsize = lseek(fileDescriptor, 0, SEEK_END);
+
+		if(fsize < length){
+			truncate(path, length);
+		}
+
 		void* mmapArchivo = mmap(NULL, length, PROT_READ|PROT_WRITE, flag, fileDescriptor,0);
 
 		int sizePath = strlen(path) + 1;
@@ -1464,13 +1477,13 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 		int nro_bytes = (int) fmin(length, segmento_obtenido->tam_archivo_mmap);
 		log_debug(debug_logger, "Bytes a escribir: %d MUSE SYNC", nro_bytes);
 		memcpy(segmento_obtenido->archivo_mapeado->archivo + nro_pagina_obtenida * PAGE_SIZE, buffer, nro_bytes);
+		msync(segmento_obtenido->archivo_mapeado->archivo, segmento_obtenido->tam_archivo_mmap, MS_SYNC);
 
 		if(nro_bytes < segmento_obtenido->tam_archivo_mmap)
 			memset(segmento_obtenido->archivo_mapeado->archivo + nro_pagina_obtenida * PAGE_SIZE + nro_bytes + 1,
 					0, segmento_obtenido->tam_archivo_mmap - nro_bytes);
 
 		free(buffer);
-		msync(segmento_obtenido->archivo_mapeado->archivo, segmento_obtenido->tam_archivo_mmap, MS_SYNC);
 		log_debug(debug_logger, "Fin memory_sync");
 		return 0; //unico caso que devuelve que está OK
 	}
@@ -1594,10 +1607,10 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	log_debug(debug_logger, "Elimine todas las paginas", nro_prog);
 
 	free(archivoMapeado->pathArchivo);
-
-	free(archivoMapeado);
+	archivoMapeado->pathArchivo = NULL;
 
 	free(segmentoBuscado);
+	segmentoBuscado = NULL;
 
 	log_debug(debug_logger, "Unmap terminado");
 
@@ -1608,7 +1621,6 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 {
 	program* prog = NULL;
-
 	log_debug(debug_logger, "Direccion destino: %d", src);
 	log_debug(debug_logger, "Cantidad de bytes a leer en la direccion: %d", numBytes);
 
@@ -1630,7 +1642,6 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	segment* segmento = list_get(prog->segment_table, numSeg);
 
 	log_debug(debug_logger, "Nro de segmento: %d", numSeg);
-	log_debug(debug_logger, "Base del segmento: %d", segmento->base);
 
 
 	if(segmento == NULL || (segmento->base + segmento->limit) < (src + numBytes)){
@@ -1638,9 +1649,16 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 		log_debug(debug_logger, "ERROR - ESTAS TRATANDO DE LEER MAS BYTES DE LOS QUE TIENE EL SEGMENTO O EL SEGMENTO NO EXISTE");
 		return (void*)-1;
 	}
+	log_debug(debug_logger, "Base del segmento: %d", segmento->base);
 
 	if(!segmento->is_heap){
 		int pidEncontrada;
+
+		if(segmento->archivo_mapeado->pathArchivo == NULL){
+			log_error(debug_logger, "Se trata de acceder a una direccion unmapped");
+			int respuesta = -1;
+			return -1;
+		}
 
 		int igualPID(int pid){
 		    return pid == prog->pid;
@@ -1648,8 +1666,8 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 
 		pidEncontrada = (int)list_find(segmento->archivo_mapeado->programas,(void*) igualPID);
 		if((void*)pidEncontrada == NULL){
-			log_debug(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
-			return (void*)-1;
+			log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			return -2;
 		}
 	}
 

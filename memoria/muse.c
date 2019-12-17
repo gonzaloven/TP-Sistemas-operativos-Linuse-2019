@@ -129,13 +129,20 @@ void message_handler(Message *m,int socket)
 		case MESSAGE_CALL:
 			if(((Function*)m->data)->type == FUNCTION_GET){
 				res_get = (void*) muse_invoke_function((Function *)m->data,m->header.caller_id);
-
 				Function f;
-				f.type = RTA_FUNCTION_GET;
-				f.num_args = 1;
-				f.args[0].type = VAR_VOID_PTR;
-				f.args[0].size = ((Function *)m->data)->args[2].value.val_u32;
-				f.args[0].value.val_voidptr = res_get;
+				if((int)res_get == -1 || (int)res_get == -2){
+					f.type = RTA_FUNCTION_GET_ERROR;
+					f.num_args = 1;
+					f.args[0].type = VAR_UINT32;
+					f.args[0].size = sizeof(uint32_t);
+					f.args[0].value.val_u32 = (int)res_get;
+				}else{
+					f.type = RTA_FUNCTION_GET;
+					f.num_args = 1;
+					f.args[0].type = VAR_VOID_PTR;
+					f.args[0].size = ((Function *)m->data)->args[2].value.val_u32;
+					f.args[0].value.val_voidptr = res_get;
+				}
 
 				create_message_header(&head,MESSAGE_CALL,1,tamDataFunction(f));
 				create_function_message(&msg_send,&head,&f);
