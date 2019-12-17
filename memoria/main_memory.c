@@ -524,12 +524,12 @@ void listar_metadatas(int dirLogica, segment* segmento){
 	heap_metadata* metadataActual = NULL;
 	metadataActual = buscar_metadata_por_direccion(dirLogica, segmento);
 
-	log_info(debug_logger, "Limite segmento: %d", segmento->limit);
+	log_debug(debug_logger, "Limite segmento: %d", segmento->limit);
 
 	int direccionUltimaMetadata = ultima_metadata_segmento(segmento->base, segmento);
 
 	if(dirLogica == direccionUltimaMetadata){
-		log_info(debug_logger, "Ultima metadata --> Size: %d, is_free: %d, direccionLogica: %d", metadataActual->size, metadataActual->is_free, dirLogica);
+		log_debug(debug_logger, "Ultima metadata --> Size: %d, is_free: %d, direccionLogica: %d", metadataActual->size, metadataActual->is_free, dirLogica);
 
 	}else{
 		int dirLogicaSiguienteMetadata = metadataActual->size + METADATA_SIZE + dirLogica;
@@ -537,10 +537,10 @@ void listar_metadatas(int dirLogica, segment* segmento){
 		if(direccionUltimaMetadata == dirLogicaSiguienteMetadata){
 			heap_metadata* ultimaMetadata = NULL;
 			ultimaMetadata = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmento);
-			log_info(debug_logger, "Metadata --> Size: %d, is_free: %d, direccionLogica: %d", metadataActual->size, metadataActual->is_free, dirLogica);
-			log_info(debug_logger, "Ultima metadata --> Size: %d, is_free: %d, direccionLogica: %d", ultimaMetadata->size, ultimaMetadata->is_free, dirLogicaSiguienteMetadata);
+			log_debug(debug_logger, "Metadata --> Size: %d, is_free: %d, direccionLogica: %d", metadataActual->size, metadataActual->is_free, dirLogica);
+			log_debug(debug_logger, "Ultima metadata --> Size: %d, is_free: %d, direccionLogica: %d", ultimaMetadata->size, ultimaMetadata->is_free, dirLogicaSiguienteMetadata);
 		}else{
-			log_info(debug_logger, "Metadata --> Size: %d, is_free: %d, direccionLogica: %d", metadataActual->size, metadataActual->is_free, dirLogica);
+			log_debug(debug_logger, "Metadata --> Size: %d, is_free: %d, direccionLogica: %d", metadataActual->size, metadataActual->is_free, dirLogica);
 
 			listar_metadatas(dirLogicaSiguienteMetadata, segmento);
 		}
@@ -586,7 +586,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 {	
 	if (size <= 0) return 0;
 	if (size + METADATA_SIZE > number_of_free_frames() * PAGE_SIZE){
-		log_debug(debug_logger, "Memoria llena: no se puede maloquear tanto espacio en memoria");
+		log_error(debug_logger, "Memoria llena: no se puede allocar tanto espacio en memoria");
 		log_error(debug_logger, "Segmentation Fault");
 		return -1;		
 	} 
@@ -605,7 +605,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	int espacio_q_quedara_libre = total_pages_needed * PAGE_SIZE - total_size;
 	int is_first_page = 1;
 	
-	log_debug(debug_logger, "Se pidieron %d bytes, + metadata = %d", size, total_size);
+	log_info(debug_logger, "Se pidieron %d bytes, + metadata = %d, PID: %d", size, total_size, pid);
 	
 	//si el programa no está en la lista de programas, se agrega y le creamos una nueva tabla de segmentos
 	if((nro_prog = search_program(pid)) == -1)
@@ -805,6 +805,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 	prog->using_memory += size;
 
+	log_info(debug_logger, "Fin memory_alloc");
+
 	return direccionLogicaFinal;
 }
 
@@ -943,7 +945,7 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 	program *prog;
 	segment *seg;
 
-	log_debug(debug_logger, "Direccion virtual pedida: %d", virtual_address);
+	log_info(debug_logger, "Direccion virtual pedida: %d, PID: %d", virtual_address, pid);
 
 	prog = list_get(program_list, nro_prog);
 	int nro_seg = busca_segmento(prog,virtual_address);	
@@ -966,7 +968,7 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 
 	prog->using_memory -= viejoSize;
 
-	log_debug(debug_logger, "Fin memory_free");
+	log_info(debug_logger, "Fin memory_free");
 	listar_metadatas(seg->base, seg);
 
 	return 0;
@@ -1068,11 +1070,6 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
 
         free(sacarFrame);
 
-        //fseek(segmento->archivo_mapeado,nro_pagina * PAGE_SIZE,SEEK_SET);
-        //fread(buffer_page_mmap,PAGE_SIZE,1,segmento->archivo_mapeado);
-
-        //memcpy(pagina->fr,buffer_page_mmap,PAGE_SIZE);
-        log_debug(debug_logger, "Llegue aca");
         log_debug(debug_logger, "Nro pagina: %d", nro_pagina);
         log_debug(debug_logger, "dir frame de la pagina: %d", *(int *)pagina->fr);
         log_debug(debug_logger, "Tamanio archivo mappeado: %d, path: %s", segmento->tam_archivo_mmap,segmento->archivo_mapeado->pathArchivo);
@@ -1091,6 +1088,8 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	program* prog;
 	page* paginaObtenida;
 	int numProg = search_program(pid);
+
+	log_info(debug_logger, "Direccion destino: %d, Bytes a copiar: %d, PID: %d", dst, n, pid);
 
 	if((numProg = search_program(pid)) == -1)
 	{
@@ -1223,7 +1222,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 
 	log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 
-	log_debug(debug_logger, "Fin memory_cpy");
+	log_info(debug_logger, "Fin memory_cpy");
 	free(buffer);
 	
 	return dst;
@@ -1279,8 +1278,6 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	int direccionDelSegmento;
 	archivoMMAP* archivoMappeado;
 
-	log_debug(debug_logger, "PID ----> %d", pid);
-
 	if((nro_prog = search_program(pid)) == -1)
 	{
 		log_debug(debug_logger, "No lo encontre, lo creo ----> %d", pid);
@@ -1295,7 +1292,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 		prog = list_get(program_list, nro_prog);
 	}
 
-	log_debug(debug_logger, "Path recibido: %s", path);
+	log_info(debug_logger, "Path recibido: %s, PID: %d, Length: %d", path, pid, length);
 
 	archivoMappeado = buscar_archivo_mmap(path);
 
@@ -1366,11 +1363,11 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 	segmentoNuevo->tam_archivo_mmap = length;
 
 	if(flag == MAP_SHARED){
-		log_debug(debug_logger, "La flag de MAP es: MAP_SHARED");
+		log_info(debug_logger, "La flag de MAP es: MAP_SHARED");
 		segmentoNuevo->tipo_map = 1;
 		list_add(archivoMappeado->programas, (void*)pid);
 	}else if(flag == MAP_PRIVATE){
-		log_debug(debug_logger, "La flag de MAP es: MAP_PRIVATE");
+		log_info(debug_logger, "La flag de MAP es: MAP_PRIVATE");
 		segmentoNuevo->tipo_map = 0;
 		if(list_size(archivoMappeado->programas) == 0){
 			list_add(archivoMappeado->programas, pid);
@@ -1387,17 +1384,18 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 			segmentoNuevo->tam_archivo_mmap,
 			segmentoNuevo->tipo_map);
 
-	log_debug(debug_logger, "Fin memory_map");
+	log_info(debug_logger, "Fin memory_map");
 
 	return segmentoNuevo->base;
 }
 
 uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 {
-	
 	program* prog;
 	segment* segmento_obtenido;
 	int nro_prog;
+
+	log_info(debug_logger, "Direccion solicitada: %d, Length: %d", direccion, length);
 
 	//primero chequea que exista el programa
 	if((nro_prog = search_program(pid)) == -1)
@@ -1484,7 +1482,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 					0, segmento_obtenido->tam_archivo_mmap - nro_bytes);
 
 		free(buffer);
-		log_debug(debug_logger, "Fin memory_sync");
+		log_info(debug_logger, "Fin memory_sync");
 		return 0; //unico caso que devuelve que está OK
 	}
 	free(buffer);
@@ -1537,6 +1535,8 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	program* prog;
 	segment* segmentoBuscado;
 
+	log_info(debug_logger, "Direccion solicitada: %d", dir);
+
 	if((nro_prog = search_program(pid)) == -1)
 	{
 		prog = (program *) malloc(sizeof(program));
@@ -1578,7 +1578,7 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	}
 
 	archivoMMAP* archivoMapeado = segmentoBuscado->archivo_mapeado;
-	log_debug(debug_logger, "El archivo mapeado tiene: Path: %s", archivoMapeado->pathArchivo);
+	log_info(debug_logger, "El archivo mapeado tiene: Path: %s", archivoMapeado->pathArchivo);
 
 	int igualPID(int pid) {
 		return pid == prog->pid;
@@ -1612,7 +1612,7 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	free(segmentoBuscado);
 	segmentoBuscado = NULL;
 
-	log_debug(debug_logger, "Unmap terminado");
+	log_info(debug_logger, "Unmap terminado");
 
 	return 0;
 }
@@ -1621,8 +1621,8 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 {
 	program* prog = NULL;
-	log_debug(debug_logger, "Direccion destino: %d", src);
-	log_debug(debug_logger, "Cantidad de bytes a leer en la direccion: %d", numBytes);
+	log_info(debug_logger, "Direccion destino: %d", src);
+	log_info(debug_logger, "Cantidad de bytes a leer en la direccion: %d", numBytes);
 
 	int numProg = search_program(pid);
 	log_debug(debug_logger, "Proceso que hace call a memory_get: %d", numProg);
@@ -1707,7 +1707,7 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 
 	free(buffer);
 
-	log_debug(debug_logger, "Fin memory_get");
+	log_info(debug_logger, "Fin memory_get");
 
 	return dst;
 }

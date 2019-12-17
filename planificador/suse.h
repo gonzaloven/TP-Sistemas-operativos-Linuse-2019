@@ -128,6 +128,7 @@ void metricas_sistema();
 void* metricas(void* params);
 void metricas_por_programa();
 void metricas_por_hilo();
+void* realizarMetricas(void*params);
 
 /////////////METRICAS/////////////
 
