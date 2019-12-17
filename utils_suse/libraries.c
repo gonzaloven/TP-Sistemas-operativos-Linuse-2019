@@ -148,6 +148,8 @@ void enviar(un_socket socket_para_enviar, int codigo_operacion, int tamanio,
 t_paquete* recibir(un_socket socket_para_recibir) {
 
 	t_paquete * paquete_recibido = malloc(sizeof(t_paquete));
+	memset(paquete_recibido, 0, sizeof(t_paquete));
+
 	int retorno = recv(socket_para_recibir, &(paquete_recibido->codigo_operacion), sizeof(int),
 	MSG_WAITALL);
 
@@ -158,19 +160,13 @@ t_paquete* recibir(un_socket socket_para_recibir) {
 		return paquete_recibido;
 
 	}
+	recv(socket_para_recibir, &(paquete_recibido->tamanio), sizeof(int),MSG_WAITALL);
 
-	recv(socket_para_recibir, &(paquete_recibido->tamanio), sizeof(int),
-	MSG_WAITALL);
+	void * informacion_recibida = malloc(paquete_recibido->tamanio);
 
-	if(1 > 0)
-	{
-		void * informacion_recibida = malloc(paquete_recibido->tamanio);
+	recv(socket_para_recibir, informacion_recibida, paquete_recibido->tamanio,MSG_WAITALL);
 
-			recv(socket_para_recibir, informacion_recibida, paquete_recibido->tamanio,
-			MSG_WAITALL);
-
-			paquete_recibido->data = informacion_recibida;
-	}
+	paquete_recibido->data = informacion_recibida;
 
 	return paquete_recibido;
 }
@@ -219,15 +215,10 @@ bool esperar_handshake(un_socket socket_del_cliente, t_paquete* inicio_del_hands
 
 	liberar_paquete(inicio_del_handshake);
 
-	char * respuesta;
 	if (resultado) {
-		respuesta = malloc(12);
-		respuesta = "Autenticado";
-		enviar(socket_del_cliente, cop_handshake, 12, respuesta);
+		enviar(socket_del_cliente, cop_handshake, 12, "Autenticado");
 	} else {
-		respuesta = malloc(6);
-		respuesta = "Error";
-		enviar(socket_del_cliente, cop_handshake, 6, respuesta);
+		enviar(socket_del_cliente, cop_handshake, 6, "Error");
 	}
 	return resultado;
 }

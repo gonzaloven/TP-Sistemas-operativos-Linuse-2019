@@ -1608,7 +1608,6 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 
 	free(archivoMapeado->pathArchivo);
 	archivoMapeado->pathArchivo = NULL;
-
 	free(segmentoBuscado);
 	segmentoBuscado = NULL;
 

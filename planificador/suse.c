@@ -140,6 +140,8 @@ void metricas_por_programa()
 		log_info(logger_metrics,"En cola de exit: %d...\n",exit);
 		log_info(logger_metrics,"---------------------------------------\n");
 
+		list_destroy(nuevaLista);
+
 	}
 
 }
@@ -306,7 +308,7 @@ void iniciar_servidor() {
 		t_paquete* handshake = recibir(listener);
 
 		log_info(logger, "Recibi una nueva conexion del socket %d. \n", new_connection);
-
+		free(handshake->data);
 		free(handshake);
 
 		//Creo un hilo por programa que se conecta
@@ -358,6 +360,8 @@ void handle_conection_suse(un_socket socket_actual)
 				handle_suse_join(socket_actual,paquete_recibido);
 				break;
 			default:
+				free(paquete_recibido->data);
+				free(paquete_recibido);
 				atender = false;
 
 			}
@@ -529,8 +533,8 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 	new_thread->estado = E_NEW;
 	new_thread->duracionRafaga = 0;
 	new_thread->ejecutado_desde_estimacion = false;
-	new_thread->joinTo = list_create();
-	new_thread->joinedBy = list_create();
+	new_thread->joinTo = list_create(); //TODO: esto no se libera
+	new_thread->joinedBy = list_create(); // TODO: ESO NO SE LIBERA
 	new_thread->estimacionUltimaRafaga = 0;
 	new_thread->tiempoDeCpu = 0;
 	new_thread->tiempoDeEspera = 0;
@@ -542,7 +546,6 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 
 	return new_thread;
 }
-
 
 int close_tid(int tid, int socket_actual){
 	bool find_process_by_id(t_process* process)
@@ -714,7 +717,7 @@ t_process * generar_process(int process_id) {
 	t_process * process = malloc(sizeof(t_process));
 	process->PROCESS_ID = process_id; //todo ver tipo de dato
 	process->ULTS = list_create();
-	process->READY_LIST = list_create();
+	process->READY_LIST = list_create(); //TODO: ESTO NO SE LIBERA
 	process->EXEC_THREAD = 0;
 	sem_init(&(process->semaforoReady),0,0);
 
@@ -877,6 +880,7 @@ void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem){
 	serializar_int(buffer, &desp, resultado);
 	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
+	free(sem);
 }
 
 void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
@@ -905,6 +909,7 @@ void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 	serializar_int(buffer, &desp, resultado);
 	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
+	free(sem);
 }
 
 //todo definir que le pasas, si un char* o un t_sem*
