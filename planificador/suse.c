@@ -66,7 +66,7 @@ int main(void){
 
 void iniciar_metricas(){
 	t_list* params = list_create();
-	nuevo_hilo(realizarMetricas, params);
+	nuevo_hilo(realizarMetricas, params);// TODO: Aca me dice valgrind que creas un hilo y no lo detachas
 }
 
 void* realizarMetricas(void*params)
@@ -329,7 +329,7 @@ void iniciar_servidor() {
 		t_list* thread_params;
 		thread_params = list_create();
 		list_add(thread_params, new_connection);
-		nuevo_hilo(process_conectado_funcion_thread, thread_params);
+		nuevo_hilo(process_conectado_funcion_thread, thread_params); //TODO: Aca me dice valgrind que creas un hilo y no lo detachas
 		log_info(logger, "Cree el hilo para el proceso %d", new_connection);
 	}
 }
