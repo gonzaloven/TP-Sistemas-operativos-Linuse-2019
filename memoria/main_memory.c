@@ -289,7 +289,7 @@ int dame_nro_frame_reemplazado(){
 		{
 			seg = list_get(listaSeg,nro_de_segmento);
 			cantidad_de_paginas_en_segmento = list_size(seg->page_table);			
-			log_debug(debug_logger, "--- SEGMENTO ANALIZADO ALG REEMPLAZO: %d", nro_de_segmento);
+			log_debug(debug_logger, "--- SEGMENTO ANALIZADO ALG REEMPLAZO: %d - Tiene %d paginas", nro_de_segmento, cantidad_de_paginas_en_segmento);
 			
 			for(nro_de_pag = 0; nro_de_pag < cantidad_de_paginas_en_segmento; nro_de_pag++)
 			{
@@ -353,6 +353,7 @@ int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento)
 
 int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame)
 {
+	log_warning(debug_logger, "MANDAR A SWAP - El nro de frame recibido es: %d", nro_frame);
 	FILE *swap_file;
 	void* buffer = malloc(PAGE_SIZE);
 	int nro_frame_swap = frame_swap_libre();
@@ -461,6 +462,7 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 
 heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado){
 
+	log_warning(debug_logger, "Llamado buscar_metadata_por_direccion");
 	log_debug(debug_logger, "buscar_metadata_por_direccion. Dir Logica: %d", direccionLogica);
 	heap_metadata* metadataBuscada = NULL;
 
@@ -479,6 +481,7 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 	}
 
 	if(!pagina->is_present){
+		log_debug(debug_logger, "LA PAGINA BUSCADA NO ESTABA PRESENTE - LA CARGO - BUSCAR_METADATA_POR_DIR");
 		obtener_data_marco_heap(pagina);
 		//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 	}
@@ -487,13 +490,14 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 
 
 	if((offset + METADATA_SIZE) > PAGE_SIZE){
+		log_debug(debug_logger, "LA METADATA ESTA CORTADA - BUSCAR_METADATA_POR_DIR");
 		heap_metadata metadataCopia;
 
 		page* proximaPagina = list_get(segmentoBuscado->page_table, (paginaBuscada + 1));
 
 		if(!proximaPagina->is_present){
-			obtener_data_marco_heap(proximaPagina);
 			log_debug(debug_logger, "-- ELA METADATA ESTABA CORTADA, LA PAGINA SIG NO ESTABA PRESENTE, LA CARGO--");
+			obtener_data_marco_heap(proximaPagina);
 		}
 
 		void* punteroAlFrameSiguiente = proximaPagina->fr;
@@ -504,8 +508,11 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 
 		log_debug(debug_logger, "La metadata copia tiene is_free: %d, size: %d", metadataCopia.is_free, metadataCopia.size);
 
+		log_warning(debug_logger, "Fin buscar_metadata_por_direccion");
+
 		return metadataCopia;
 	}else{
+		log_warning(debug_logger, "Fin buscar_metadata_por_direccion");
 		return *metadataBuscada;
 	}
 }
@@ -1073,6 +1080,10 @@ void* obtener_data_marco_heap(page* pagina){
 
     	//TODO: mutex archivo swap ? ADEMAS BLOQUEAR QUE NO ESCRIBA CUANDO LIBERA EL FRAME SWAP HASTA QUE MEMCPY
     	int numFrame = dame_nro_frame_reemplazado();
+
+    	BITMAP[numFrame] = 0;
+
+
     	liberar_frame_swap(pagina->fr);
     	log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap. Num frame upcm: %d", numFrame);
 
@@ -1105,6 +1116,10 @@ void* obtener_data_marco_heap(page* pagina){
         page* sacarFrame = page_with_free_size();
         liberar_frame_swap(pagina->fr);
         log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap");
+
+        BITMAP[(sacarFrame->fr - MAIN_MEMORY)/PAGE_SIZE] = 0;
+
+
         pagina->fr = sacarFrame->fr;
         pagina->is_present = 1;
         pagina->is_used = 1;
