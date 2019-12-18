@@ -198,7 +198,7 @@ int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame);
 
 int frame_swap_libre();
 
-void liberar_frame_swap(void* frame);
+void liberar_frame_swap(int frame);
 
 void destroy_program_list_elements(program* prog);
 
