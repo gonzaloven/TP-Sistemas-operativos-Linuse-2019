@@ -100,7 +100,7 @@ void metricas_por_socket_conectado(uint32_t pid);
 
 int busca_segmento(program *prog,uint32_t va);
 
-heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado);
+heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado);
 
 void* obtener_data_marco_heap(page* pagina);
 
