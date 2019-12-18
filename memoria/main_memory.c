@@ -140,6 +140,27 @@ void el_cliente_se_tomo_el_palo(uint32_t pid){
 	log_trace(metricas_logger, "LEAK SUMMARY: definitely lost: %d bytes", memory_leaks);
 }
 
+int number_of_free_frames_upcm(){
+	int frames_libres_1 = 0;
+	int memoria_libre = 0;
+	int memoria_total = 0;
+	pthread_mutex_lock(&mutex_bitmap_heap);
+	for(int i=0; i < TOTAL_FRAME_NUM; i++)
+	{
+		frames_libres_1 += (BITMAP[i]);
+	}
+	pthread_mutex_unlock(&mutex_bitmap_heap);
+
+	memoria_libre = frames_libres_1 * PAGE_SIZE;
+	memoria_total = TOTAL_FRAME_NUM * PAGE_SIZE;
+
+	log_trace(metricas_logger, "Cantidad de Memoria libre en UPCM: %d / %d", memoria_libre, memoria_total);
+	log_trace(metricas_logger, "Cantidad de Frames libres en UPCM: %d / %d", frames_libres_1, TOTAL_FRAME_NUM);
+
+	return frames_libres_1;
+
+}
+
 int number_of_free_frames(){
 	int memoria_libre = 0; 
 	int memoria_total = 0;
@@ -220,7 +241,7 @@ page* page_with_free_size(){
 			pag->fr = MAIN_MEMORY + (curr_frame_num * PAGE_SIZE);
 			pthread_mutex_unlock(&mutex_MM);
 
-			log_debug(debug_logger, "La direccion del frame libre es: %d", *(int *)pag->fr);
+			log_debug(debug_logger, "La direccion del frame libre es: %d", pag->fr);
 
 			pthread_mutex_unlock(&mutex_bitmap_heap);
 			return pag;
@@ -323,11 +344,9 @@ int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento)
 	else{
 		log_debug(debug_logger, "La pagina victima se mando satisfactoriamente al archivo swap");
 
-		int dir_disco = nro_frame_swap * PAGE_SIZE;
-		memcpy(pag->fr, &dir_disco, sizeof(int));
+		pag->fr = nro_frame_swap;
 		pag->is_present = false;
 
-		//pag->fr = (int) nro_frame_swap;
 	}
 	return nro_frame_upcm;
 }
@@ -414,6 +433,8 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 		}
 		void* punteroAlFrameSiguiente = proximaPagina->fr;
 		int tamanioMetadataCortada = (PAGE_SIZE) - offset;
+		log_debug(debug_logger, "Tamanio metadata cortada parte 1: %d", tamanioMetadataCortada);
+		log_debug(debug_logger, "Tamanio metadata cortada parte 2: %d", tamanioMetadataCortada);
 
 		memcpy(&metadataCopia, metadataBuscada, tamanioMetadataCortada);
 		memcpy((void*)(&metadataCopia) + tamanioMetadataCortada, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
@@ -716,18 +737,26 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		heap_metadata* ultimaMetadata = NULL;
 
 		int direccionLogicaUltimaMetadata = ultima_metadata_segmento(segmentoAAgrandar->base, segmentoAAgrandar);
+		log_debug(debug_logger, "Soy malloc y encontre dir ultima metadata: %d", direccionLogicaUltimaMetadata);
 
 		ultimaMetadata = buscar_metadata_por_direccion(direccionLogicaUltimaMetadata, segmentoAAgrandar);
+		log_debug(debug_logger, "Soy malloc y los datos de ult metadata son isfree: %d - size: %d",
+				ultimaMetadata->is_free, ultimaMetadata->size);
 
 		int sizeAnterior = ultimaMetadata->size;
 		float cantidadDePaginasAAgrandar = ceil(((float)(total_size - sizeAnterior))/PAGE_SIZE);
+		log_debug(debug_logger, "Soy malloc y la cant de paginas a agrandar es: %d", cantidadDePaginasAAgrandar);
 
 		modificar_metadata(direccionLogicaUltimaMetadata, segmentoAAgrandar, cantidadDePaginasAAgrandar * PAGE_SIZE + sizeAnterior, 1);
-
+		ultimaMetadata = buscar_metadata_por_direccion(direccionLogicaUltimaMetadata, segmentoAAgrandar);
+		log_debug(debug_logger, "Soy malloc y la data de la nueva ult metadata es isfree: %d - size: %d",
+				ultimaMetadata->is_free, ultimaMetadata->size);
 
 		for(int i=0 ; i < cantidadDePaginasAAgrandar ; i++ )
 		{
+			log_debug(debug_logger, "Soy malloc y antes page_with_free_size()");
 			pag = page_with_free_size();
+			log_debug(debug_logger, "Soy malloc y despues page_with_free_size()");
 			log_debug(debug_logger, "El frame de la pagina a cargar que obtengo de page_w_f_s es: %d", (pag->fr - MAIN_MEMORY) / PAGE_SIZE);
 			pag->is_used = 1;
 			list_add(segmentoAAgrandar->page_table, pag);
@@ -1028,23 +1057,37 @@ int busca_segmento(program* prog, uint32_t direccion){
 }
 
 void* obtener_data_marco_heap(page* pagina){
-    if(!pagina->is_present && number_of_free_frames() == 0){
+    if(!pagina->is_present && number_of_free_frames_upcm() == 0){
 
+    	//TODO: mutex archivo swap ? ADEMAS BLOQUEAR QUE NO ESCRIBA CUANDO LIBERA EL FRAME SWAP HASTA QUE MEMCPY
     	int numFrame = dame_nro_frame_reemplazado();
     	liberar_frame_swap(pagina->fr);
-    	log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap");
-    	pthread_mutex_lock(&mutex_MM);
-    	pagina->fr = (void*) (MAIN_MEMORY + numFrame * PAGE_SIZE);
-    	pthread_mutex_unlock(&mutex_MM);
-        pagina->is_present = 1;
-        pagina->is_used = 1;
-    }
-    else if(!pagina->is_present && number_of_free_frames() > 0){
+    	log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap. Num frame upcm: %d", numFrame);
+
         void* buffer_page_swap = malloc(PAGE_SIZE);
 
         FILE* archivo_swap = fopen(SWAP_PATH,"r+");
 
-        fseek(archivo_swap,*(int*)pagina->fr,SEEK_SET);
+        fseek(archivo_swap,(int)pagina->fr * PAGE_SIZE,SEEK_SET);
+        fread(buffer_page_swap,PAGE_SIZE,1,archivo_swap);
+
+        pthread_mutex_lock(&mutex_MM);
+    	pagina->fr = (void*) (MAIN_MEMORY + numFrame * PAGE_SIZE);
+    	pthread_mutex_unlock(&mutex_MM);
+        pagina->is_present = 1;
+        pagina->is_used = 1;
+
+        memcpy(pagina->fr,buffer_page_swap,PAGE_SIZE);
+
+        fclose(archivo_swap);
+        free(buffer_page_swap);
+    }
+    else if(!pagina->is_present && number_of_free_frames_upcm() > 0){
+        void* buffer_page_swap = malloc(PAGE_SIZE);
+
+        FILE* archivo_swap = fopen(SWAP_PATH,"r+");
+
+        fseek(archivo_swap, (int)pagina->fr * PAGE_SIZE,SEEK_SET);
         fread(buffer_page_swap,PAGE_SIZE,1,archivo_swap);
 
         page* sacarFrame = page_with_free_size();
@@ -1064,7 +1107,7 @@ void* obtener_data_marco_heap(page* pagina){
 }
 
 void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
-    if(!pagina->is_present && number_of_free_frames() == 0){
+    if(!pagina->is_present && number_of_free_frames_upcm() == 0){
     	void* buffer_page_mmap = malloc(PAGE_SIZE);
 
     	int numFrame = dame_nro_frame_reemplazado();
@@ -1090,7 +1133,7 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
 
         free(buffer_page_mmap);
     }
-    else if(!pagina->is_present && number_of_free_frames() > 0){
+    else if(!pagina->is_present && number_of_free_frames_upcm() > 0){
         void* buffer_page_mmap = malloc(PAGE_SIZE);
 
         page* sacarFrame = page_with_free_size();
@@ -1533,14 +1576,11 @@ void liberar_frame(int numeroFrame){
 	pthread_mutex_unlock(&mutex_bitmap_heap);
 }
 
-void liberar_frame_swap(void* frame){
-	pthread_mutex_lock(&mutex_MM);
-	int numeroFrame = (frame - MAIN_MEMORY)/PAGE_SIZE;
-	pthread_mutex_unlock(&mutex_MM);
-	log_debug(debug_logger, "Libero el frame swap: %d", numeroFrame);
+void liberar_frame_swap(int frame){
+	log_debug(debug_logger, "Libero el frame swap: %d", frame);
 
 	pthread_mutex_lock(&mutex_bitmap_mmap);
-	BITMAP_SWAP_FILE[numeroFrame] = 1;
+	BITMAP_SWAP_FILE[frame] = 1;
 	pthread_mutex_unlock(&mutex_bitmap_mmap);
 }
 
