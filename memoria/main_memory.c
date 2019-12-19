@@ -1116,7 +1116,9 @@ void* obtener_data_marco_heap(page* pagina){
     	//TODO: mutex archivo swap ? ADEMAS BLOQUEAR QUE NO ESCRIBA CUANDO LIBERA EL FRAME SWAP HASTA QUE MEMCPY
     	int numFrame = dame_nro_frame_reemplazado();
 
+    	pthread_mutex_lock(&mutex_bitmap_heap);
     	BITMAP[numFrame] = 0;
+    	pthread_mutex_unlock(&mutex_bitmap_heap);
 
 
     	liberar_frame_swap(pagina->fr);
@@ -1153,7 +1155,9 @@ void* obtener_data_marco_heap(page* pagina){
         liberar_frame_swap(pagina->fr);
         log_debug(debug_logger, "Paso pagina de SWAP a MEMORIA PRINCIPAL -> libero frame de swap");
 
+        pthread_mutex_lock(&mutex_bitmap_heap);
         BITMAP[(sacarFrame->fr - MAIN_MEMORY)/PAGE_SIZE] = 0;
+        pthread_mutex_unlock(&mutex_bitmap_heap);
 
 
         pagina->fr = sacarFrame->fr;
@@ -1177,6 +1181,11 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
     	void* buffer_page_mmap = malloc(PAGE_SIZE);
 
     	int numFrame = dame_nro_frame_reemplazado();
+
+    	pthread_mutex_lock(&mutex_bitmap_mmap);
+    	BITMAP[numFrame] = 0;
+    	pthread_mutex_unlock(&mutex_bitmap_mmap);
+
     	log_debug(debug_logger, "Paso pagina de ARCHIVO MAPPED a MEMORIA PRINCIPAL");
     	log_debug(debug_logger, "NUM FRAME: %d",numFrame);
     	pthread_mutex_lock(&mutex_MM);
@@ -1203,6 +1212,11 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
         void* buffer_page_mmap = malloc(PAGE_SIZE);
 
         page* sacarFrame = page_with_free_size();
+
+        pthread_mutex_lock(&mutex_bitmap_heap);
+        BITMAP[(sacarFrame->fr - MAIN_MEMORY)/PAGE_SIZE] = 0;
+        pthread_mutex_unlock(&mutex_bitmap_heap);
+
         log_debug(debug_logger, "Paso pagina de MAPPED a MEMORIA PRINCIPAL");
         log_debug(debug_logger, "La dir del frame es: %d", *(int *)sacarFrame->fr);
         log_debug(debug_logger, "Num frame: %d", (sacarFrame->fr - MAIN_MEMORY) /  PAGE_SIZE);
