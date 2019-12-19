@@ -60,7 +60,8 @@ int close_tid(int tid, int socket_actual);
 void handle_close_tid(un_socket socket_actual, t_paquete* received_packet);
 
 void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem);
-
+void suse_stop_service();
+void destruir_suse_config();
 void obtener_ULT_ready_FIFO();
 
 int i_thread = 0;
@@ -128,6 +129,7 @@ void metricas_sistema();
 void* metricas(void* params);
 void metricas_por_programa();
 void metricas_por_hilo();
+void* realizarMetricas(void*params);
 
 /////////////METRICAS/////////////
 

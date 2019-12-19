@@ -16,7 +16,31 @@ t_log* logger;
 t_log* logger_metrics;
 char * suse_config_path = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config";
 
+void suse_stop_service()
+{
+	void destroy_ULTsList(t_suse_thread* thread)
+		{
+			list_destroy(thread->joinedBy);
+			list_destroy(thread->joinTo);
+			free(thread);
+		}
+
+	log_destroy(logger);
+	destruir_suse_config();
+	list_destroy_and_destroy_elements(new_queue,destroy_ULTsList);
+	list_destroy_and_destroy_elements(blocked_queue,destroy_ULTsList);
+	list_destroy_and_destroy_elements(exit_queue,destroy_ULTsList);
+
+	pthread_mutex_destroy(&mutex_new_queue);
+	pthread_mutex_destroy(&mutex_blocked_queue);
+	pthread_mutex_destroy(&mutex_multiprog);
+	pthread_mutex_destroy(&mutex_semaforos);
+}
+
 int main(void){
+
+	signal(SIGINT,suse_stop_service);
+
 	char* log_file;
 	log_file = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
 	logger = log_create(log_file, "SUSE logs", 1, 1);
@@ -46,23 +70,46 @@ int main(void){
 	log_info(logger, "Iniciando servidor... \n");
 	iniciar_servidor();
 
-	list_destroy(new_queue);
-	list_destroy(blocked_queue);
-	list_destroy(exit_queue);
-
-	pthread_mutex_destroy(&mutex_new_queue);
-	pthread_mutex_destroy(&mutex_blocked_queue);
-	pthread_mutex_destroy(&mutex_multiprog);
-	pthread_mutex_destroy(&mutex_semaforos);
+	suse_stop_service();
 
 	return EXIT_SUCCESS;
 }
 
-void iniciar_metricas(){
-	t_list* params = list_create();
-	nuevo_hilo(metricas, params);
+void destruir_suse_config()
+{
+	void destroy_ULTsList(t_suse_thread* thread)
+	{
+		list_destroy(thread->joinedBy);
+		list_destroy(thread->joinTo);
+		free(thread);
+	}
+
+	void destroy_Process(t_process* process)
+	{
+		list_destroy_and_destroy_elements(process->READY_LIST,destroy_ULTsList);
+		free(process);
+	}
+
+	void destroy_semaforos(t_suse_semaforos* semaforo)
+	{
+		list_destroy_and_destroy_elements(semaforo->BLOCKED_LIST,destroy_ULTsList);
+		free(semaforo);
+	}
 }
 
+
+void iniciar_metricas(){
+	t_list* params = list_create();
+	nuevo_hilo(realizarMetricas, params);// TODO: Aca me dice valgrind que creas un hilo y no lo detachas
+}
+
+void* realizarMetricas(void*params)
+{
+	metricas(params);
+	list_destroy(params);
+	pthread_detach(pthread_self());
+	return NULL;
+}
 void* metricas(void* params){
 
 	char* metrics_logs;
@@ -76,7 +123,6 @@ void* metricas(void* params){
 	metricas_por_programa();
 	metricas_por_hilo();
 	}
-	pthread_detach(pthread_self());
 	return NULL;
 }
 
@@ -139,6 +185,8 @@ void metricas_por_programa()
 		log_info(logger_metrics,"En cola de blocked: %d...\n",blocked);
 		log_info(logger_metrics,"En cola de exit: %d...\n",exit);
 		log_info(logger_metrics,"---------------------------------------\n");
+
+		list_destroy(nuevaLista);
 
 	}
 
@@ -306,7 +354,7 @@ void iniciar_servidor() {
 		t_paquete* handshake = recibir(listener);
 
 		log_info(logger, "Recibi una nueva conexion del socket %d. \n", new_connection);
-
+		free(handshake->data);
 		free(handshake);
 
 		//Creo un hilo por programa que se conecta
@@ -315,7 +363,7 @@ void iniciar_servidor() {
 		t_list* thread_params;
 		thread_params = list_create();
 		list_add(thread_params, new_connection);
-		nuevo_hilo(process_conectado_funcion_thread, thread_params);
+		nuevo_hilo(process_conectado_funcion_thread, thread_params); //TODO: Aca me dice valgrind que creas un hilo y no lo detachas
 		log_info(logger, "Cree el hilo para el proceso %d", new_connection);
 	}
 }
@@ -358,6 +406,8 @@ void handle_conection_suse(un_socket socket_actual)
 				handle_suse_join(socket_actual,paquete_recibido);
 				break;
 			default:
+				free(paquete_recibido->data);
+				free(paquete_recibido);
 				atender = false;
 
 			}
@@ -368,11 +418,11 @@ void handle_conection_suse(un_socket socket_actual)
 
 void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
 
-	log_info(logger,"Inicio Join");
+	//log_info(logger,"Inicio Join");
 	esperar_handshake(socket_actual, paquete_recibido, cop_suse_join);
 
-	log_info(logger, "Realice el primer handshake con hilolay\n");
-	log_info(logger,"el socket es", "%d", socket_actual);
+	//log_info(logger, "Realice el primer handshake con hilolay\n");
+	//log_info(logger,"el socket es", "%d", socket_actual);
 
 	t_paquete* paquete = recibir(socket_actual);
 
@@ -396,7 +446,7 @@ void handle_close_tid(un_socket socket, t_paquete* paquete_recibido)
 {
 	esperar_handshake(socket, paquete_recibido, cop_close_tid);
 
-	log_info(logger, "Realice el handshake de close_tid\n");
+	//log_info(logger, "Realice el handshake de close_tid\n");
 
 	t_paquete* paquete = recibir(socket);
 
@@ -448,7 +498,7 @@ int join(un_socket socket, int tid){
 }
 
 void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay) {
-	log_info(logger, "Esperando handshake en suse_create...\n");
+	//log_info(logger, "Esperando handshake en suse_create...\n");
 	esperar_handshake(socket_actual, paquete_hilolay, cop_suse_create);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
@@ -482,7 +532,7 @@ void handle_ULT_create(t_process* process, int tid){
 	t_suse_thread * new_thread;
 	new_thread  = ULT_create(process, tid);
 
-	log_info(logger, "El grado de multiprogramacion es %d \n", configuracion_suse.ACTUAL_MULTIPROG);
+	//log_info(logger, "El grado de multiprogramacion es %d \n", configuracion_suse.ACTUAL_MULTIPROG);
 
 	pthread_mutex_lock(&mutex_multiprog);
 	if(validar_grado_multiprogramacion())
@@ -520,7 +570,7 @@ void handle_main_thread_create(un_socket socket_actual, int tid) {
 }
 
 t_suse_thread* ULT_create(t_process* process, int tid){
-	log_info(logger, "Creando ULT %d", tid);
+	//log_info(logger, "Creando ULT %d", tid);
 	double tiempo = get_time_today();
 
 	t_suse_thread* new_thread = malloc(sizeof(t_suse_thread));
@@ -529,8 +579,8 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 	new_thread->estado = E_NEW;
 	new_thread->duracionRafaga = 0;
 	new_thread->ejecutado_desde_estimacion = false;
-	new_thread->joinTo = list_create();
-	new_thread->joinedBy = list_create();
+	new_thread->joinTo = list_create(); //TODO: esto no se libera
+	new_thread->joinedBy = list_create(); // TODO: ESO NO SE LIBERA
 	new_thread->estimacionUltimaRafaga = 0;
 	new_thread->tiempoDeCpu = 0;
 	new_thread->tiempoDeEspera = 0;
@@ -542,7 +592,6 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 
 	return new_thread;
 }
-
 
 int close_tid(int tid, int socket_actual){
 	bool find_process_by_id(t_process* process)
@@ -560,14 +609,29 @@ int close_tid(int tid, int socket_actual){
 
 	if(thread->tid == 0)
 	{
-		log_info(logger, "Recibi un close para el ULT %d\n", tid);
-		list_destroy_and_destroy_elements(process->ULTS, free);
-		bool destructor(t_process* p)
+		log_info(logger, "Recibi un close para el proceso %d\n", tid);
+
+		void destroy_ULTsList(t_suse_thread* thread)
 		{
-			return p->PROCESS_ID == socket_actual;
+			list_destroy(thread->joinedBy);
+			list_destroy(thread->joinTo);
+			free(thread);
+		}
+		list_destroy_and_destroy_elements(process->ULTS, destroy_ULTsList);
+
+		bool buscarProcesoAdestruir(t_process* proceso)
+		{
+			return proceso->PROCESS_ID == socket_actual;
 		}
 
-		list_remove_and_destroy_by_condition(configuracion_suse.process, destructor, free);
+		void destroy_Process(t_process* proc)
+		{
+			list_destroy(proc->READY_LIST);
+			free(proc);
+		}
+
+		list_remove_and_destroy_by_condition(configuracion_suse.process, buscarProcesoAdestruir, destroy_Process);
+
 		int resultado = close(socket_actual);
 		return resultado;
 	}
@@ -705,16 +769,16 @@ void obtener_ULT_ready_FIFO()
 
 bool validar_grado_multiprogramacion()
 {
-	log_info(logger, "Validando grado de multiprogramacion...\n");
+	//log_info(logger, "Validando grado de multiprogramacion...\n");
 	return configuracion_suse.MAX_MULTIPROG >= configuracion_suse.ACTUAL_MULTIPROG + 1;
-	log_info(logger, "El grado de multiprogramacion es %d\n", configuracion_suse.ACTUAL_MULTIPROG);
+	//log_info(logger, "El grado de multiprogramacion es %d\n", configuracion_suse.ACTUAL_MULTIPROG);
 }
 
 t_process * generar_process(int process_id) {
 	t_process * process = malloc(sizeof(t_process));
 	process->PROCESS_ID = process_id; //todo ver tipo de dato
 	process->ULTS = list_create();
-	process->READY_LIST = list_create();
+	process->READY_LIST = list_create(); //TODO: ESTO NO SE LIBERA
 	process->EXEC_THREAD = 0;
 	sem_init(&(process->semaforoReady),0,0);
 
@@ -723,7 +787,7 @@ t_process * generar_process(int process_id) {
 
 
 void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
-	log_info(logger, "Inicio schedule_next...\n");
+	//log_info(logger, "Inicio schedule_next...\n");
 	bool comparador(t_process* p)
 	{
 		return p->PROCESS_ID == socket_actual;
@@ -733,14 +797,14 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	sem_t sem_ULTs_listos = process->semaforoReady;
 	int value;
 	sem_getvalue(&sem_ULTs_listos,&value);
-	log_info(logger, "El valor del sem_ULTs_listos es %d \n", value);
+	//log_info(logger, "El valor del sem_ULTs_listos es %d \n", value);
 	esperar_handshake(socket_actual, paquete_next_tid, cop_next_tid);
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	log_info(logger, "Recibi una peticion de suse_schedule_next \n");
+	//log_info(logger, "Recibi una peticion de suse_schedule_next \n");
 	log_info(logger, "Iniciando planificacion...\n");
 
 	int next_tid = obtener_proximo_ejecutar(process);
@@ -787,7 +851,7 @@ int obtener_proximo_ejecutar(t_process* process){
 	for(int i = 0 ; i<count; i++)
 	{
 		t_suse_thread* th = list_get(process->READY_LIST,i);
-		log_info(logger,"El hilo %d tiene rafaga %f...\n",th->tid,th->estimacionUltimaRafaga);
+		//log_info(logger,"El hilo %d tiene rafaga %f...\n",th->tid,th->estimacionUltimaRafaga);
 	}
 
 	t_suse_thread *next_ULT = list_get(process->READY_LIST, 0); // TODO: Si no funciona hacemos una bool que haga return thread != null; va a retornar el primero q haya
@@ -858,7 +922,7 @@ bool funcion_SJF(t_suse_thread* ULT1, t_suse_thread* ULT2) {
 void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem){
 	//Recibo el semaforo a decremetnar
 	esperar_handshake(socket_actual, paquete_wait_sem, cop_wait_sem);
-	log_info(logger, "Recibiendo el semaforo para incrementar \n");
+	//log_info(logger, "Recibiendo el semaforo para incrementar \n");
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
@@ -877,12 +941,13 @@ void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem){
 	serializar_int(buffer, &desp, resultado);
 	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
+	free(sem);
 }
 
 void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 
 	esperar_handshake(socket_actual, paquete_signal_sem, cop_signal_sem);
-	log_info(logger, "Recibiendo el semaforo para incrementar...\n");
+	//log_info(logger, "Recibiendo el semaforo para incrementar...\n");
 
 	t_paquete* paquete_recibido = recibir(socket_actual);
 	int desplazamiento = 0;
@@ -890,7 +955,7 @@ void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
 
-	log_info(logger,"Recibi el semaforo %s para incrementar...\n",sem);
+	//log_info(logger,"Recibi el semaforo %s para incrementar...\n",sem);
 
 	pthread_mutex_lock(&mutex_semaforos);
 	int resultado = incrementar_semaforo(tid, sem);
@@ -905,6 +970,7 @@ void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 	serializar_int(buffer, &desp, resultado);
 	enviar(socket_actual, cop_wait_sem, tamanio_buffer, buffer);
 	free(buffer);
+	free(sem);
 }
 
 //todo definir que le pasas, si un char* o un t_sem*
@@ -978,7 +1044,7 @@ int decrementar_semaforo(int socket_actual,int tid, char* sem_name){
 		return -1;
 	}
 
-	log_info(logger,"El valor actual del semaforo es %d",semaforo->VALUE);
+	//log_info(logger,"El valor actual del semaforo es %d",semaforo->VALUE);
 
 	if(semaforo->VALUE <= 0)
 	{

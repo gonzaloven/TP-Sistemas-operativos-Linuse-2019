@@ -100,7 +100,7 @@ void metricas_por_socket_conectado(uint32_t pid);
 
 int busca_segmento(program *prog,uint32_t va);
 
-heap_metadata* buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado);
+heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado);
 
 void* obtener_data_marco_heap(page* pagina);
 
@@ -198,7 +198,7 @@ int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame);
 
 int frame_swap_libre();
 
-void liberar_frame_swap(void* frame);
+void liberar_frame_swap(int frame);
 
 void destroy_program_list_elements(program* prog);
 

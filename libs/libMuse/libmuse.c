@@ -19,7 +19,7 @@ int tamDataFunction(Function f){
 	return tamano;
 }
 
-int muse_init(int id)
+int muse_init(int id, char* ip, int puerto)
 {
 	config = config_create(LIBMUSE_CONFIG_PATH);
 	logger = log_create("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/libmuse.log", "LIBMUSE", true, LOG_LEVEL_TRACE);
@@ -29,11 +29,8 @@ int muse_init(int id)
 		printf("Configuration couldn't be loaded.Quitting program!\n");
 		return(-1);
 	}
-
-	char* SERVER_IP = config_get_string_value(config, "SERVER_IP");
-	int SERVER_PORT = config_get_int_value(config, "SERVER_PORT");
 	
-	MASTER_SOCKET = connect_to(SERVER_IP,SERVER_PORT);
+	MASTER_SOCKET = connect_to(ip,puerto);
 
 	PROCESS_ID = id;
 
@@ -125,7 +122,7 @@ int muse_get(void* dst, uint32_t src, size_t n)
 	function.args[0].type = VAR_VOID_PTR;
 	function.args[0].size = n;
 	function.args[0].value.val_voidptr = malloc(n);
-	memcpy(function.args[0].value.val_voidptr, dst, n);
+	//memcpy(function.args[0].value.val_voidptr, dst, n);
 
 	function.args[1].type = VAR_UINT32;
 	function.args[1].size = sizeof(uint32_t);
@@ -161,14 +158,32 @@ int muse_get(void* dst, uint32_t src, size_t n)
 
 	Function* f = msg.data;
 
-	if(f->type != RTA_FUNCTION_GET){
+	if(f->type != RTA_FUNCTION_GET && f->type != RTA_FUNCTION_GET_ERROR){
 		log_error(logger,"Respuesta Get recibida -> No se ha podido recibir el contenido de esa direccion");
 		return -1;
 	}
-	memcpy(dst, f->args[0].value.val_voidptr, f->args[0].size);
-	free(f->args[0].value.val_voidptr);
 
-	log_info(logger,"Respuesta Get recibida -> Se ha recibido el contenido de la direccion correctamente");
+	if(f->type == RTA_FUNCTION_GET_ERROR){
+		log_info(logger,"Respuesta Get recibida -> ERROR");
+
+		if(f->args[0].value.val_u32 == -1)
+			log_error(logger,"Se trato de acceder a un archivo unmmaped");
+		if(f->args[0].value.val_u32 == -2)
+			log_error(logger, "El archivo mmap es privado y el programa no tiene permisos");
+		if(f->args[0].value.val_u32 == -3)
+			log_error(logger, "El segmento buscado no existe");
+		if(f->args[0].value.val_u32 == -4)
+			log_error(logger, "Estas tratando de leer mas del limite del segmento");
+
+		raise(SIGSEGV);
+	}
+	else{
+		memcpy(dst, f->args[0].value.val_voidptr, f->args[0].size);
+		free(f->args[0].value.val_voidptr);
+		log_info(logger,"El tamaño de lo recibido es: %d", f->args[0].size);
+		log_info(logger,"Respuesta Get recibida -> Se ha recibido el contenido de la direccion correctamente");
+	}
+
 
 	return 0;
 }
@@ -201,6 +216,17 @@ int muse_cpy(uint32_t dst, void* src, int n)
 	int result = call(&function);
 
 	if(result == -1){
+		log_error(logger, "Se trata de acceder a una direccion unmapped");
+		raise(SIGSEGV);
+	}
+
+	if(result == -2){
+		log_error(logger, "El archivo mmap es privado y el programa no tiene permisos");
+		raise(SIGSEGV);
+	}
+
+	if(result == -3){
+		log_error(logger, "Se busco el segmento, pero no se encontro");
 		raise(SIGSEGV);
 	}
 

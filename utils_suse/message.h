@@ -7,6 +7,7 @@
 #include <pthread.h>
 
 typedef enum{
+	RTA_FUNCTION_GET_ERROR,
 	FUNCTION_MALLOC,
 	FUNCTION_FREE,
 	FUNCTION_COPY,
