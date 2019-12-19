@@ -1,4 +1,5 @@
 
+
 #include "suse.h"
 
 #include <commons/collections/node.h>
@@ -11,10 +12,13 @@
 #include <stdlib.h>
 #include "libraries.h"
 
+
 //hols
 t_log* logger;
 t_log* logger_metrics;
 char * suse_config_path = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/configs/planificador.config";
+
+int keepRunning = 1;
 
 void suse_stop_service()
 {
@@ -35,12 +39,17 @@ void suse_stop_service()
 	pthread_mutex_destroy(&mutex_blocked_queue);
 	pthread_mutex_destroy(&mutex_multiprog);
 	pthread_mutex_destroy(&mutex_semaforos);
+
+	keepRunning = 0;
+
+	close(listener);
+
+	printf("Gracias por usar SUSE, hasta luego!\n");
 }
 
 int main(void){
 
 	signal(SIGINT,suse_stop_service);
-
 	char* log_file;
 	log_file = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
 	logger = log_create(log_file, "SUSE logs", 1, 1);
@@ -69,8 +78,6 @@ int main(void){
 
 	log_info(logger, "Iniciando servidor... \n");
 	iniciar_servidor();
-
-	suse_stop_service();
 
 	return EXIT_SUCCESS;
 }
@@ -346,10 +353,13 @@ void iniciar_servidor() {
 ----------------- Conexiones entrantes -----------------
 --------------------------------------------------------
 */
-	while(1){
+	while(keepRunning){
 		log_info(logger,"SUSE esperando conexiones...\n");
 
 		un_socket new_connection = aceptar_conexion(listener);
+
+		if(keepRunning == 0)
+			break;
 
 		t_paquete* handshake = recibir(listener);
 
