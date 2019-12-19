@@ -441,6 +441,11 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 
 	page* pagina = list_get(segmentoBuscado->page_table, paginaBuscada);
 
+	if(!pagina->is_present){
+		obtener_data_marco_heap(pagina);
+		//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
+	}
+
 	metadataBuscada = (heap_metadata*) ((pagina->fr) + offset);
 
 	if((offset + METADATA_SIZE) > PAGE_SIZE){
@@ -451,11 +456,6 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 		if(!proximaPagina->is_present){
 			obtener_data_marco_heap(proximaPagina);
 			log_debug(debug_logger, "-- LLA METADATA ESTABA CORTADA, LA PAGINA SIG NO ESTABA PRESENTE, LA CARGO--");
-		}
-
-		if(!pagina->is_present){
-			obtener_data_marco_heap(pagina);
-			//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 		}
 
 		void* punteroAlFrameSiguiente = proximaPagina->fr;
