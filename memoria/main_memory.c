@@ -141,11 +141,14 @@ void el_cliente_se_tomo_el_palo(uint32_t pid){
 }
 
 int number_of_free_frames_upcm(){
-	int frames_libres_1 = 0;
 	int memoria_libre = 0;
 	int memoria_total = 0;
+	int frames_libres_1 = 0;
+	int frames_libres_2 = 0;
+	int i;
+
 	pthread_mutex_lock(&mutex_bitmap_heap);
-	for(int i=0; i < TOTAL_FRAME_NUM; i++)
+	for(i=0; i < TOTAL_FRAME_NUM; i++)
 	{
 		frames_libres_1 += (BITMAP[i]);
 	}
@@ -156,6 +159,25 @@ int number_of_free_frames_upcm(){
 
 	log_trace(metricas_logger, "Cantidad de Memoria libre en UPCM: %d / %d", memoria_libre, memoria_total);
 	log_trace(metricas_logger, "Cantidad de Frames libres en UPCM: %d / %d", frames_libres_1, TOTAL_FRAME_NUM);
+
+	/* SWAP SPACE */
+
+	memoria_libre = 0;
+
+	pthread_mutex_lock(&mutex_bitmap_mmap);
+	for(i=0; i < TOTAL_FRAME_NUM_SWAP; i++)
+	{
+		frames_libres_2 += (BITMAP_SWAP_FILE[i]);
+	}
+	pthread_mutex_unlock(&mutex_bitmap_mmap);
+
+	memoria_libre = frames_libres_2 * PAGE_SIZE;
+	memoria_total = TOTAL_FRAME_NUM_SWAP * PAGE_SIZE;
+
+	log_trace(metricas_logger, "Cantidad de Espacio libre en SWAP: %d / %d", memoria_libre, memoria_total);
+	log_trace(metricas_logger, "Cantidad de Frames libres en SWAP: %d / %d", frames_libres_2, TOTAL_FRAME_NUM_SWAP);
+
+	/* FIN SWAP SPACE */
 
 	return frames_libres_1;
 
@@ -430,10 +452,12 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 			obtener_data_marco_heap(proximaPagina);
 			log_debug(debug_logger, "-- LLA METADATA ESTABA CORTADA, LA PAGINA SIG NO ESTABA PRESENTE, LA CARGO--");
 		}
+
 		if(!pagina->is_present){
 			obtener_data_marco_heap(pagina);
 			//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 		}
+
 		void* punteroAlFrameSiguiente = proximaPagina->fr;
 		int tamanioMetadataCortada = (PAGE_SIZE) - offset;
 		log_debug(debug_logger, "Tamanio metadata cortada parte 1: %d", tamanioMetadataCortada);
@@ -487,11 +511,16 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 	}
 
 	metadataBuscada = (heap_metadata*) ((pagina->fr) + offset);
-
+	log_debug(debug_logger, "Soy buscar metadata y el numero de frame que recibi para la pag es: %d",
+			(pagina->fr - MAIN_MEMORY)/PAGE_SIZE);
 
 	if((offset + METADATA_SIZE) > PAGE_SIZE){
 		log_debug(debug_logger, "LA METADATA ESTA CORTADA - BUSCAR_METADATA_POR_DIR");
 		heap_metadata metadataCopia;
+
+		int tamanioMetadataCortada = (PAGE_SIZE) - offset;
+
+		memcpy(&metadataCopia, metadataBuscada, tamanioMetadataCortada);
 
 		page* proximaPagina = list_get(segmentoBuscado->page_table, (paginaBuscada + 1));
 
@@ -500,15 +529,21 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 			obtener_data_marco_heap(proximaPagina);
 		}
 
+		//log_debug(debug_logger, "Soy buscar metadata y el numero de frame que recibi para la pag siguiente es: %d",
+		//			(pagina->fr - MAIN_MEMORY)/PAGE_SIZE);
 		void* punteroAlFrameSiguiente = proximaPagina->fr;
-		int tamanioMetadataCortada = (PAGE_SIZE) - offset;
 
-		memcpy(&metadataCopia, metadataBuscada, tamanioMetadataCortada);
+		//log_debug(debug_logger, "Tamanio metadata cortada parte 1: %d", tamanioMetadataCortada);
+		//log_debug(debug_logger, "Tamanio metadata cortada parte 2: %d", METADATA_SIZE - tamanioMetadataCortada);
+		//log_debug(debug_logger, "El frame de la pagina que tiene la parte 1 es: %d", (pagina->fr - MAIN_MEMORY)/PAGE_SIZE);
+		//log_debug(debug_logger, "El frame de la pagina que tiene la parte 2 es: %d", (proximaPagina->fr - MAIN_MEMORY)/PAGE_SIZE);
+
+		//memcpy(&metadataCopia, metadataBuscada, tamanioMetadataCortada);
 		memcpy((void*)(&metadataCopia) + tamanioMetadataCortada, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
 
-		log_debug(debug_logger, "La metadata copia tiene is_free: %d, size: %d", metadataCopia.is_free, metadataCopia.size);
+		//log_debug(debug_logger, "La metadata copia tiene is_free: %d, size: %d", metadataCopia.is_free, metadataCopia.size);
 
-		log_warning(debug_logger, "Fin buscar_metadata_por_direccion");
+		//log_warning(debug_logger, "Fin buscar_metadata_por_direccion");
 
 		return metadataCopia;
 	}else{
@@ -1095,6 +1130,7 @@ void* obtener_data_marco_heap(page* pagina){
         fread(buffer_page_swap,PAGE_SIZE,1,archivo_swap);
 
         pthread_mutex_lock(&mutex_MM);
+        log_debug(debug_logger, "Estoy en obtener data y el frame de upcm que me dieron es: %d", numFrame);
     	pagina->fr = (void*) (MAIN_MEMORY + numFrame * PAGE_SIZE);
     	pthread_mutex_unlock(&mutex_MM);
         pagina->is_present = 1;
@@ -1129,6 +1165,9 @@ void* obtener_data_marco_heap(page* pagina){
         free(buffer_page_swap);
         fclose(archivo_swap);
     }
+
+	log_debug(debug_logger, "Estoy en obtener data y repito el frame de upcm que me dieron es: %d",
+			(pagina->fr - MAIN_MEMORY) / PAGE_SIZE);
 
     return pagina->fr;
 }
