@@ -37,6 +37,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_bitmap_heap, NULL);
 	pthread_mutex_init(&mutex_bitmap_mmap, NULL);
 	pthread_mutex_init(&mutex_MM, NULL);
+	pthread_mutex_init(&mutex_clock, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -90,6 +91,8 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_bitmap_heap);
 	pthread_mutex_destroy(&mutex_bitmap_mmap);
 	pthread_mutex_destroy(&mutex_MM);
+	pthread_mutex_destroy(&mutex_clock);
+
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
 }
@@ -310,6 +313,7 @@ int dame_nro_frame_reemplazado(){
 	segment *seg;
 	int U, M;	
 
+	pthread_mutex_lock(&mutex_clock);
 	while(true)
 	{
 		for (nro_de_segmento; nro_de_segmento < cantidad_de_segmentos_totales ; nro_de_segmento++)
@@ -330,6 +334,7 @@ int dame_nro_frame_reemplazado(){
 						segmentoClock = nro_de_segmento;
 						paginaClock = nro_de_pag;
 						list_destroy(listaSeg);
+						pthread_mutex_unlock(&mutex_clock);
 						return nro_frame;											
 					}
 				}
@@ -339,6 +344,7 @@ int dame_nro_frame_reemplazado(){
 						segmentoClock = nro_de_segmento;
 						paginaClock = nro_de_pag;
 						list_destroy(listaSeg);
+						pthread_mutex_unlock(&mutex_clock);
 						return nro_frame;	
 					}
 					pag->is_used = 0;
