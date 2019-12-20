@@ -21,6 +21,7 @@ int tamDataFunction(Function f){
 
 t_log *muse_logger = NULL;
 muse_configuration *muse_config = NULL;
+pthread_mutex_t mutex_malloc = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc,char *argv[])
 {
@@ -184,7 +185,9 @@ void* muse_invoke_function(Function *function,uint32_t pid)
 	{
 		case FUNCTION_MALLOC:
 			log_info(muse_logger,"Llamado a Malloc, quiere allocar -> %d bytes",function->args[0].value.val_u32);
+			pthread_mutex_lock(&mutex_malloc);
 			func_ret = memory_malloc(function->args[0].value.val_u32,pid);
+			pthread_mutex_unlock(&mutex_malloc);
 			log_info(muse_logger, "Fin memory_malloc");
 			break;
 		case FUNCTION_FREE:
