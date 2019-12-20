@@ -38,6 +38,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_bitmap_mmap, NULL);
 	pthread_mutex_init(&mutex_MM, NULL);
 	pthread_mutex_init(&mutex_clock, NULL);
+	pthread_mutex_init(&mutex_segment, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -92,6 +93,7 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_bitmap_mmap);
 	pthread_mutex_destroy(&mutex_MM);
 	pthread_mutex_destroy(&mutex_clock);
+	pthread_mutex_destroy(&mutex_segment);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -967,11 +969,15 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 int segment_with_free_space(program *prog, int size)
 {
+	pthread_mutex_lock(&mutex_segment);
 	int i=0;
 	segment *segmentoActual;
 	int cantidadDeSegmentos = list_size(prog->segment_table);
 
-	if (cantidadDeSegmentos == 0) return -1;
+	if (cantidadDeSegmentos == 0){
+		pthread_mutex_unlock(&mutex_segment);
+		return -1;
+	}
 
 	while(i < cantidadDeSegmentos)
 	{		
@@ -988,12 +994,14 @@ int segment_with_free_space(program *prog, int size)
 				metadataEncontrada = buscar_metadata_por_direccion(direccionLogicaEncontrada, segmentoActual);
 
 				log_debug(debug_logger, "Encontramos que el segmento %d tiene una metadata de %d de size", i, metadataEncontrada.size);
+				pthread_mutex_unlock(&mutex_segment);
 				return i;
 			}
 		}
 		i++;
 	}
 	log_debug(debug_logger, "No habia ningun segmento con %d de espacio libre", size);
+	pthread_mutex_unlock(&mutex_segment);
 	return -1;
 }
 

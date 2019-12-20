@@ -21,7 +21,6 @@ int tamDataFunction(Function f){
 
 t_log *muse_logger = NULL;
 muse_configuration *muse_config = NULL;
-pthread_mutex_t mutex_malloc = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc,char *argv[])
 {
@@ -200,10 +199,8 @@ void* muse_invoke_function(Function *function,uint32_t pid)
 			break;
 		case FUNCTION_COPY:
 			log_info(muse_logger,"Llamado a Copy con Memoria destino %d - Bytes a copiar %d",function->args[0].value.val_u32,function->args[2].value.val_u32);
-			pthread_mutex_lock(&mutex_malloc);
 			func_ret = memory_cpy(function->args[0].value.val_u32,
 								function->args[1].value.val_voidptr,function->args[2].value.val_u32,pid);
-			pthread_mutex_unlock(&mutex_malloc);
 			log_info(muse_logger, "Fin memory_cpy");
 			break;
 		case FUNCTION_MAP:
