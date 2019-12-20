@@ -37,9 +37,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_bitmap_heap, NULL);
 	pthread_mutex_init(&mutex_bitmap_mmap, NULL);
 	pthread_mutex_init(&mutex_MM, NULL);
-	pthread_mutex_init(&mutex_clock, NULL);
-	pthread_mutex_init(&mutex_pagina_cortada, NULL);
-
+	pthread_mutex_init(&mutex_obtener_data, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -93,9 +91,7 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_bitmap_heap);
 	pthread_mutex_destroy(&mutex_bitmap_mmap);
 	pthread_mutex_destroy(&mutex_MM);
-	pthread_mutex_destroy(&mutex_clock);
-	pthread_mutex_destroy(&mutex_pagina_cortada);
-
+	pthread_mutex_destroy(&mutex_obtener_data);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -315,9 +311,8 @@ int dame_nro_frame_reemplazado(){
 	int nro_paso = 1;
 	page *pag;
 	segment *seg;
-	int U, M;	
+	int U, M;
 
-	pthread_mutex_lock(&mutex_clock);
 	while(true)
 	{
 		for (nro_de_segmento; nro_de_segmento < cantidad_de_segmentos_totales ; nro_de_segmento++)
@@ -338,7 +333,6 @@ int dame_nro_frame_reemplazado(){
 						segmentoClock = nro_de_segmento;
 						paginaClock = nro_de_pag;
 						list_destroy(listaSeg);
-						pthread_mutex_unlock(&mutex_clock);
 						return nro_frame;											
 					}
 				}
@@ -348,7 +342,6 @@ int dame_nro_frame_reemplazado(){
 						segmentoClock = nro_de_segmento;
 						paginaClock = nro_de_pag;
 						list_destroy(listaSeg);
-						pthread_mutex_unlock(&mutex_clock);
 						return nro_frame;	
 					}
 					pag->is_used = 0;
@@ -472,7 +465,6 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 	metadataBuscada = (heap_metadata*) ((pagina->fr) + offset);
 
 	if((offset + METADATA_SIZE) > PAGE_SIZE){
-		pthread_mutex_lock(&mutex_pagina_cortada);
 		heap_metadata metadataCopia = { 0, true };
 
 		page* proximaPagina = list_get(segmentoBuscado->page_table, (paginaBuscada + 1));
@@ -502,7 +494,6 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 		memcpy((void*)(&metadataCopia2) + tamanioMetadataCortada, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
 		log_debug(debug_logger, "Lo cargado en metadataBuscada es -> isfree: %d - size: %d",
 				metadataCopia2.is_free, metadataCopia2.size);
-		pthread_mutex_unlock(&mutex_pagina_cortada);
 	}else{
 		metadataBuscada->is_free = is_free;
 		metadataBuscada->size = nuevoSize;
@@ -529,7 +520,6 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 		log_error(debug_logger, "La pagina buscada no existe");
 	}
 
-	pthread_mutex_lock(&mutex_pagina_cortada);
 	if(!pagina->is_present){
 		log_debug(debug_logger, "LA PAGINA BUSCADA NO ESTABA PRESENTE - LA CARGO - BUSCAR_METADATA_POR_DIR");
 		obtener_data_marco_heap(pagina);
@@ -571,11 +561,9 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 		//log_debug(debug_logger, "La metadata copia tiene is_free: %d, size: %d", metadataCopia.is_free, metadataCopia.size);
 
 		//log_warning(debug_logger, "Fin buscar_metadata_por_direccion");
-		pthread_mutex_unlock(&mutex_pagina_cortada);
 		return metadataCopia;
 	}else{
 		log_debug(debug_logger, "Fin buscar_metadata_por_direccion");
-		pthread_mutex_unlock(&mutex_pagina_cortada);
 		return *metadataBuscada;
 	}
 }
@@ -1136,8 +1124,8 @@ int busca_segmento(program* prog, uint32_t direccion){
 }
 
 void* obtener_data_marco_heap(page* pagina){
+	pthread_mutex_lock(&mutex_obtener_data);
     if(!pagina->is_present && number_of_free_frames_upcm() == 0){
-
     	//TODO: mutex archivo swap ? ADEMAS BLOQUEAR QUE NO ESCRIBA CUANDO LIBERA EL FRAME SWAP HASTA QUE MEMCPY
     	int numFrame = dame_nro_frame_reemplazado();
 
@@ -1197,7 +1185,7 @@ void* obtener_data_marco_heap(page* pagina){
 
 	log_debug(debug_logger, "Estoy en obtener data y repito el frame de upcm que me dieron es: %d",
 			(pagina->fr - MAIN_MEMORY) / PAGE_SIZE);
-
+	pthread_mutex_unlock(&mutex_obtener_data);
     return pagina->fr;
 }
 
