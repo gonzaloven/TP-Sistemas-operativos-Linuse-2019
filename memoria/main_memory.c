@@ -42,6 +42,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_prox_lib, NULL);
 	pthread_mutex_init(&mutex_carga_pag, NULL);
 	pthread_mutex_init(&mutex_buscar_metadata, NULL);
+	pthread_mutex_init(&mutex_malloc, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -100,6 +101,7 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_prox_lib);
 	pthread_mutex_destroy(&mutex_carga_pag);
 	pthread_mutex_destroy(&mutex_buscar_metadata);
+	pthread_mutex_destroy(&mutex_malloc);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -804,6 +806,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			}
 		}
 
+		pthread_mutex_lock(&mutex_malloc);
 		direccionLogicaMetadataLibre = proxima_metadata_libre_con_size(segmentoConEspacio->base, segmentoConEspacio, total_size);
 
 		log_debug(debug_logger, "La direccion logica de la metadata donde voy a allocar esta en ---> %d", direccionLogicaMetadataLibre);
@@ -837,6 +840,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		int direccionLogicaUltimaMetadata = ultima_metadata_segmento(segmentoConEspacio->base, segmentoConEspacio);
 
 		heap_metadata ultimaMetadata = buscar_metadata_por_direccion(direccionLogicaUltimaMetadata, segmentoConEspacio);
+
+		pthread_mutex_unlock(&mutex_malloc);
 
 		log_debug(debug_logger, "Valores metadata free: %d, size: %d", ultimaMetadata.is_free, ultimaMetadata.size);
 

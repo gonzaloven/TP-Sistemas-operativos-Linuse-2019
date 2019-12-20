@@ -23,6 +23,7 @@ pthread_mutex_t mutex_segment;
 pthread_mutex_t mutex_prox_lib;
 pthread_mutex_t mutex_carga_pag;
 pthread_mutex_t mutex_buscar_metadata;
+pthread_mutex_t mutex_malloc;
 
 
 
