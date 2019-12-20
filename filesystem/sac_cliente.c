@@ -134,7 +134,6 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 		free(f->args[0].value.val_charptr);
 		f->args[0].value.val_charptr = NULL;
 		free(msg.data);
-		log_info(logger,"Respuesta Readdir recibida -> El directorio buscado esta vacio.");
 		return 0;
 	}
 
@@ -653,7 +652,7 @@ int main(int argc, char *argv[]){
 	//Cargando Configuraciones
 	fuse_config = load_configuration(SAC_CONFIG_PATH);
 	//Inicializando el logger
-	logger = log_create("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/sac_cliente.log","SAC_CLIENTE",true,LOG_LEVEL_TRACE);
+	logger = log_create("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/sac_cliente.log","SAC_CLIENTE",true,LOG_LEVEL_INFO);
 	//Conectando al servidor
 	serverSocket = connect_to(fuse_config->ip_cliente,fuse_config->listen_port);
 

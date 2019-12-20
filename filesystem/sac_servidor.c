@@ -103,7 +103,7 @@ void configurar_server(){
 void fuse_start_service(ConnectionHandler ch)
 {
 	fuse_config = load_configuration(SAC_CONFIG_PATH);
-	fuse_logger = log_create("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
+	fuse_logger = log_create("/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/fuse.log","FUSE",true,LOG_LEVEL_INFO);
 	configurar_server();
 	//fuse_logger = log_create("../logs/fuse.log","FUSE",true,LOG_LEVEL_TRACE);
 	server_start(fuse_config->listen_port,ch);
@@ -176,53 +176,65 @@ Function fuse_invoke_function(Function *f)
 		case FUNCTION_GETATTR:
 			log_info(fuse_logger,"Getattr llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_getattr(f->args[0].value.val_charptr);
+			log_info(fuse_logger,"Fin Getattr");
 			break;
 		case FUNCTION_READDIR:
 			log_info(fuse_logger,"Readdir llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_readdir(f->args[0].value.val_charptr);
+			log_info(fuse_logger,"Fin Readdir");
 			break;
 		case FUNCTION_OPEN:
 			log_info(fuse_logger,"Open llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_open(f->args[0].value.val_charptr);
+			log_info(fuse_logger,"Fin Open");
 			break;
 		case FUNCTION_READ:
 			log_info(fuse_logger,"Read llamado with -> Path: %s  Size: %d Offset: %d", f->args[1].value.val_charptr, f->args[2].value.val_u32, f->args[0].value.val_u32);
 			func_ret = sac_server_read(f->args[1].value.val_charptr, f->args[2].value.val_u32, f->args[0].value.val_u32);
+			log_info(fuse_logger,"Fin Read");
 			break;
 		case FUNCTION_OPENDIR:
 			log_info(fuse_logger,"Opendir llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_opendir(f->args[0].value.val_charptr);
+			log_info(fuse_logger,"Fin Opendir");
 			break;
 		case FUNCTION_MKNOD:
 			log_info(fuse_logger,"Mknod llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_mknod(f->args[0].value.val_charptr);
+			log_info(fuse_logger,"Fin Mknod");
 			break;
 		case FUNCTION_WRITE:
-			log_info(fuse_logger,"Write llamado with -> Path: %s Pide Escribir: %s Size: %d Offset: %d", f->args[1].value.val_charptr, f->args[2].value.val_charptr, f->args[2].size, f->args[0].value.val_u32);
+			log_info(fuse_logger,"Write llamado with -> Path: %s Size: %d Offset: %d", f->args[1].value.val_charptr, f->args[2].size, f->args[0].value.val_u32);
 			func_ret = sac_server_write(f->args[1].value.val_charptr, f->args[2].value.val_charptr, f->args[2].size, f->args[0].value.val_u32);
+			log_info(fuse_logger,"Fin Write");
 			break;
 		case FUNCTION_UNLINK:
 			log_info(fuse_logger,"Unlink llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_unlink(f->args[0].value.val_charptr);
+			log_info(fuse_logger,"Fin Unlink");
 			break;
 		case FUNCTION_MKDIR:
 			log_info(fuse_logger,"Mkdir llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_mkdir(f->args[0].value.val_charptr);
+			log_info(fuse_logger,"Fin Mkdir");
 			break;
 		case FUNCTION_RMDIR:
 			log_info(fuse_logger,"Rmdir llamado with -> Path: %s", f->args[0].value.val_charptr);
 			func_ret = sac_server_rmdir(f->args[0].value.val_charptr);
+			log_info(fuse_logger,"Fin Rmdir");
 			break;
 		case FUNCTION_TRUNCATE:
 			log_info(fuse_logger,"Truncate llamado with -> Path: %s, Size: %d", f->args[1].value.val_charptr, f->args[0].value.val_u32);
 			func_ret = sac_server_truncate(f->args[1].value.val_charptr, f->args[0].value.val_u32);
+			log_info(fuse_logger,"Fin Truncate");
 			break;
 		case FUNCTION_RENAME:
 			log_info(fuse_logger,"Rename llamado with -> Path viejo: %s, Path nuevo: %s", f->args[0].value.val_charptr, f->args[1].value.val_charptr);
 			func_ret = sac_server_rename(f->args[0].value.val_charptr, f->args[1].value.val_charptr);
+			log_info(fuse_logger,"Fin Rename");
 			break;
 		default:
-			log_error(fuse_logger,"Funcion desconocida");
+			log_error(fuse_logger,"Llamado a funcion desconocida");
 			break;
 	}
 	return func_ret;
@@ -332,7 +344,7 @@ Function sac_server_read(char* path, size_t size, uint32_t offset){
 
 	sizeRespuesta = leer_archivo(buffer, path, size, offset);
 
-	log_info(fuse_logger, "Fin lectura -> Bytes leidos: %d", sizeRespuesta);
+	log_info(fuse_logger, "Bytes leidos: %d", sizeRespuesta);
 
 	fsend.type = FUNCTION_RTA_READ;
 	fsend.num_args = 1;
@@ -351,7 +363,7 @@ Function sac_server_write(char* path, char* buf, size_t size, uint32_t offset){
 
 	respuesta = escribir_archivo(buf, path, size, offset);
 
-	log_info(fuse_logger, "Fin escritura -> Bytes escritos: %d", respuesta);
+	log_info(fuse_logger, "Bytes escritos: %d", respuesta);
 
 	fsend.type = FUNCTION_RTA_WRITE;
 	fsend.num_args = 1;
