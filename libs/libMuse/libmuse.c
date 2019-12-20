@@ -47,13 +47,9 @@ int call(Function *function)
 	create_message_header(&header,MESSAGE_CALL,PROCESS_ID,sizeof(Function));
 	create_function_message(&msg,&header,function);
 
-	pthread_mutex_lock(&s_socket);
 	send_message(MASTER_SOCKET,&msg);
-	pthread_mutex_unlock(&s_socket);
-
-	pthread_mutex_lock(&s_socket);
+	
 	receive_message(MASTER_SOCKET,&msg);
-	pthread_mutex_unlock(&s_socket);
 
 	int *response = msg.data;
 	return *response;
@@ -81,9 +77,11 @@ uint32_t muse_alloc(uint32_t tam)
 	function.args[0] = arg;
 	
 	log_info(logger,"Alloc llamado -> Size: %d", tam);
-
+	
+	pthread_mutex_lock(&s_socket);
 	int result = call(&function);
-
+	pthread_mutex_unlock(&s_socket);
+	
 	if (result == -1)
 		raise(SIGSEGV);
 	
@@ -107,7 +105,9 @@ void muse_free(uint32_t dir)
 
 	log_info(logger,"Free llamado -> Direccion: %d", dir);
 
+	pthread_mutex_lock(&s_socket);
 	call(&function);
+	pthread_mutex_unlock(&s_socket);
 
 	log_info(logger,"Respuesta Free recibida -> Se ha liberado la direccion de memoria correctamente");
 
@@ -145,14 +145,13 @@ int muse_get(void* dst, uint32_t src, size_t n)
 
 	pthread_mutex_lock(&s_socket);
 	if(send_message(MASTER_SOCKET,&msg) == -1){
+		pthread_mutex_unlock(&s_socket);
 		//error no se pudo enviar
 		return -1;
 	}
-	pthread_mutex_unlock(&s_socket);
 
 	free(function.args[0].value.val_voidptr);
 
-	pthread_mutex_lock(&s_socket);
 	receive_message_var(MASTER_SOCKET, &msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -213,7 +212,9 @@ int muse_cpy(uint32_t dst, void* src, int n)
 	function.args[0] = arg[0];
 	function.args[2] = arg[2];
 
+	pthread_mutex_lock(&s_socket);
 	int result = call(&function);
+	pthread_mutex_unlock(&s_socket);
 
 	if(result == -1){
 		log_error(logger, "Se trata de acceder a una direccion unmapped");
@@ -261,7 +262,9 @@ uint32_t muse_map(char *path, size_t length, int flags)
 
 	log_info(logger,"Map llamado -> Path: %s, Length: %d, Flag: %d", path, length, flags);
 
+	pthread_mutex_lock(&s_socket);
 	int result = call(&function);
+	pthread_mutex_unlock(&s_socket);
 
 	if(result == -1){
 		log_error(logger,"Respuesta Map recibida -> No se ha podido realizar el mapeo");
@@ -291,8 +294,11 @@ int muse_sync(uint32_t addr, size_t len)
 	function.args[1] = arg[1];
 
 	log_info(logger,"Sync llamado -> Direccion: %d, Length: %d", addr, len);
-
+	
+	pthread_mutex_lock(&s_socket);
 	int result = call(&function);
+	pthread_mutex_unlock(&s_socket);
+	
 	if (result == -2){
 		log_error(logger,"Respuesta Sync recibida -> No se ha podido realizar la sincronizacion");
 		return -1;
@@ -318,7 +324,9 @@ int muse_unmap(uint32_t dir)
 
 	log_info(logger,"Unmap llamado -> Direccion: %d", dir);
 
+	pthread_mutex_lock(&s_socket);
 	int result = call(&function);
+	pthread_mutex_unlock(&s_socket);
 
 	if(result == -1){
 		raise(SIGSEGV);
