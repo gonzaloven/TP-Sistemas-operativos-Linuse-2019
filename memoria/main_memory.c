@@ -38,12 +38,6 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_bitmap_mmap, NULL);
 	pthread_mutex_init(&mutex_MM, NULL);
 	pthread_mutex_init(&mutex_clock, NULL);
-	pthread_mutex_init(&mutex_segment, NULL);
-	pthread_mutex_init(&mutex_prox_lib, NULL);
-	pthread_mutex_init(&mutex_carga_pag, NULL);
-	pthread_mutex_init(&mutex_buscar_metadata, NULL);
-	pthread_mutex_init(&mutex_malloc, NULL);
-	pthread_mutex_init(&mutex_cpy, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -98,11 +92,6 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_bitmap_mmap);
 	pthread_mutex_destroy(&mutex_MM);
 	pthread_mutex_destroy(&mutex_clock);
-	pthread_mutex_destroy(&mutex_segment);
-	pthread_mutex_destroy(&mutex_prox_lib);
-	pthread_mutex_destroy(&mutex_carga_pag);
-	pthread_mutex_destroy(&mutex_buscar_metadata);
-	pthread_mutex_destroy(&mutex_malloc);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -537,7 +526,6 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 }
 
 heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado){
-	pthread_mutex_lock(&mutex_buscar_metadata);
 	log_debug(debug_logger, "Llamado buscar_metadata_por_direccion");
 	log_debug(debug_logger, "buscar_metadata_por_direccion. Dir Logica: %d", direccionLogica);
 	heap_metadata* metadataBuscada = NULL;
@@ -597,17 +585,14 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 		//log_debug(debug_logger, "La metadata copia tiene is_free: %d, size: %d", metadataCopia.is_free, metadataCopia.size);
 
 		//log_warning(debug_logger, "Fin buscar_metadata_por_direccion");
-		pthread_mutex_unlock(&mutex_buscar_metadata);
 		return metadataCopia;
 	}else{
-		pthread_mutex_unlock(&mutex_buscar_metadata);
 		log_debug(debug_logger, "Fin buscar_metadata_por_direccion");
 		return *metadataBuscada;
 	}
 }
 
 int ultima_metadata_segmento(int dirLogica, segment* segmentoActual){
-	pthread_mutex_lock(&mutex_carga_pag);
 	log_debug(debug_logger, "Func. Ult. Met. Seg. : Dir logica pedida: %d", dirLogica);
 
 	heap_metadata metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
@@ -618,18 +603,15 @@ int ultima_metadata_segmento(int dirLogica, segment* segmentoActual){
 	log_debug(debug_logger, "La direccion log de la metActual es: %d \nEl size de la metActual: %d",dirLogica, metadataActual.size);
 	log_debug(debug_logger, "El limite del segmento es: ", segmentoActual->limit);
 	if(dirLogicaSiguienteMetadata == segmentoActual->limit){
-		pthread_mutex_unlock(&mutex_carga_pag);
 		return dirLogica;
 	}
 	else{
-		pthread_mutex_unlock(&mutex_carga_pag);
 		ultima_metadata = ultima_metadata_segmento(dirLogicaSiguienteMetadata, segmentoActual);
 		return ultima_metadata;
 	}
 }
 
 int proxima_metadata_libre_con_size(int dirLogica, segment* segmentoActual, int size){
-	pthread_mutex_lock(&mutex_prox_lib);
 	heap_metadata metadataActual;
 	metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
 
@@ -637,11 +619,9 @@ int proxima_metadata_libre_con_size(int dirLogica, segment* segmentoActual, int 
 
 	if(dirLogica == direccionUltimaMetadata){
 		if(metadataActual.size >=size){
-			pthread_mutex_unlock(&mutex_prox_lib);
 			return dirLogica;
 		}
 		else{
-			pthread_mutex_unlock(&mutex_prox_lib);
 			return -1;
 		}
 	}
@@ -657,21 +637,17 @@ int proxima_metadata_libre_con_size(int dirLogica, segment* segmentoActual, int 
 		ultimaMetadata = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmentoActual);
 		if(ultimaMetadata.is_free && ultimaMetadata.size >= size){
 			log_debug(debug_logger, "Retorne la siguiente dir logica %d", dirLogicaSiguienteMetadata);
-			pthread_mutex_unlock(&mutex_prox_lib);
 			return dirLogicaSiguienteMetadata;
 		}else{
 			log_debug(debug_logger, "ultimaMetadata libre: %d - ultMetadata size: %d - Size Requerido %d"
 					,ultimaMetadata.is_free, ultimaMetadata.size, size);
-			pthread_mutex_unlock(&mutex_prox_lib);
 			return -1;
 		}
 	}
 
 	if(metadataActual.is_free && metadataActual.size >= size){
-		pthread_mutex_unlock(&mutex_prox_lib);
 		return dirLogica;
 	}else{
-		pthread_mutex_unlock(&mutex_prox_lib);
 		return proxima_metadata_libre_con_size(dirLogicaSiguienteMetadata, segmentoActual, size);
 	}
 
@@ -741,13 +717,11 @@ bool sePuedeAgrandar(segment* segmentoAAgrandar, program* prog){
 
 uint32_t memory_malloc(int size, uint32_t pid)
 {
-	pthread_mutex_lock(&mutex_malloc);
 	log_debug(debug_logger, "Ejecuto memory_malloc");
 	if (size <= 0) return 0;
 	if (size + METADATA_SIZE > number_of_free_frames() * PAGE_SIZE){
 		log_error(debug_logger, "Memoria llena: no se puede allocar tanto espacio en memoria");
 		log_error(debug_logger, "Segmentation Fault");
-		pthread_mutex_unlock(&mutex_malloc);
 		return -1;		
 	} 
 
@@ -792,7 +766,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		if(segmentoConEspacio == NULL){
 			log_error(debug_logger, "Segmento nulo - ERROR -");
-			pthread_mutex_unlock(&mutex_malloc);
 			return -1;
 		}
 
@@ -806,7 +779,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			pidEncontrada = (int)list_find(segmentoConEspacio->archivo_mapeado->programas,(void*) igualPID);
 			if((void*)pidEncontrada == NULL){
 				log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
-				pthread_mutex_unlock(&mutex_malloc);
 				return -1;
 			}
 		}
@@ -893,7 +865,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		heap_metadata metadata = buscar_metadata_por_direccion(direccionLogicaUltimaMetadata, segmentoAAgrandar);
 
 		log_debug(debug_logger, "Valores metadata free: %d, size: %d", metadata.is_free, metadata.size);
-		pthread_mutex_unlock(&mutex_malloc);
 		return memory_malloc(size, pid);
 		}else{
 			log_info(debug_logger, "No pude agrandar ningun segmento asi que le creo uno nuevo");
@@ -938,7 +909,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			heap_metadata metadata = buscar_metadata_por_direccion(0, segmentoNuevo);
 
 			log_debug(debug_logger, "Valores metadata free: %d, size: %d", metadata.is_free, metadata.size);
-			pthread_mutex_unlock(&mutex_malloc);
 			return memory_malloc(size, pid);
 		}
 	}
@@ -979,7 +949,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		heap_metadata metadata = buscar_metadata_por_direccion(0, segmentoNuevo);
 
 		log_debug(debug_logger, "Valores metadata free: %d, size: %d", metadata.is_free, metadata.size);
-		pthread_mutex_unlock(&mutex_malloc);
 		return memory_malloc(size, pid);
 	}	
 	
@@ -990,19 +959,16 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 	prog->using_memory += size;
 
-	pthread_mutex_unlock(&mutex_malloc);
 	return direccionLogicaFinal;
 }
 
 int segment_with_free_space(program *prog, int size)
 {
-	pthread_mutex_lock(&mutex_segment);
 	int i=0;
 	segment *segmentoActual;
 	int cantidadDeSegmentos = list_size(prog->segment_table);
 
 	if (cantidadDeSegmentos == 0){
-		pthread_mutex_unlock(&mutex_segment);
 		return -1;
 	}
 
@@ -1021,14 +987,12 @@ int segment_with_free_space(program *prog, int size)
 				metadataEncontrada = buscar_metadata_por_direccion(direccionLogicaEncontrada, segmentoActual);
 
 				log_debug(debug_logger, "Encontramos que el segmento %d tiene una metadata de %d de size", i, metadataEncontrada.size);
-				pthread_mutex_unlock(&mutex_segment);
 				return i;
 			}
 		}
 		i++;
 	}
 	log_debug(debug_logger, "No habia ningun segmento con %d de espacio libre", size);
-	pthread_mutex_unlock(&mutex_segment);
 	return -1;
 }
 
@@ -1389,7 +1353,6 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	void* datos;
 	heap_metadata metadata;
 
-	pthread_mutex_lock(&mutex_cpy);
 	for(int i = 0; i < cantidad_paginas_necesarias; i++){
 		paginaObtenida = list_get(segment->page_table, numPage + i);
 		if(segment->is_heap){
@@ -1425,7 +1388,6 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
         }
         else{
         	log_error(debug_logger, "Posicion invalida, no se pudo realizar la copia");
-        	pthread_mutex_unlock(&mutex_cpy);
             return -1;
         }
 	}else{
@@ -1446,7 +1408,6 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		 	// no puedo almacenar los datos pq ingreso a una posicion invalida
 			log_error(debug_logger, "Posicion invalida, no se pudo realizar la copia");
 			free(buffer);
-			pthread_mutex_unlock(&mutex_cpy);
 			return -1;
 		 }
 	}
@@ -1454,8 +1415,6 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 
 	free(buffer);
-	
-	pthread_mutex_unlock(&mutex_cpy);
 
 	return dst;
 }

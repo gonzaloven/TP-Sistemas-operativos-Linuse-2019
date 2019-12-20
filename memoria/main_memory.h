@@ -19,14 +19,6 @@ pthread_mutex_t mutex_bitmap_heap;
 pthread_mutex_t mutex_bitmap_mmap;
 pthread_mutex_t mutex_MM;
 pthread_mutex_t mutex_clock;
-pthread_mutex_t mutex_segment;
-pthread_mutex_t mutex_prox_lib;
-pthread_mutex_t mutex_carga_pag;
-pthread_mutex_t mutex_buscar_metadata;
-pthread_mutex_t mutex_malloc;
-pthread_mutex_t mutex_cpy;
-
-
 
 //#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"
 
