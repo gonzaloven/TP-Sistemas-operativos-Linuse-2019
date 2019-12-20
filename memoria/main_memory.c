@@ -41,6 +41,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_segment, NULL);
 	pthread_mutex_init(&mutex_prox_lib, NULL);
 	pthread_mutex_init(&mutex_carga_pag, NULL);
+	pthread_mutex_init(&mutex_buscar_metadata, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -98,6 +99,7 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_segment);
 	pthread_mutex_destroy(&mutex_prox_lib);
 	pthread_mutex_destroy(&mutex_carga_pag);
+	pthread_mutex_destroy(&mutex_buscar_metadata);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -532,6 +534,7 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 }
 
 heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado){
+	pthread_mutex_lock(&mutex_buscar_metadata);
 	log_debug(debug_logger, "Llamado buscar_metadata_por_direccion");
 	log_debug(debug_logger, "buscar_metadata_por_direccion. Dir Logica: %d", direccionLogica);
 	heap_metadata* metadataBuscada = NULL;
@@ -591,8 +594,10 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 		//log_debug(debug_logger, "La metadata copia tiene is_free: %d, size: %d", metadataCopia.is_free, metadataCopia.size);
 
 		//log_warning(debug_logger, "Fin buscar_metadata_por_direccion");
+		pthread_mutex_unlock(&mutex_buscar_metadata);
 		return metadataCopia;
 	}else{
+		pthread_mutex_unlock(&mutex_buscar_metadata);
 		log_debug(debug_logger, "Fin buscar_metadata_por_direccion");
 		return *metadataBuscada;
 	}
