@@ -218,12 +218,12 @@ void metricas_por_hilo()
 			double espera = thread->tiempoDeEspera;
 			double cpu = thread->tiempoDeCpu;
 			double ejecucionTotal = get_ejecucion_total(process);
-			double porcentajeEjecucion = (ejecucionTotal / ejecucion)*100 ;
+			int porcentajeEjecucion = (int)((ejecucion / ejecucionTotal)*100) ;
 
 			log_info(logger_metrics,"Tiempo de ejecucion para hilo %d: %f\n",thread->tid,ejecucion);
 			log_info(logger_metrics,"Tiempo de espera para hilo %d: %f\n",thread->tid,espera);
 			log_info(logger_metrics,"Tiempo de uso de CPU para hilo %d: %f\n",thread->tid,cpu);
-			log_info(logger_metrics,"Porcentaje de ejecucion para hilo %d: %f\n",thread->tid,porcentajeEjecucion);
+			log_info(logger_metrics,"Porcentaje de ejecucion para hilo %d: %d%\n",thread->tid,porcentajeEjecucion);
 
 		}
 	}
@@ -238,13 +238,16 @@ double get_tiempo_ejecucion(t_suse_thread* thread, double tiempo)
 
 double get_ejecucion_total(t_process* process)
 {
+	double tiempo = get_time_today();
 	int cantidadHilos = list_size(process->ULTS);
 	double contador = 0;
+
 	for(int i = 0; i < cantidadHilos; i++)
 	{
 		t_suse_thread* thread = list_get(process->ULTS,i);
-		contador += thread->tiempoDeEjecucion;
+		contador += (tiempo - thread->tiempoDeEjecucion);
 	}
+
 	return contador;
 }
 
