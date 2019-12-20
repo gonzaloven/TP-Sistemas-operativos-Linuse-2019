@@ -529,13 +529,13 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 		log_error(debug_logger, "La pagina buscada no existe");
 	}
 
+	pthread_mutex_lock(&mutex_pagina_cortada);
 	if(!pagina->is_present){
 		log_debug(debug_logger, "LA PAGINA BUSCADA NO ESTABA PRESENTE - LA CARGO - BUSCAR_METADATA_POR_DIR");
 		obtener_data_marco_heap(pagina);
 		//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 	}
 
-	pthread_mutex_lock(&mutex_pagina_cortada);
 	metadataBuscada = (heap_metadata*) ((pagina->fr) + offset);
 	log_debug(debug_logger, "Soy buscar metadata y el numero de frame que recibi para la pag es: %d",
 			(pagina->fr - MAIN_MEMORY)/PAGE_SIZE);
