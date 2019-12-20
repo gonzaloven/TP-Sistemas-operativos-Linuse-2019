@@ -313,20 +313,23 @@ int dame_nro_frame_reemplazado(){
 	seg = list_get(listaSeg,segmentoClock);
 	cantidad_de_paginas_en_segmento = list_size(seg->page_table);
 
-	if(paginaClock == cantidad_de_paginas_en_segmento){
-		if(segmentoClock == cantidad_de_segmentos_totales){
-			nro_de_segmento = 0;
-			nro_de_pag = 0;
-		}
-		else{
-			nro_de_segmento = segmentoClock + 1;
-			nro_de_pag = 0;
-		}
-	}
-	else{
-		nro_de_segmento = segmentoClock;
-		nro_de_pag = paginaClock + 1;
-	}
+//	if(paginaClock == cantidad_de_paginas_en_segmento){
+//		if(segmentoClock == cantidad_de_segmentos_totales){
+//			nro_de_segmento = 0;
+//			nro_de_pag = 0;
+//		}
+//		else{
+//			nro_de_segmento = segmentoClock + 1;
+//			nro_de_pag = 0;
+//		}
+//	}
+//	else{
+//		nro_de_segmento = segmentoClock;
+//		nro_de_pag = paginaClock + 1;
+//	}
+
+	nro_de_segmento = segmentoClock;
+	nro_de_pag = paginaClock + 1;
 
 	int nro_frame;
 	int nro_paso = 1;
