@@ -40,6 +40,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_clock, NULL);
 	pthread_mutex_init(&mutex_segment, NULL);
 	pthread_mutex_init(&mutex_prox_lib, NULL);
+	pthread_mutex_init(&mutex_carga_pag, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -96,6 +97,7 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_clock);
 	pthread_mutex_destroy(&mutex_segment);
 	pthread_mutex_destroy(&mutex_prox_lib);
+	pthread_mutex_destroy(&mutex_carga_pag);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -530,7 +532,6 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 }
 
 heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado){
-
 	log_debug(debug_logger, "Llamado buscar_metadata_por_direccion");
 	log_debug(debug_logger, "buscar_metadata_por_direccion. Dir Logica: %d", direccionLogica);
 	heap_metadata* metadataBuscada = NULL;
@@ -598,7 +599,7 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 }
 
 int ultima_metadata_segmento(int dirLogica, segment* segmentoActual){
-
+	pthread_mutex_lock(&mutex_carga_pag);
 	log_debug(debug_logger, "Func. Ult. Met. Seg. : Dir logica pedida: %d", dirLogica);
 
 	heap_metadata metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
@@ -609,9 +610,11 @@ int ultima_metadata_segmento(int dirLogica, segment* segmentoActual){
 	log_debug(debug_logger, "La direccion log de la metActual es: %d \nEl size de la metActual: %d",dirLogica, metadataActual.size);
 	log_debug(debug_logger, "El limite del segmento es: ", segmentoActual->limit);
 	if(dirLogicaSiguienteMetadata == segmentoActual->limit){
+		pthread_mutex_unlock(&mutex_carga_pag);
 		return dirLogica;
 	}
 	else{
+		pthread_mutex_unlock(&mutex_carga_pag);
 		ultima_metadata = ultima_metadata_segmento(dirLogicaSiguienteMetadata, segmentoActual);
 		return ultima_metadata;
 	}
