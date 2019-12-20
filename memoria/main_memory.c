@@ -43,6 +43,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_carga_pag, NULL);
 	pthread_mutex_init(&mutex_buscar_metadata, NULL);
 	pthread_mutex_init(&mutex_malloc, NULL);
+	pthread_mutex_init(&mutex_cpy, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -1385,6 +1386,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	void* datos;
 	heap_metadata metadata;
 
+	pthread_mutex_lock(&mutex_cpy);
 	for(int i = 0; i < cantidad_paginas_necesarias; i++){
 		paginaObtenida = list_get(segment->page_table, numPage + i);
 		if(segment->is_heap){
@@ -1420,6 +1422,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
         }
         else{
         	log_error(debug_logger, "Posicion invalida, no se pudo realizar la copia");
+        	pthread_mutex_unlock(&mutex_cpy);
             return -1;
         }
 	}else{
@@ -1440,6 +1443,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		 	// no puedo almacenar los datos pq ingreso a una posicion invalida
 			log_error(debug_logger, "Posicion invalida, no se pudo realizar la copia");
 			free(buffer);
+			pthread_mutex_unlock(&mutex_cpy);
 			return -1;
 		 }
 	}
@@ -1448,6 +1452,8 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 
 	free(buffer);
 	
+	pthread_mutex_unlock(&mutex_cpy);
+
 	return dst;
 }
 
