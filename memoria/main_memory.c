@@ -740,6 +740,7 @@ bool sePuedeAgrandar(segment* segmentoAAgrandar, program* prog){
 
 uint32_t memory_malloc(int size, uint32_t pid)
 {
+	pthread_mutex_lock(&mutex_malloc);
 	log_debug(debug_logger, "Ejecuto memory_malloc");
 	if (size <= 0) return 0;
 	if (size + METADATA_SIZE > number_of_free_frames() * PAGE_SIZE){
@@ -806,7 +807,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			}
 		}
 
-		pthread_mutex_lock(&mutex_malloc);
 		direccionLogicaMetadataLibre = proxima_metadata_libre_con_size(segmentoConEspacio->base, segmentoConEspacio, total_size);
 
 		log_debug(debug_logger, "La direccion logica de la metadata donde voy a allocar esta en ---> %d", direccionLogicaMetadataLibre);
@@ -840,8 +840,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		int direccionLogicaUltimaMetadata = ultima_metadata_segmento(segmentoConEspacio->base, segmentoConEspacio);
 
 		heap_metadata ultimaMetadata = buscar_metadata_por_direccion(direccionLogicaUltimaMetadata, segmentoConEspacio);
-
-		pthread_mutex_unlock(&mutex_malloc);
 
 		log_debug(debug_logger, "Valores metadata free: %d, size: %d", ultimaMetadata.is_free, ultimaMetadata.size);
 
@@ -988,6 +986,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 	prog->using_memory += size;
 
+	pthread_mutex_unlock(&mutex_malloc);
 	return direccionLogicaFinal;
 }
 
