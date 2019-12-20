@@ -747,6 +747,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	if (size + METADATA_SIZE > number_of_free_frames() * PAGE_SIZE){
 		log_error(debug_logger, "Memoria llena: no se puede allocar tanto espacio en memoria");
 		log_error(debug_logger, "Segmentation Fault");
+		pthread_mutex_unlock(&mutex_malloc);
 		return -1;		
 	} 
 
@@ -791,6 +792,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		if(segmentoConEspacio == NULL){
 			log_error(debug_logger, "Segmento nulo - ERROR -");
+			pthread_mutex_unlock(&mutex_malloc);
 			return -1;
 		}
 
@@ -804,6 +806,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			pidEncontrada = (int)list_find(segmentoConEspacio->archivo_mapeado->programas,(void*) igualPID);
 			if((void*)pidEncontrada == NULL){
 				log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+				pthread_mutex_unlock(&mutex_malloc);
 				return -1;
 			}
 		}
@@ -890,7 +893,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		heap_metadata metadata = buscar_metadata_por_direccion(direccionLogicaUltimaMetadata, segmentoAAgrandar);
 
 		log_debug(debug_logger, "Valores metadata free: %d, size: %d", metadata.is_free, metadata.size);
-
+		pthread_mutex_unlock(&mutex_malloc);
 		return memory_malloc(size, pid);
 		}else{
 			log_info(debug_logger, "No pude agrandar ningun segmento asi que le creo uno nuevo");
@@ -935,7 +938,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			heap_metadata metadata = buscar_metadata_por_direccion(0, segmentoNuevo);
 
 			log_debug(debug_logger, "Valores metadata free: %d, size: %d", metadata.is_free, metadata.size);
-
+			pthread_mutex_unlock(&mutex_malloc);
 			return memory_malloc(size, pid);
 		}
 	}
@@ -976,7 +979,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		heap_metadata metadata = buscar_metadata_por_direccion(0, segmentoNuevo);
 
 		log_debug(debug_logger, "Valores metadata free: %d, size: %d", metadata.is_free, metadata.size);
-
+		pthread_mutex_unlock(&mutex_malloc);
 		return memory_malloc(size, pid);
 	}	
 	
