@@ -535,12 +535,12 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 		//log_debug(debug_logger, "-- PAGINA NO PRESENTE, LA CARGO--");
 	}
 
+	pthread_mutex_lock(&mutex_pagina_cortada);
 	metadataBuscada = (heap_metadata*) ((pagina->fr) + offset);
 	log_debug(debug_logger, "Soy buscar metadata y el numero de frame que recibi para la pag es: %d",
 			(pagina->fr - MAIN_MEMORY)/PAGE_SIZE);
 
 	if((offset + METADATA_SIZE) > PAGE_SIZE){
-		pthread_mutex_lock(&mutex_pagina_cortada);
 
 		log_debug(debug_logger, "LA METADATA ESTA CORTADA - BUSCAR_METADATA_POR_DIR");
 		heap_metadata metadataCopia;
@@ -575,6 +575,7 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 		return metadataCopia;
 	}else{
 		log_debug(debug_logger, "Fin buscar_metadata_por_direccion");
+		pthread_mutex_unlock(&mutex_pagina_cortada);
 		return *metadataBuscada;
 	}
 }
