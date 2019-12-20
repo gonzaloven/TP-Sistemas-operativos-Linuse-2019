@@ -39,6 +39,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_MM, NULL);
 	pthread_mutex_init(&mutex_clock, NULL);
 	pthread_mutex_init(&mutex_segment, NULL);
+	pthread_mutex_init(&mutex_prox_lib, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -94,6 +95,7 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_MM);
 	pthread_mutex_destroy(&mutex_clock);
 	pthread_mutex_destroy(&mutex_segment);
+	pthread_mutex_destroy(&mutex_prox_lib);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -616,16 +618,21 @@ int ultima_metadata_segmento(int dirLogica, segment* segmentoActual){
 }
 
 int proxima_metadata_libre_con_size(int dirLogica, segment* segmentoActual, int size){
+	pthread_mutex_lock(&mutex_prox_lib);
 	heap_metadata metadataActual;
 	metadataActual = buscar_metadata_por_direccion(dirLogica, segmentoActual);
 
 	int direccionUltimaMetadata = ultima_metadata_segmento(segmentoActual->base, segmentoActual);
 
 	if(dirLogica == direccionUltimaMetadata){
-		if(metadataActual.size >=size)
+		if(metadataActual.size >=size){
+			pthread_mutex_unlock(&mutex_prox_lib);
 			return dirLogica;
-		else
+		}
+		else{
+			pthread_mutex_unlock(&mutex_prox_lib);
 			return -1;
+		}
 	}
 
 	int dirLogicaSiguienteMetadata;
@@ -639,17 +646,21 @@ int proxima_metadata_libre_con_size(int dirLogica, segment* segmentoActual, int 
 		ultimaMetadata = buscar_metadata_por_direccion(dirLogicaSiguienteMetadata, segmentoActual);
 		if(ultimaMetadata.is_free && ultimaMetadata.size >= size){
 			log_debug(debug_logger, "Retorne la siguiente dir logica %d", dirLogicaSiguienteMetadata);
+			pthread_mutex_unlock(&mutex_prox_lib);
 			return dirLogicaSiguienteMetadata;
 		}else{
 			log_debug(debug_logger, "ultimaMetadata libre: %d - ultMetadata size: %d - Size Requerido %d"
 					,ultimaMetadata.is_free, ultimaMetadata.size, size);
+			pthread_mutex_unlock(&mutex_prox_lib);
 			return -1;
 		}
 	}
 
 	if(metadataActual.is_free && metadataActual.size >= size){
+		pthread_mutex_unlock(&mutex_prox_lib);
 		return dirLogica;
 	}else{
+		pthread_mutex_unlock(&mutex_prox_lib);
 		return proxima_metadata_libre_con_size(dirLogicaSiguienteMetadata, segmentoActual, size);
 	}
 
