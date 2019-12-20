@@ -18,6 +18,9 @@ t_list *lista_archivos_mmap = NULL;
 t_log *metricas_logger = NULL;
 t_log *debug_logger = NULL;
 
+int paginaClock = 0;
+int segmentoClock = 0;
+
 int PAGE_SIZE = 0;
 int TOTAL_FRAME_NUM = 0;
 
@@ -299,7 +302,9 @@ int dame_nro_frame_reemplazado(){
 	
 	int cantidad_de_segmentos_totales = list_size(listaSeg);
 	int cantidad_de_paginas_en_segmento;
-	int nro_de_segmento, nro_de_pag, nro_frame;
+	int nro_de_segmento = segmentoClock;
+	int nro_de_pag = paginaClock;
+	int nro_frame;
 	int nro_paso = 1;
 	page *pag;
 	segment *seg;
@@ -307,13 +312,13 @@ int dame_nro_frame_reemplazado(){
 
 	while(true)
 	{
-		for (nro_de_segmento = 0; nro_de_segmento < cantidad_de_segmentos_totales ; nro_de_segmento++)
+		for (nro_de_segmento; nro_de_segmento < cantidad_de_segmentos_totales ; nro_de_segmento++)
 		{
 			seg = list_get(listaSeg,nro_de_segmento);
 			cantidad_de_paginas_en_segmento = list_size(seg->page_table);			
 			log_debug(debug_logger, "--- SEGMENTO ANALIZADO ALG REEMPLAZO: %d - Tiene %d paginas", nro_de_segmento, cantidad_de_paginas_en_segmento);
 			
-			for(nro_de_pag = 0; nro_de_pag < cantidad_de_paginas_en_segmento; nro_de_pag++)
+			for(nro_de_pag; nro_de_pag < cantidad_de_paginas_en_segmento; nro_de_pag++)
 			{
 				pag = list_get(seg->page_table,nro_de_pag);
 				if (!pag->is_present) continue;
@@ -322,6 +327,8 @@ int dame_nro_frame_reemplazado(){
 				if (nro_paso == 1){
 					if (!U && !M){	
 						nro_frame = se_hace_la_vistima(pag, nro_de_pag, nro_de_segmento);
+						segmentoClock = nro_de_segmento;
+						paginaClock = nro_de_pag;
 						list_destroy(listaSeg);
 						return nro_frame;											
 					}
@@ -329,13 +336,19 @@ int dame_nro_frame_reemplazado(){
 				if (nro_paso == 2){
 					if (!U && M){
 						nro_frame = se_hace_la_vistima(pag, nro_de_pag, nro_de_segmento);
+						segmentoClock = nro_de_segmento;
+						paginaClock = nro_de_pag;
 						list_destroy(listaSeg);
 						return nro_frame;	
 					}
 					pag->is_used = 0;
 				}			
-			}			
+			}
+			nro_de_pag = 0;
 		}
+		nro_de_segmento = 0;
+		nro_de_pag = 0;
+
 		nro_paso++;
 		if (nro_paso == 3)
 			nro_paso = 1;
