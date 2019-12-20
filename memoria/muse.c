@@ -7,6 +7,8 @@
 
 #include "muse.h"
 
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
 int tamDataFunction(Function f){
 	int tamano = 0;
 	tamano+= sizeof(uint8_t);
@@ -183,41 +185,55 @@ void* muse_invoke_function(Function *function,uint32_t pid)
 	switch(function->type)
 	{
 		case FUNCTION_MALLOC:
+			pthread_mutex_lock(&lock);
 			log_info(muse_logger,"Llamado a Malloc, quiere allocar -> %d bytes",function->args[0].value.val_u32);
 			func_ret = memory_malloc(function->args[0].value.val_u32,pid);
 			log_info(muse_logger, "Fin memory_malloc");
+			pthread_mutex_unlock(&lock);
 			break;
 		case FUNCTION_FREE:
+			pthread_mutex_lock(&lock);
 			log_info(muse_logger,"Llamado a Free");
 			func_ret = memory_free(function->args[0].value.val_u32,pid);
 			log_info(muse_logger, "Fin memory_free");
+			pthread_mutex_unlock(&lock);
 			break;
 		case FUNCTION_GET:
+			pthread_mutex_lock(&lock);
 			log_info(muse_logger,"Llamado a Get");
-			return memory_get(function->args[0].value.val_voidptr,
+			func_ret = memory_get(function->args[0].value.val_voidptr,
 								function->args[1].value.val_u32,function->args[2].value.val_sizet,pid);
+			pthread_mutex_unlock(&lock);
 			break;
 		case FUNCTION_COPY:
+			pthread_mutex_lock(&lock);
 			log_info(muse_logger,"Llamado a Copy con Memoria destino %d - Bytes a copiar %d",function->args[0].value.val_u32,function->args[2].value.val_u32);
 			func_ret = memory_cpy(function->args[0].value.val_u32,
 								function->args[1].value.val_voidptr,function->args[2].value.val_u32,pid);
 			log_info(muse_logger, "Fin memory_cpy");
+			pthread_mutex_unlock(&lock);
 			break;
 		case FUNCTION_MAP:
+			pthread_mutex_lock(&lock);
 			log_info(muse_logger,"Llamado a Map");
 			func_ret = memory_map(function->args[0].value.val_charptr,
 								function->args[1].value.val_sizet,function->args[2].value.val_u32,pid);
 			log_info(muse_logger, "Fin memory_map");
+			pthread_mutex_unlock(&lock);
 			break;
 		case FUNCTION_SYNC:
+			pthread_mutex_lock(&lock);
 			log_debug(muse_logger,"Llamado a Sync");
 			func_ret = memory_sync(function->args[0].value.val_u32,function->args[1].value.val_sizet,pid);
 			log_info(muse_logger, "Fin memory_sync");
+			pthread_mutex_unlock(&lock);
 			break;
 		case FUNCTION_UNMAP:
+			pthread_mutex_lock(&lock);
 			log_debug(muse_logger,"Llamado a Unmap con Direccion: %d", function->args[0].value.val_u32);
 			func_ret = memory_unmap(function->args[0].value.val_u32, pid);
 			log_info(muse_logger, "Fin memory_unmap");
+			pthread_mutex_unlock(&lock);
 			break;
 		default:
 			log_error(muse_logger,"Llamado a funcion desconocida");
