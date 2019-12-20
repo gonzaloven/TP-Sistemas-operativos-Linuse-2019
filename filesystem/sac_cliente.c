@@ -11,9 +11,7 @@ int send_call(Function *f)
 	create_message_header(&header,MESSAGE_CALL,1,sizeof(char) * tamDataFunction(*f));
 	create_function_message(msg,&header,f);
 
-	pthread_mutex_lock(&s_socket);
 	int resultado = send_message(serverSocket,msg);
-	pthread_mutex_unlock(&s_socket);
 
 	free(msg);
 	msg = NULL;
