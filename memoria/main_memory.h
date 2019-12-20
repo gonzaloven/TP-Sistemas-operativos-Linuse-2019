@@ -18,7 +18,8 @@
 pthread_mutex_t mutex_bitmap_heap;
 pthread_mutex_t mutex_bitmap_mmap;
 pthread_mutex_t mutex_MM;
-pthread_mutex_t mutex_obtener_data;
+pthread_mutex_t mutex_clock;
+
 
 
 //#define MUSE_LOG_PATH "/home/utnso/git/tp-2019-2c-Los-Trapitos/logs/muse.log"

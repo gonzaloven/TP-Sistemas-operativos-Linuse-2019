@@ -37,7 +37,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_bitmap_heap, NULL);
 	pthread_mutex_init(&mutex_bitmap_mmap, NULL);
 	pthread_mutex_init(&mutex_MM, NULL);
-	pthread_mutex_init(&mutex_obtener_data, NULL);
+	pthread_mutex_init(&mutex_clock, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -91,7 +91,7 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_bitmap_heap);
 	pthread_mutex_destroy(&mutex_bitmap_mmap);
 	pthread_mutex_destroy(&mutex_MM);
-	pthread_mutex_destroy(&mutex_obtener_data);
+	pthread_mutex_destroy(&mutex_clock);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -301,16 +301,36 @@ t_list* lista_de_segmentos(){
 
  */
 int dame_nro_frame_reemplazado(){
+	pthread_mutex_lock(&mutex_clock);
 	t_list *listaSeg = lista_de_segmentos();
 	
 	int cantidad_de_segmentos_totales = list_size(listaSeg);
 	int cantidad_de_paginas_en_segmento;
-	int nro_de_segmento = segmentoClock;
-	int nro_de_pag = paginaClock;
+	int nro_de_segmento;
+	int nro_de_pag;
+	segment *seg;
+
+	seg = list_get(listaSeg,segmentoClock);
+	cantidad_de_paginas_en_segmento = list_size(seg->page_table);
+
+	if(paginaClock == cantidad_de_paginas_en_segmento){
+		if(segmentoClock == cantidad_de_segmentos_totales){
+			nro_de_segmento = 0;
+			nro_de_pag = 0;
+		}
+		else{
+			nro_de_segmento = segmentoClock + 1;
+			nro_de_pag = 0;
+		}
+	}
+	else{
+		nro_de_segmento = segmentoClock;
+		nro_de_pag = paginaClock + 1;
+	}
+
 	int nro_frame;
 	int nro_paso = 1;
 	page *pag;
-	segment *seg;
 	int U, M;
 
 	while(true)
@@ -333,6 +353,7 @@ int dame_nro_frame_reemplazado(){
 						segmentoClock = nro_de_segmento;
 						paginaClock = nro_de_pag;
 						list_destroy(listaSeg);
+						pthread_mutex_unlock(&mutex_clock);
 						return nro_frame;											
 					}
 				}
@@ -342,6 +363,7 @@ int dame_nro_frame_reemplazado(){
 						segmentoClock = nro_de_segmento;
 						paginaClock = nro_de_pag;
 						list_destroy(listaSeg);
+						pthread_mutex_unlock(&mutex_clock);
 						return nro_frame;	
 					}
 					pag->is_used = 0;
@@ -1124,7 +1146,6 @@ int busca_segmento(program* prog, uint32_t direccion){
 }
 
 void* obtener_data_marco_heap(page* pagina){
-	pthread_mutex_lock(&mutex_obtener_data);
     if(!pagina->is_present && number_of_free_frames_upcm() == 0){
     	//TODO: mutex archivo swap ? ADEMAS BLOQUEAR QUE NO ESCRIBA CUANDO LIBERA EL FRAME SWAP HASTA QUE MEMCPY
     	int numFrame = dame_nro_frame_reemplazado();
@@ -1185,7 +1206,6 @@ void* obtener_data_marco_heap(page* pagina){
 
 	log_debug(debug_logger, "Estoy en obtener data y repito el frame de upcm que me dieron es: %d",
 			(pagina->fr - MAIN_MEMORY) / PAGE_SIZE);
-	pthread_mutex_unlock(&mutex_obtener_data);
     return pagina->fr;
 }
 
