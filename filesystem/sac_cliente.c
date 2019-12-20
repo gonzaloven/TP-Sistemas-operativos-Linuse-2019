@@ -48,11 +48,12 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	log_info(logger,"Gettatr llamado -> Path: %s", path);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_path(FUNCTION_GETATTR, path) == -1){
+		pthread_mutex_unlock(&s_socket);
 		return EXIT_FAILURE;
 	}
 
-	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -106,11 +107,12 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 	log_info(logger,"Readdir llamado -> Path: %s", path);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_path(FUNCTION_READDIR, path) == -1){
-			return EXIT_FAILURE;
+		pthread_mutex_unlock(&s_socket);
+		return EXIT_FAILURE;
 	}
 
-	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -169,11 +171,12 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 	log_info(logger,"Open llamado -> Path: %s", path);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_path(FUNCTION_OPEN, path) == -1){
 		return EXIT_FAILURE;
+		pthread_mutex_unlock(&s_socket);
 	}
 
-	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -201,11 +204,12 @@ static int sac_opendir(const char *path, struct fuse_file_info *fi){
 
 	log_info(logger,"Opendir llamado -> Path: %s", path);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_path(FUNCTION_OPENDIR, path) == -1){
+		pthread_mutex_unlock(&s_socket);
 		return EXIT_FAILURE;
 	}
 
-	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -253,7 +257,9 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 
 	log_info(logger,"Read llamado -> Path: %s, Size: %d, Offset: %d", path, size, offset);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_call(&fsend) == -1){
+		pthread_mutex_unlock(&s_socket);
 		free(fsend.args[1].value.val_charptr);
 		fsend.args[1].value.val_charptr = NULL;
 		return EXIT_FAILURE;
@@ -262,7 +268,6 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	free(fsend.args[1].value.val_charptr);
 	fsend.args[1].value.val_charptr = NULL;
 
-	pthread_mutex_lock(&s_socket);
 	receive_message_var(serverSocket,&msg); // esto cambie
 	pthread_mutex_unlock(&s_socket);
 
@@ -304,11 +309,12 @@ static int sac_mknod(const char* path, mode_t mode, dev_t rdev){
 
 	log_info(logger,"Mknod llamado -> Path: %s", path);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_path(FUNCTION_MKNOD, path) == -1){
+		pthread_mutex_unlock(&s_socket);
 		return EXIT_FAILURE;
 	}
 
-	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -356,7 +362,9 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 
 	log_info(logger,"Write llamado -> Path: %s, Pide Escribir: %s, Size: %d, Offset: %d", path, buf, size, offset);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_call(&f) == -1){
+		pthread_mutex_unlock(&s_socket);
 		free(f.args[1].value.val_charptr);
 		f.args[1].value.val_charptr = NULL;
 		free(f.args[2].value.val_charptr);
@@ -369,7 +377,6 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	free(f.args[2].value.val_charptr);
 	f.args[2].value.val_charptr = NULL;
 
-	pthread_mutex_lock(&s_socket);
 	receive_message_var(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -398,11 +405,12 @@ static int sac_unlink(const char* path){
 
 	log_info(logger,"Unlink llamado -> Path: %s", path);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_path(FUNCTION_UNLINK, path) == -1){
+		pthread_mutex_unlock(&s_socket);
 		return EXIT_FAILURE;
 	}
 
-	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -445,16 +453,17 @@ static int sac_truncate(const char* path, off_t size){
 
 	log_info(logger,"Truncate llamado -> Path: %s, Size: %d", path, size);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_call(&fsend) == -1){
 		free(fsend.args[1].value.val_charptr);
 		fsend.args[1].value.val_charptr = NULL;
+		pthread_mutex_unlock(&s_socket);
 		return EXIT_FAILURE;
 	}
 
 	free(fsend.args[1].value.val_charptr);
 	fsend.args[1].value.val_charptr = NULL;
 
-	pthread_mutex_lock(&s_socket);
 	receive_message_var(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -483,11 +492,12 @@ static int sac_mkdir(const char* path, mode_t mode){
 
 	log_info(logger,"Mkdir llamado -> Path: %s", path);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_path(FUNCTION_MKDIR, path) == -1){
+		pthread_mutex_unlock(&s_socket);
 		return EXIT_FAILURE;
 	}
 
-	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -531,7 +541,9 @@ static int sac_rename(const char *path, const char *nuevoPath){
 
 	log_info(logger,"Rename llamado -> Path viejo: %s, Path nuevo: %s", path, nuevoPath);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_call(&fsend) == -1){
+		pthread_mutex_unlock(&s_socket);
 		free(fsend.args[1].value.val_charptr);
 		fsend.args[1].value.val_charptr = NULL;
 		free(fsend.args[0].value.val_charptr);
@@ -544,7 +556,6 @@ static int sac_rename(const char *path, const char *nuevoPath){
 	free(fsend.args[0].value.val_charptr);
 	fsend.args[0].value.val_charptr = NULL;
 
-	pthread_mutex_lock(&s_socket);
 	receive_message_var(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
@@ -572,11 +583,12 @@ static int sac_rmdir(const char* path){
 
 	log_info(logger,"Rmdir llamado -> Path: %s", path);
 
+	pthread_mutex_lock(&s_socket);
 	if(send_path(FUNCTION_RMDIR, path) == -1){
+		pthread_mutex_unlock(&s_socket);
 		return EXIT_FAILURE;
 	}
 
-	pthread_mutex_lock(&s_socket);
 	receive_message(serverSocket,&msg);
 	pthread_mutex_unlock(&s_socket);
 
