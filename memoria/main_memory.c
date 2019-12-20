@@ -66,12 +66,12 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	program_list = list_create();
 	//segment_list = list_create();
 
-	debug_logger = log_create(MUSE_LOG_PATH,"DEBUG", true,LOG_LEVEL_TRACE);
-	metricas_logger = log_create(MUSE_LOG_PATH, "METRICAS", true, LOG_LEVEL_TRACE);
+	debug_logger = log_create(MUSE_LOG_PATH,"DEBUG", true,LOG_LEVEL_INFO);
+	metricas_logger = log_create(MUSE_LOG_PATH, "METRICAS", true, LOG_LEVEL_INFO);
 
-	log_trace(metricas_logger, "Tamaño de pagina = tamaño de frame: %d", PAGE_SIZE);
-	log_trace(metricas_logger, "Tamaño de metadata: %d", METADATA_SIZE);	
-	log_trace(metricas_logger, "Cantidad Total de Memoria:%d", memory_size);
+	log_info(metricas_logger, "Tamaño de pagina = tamaño de frame: %d", PAGE_SIZE);
+	log_info(metricas_logger, "Tamaño de metadata: %d", METADATA_SIZE);
+	log_info(metricas_logger, "Cantidad Total de Memoria:%d", memory_size);
 	number_of_free_frames();
 }
 
@@ -157,8 +157,8 @@ int number_of_free_frames_upcm(){
 	memoria_libre = frames_libres_1 * PAGE_SIZE;
 	memoria_total = TOTAL_FRAME_NUM * PAGE_SIZE;
 
-	log_trace(metricas_logger, "Cantidad de Memoria libre en UPCM: %d / %d", memoria_libre, memoria_total);
-	log_trace(metricas_logger, "Cantidad de Frames libres en UPCM: %d / %d", frames_libres_1, TOTAL_FRAME_NUM);
+	log_info(metricas_logger, "Cantidad de Memoria libre en UPCM: %d / %d", memoria_libre, memoria_total);
+	log_info(metricas_logger, "Cantidad de Frames libres en UPCM: %d / %d", frames_libres_1, TOTAL_FRAME_NUM);
 
 	/* SWAP SPACE */
 
@@ -174,8 +174,8 @@ int number_of_free_frames_upcm(){
 	memoria_libre = frames_libres_2 * PAGE_SIZE;
 	memoria_total = TOTAL_FRAME_NUM_SWAP * PAGE_SIZE;
 
-	log_trace(metricas_logger, "Cantidad de Espacio libre en SWAP: %d / %d", memoria_libre, memoria_total);
-	log_trace(metricas_logger, "Cantidad de Frames libres en SWAP: %d / %d", frames_libres_2, TOTAL_FRAME_NUM_SWAP);
+	log_info(metricas_logger, "Cantidad de Espacio libre en SWAP: %d / %d", memoria_libre, memoria_total);
+	log_info(metricas_logger, "Cantidad de Frames libres en SWAP: %d / %d", frames_libres_2, TOTAL_FRAME_NUM_SWAP);
 
 	/* FIN SWAP SPACE */
 
@@ -200,8 +200,8 @@ int number_of_free_frames(){
 	memoria_libre = frames_libres_1 * PAGE_SIZE;
 	memoria_total = TOTAL_FRAME_NUM * PAGE_SIZE;
 
-	log_trace(metricas_logger, "Cantidad de Memoria libre en UPCM: %d / %d", memoria_libre, memoria_total);	
-	log_trace(metricas_logger, "Cantidad de Frames libres en UPCM: %d / %d", frames_libres_1, TOTAL_FRAME_NUM);
+	log_info(metricas_logger, "Cantidad de Memoria libre en UPCM: %d / %d", memoria_libre, memoria_total);
+	log_info(metricas_logger, "Cantidad de Frames libres en UPCM: %d / %d", frames_libres_1, TOTAL_FRAME_NUM);
 
 	/* SWAP SPACE */
 
@@ -217,8 +217,8 @@ int number_of_free_frames(){
 	memoria_libre = frames_libres_2 * PAGE_SIZE;
 	memoria_total = TOTAL_FRAME_NUM_SWAP * PAGE_SIZE;
 
-	log_trace(metricas_logger, "Cantidad de Espacio libre en SWAP: %d / %d", memoria_libre, memoria_total);	
-	log_trace(metricas_logger, "Cantidad de Frames libres en SWAP: %d / %d", frames_libres_2, TOTAL_FRAME_NUM_SWAP);
+	log_info(metricas_logger, "Cantidad de Espacio libre en SWAP: %d / %d", memoria_libre, memoria_total);
+	log_info(metricas_logger, "Cantidad de Frames libres en SWAP: %d / %d", frames_libres_2, TOTAL_FRAME_NUM_SWAP);
 
 	/* FIN SWAP SPACE */
 
@@ -248,7 +248,7 @@ page* page_with_free_size(){
 	for(curr_frame_num=0; true; curr_frame_num++)
 	{	
 		if (curr_frame_num == TOTAL_FRAME_NUM){
-			log_debug(debug_logger, "Nos quedamos sin frames libres, aplicando algoritmo de reemplazo");
+			log_info(debug_logger, "Se quiso cargar una pagina pero nos quedamos sin frames upcm libres, aplicando algoritmo de reemplazo");
 			curr_frame_num = dame_nro_frame_reemplazado();
 		}
 
@@ -346,7 +346,7 @@ int dame_nro_frame_reemplazado(){
 //devuelve el nro de frame de la víctima & la manda al archivo swap
 int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento)
 {
-	log_debug(debug_logger, "Se eligio como víctima a la pagina %d del segmento %d",
+	log_info(debug_logger, "Se eligio como víctima a la pagina %d del segmento %d",
 							nro_de_pag, nro_de_segmento);
 	int nro_frame_upcm;
 	int nro_frame_swap;
@@ -362,9 +362,9 @@ int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento)
  	nro_frame_swap = mandar_al_archivo_swap_toda_la_pagina_que_esta_en(nro_frame_upcm);
 
 	if (nro_frame_swap == -1)
-		log_debug(debug_logger, "Nos quedamos sin frames libres en el archivo swap");
+		log_error(debug_logger, "Nos quedamos sin frames libres en el archivo swap");
 	else{
-		log_debug(debug_logger, "La pagina victima se mando satisfactoriamente al archivo swap");
+		log_info(debug_logger, "La pagina victima se mando satisfactoriamente al archivo swap");
 
 		pag->fr = nro_frame_swap;
 		pag->is_present = false;
@@ -375,7 +375,7 @@ int se_hace_la_vistima(page* pag, int nro_de_pag, int nro_de_segmento)
 
 int mandar_al_archivo_swap_toda_la_pagina_que_esta_en(int nro_frame)
 {
-	log_warning(debug_logger, "MANDAR A SWAP - El nro de frame recibido es: %d", nro_frame);
+	log_debug(debug_logger, "MANDAR A SWAP - El nro de frame recibido es: %d", nro_frame);
 	FILE *swap_file;
 	void* buffer = malloc(PAGE_SIZE);
 	int nro_frame_swap = frame_swap_libre();
@@ -426,13 +426,13 @@ void metricas_por_socket_conectado(uint32_t pid){
 
 	list_destroy(listaSeg);
 
-	log_trace(metricas_logger, "El programa n° %d tiene asignados %d de %d segmentos en el sistema", 
+	log_info(metricas_logger, "El programa n° %d tiene asignados %d de %d segmentos en el sistema",
 			nro_prog, cantidad_de_segmentos_asignados, cantidad_de_segmentos_totales);
 	number_of_free_frames();
 }
 
 void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevoSize, int is_free){
-	log_warning(debug_logger, "Llamado a modificar_metadata con dir log: %d, nuevoSize: %d, isfree: %d",
+	log_debug(debug_logger, "Llamado a modificar_metadata con dir log: %d, nuevoSize: %d, isfree: %d",
 			direccionLogica, nuevoSize, is_free);
 	heap_metadata* metadataBuscada = NULL;
 
@@ -476,7 +476,7 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 		heap_metadata metadataCopia2;
 		memcpy(&metadataCopia2, metadataBuscada, tamanioMetadataCortada);
 		memcpy((void*)(&metadataCopia2) + tamanioMetadataCortada, punteroAlFrameSiguiente, METADATA_SIZE - tamanioMetadataCortada);
-		log_warning(debug_logger, "Lo cargado en metadataBuscada es -> isfree: %d - size: %d",
+		log_debug(debug_logger, "Lo cargado en metadataBuscada es -> isfree: %d - size: %d",
 				metadataCopia2.is_free, metadataCopia2.size);
 	}else{
 		metadataBuscada->is_free = is_free;
@@ -486,7 +486,7 @@ void modificar_metadata(int direccionLogica, segment* segmentoBuscado, int nuevo
 
 heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmentoBuscado){
 
-	log_warning(debug_logger, "Llamado buscar_metadata_por_direccion");
+	log_debug(debug_logger, "Llamado buscar_metadata_por_direccion");
 	log_debug(debug_logger, "buscar_metadata_por_direccion. Dir Logica: %d", direccionLogica);
 	heap_metadata* metadataBuscada = NULL;
 
@@ -547,7 +547,7 @@ heap_metadata buscar_metadata_por_direccion(int direccionLogica, segment* segmen
 
 		return metadataCopia;
 	}else{
-		log_warning(debug_logger, "Fin buscar_metadata_por_direccion");
+		log_debug(debug_logger, "Fin buscar_metadata_por_direccion");
 		return *metadataBuscada;
 	}
 }
@@ -782,7 +782,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	//Si su ultimo segmento es heap y tiene memoria están los frames que necesitamos
 	else if (list_size(prog->segment_table)>0 && ultimo_segmento_programa(prog)->is_heap)
 	{
-		log_debug(debug_logger, "Intento agrandar el que tiene");
+		log_info(debug_logger, "El segmento no tenia suficiente espacio libre, intento agrandar");
 		segment *segmentoAAgrandar;
 		segmentoAAgrandar = ultimo_segmento_programa(prog);
 
@@ -819,7 +819,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		}
 		log_debug(debug_logger, "La dir de la ultima metadata es: %d - Su nuevo espacio libre es: %d", direccionLogicaUltimaMetadata, ultimaMetadata.size);
 
-		log_debug(debug_logger, "Se pudo agrandar el segmento con nuevo limite %d, intento alocar otra vez", segmentoAAgrandar->limit);
+		log_info(debug_logger, "Se pudo agrandar el segmento con nuevo limite %d, procedo a allocar", segmentoAAgrandar->limit);
 
 		heap_metadata metadata = buscar_metadata_por_direccion(direccionLogicaUltimaMetadata, segmentoAAgrandar);
 
@@ -827,7 +827,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		return memory_malloc(size, pid);
 		}else{
-			log_debug(debug_logger, "No pude agrandar ningun segmento asi que le creo uno nuevo");
+			log_info(debug_logger, "No pude agrandar ningun segmento asi que le creo uno nuevo");
 
 			int tamanioNecesario = size + METADATA_SIZE*2;
 			int paginasNecesarias = (int)ceil((double)tamanioNecesario / (double)PAGE_SIZE);
@@ -862,7 +862,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 			page* primeraPagina = list_get(segmentoNuevo->page_table, 0);
 
-			log_debug(debug_logger, "Limite del segmento nuevo ----> %d", segmentoNuevo->limit);
+			log_info(debug_logger, "El limite del nuevo segmento es: %d", segmentoNuevo->limit);
 
 			modificar_metadata(0, segmentoNuevo, (cantidadDePaginasAAgregar * PAGE_SIZE) - METADATA_SIZE, 1);
 
@@ -876,7 +876,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	//en ultimo caso: si no hay espacio ni se puede agrandar ningún segmento, le creo uno
 	else 	
 	{
-		log_debug(debug_logger, "No tiene ningun segmento asi que le creo uno");
+		log_info(debug_logger, "No tiene ningun segmento asi que le creo uno");
 
 		int tamanioNecesario = size + METADATA_SIZE*2;
 		int paginasNecesarias = (int)ceil((double)tamanioNecesario / (double)PAGE_SIZE);
@@ -903,7 +903,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		page* primeraPagina = list_get(segmentoNuevo->page_table, 0);
 
-		log_debug(debug_logger, "Limite del segmento nuevo ----> %d", segmentoNuevo->limit);
+		log_info(debug_logger, "El limite del nuevo segmento es: %d", segmentoNuevo->limit);
 
 		modificar_metadata(0, segmentoNuevo, (cantidadDePaginasAAgregar * PAGE_SIZE) - METADATA_SIZE, 1);
 
@@ -920,8 +920,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	metricas_por_socket_conectado(pid);
 
 	prog->using_memory += size;
-
-	log_info(debug_logger, "Fin memory_alloc");
 
 	return direccionLogicaFinal;
 }
@@ -954,7 +952,7 @@ int segment_with_free_space(program *prog, int size)
 		}
 		i++;
 	}
-	log_error(debug_logger, "No habia ningun segmento con %d de espacio libre", size);
+	log_debug(debug_logger, "No habia ningun segmento con %d de espacio libre", size);
 	return -1;
 }
 
@@ -1085,7 +1083,6 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 
 	prog->using_memory -= viejoSize;
 
-	log_info(debug_logger, "Fin memory_free");
 	listar_metadatas(seg->base, seg);
 
 	return 0;
@@ -1379,7 +1376,6 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 
 	log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 
-	log_info(debug_logger, "Fin memory_cpy");
 	free(buffer);
 	
 	return dst;
@@ -1540,8 +1536,6 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 			segmentoNuevo->limit,
 			segmentoNuevo->tam_archivo_mmap,
 			segmentoNuevo->tipo_map);
-
-	log_info(debug_logger, "Fin memory_map");
 
 	return segmentoNuevo->base;
 }
@@ -1766,8 +1760,6 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	free(segmentoBuscado);
 	segmentoBuscado = NULL;
 
-	log_info(debug_logger, "Unmap terminado");
-
 	return 0;
 }
 
@@ -1860,8 +1852,6 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	memcpy(dst, buffer + offset, numBytes);
 
 	free(buffer);
-
-	log_info(debug_logger, "Fin memory_get");
 
 	return dst;
 }

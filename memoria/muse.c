@@ -129,6 +129,7 @@ void message_handler(Message *m,int socket)
 		case MESSAGE_CALL:
 			if(((Function*)m->data)->type == FUNCTION_GET){
 				res_get = (void*) muse_invoke_function((Function *)m->data,m->header.caller_id);
+				log_info(debug_logger, "Fin memory_get");
 				Function f;
 				if((int)res_get == -1 || (int)res_get == -2 || (int)res_get == -3 || (int)res_get == -4){
 					f.type = RTA_FUNCTION_GET_ERROR;
@@ -182,38 +183,44 @@ void* muse_invoke_function(Function *function,uint32_t pid)
 	switch(function->type)
 	{
 		case FUNCTION_MALLOC:
-			log_debug(muse_logger,"Malloc called with args -> %d bytes",function->args[0].value.val_u32);
+			log_info(muse_logger,"Llamado a Malloc, quiere allocar -> %d bytes",function->args[0].value.val_u32);
 			func_ret = memory_malloc(function->args[0].value.val_u32,pid);
+			log_info(debug_logger, "Fin memory_malloc");
 			break;
 		case FUNCTION_FREE:
-			log_debug(muse_logger,"Free called");
+			log_info(muse_logger,"Llamado a Free");
 			func_ret = memory_free(function->args[0].value.val_u32,pid);
+			log_info(debug_logger, "Fin memory_free");
 			break;
 		case FUNCTION_GET:
-			log_debug(muse_logger,"Get called");
+			log_info(muse_logger,"Llamado a Get");
 			return memory_get(function->args[0].value.val_voidptr,
 								function->args[1].value.val_u32,function->args[2].value.val_sizet,pid);
 			break;
 		case FUNCTION_COPY:
-			log_debug(muse_logger,"Copy called with args -> Memoria destino %d - Bytes a copiar %d",function->args[0].value.val_u32,function->args[2].value.val_u32);
+			log_info(muse_logger,"Llamado a Copy con Memoria destino %d - Bytes a copiar %d",function->args[0].value.val_u32,function->args[2].value.val_u32);
 			func_ret = memory_cpy(function->args[0].value.val_u32,
 								function->args[1].value.val_voidptr,function->args[2].value.val_u32,pid);
+			log_info(debug_logger, "Fin memory_cpy");
 			break;
 		case FUNCTION_MAP:
-			log_debug(muse_logger,"Map called");
+			log_info(muse_logger,"Llamado a Map");
 			func_ret = memory_map(function->args[0].value.val_charptr,
 								function->args[1].value.val_sizet,function->args[2].value.val_u32,pid);
+			log_info(debug_logger, "Fin memory_map");
 			break;
 		case FUNCTION_SYNC:
-			log_debug(muse_logger,"Sync called");
+			log_debug(muse_logger,"Llamado a Sync");
 			func_ret = memory_sync(function->args[0].value.val_u32,function->args[1].value.val_sizet,pid);
+			log_info(debug_logger, "Fin memory_sync");
 			break;
 		case FUNCTION_UNMAP:
-			log_debug(muse_logger,"Unmap called with args -> Direccion: %d", function->args[0].value.val_u32);
+			log_debug(muse_logger,"Llamado a Unmap con Direccion: %d", function->args[0].value.val_u32);
 			func_ret = memory_unmap(function->args[0].value.val_u32, pid);
+			log_info(debug_logger, "Fin memory_unmap");
 			break;
 		default:
-			log_error(muse_logger,"Unknown function");
+			log_error(muse_logger,"Llamado a funcion desconocida");
 			func_ret = 0;
 			break;
 	}
