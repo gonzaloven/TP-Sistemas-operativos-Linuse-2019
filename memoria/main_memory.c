@@ -727,7 +727,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		log_error(debug_logger, "Segmentation Fault");
 		pthread_mutex_unlock(&mutex_lock);
 		return -1;		
-	} 
+	}
+	pthread_mutex_unlock(&mutex_lock);
 
 	int nro_prog;
 	uint32_t nro_seg;
@@ -756,7 +757,9 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		log_debug(debug_logger, "Se creo el prog n°%d de la lista de programas", nro_prog);
 	}
 
-	prog = list_get(program_list, nro_prog);	
+	prog = list_get(program_list, nro_prog);
+
+	pthread_mutex_lock(&mutex_lock);
 	
 	//si hay espacio en su segmento, lo malloqueo ahí
 	if(segment_with_free_space(prog, total_size) != -1)
@@ -829,6 +832,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	//Si su ultimo segmento es heap y tiene memoria están los frames que necesitamos
 	else if (list_size(prog->segment_table)>0 && ultimo_segmento_programa(prog)->is_heap)
 	{
+		pthread_mutex_unlock(&mutex_lock);
 		log_info(debug_logger, "El segmento no tenia suficiente espacio libre, intento agrandar");
 		segment *segmentoAAgrandar;
 		segmentoAAgrandar = ultimo_segmento_programa(prog);
@@ -837,6 +841,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		log_debug(debug_logger, "Se puede agrandar");
 		heap_metadata ultimaMetadata;
+
+		pthread_mutex_lock(&mutex_lock);
 
 		int direccionLogicaUltimaMetadata = ultima_metadata_segmento(segmentoAAgrandar->base, segmentoAAgrandar);
 		log_debug(debug_logger, "Soy malloc y encontre dir ultima metadata: %d", direccionLogicaUltimaMetadata);
@@ -898,6 +904,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			list_add(prog->segment_table, segmentoNuevo);
 			log_debug(debug_logger, "Se creo un segmento");
 
+			pthread_mutex_lock(&mutex_lock);
+
 			for(int i=0; i < cantidadDePaginasAAgregar; i++ )
 			{
 				pag = page_with_free_size();
@@ -905,11 +913,15 @@ uint32_t memory_malloc(int size, uint32_t pid)
 				list_add(segmentoNuevo->page_table, pag);
 			}
 
+			pthread_mutex_unlock(&mutex_lock);
+
 			segmentoNuevo->limit = (paginasNecesarias * PAGE_SIZE) + segmentoNuevo->base;
 
 			page* primeraPagina = list_get(segmentoNuevo->page_table, 0);
 
 			log_info(debug_logger, "El limite del nuevo segmento es: %d", segmentoNuevo->limit);
+
+			pthread_mutex_lock(&mutex_lock);
 
 			modificar_metadata(0, segmentoNuevo, (cantidadDePaginasAAgregar * PAGE_SIZE) - METADATA_SIZE, 1);
 
@@ -923,6 +935,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 	//en ultimo caso: si no hay espacio ni se puede agrandar ningún segmento, le creo uno
 	else 	
 	{
+		pthread_mutex_unlock(&mutex_lock);
 		log_info(debug_logger, "No tiene ningun segmento asi que le creo uno");
 
 		int tamanioNecesario = size + METADATA_SIZE*2;
@@ -937,6 +950,8 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		segmentoNuevo->limit = 0;
 		list_add(prog->segment_table, segmentoNuevo);			
 		log_debug(debug_logger, "Se creo un segmento");
+
+		pthread_mutex_lock(&mutex_lock);
 
 		for(int i=0; i < cantidadDePaginasAAgregar; i++ )
 		{
@@ -961,6 +976,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		return memory_malloc(size, pid);
 	}	
 	
+	pthread_mutex_unlock(&mutex_lock);
 	int direccionLogicaFinal = direccionLogicaMetadataLibre + METADATA_SIZE;
 	log_debug(debug_logger, "Direccion logica final del MALLOC ----> %d", direccionLogicaFinal); 
 
@@ -968,7 +984,6 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 	prog->using_memory += size;
 
-	pthread_mutex_unlock(&mutex_lock);
 	return direccionLogicaFinal;
 }
 
