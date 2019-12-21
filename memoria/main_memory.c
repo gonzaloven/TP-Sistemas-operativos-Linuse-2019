@@ -38,6 +38,7 @@ void muse_main_memory_init(int memory_size, int page_size, int swap_size)
 	pthread_mutex_init(&mutex_bitmap_mmap, NULL);
 	pthread_mutex_init(&mutex_MM, NULL);
 	pthread_mutex_init(&mutex_clock, NULL);
+	pthread_mutex_init(&mutex_lock, NULL);
 
 	int curr_page_num;	
 	void *mem_ptr = MAIN_MEMORY;
@@ -92,6 +93,7 @@ void muse_main_memory_stop()
 	pthread_mutex_destroy(&mutex_bitmap_mmap);
 	pthread_mutex_destroy(&mutex_MM);
 	pthread_mutex_destroy(&mutex_clock);
+	pthread_mutex_destroy(&mutex_lock);
 
 	log_destroy(metricas_logger);
 	log_destroy(debug_logger);
@@ -717,11 +719,13 @@ bool sePuedeAgrandar(segment* segmentoAAgrandar, program* prog){
 
 uint32_t memory_malloc(int size, uint32_t pid)
 {
+	pthread_mutex_lock(&mutex_lock);
 	log_debug(debug_logger, "Ejecuto memory_malloc");
 	if (size <= 0) return 0;
 	if (size + METADATA_SIZE > number_of_free_frames() * PAGE_SIZE){
 		log_error(debug_logger, "Memoria llena: no se puede allocar tanto espacio en memoria");
 		log_error(debug_logger, "Segmentation Fault");
+		pthread_mutex_unlock(&mutex_lock);
 		return -1;		
 	} 
 
@@ -766,6 +770,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 		if(segmentoConEspacio == NULL){
 			log_error(debug_logger, "Segmento nulo - ERROR -");
+			pthread_mutex_unlock(&mutex_lock);
 			return -1;
 		}
 
@@ -779,6 +784,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			pidEncontrada = (int)list_find(segmentoConEspacio->archivo_mapeado->programas,(void*) igualPID);
 			if((void*)pidEncontrada == NULL){
 				log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+				pthread_mutex_unlock(&mutex_lock);
 				return -1;
 			}
 		}
@@ -865,6 +871,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		heap_metadata metadata = buscar_metadata_por_direccion(direccionLogicaUltimaMetadata, segmentoAAgrandar);
 
 		log_debug(debug_logger, "Valores metadata free: %d, size: %d", metadata.is_free, metadata.size);
+		pthread_mutex_unlock(&mutex_lock);
 		return memory_malloc(size, pid);
 		}else{
 			log_info(debug_logger, "No pude agrandar ningun segmento asi que le creo uno nuevo");
@@ -909,6 +916,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 			heap_metadata metadata = buscar_metadata_por_direccion(0, segmentoNuevo);
 
 			log_debug(debug_logger, "Valores metadata free: %d, size: %d", metadata.is_free, metadata.size);
+			pthread_mutex_unlock(&mutex_lock);
 			return memory_malloc(size, pid);
 		}
 	}
@@ -949,6 +957,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 		heap_metadata metadata = buscar_metadata_por_direccion(0, segmentoNuevo);
 
 		log_debug(debug_logger, "Valores metadata free: %d, size: %d", metadata.is_free, metadata.size);
+		pthread_mutex_unlock(&mutex_lock);
 		return memory_malloc(size, pid);
 	}	
 	
@@ -959,6 +968,7 @@ uint32_t memory_malloc(int size, uint32_t pid)
 
 	prog->using_memory += size;
 
+	pthread_mutex_unlock(&mutex_lock);
 	return direccionLogicaFinal;
 }
 
@@ -1096,6 +1106,7 @@ void compactar_espacios_libres(program *prog){
 
 uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 {
+	pthread_mutex_lock(&mutex_lock);
 	int nro_prog = search_program(pid);
 	program *prog;
 	segment *seg;
@@ -1125,6 +1136,7 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 
 	listar_metadatas(seg->base, seg);
 
+	pthread_mutex_unlock(&mutex_lock);
 	return 0;
 }
 
@@ -1277,6 +1289,7 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
 //Copia n bytes de LIBMUSE a MUSE
 uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 {
+	pthread_mutex_lock(&mutex_lock);
 	program* prog;
 	page* paginaObtenida;
 	int numProg = search_program(pid);
@@ -1300,6 +1313,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 
 	if(segment == NULL){
 		log_error(debug_logger, "Se busco el segmento %d, pero no se encontro", numSeg);
+		pthread_mutex_unlock(&mutex_lock);
 		return -3;
 	}else{
 		log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
@@ -1311,6 +1325,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 
 		if(segment->archivo_mapeado->pathArchivo == NULL){
 			log_error(debug_logger, "Se trata de acceder a una direccion unmapped");
+			pthread_mutex_unlock(&mutex_lock);
 			return -1;
 		}
 
@@ -1321,6 +1336,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		pidEncontrada = (int)list_find(segment->archivo_mapeado->programas,(void*) igualPID);
 		if((void*)pidEncontrada == NULL){
 			log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			pthread_mutex_unlock(&mutex_lock);
 			return -2;
 		}
 	}
@@ -1388,7 +1404,8 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
         }
         else{
         	log_error(debug_logger, "Posicion invalida, no se pudo realizar la copia");
-            return -1;
+        	pthread_mutex_unlock(&mutex_lock);
+        	return -1;
         }
 	}else{
 		log_debug(debug_logger, "Offset: %d",offset);
@@ -1408,6 +1425,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		 	// no puedo almacenar los datos pq ingreso a una posicion invalida
 			log_error(debug_logger, "Posicion invalida, no se pudo realizar la copia");
 			free(buffer);
+			pthread_mutex_unlock(&mutex_lock);
 			return -1;
 		 }
 	}
@@ -1415,7 +1433,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 
 	free(buffer);
-
+	pthread_mutex_unlock(&mutex_lock);
 	return dst;
 }
 
@@ -1463,6 +1481,7 @@ int crear_nuevo_segmento_mmap(size_t length, program* prog){
 // del archivo de swap. Esta distinción deberá estar plasmada en la tabla de segmentos.
 uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 {
+	pthread_mutex_lock(&mutex_lock);
 	int nro_prog;
 	program* prog = NULL;
 	segment* segmentoNuevo = NULL;
@@ -1492,6 +1511,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 		int fileDescriptor = open(path, O_RDWR, 0);
 
 		if(fileDescriptor == -1){
+			pthread_mutex_unlock(&mutex_lock);
 			return -1;
 		}
 
@@ -1538,6 +1558,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 
 		if(flag == MAP_PRIVATE && (void*)pidEncontrada == NULL){
 			log_error(debug_logger, "El archivo ya fue mappeado con la flag MAP_PRIVATE");
+			pthread_mutex_unlock(&mutex_lock);
 			return -2;
 		}
 	}
@@ -1565,6 +1586,7 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 		}
 	}else{
 		log_error(debug_logger, "No se reconocio la flag especificada");
+		pthread_mutex_unlock(&mutex_lock);
 		return -1;
 	}
 
@@ -1575,11 +1597,13 @@ uint32_t memory_map(char *path, size_t length, int flag, uint32_t pid)
 			segmentoNuevo->tam_archivo_mmap,
 			segmentoNuevo->tipo_map);
 
+	pthread_mutex_unlock(&mutex_lock);
 	return segmentoNuevo->base;
 }
 
 uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 {
+	pthread_mutex_lock(&mutex_lock);
 	program* prog;
 	segment* segmento_obtenido;
 	int nro_prog;
@@ -1616,6 +1640,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 	//segmentation fault
 	if((segmento_obtenido == NULL) || (cantidad_paginas_necesarias > list_size(segmento_obtenido->page_table)) || (segmento_obtenido->base + segmento_obtenido->limit) < (direccion + length)){
 		log_error(debug_logger, "Error: Segmentation Fault");
+		pthread_mutex_unlock(&mutex_lock);
 		return -2;
 	} 
 
@@ -1629,6 +1654,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 		pidEncontrada = (int)list_find(segmento_obtenido->archivo_mapeado->programas,(void*) igualPID);
 		if((void*)pidEncontrada == NULL){
 			log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			pthread_mutex_unlock(&mutex_lock);
 			return -1;
 		}
 	}
@@ -1636,6 +1662,7 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 	//error (returen -1)
 	if((segmento_obtenido->is_heap) || (direccion % PAGE_SIZE) != 0){
 		log_error(debug_logger, "Error: el segmento obtenido es heap o la direccion no esta al inicio de una pag");
+		pthread_mutex_unlock(&mutex_lock);
 		return -1;
 	} 
 
@@ -1672,11 +1699,13 @@ uint32_t memory_sync(uint32_t direccion, size_t length, uint32_t pid)
 
 		free(buffer);
 		log_info(debug_logger, "Fin memory_sync");
+		pthread_mutex_unlock(&mutex_lock);
 		return 0; //unico caso que devuelve que está OK
 	}
 	free(buffer);
 
 	log_error(debug_logger, "Error: la direccion encontrada es mayor que el tamaño de mmap_file");
+	pthread_mutex_unlock(&mutex_lock);
 	return -1;
 }
 
@@ -1717,6 +1746,7 @@ void eliminar_archivo_mmap(archivoMMAP* archivo){
 
 int memory_unmap(uint32_t dir, uint32_t pid)
 {
+	pthread_mutex_lock(&mutex_lock);
 	int nro_prog;
 	program* prog;
 	segment* segmentoBuscado;
@@ -1740,7 +1770,8 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	segmentoBuscado = list_get(prog->segment_table, nroSegmento);
 
 	if(segmentoBuscado == NULL){
-	log_error(debug_logger, "Segmentation fault");
+		log_error(debug_logger, "Segmentation fault");
+		pthread_mutex_unlock(&mutex_lock);
 		return -1;
 	}
 
@@ -1754,12 +1785,14 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 		pidEncontrada = (int)list_find(segmentoBuscado->archivo_mapeado->programas,(void*) igualPID);
 		if((void*)pidEncontrada == NULL){
 			log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			pthread_mutex_unlock(&mutex_lock);
 			return -1;
 		}
 	}
 
 	else if((segmentoBuscado->is_heap != 0) || (dir != segmentoBuscado->base)){
-	log_error(debug_logger, "No es de MMAP el segmento buscado.");
+		log_error(debug_logger, "No es de MMAP el segmento buscado.");
+		pthread_mutex_unlock(&mutex_lock);
 		return -1;
 	}
 
@@ -1798,12 +1831,14 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 	free(segmentoBuscado);
 	segmentoBuscado = NULL;
 
+	pthread_mutex_unlock(&mutex_lock);
 	return 0;
 }
 
 // Copia n bytes de MUSE a LIBMUSE
 void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 {
+	pthread_mutex_lock(&mutex_lock);
 	program* prog = NULL;
 	log_info(debug_logger, "Direccion destino: %d", src);
 	log_info(debug_logger, "Cantidad de bytes a leer en la direccion: %d", numBytes);
@@ -1829,11 +1864,13 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 
 	if(segmento == NULL){
 		log_error(debug_logger, "El segmento no existe");
+		pthread_mutex_unlock(&mutex_lock);
 		return -3;
 	}
 
 	if((segmento->base + segmento->limit) < (src + numBytes)){
 		log_error(debug_logger, "Estas tratando de leer mas bytes de los que tiene el segmento");
+		pthread_mutex_unlock(&mutex_lock);
 		return -4;
 	}
 
@@ -1845,6 +1882,7 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 		if(segmento->archivo_mapeado->pathArchivo == NULL){
 			log_error(debug_logger, "Se trata de acceder a una direccion unmapped");
 			int respuesta = -1;
+			pthread_mutex_unlock(&mutex_lock);
 			return -1;
 		}
 
@@ -1855,6 +1893,7 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 		pidEncontrada = (int)list_find(segmento->archivo_mapeado->programas,(void*) igualPID);
 		if((void*)pidEncontrada == NULL){
 			log_error(debug_logger, "El archivo mmap es privado y el programa no tiene permisos");
+			pthread_mutex_unlock(&mutex_lock);
 			return -2;
 		}
 	}
@@ -1891,5 +1930,6 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 
 	free(buffer);
 
+	pthread_mutex_unlock(&mutex_lock);
 	return dst;
 }
