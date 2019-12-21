@@ -170,8 +170,8 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 	pthread_mutex_lock(&s_socket);
 	if(send_path(FUNCTION_OPEN, path) == -1){
-		return EXIT_FAILURE;
 		pthread_mutex_unlock(&s_socket);
+		return EXIT_FAILURE;
 	}
 
 	receive_message(serverSocket,&msg);
