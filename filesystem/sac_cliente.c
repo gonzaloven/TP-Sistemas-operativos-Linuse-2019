@@ -357,7 +357,7 @@ static int sac_write(const char *path, const char *buf, size_t size, off_t offse
 	f.args[0].size = sizeof(uint32_t);
 	f.args[0].value.val_u32 = offset;
 
-	log_info(logger,"Write llamado -> Path: %s, Pide Escribir: %s, Size: %d, Offset: %d", path, buf, size, offset);
+	log_info(logger,"Write llamado -> Path: %s, Size: %d, Offset: %d", path, size, offset);
 
 	pthread_mutex_lock(&s_socket);
 	if(send_call(&f) == -1){
