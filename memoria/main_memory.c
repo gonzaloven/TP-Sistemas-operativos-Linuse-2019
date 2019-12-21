@@ -315,21 +315,6 @@ int dame_nro_frame_reemplazado(){
 	seg = list_get(listaSeg,segmentoClock);
 	cantidad_de_paginas_en_segmento = list_size(seg->page_table);
 
-//	if(paginaClock == cantidad_de_paginas_en_segmento){
-//		if(segmentoClock == cantidad_de_segmentos_totales){
-//			nro_de_segmento = 0;
-//			nro_de_pag = 0;
-//		}
-//		else{
-//			nro_de_segmento = segmentoClock + 1;
-//			nro_de_pag = 0;
-//		}
-//	}
-//	else{
-//		nro_de_segmento = segmentoClock;
-//		nro_de_pag = paginaClock + 1;
-//	}
-
 	nro_de_segmento = segmentoClock;
 	nro_de_pag = paginaClock + 1;
 
@@ -353,6 +338,7 @@ int dame_nro_frame_reemplazado(){
 				U = pag->is_used;
 				M = pag->is_modify;
 				if (nro_paso == 1){
+					log_debug(debug_logger, "Primera ronda de clock modificado: buscando bits -> Uso:0 y Modificado:0");
 					if (!U && !M){	
 						nro_frame = se_hace_la_vistima(pag, nro_de_pag, nro_de_segmento);
 						segmentoClock = nro_de_segmento;
@@ -363,6 +349,7 @@ int dame_nro_frame_reemplazado(){
 					}
 				}
 				if (nro_paso == 2){
+					log_debug(debug_logger, "Segunda ronda de clock modificado: buscando bits -> Uso:0 y Modificado:1");
 					if (!U && M){
 						nro_frame = se_hace_la_vistima(pag, nro_de_pag, nro_de_segmento);
 						segmentoClock = nro_de_segmento;
@@ -383,6 +370,7 @@ int dame_nro_frame_reemplazado(){
 		if (nro_paso == 3)
 			nro_paso = 1;
 	}
+	log_info(debug_logger, "No encontre ninguna pagina candidata.");
 	list_destroy(listaSeg);
 }  
 
