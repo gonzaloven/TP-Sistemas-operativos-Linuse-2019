@@ -1,5 +1,3 @@
-
-
 #include "suse.h"
 
 #include <commons/collections/node.h>
@@ -52,7 +50,7 @@ int main(void){
 	signal(SIGINT,suse_stop_service);
 	char* log_file;
 	log_file = "/home/utnso/workspace/tp-2019-2c-Los-Trapitos/logs/planificador_logs.txt";
-	logger = log_create(log_file, "SUSE logs", 1, 1);
+	logger = log_create(log_file, "SUSE logs", 1, LOG_LEVEL_INFO);
 	log_info(logger, "Inicializando SUSE. \n");
 
 	configuracion_suse = get_configuracion();
@@ -135,7 +133,7 @@ void* metricas(void* params){
 
 void metricas_por_programa()
 {
-	log_info(logger_metrics, "Calculando metricas por programa...\n");
+	//log_info(logger_metrics, "Calculando metricas por programa...\n");
 	int cantidadProgramas = list_size(configuracion_suse.process);
 
 	for(int i = 0; i < cantidadProgramas; i++)
@@ -218,7 +216,13 @@ void metricas_por_hilo()
 			double espera = thread->tiempoDeEspera;
 			double cpu = thread->tiempoDeCpu;
 			double ejecucionTotal = get_ejecucion_total(process);
-			int porcentajeEjecucion = (int)((ejecucion / ejecucionTotal)*100) ;
+			int porcentajeEjecucion;
+			if(ejecucionTotal == 0){
+				porcentajeEjecucion = 0;
+			}
+			else {
+				porcentajeEjecucion = (int)((ejecucion / ejecucionTotal)*100) ;
+			}
 
 			log_info(logger_metrics,"Tiempo de ejecucion para hilo %d: %f\n",thread->tid,ejecucion);
 			log_info(logger_metrics,"Tiempo de espera para hilo %d: %f\n",thread->tid,espera);
@@ -291,7 +295,7 @@ void init_semaforos(){
 
 suse_configuration get_configuracion() {
 
-	log_info(logger, "Levantando archivo de configuracion de SUSE \n");
+	//log_info(logger, "Levantando archivo de configuracion de SUSE \n");
 
 	suse_configuration configuracion_suse;
 	t_config* archivo_configuracion;
@@ -371,13 +375,13 @@ void iniciar_servidor() {
 		free(handshake);
 
 		//Creo un hilo por programa que se conecta
-		log_info(logger, "Creando hilo para atender al proceso %d. \n", new_connection);
+		//log_info(logger, "Creando hilo para atender al proceso %d. \n", new_connection);
 
 		t_list* thread_params;
 		thread_params = list_create();
 		list_add(thread_params, new_connection);
 		nuevo_hilo(process_conectado_funcion_thread, thread_params); //TODO: Aca me dice valgrind que creas un hilo y no lo detachas
-		log_info(logger, "Cree el hilo para el proceso %d", new_connection);
+		//log_info(logger, "Cree el hilo para el proceso %d", new_connection);
 	}
 }
 
@@ -441,6 +445,8 @@ void handle_suse_join(un_socket socket_actual, t_paquete * paquete_recibido){
 
 	int desplazamiento = 0;
 	int tid = deserializar_int(paquete->data, &desplazamiento);
+
+	log_info(logger,"Recibi un join para el ULT %d", tid);
 
 	int resultado = join(socket_actual,tid);
 
@@ -526,14 +532,14 @@ void handle_suse_create(un_socket socket_actual, t_paquete* paquete_hilolay) {
 	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 
 	log_info(logger, "Recibi el ULT %d del proceso %d \n", tid, socket_actual);
-	log_info(logger, "Validando si es el main thread o ULT comun \n");
+	//log_info(logger, "Validando si es el main thread o ULT comun \n");
 
 	if(list_size(configuracion_suse.process) != 0  && process != 0){
-		log_info(logger, "El proceso %d ya tiene un main_thread \n", socket_actual);
+		//log_info(logger, "El proceso %d ya tiene un main_thread \n", socket_actual);
 		handle_ULT_create(process, tid);
 	}
 	else{
-		log_info(logger, "El proceso %d es nuevo \n", socket_actual);
+		//log_info(logger, "El proceso %d es nuevo \n", socket_actual);
 		handle_main_thread_create(socket_actual, tid);
 	}
 
@@ -554,7 +560,7 @@ void handle_ULT_create(t_process* process, int tid){
 		log_info(logger, "El ULT %d del proceso %d esta en ready \n", new_thread->tid, process->PROCESS_ID);
 	}
 	else{
-		log_info(logger, "No puedo agregar el ULT %d del proceso %d a la cola de ready por grado de multiprogramacion \n", tid);
+		log_error(logger, "No puedo agregar el ULT %d del proceso %d a la cola de ready por grado de multiprogramacion \n", tid);
 	}
 
 	pthread_mutex_unlock(&mutex_multiprog);
@@ -570,7 +576,7 @@ void handle_main_thread_create(un_socket socket_actual, int tid) {
 
 	t_suse_thread* main_thread = ULT_create(new_process, tid);
 
-	log_info(logger, "Validando si puedo poner a ejecutar el main thread... \n", configuracion_suse.ACTUAL_MULTIPROG);
+	//log_info(logger, "Validando si puedo poner a ejecutar el main thread... \n", configuracion_suse.ACTUAL_MULTIPROG);
 
 	pthread_mutex_lock(&mutex_multiprog);
 	if(validar_grado_multiprogramacion()){
@@ -601,7 +607,7 @@ t_suse_thread* ULT_create(t_process* process, int tid){
 
 	list_add(process->ULTS, new_thread);
 	list_add(new_queue, new_thread);
-	log_info(logger, "ULT creado con id %d \n", new_thread->tid);
+	//log_info(logger, "ULT creado con id %d \n", new_thread->tid);
 
 	return new_thread;
 }
@@ -622,7 +628,7 @@ int close_tid(int tid, int socket_actual){
 
 	if(thread->tid == 0)
 	{
-		log_info(logger, "Recibi un close para el proceso %d\n", tid);
+		//log_info(logger, "Recibi un close para el proceso %d\n", tid);
 
 		void destroy_ULTsList(t_suse_thread* thread)
 		{
@@ -817,7 +823,7 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	int desplazamiento = 0;
 	int msg = deserializar_int(paquete_recibido->data, &desplazamiento);
 
-	//log_info(logger, "Recibi una peticion de suse_schedule_next \n");
+	log_info(logger, "Recibi un schedule_next del proceso %d\n", socket_actual);
 	log_info(logger, "Iniciando planificacion...\n");
 
 	int next_tid = obtener_proximo_ejecutar(process);
@@ -828,7 +834,7 @@ void handle_next_tid(un_socket socket_actual, t_paquete * paquete_next_tid){
 	int desp = 0;
 	serializar_int(buffer, &desp, next_tid);
 	enviar(socket_actual, cop_next_tid, tamanio_buffer, buffer);
-	log_info(logger, "Envie el next_tid %d a SUSE", next_tid);
+	//log_info(logger, "Envie el next_tid %d a SUSE", next_tid);
 	free(buffer);
 	liberar_paquete(paquete_recibido);
 }
@@ -870,7 +876,7 @@ int obtener_proximo_ejecutar(t_process* process){
 	t_suse_thread *next_ULT = list_get(process->READY_LIST, 0); // TODO: Si no funciona hacemos una bool que haga return thread != null; va a retornar el primero q haya
 	if(next_ULT == 0)
 	{
-		log_info(logger,"No hay procesos para ejecutar \n"); //Esto se soluciona con el semaforo
+		log_error(logger,"No hay procesos para ejecutar \n"); //Esto se soluciona con el semaforo
 		return -1;
 	}
 	int next_tid = next_ULT->tid;
@@ -888,8 +894,7 @@ void ordenar_cola_listos(t_list* ready_list) {
 }
 
 void estimar_ULTs_listos(t_list* ready_list) {
-	//TODO ver sino es void*
-	log_info(logger, "Estimando ULTs...\n");
+	//log_info(logger, "Estimando ULTs...\n");
 	void estimar(t_suse_thread* ULT) {
 		if (ULT->ejecutado_desde_estimacion) {
 			ULT->ejecutado_desde_estimacion = false;
@@ -907,7 +912,7 @@ void estimar_rafaga(t_suse_thread * ULT){
 }
 
 void ordenar_por_sjf(t_list* ready_list){
-	log_info(logger, "Ordenando por SJF...");
+	//log_info(logger, "Ordenando por SJF...");
 	list_sort(ready_list, funcion_SJF);
 }
 
@@ -941,6 +946,7 @@ void handle_wait_sem(un_socket socket_actual, t_paquete* paquete_wait_sem){
 	int desplazamiento = 0;
 	int tid = deserializar_int(paquete_recibido->data, &desplazamiento);
 	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
+	log_info(logger, "Recibi un wait para el sem %s", sem);
 	liberar_paquete(paquete_recibido);
 
 	pthread_mutex_lock(&mutex_semaforos);
@@ -968,7 +974,7 @@ void handle_signal_sem(un_socket socket_actual, t_paquete* paquete_signal_sem){
 	char* sem = deserializar_string(paquete_recibido->data, &desplazamiento);
 	liberar_paquete(paquete_recibido);
 
-	//log_info(logger,"Recibi el semaforo %s para incrementar...\n",sem);
+	log_info(logger,"Recibi un signal para el semaforo %s\n",sem);
 
 	pthread_mutex_lock(&mutex_semaforos);
 	int resultado = incrementar_semaforo(tid, sem);
@@ -1027,7 +1033,7 @@ int incrementar_semaforo(uint32_t tid, char* sem){
 
 	if(semaforo == NULL)
 	{
-		log_info(logger,"El semaforo no existe\n");
+		log_error(logger,"El semaforo %d no existe\n", sem);
 		return -1;
 	}
 
@@ -1053,7 +1059,7 @@ int decrementar_semaforo(int socket_actual,int tid, char* sem_name){
 
 	if(semaforo == NULL)
 	{
-		log_info(logger,"El semaforo no existe\n");
+		log_error(logger,"El semaforo %d no existe\n", sem_name);
 		return -1;
 	}
 
@@ -1199,7 +1205,7 @@ void listo_a_ejecucion(t_suse_thread* thread, un_socket socket){
 	thread->ejecutado_desde_estimacion = true;
 
 	process->EXEC_THREAD = thread;
-	log_info(logger, "El tid %d paso de ready a execute\n", thread->tid);
+	log_info(logger, "El ULT %d paso de ready a execute\n", thread->tid);
 }
 
 void nuevo_a_ejecucion(t_suse_thread* thread, un_socket socket)
