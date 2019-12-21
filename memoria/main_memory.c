@@ -1121,7 +1121,6 @@ void compactar_espacios_libres(program *prog){
 
 uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 {
-	pthread_mutex_lock(&mutex_lock);
 	int nro_prog = search_program(pid);
 	program *prog;
 	segment *seg;
@@ -1141,6 +1140,7 @@ uint8_t memory_free(uint32_t virtual_address, uint32_t pid)
 	int direccionLogicaMetadata = virtual_address - METADATA_SIZE;
 
 	heap_metadata metadata;
+	pthread_mutex_lock(&mutex_lock);
 	metadata = buscar_metadata_por_direccion(direccionLogicaMetadata, seg);
 	int viejoSize = metadata.size;
 	modificar_metadata(direccionLogicaMetadata, seg, viejoSize, 1);
@@ -1304,7 +1304,6 @@ void* obtener_data_marco_mmap(segment* segmento,page* pagina,int nro_pagina){
 //Copia n bytes de LIBMUSE a MUSE
 uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 {
-	pthread_mutex_lock(&mutex_lock);
 	program* prog;
 	page* paginaObtenida;
 	int numProg = search_program(pid);
@@ -1328,13 +1327,13 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 
 	if(segment == NULL){
 		log_error(debug_logger, "Se busco el segmento %d, pero no se encontro", numSeg);
-		pthread_mutex_unlock(&mutex_lock);
 		return -3;
 	}else{
 		log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 		log_debug(debug_logger, "El segmento a escribir es %d", numSeg);
 	}
 
+	pthread_mutex_lock(&mutex_lock);
 	if(!segment->is_heap){
 		int pidEncontrada;
 
@@ -1356,6 +1355,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		}
 	}
 
+	pthread_mutex_unlock(&mutex_lock);
 	int numPage = floor((dst - segment->base) / PAGE_SIZE);
 
 	int offset = (dst - segment->base) % PAGE_SIZE;
@@ -1384,6 +1384,7 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 	void* datos;
 	heap_metadata metadata;
 
+	pthread_mutex_lock(&mutex_lock);
 	for(int i = 0; i < cantidad_paginas_necesarias; i++){
 		paginaObtenida = list_get(segment->page_table, numPage + i);
 		if(segment->is_heap){
@@ -1445,10 +1446,10 @@ uint32_t memory_cpy(uint32_t dst, void *src, int n, uint32_t pid)
 		 }
 	}
 
+	pthread_mutex_unlock(&mutex_lock);
 	log_debug(debug_logger, "Limite Seg: %d , Base seg: %d", segment->limit, segment->base);
 
 	free(buffer);
-	pthread_mutex_unlock(&mutex_lock);
 	return dst;
 }
 
@@ -1853,7 +1854,6 @@ int memory_unmap(uint32_t dir, uint32_t pid)
 // Copia n bytes de MUSE a LIBMUSE
 void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 {
-	pthread_mutex_lock(&mutex_lock);
 	program* prog = NULL;
 	log_info(debug_logger, "Direccion destino: %d", src);
 	log_info(debug_logger, "Cantidad de bytes a leer en la direccion: %d", numBytes);
@@ -1892,6 +1892,7 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	log_debug(debug_logger, "Base del segmento: %d", segmento->base);
 
 	if(!segmento->is_heap){
+		pthread_mutex_lock(&mutex_lock);
 		int pidEncontrada;
 
 		if(segmento->archivo_mapeado->pathArchivo == NULL){
@@ -1911,6 +1912,7 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 			pthread_mutex_unlock(&mutex_lock);
 			return -2;
 		}
+		pthread_mutex_unlock(&mutex_lock);
 	}
 
 	int numPage = floor((src - segmento->base) / PAGE_SIZE);
@@ -1926,6 +1928,7 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	page* pagina;
 	void* datos;
 
+	pthread_mutex_lock(&mutex_lock);
 	//le cargo al buffer todas las paginas
 	for(int i=0; i<cant_pag_necesarias; i++){
 
@@ -1943,8 +1946,9 @@ void* memory_get(void *dst, uint32_t src, size_t numBytes, uint32_t pid)
 	//obtengo del buffer lo que necesito (usando offset y bytes a leer)
 	memcpy(dst, buffer + offset, numBytes);
 
+	pthread_mutex_unlock(&mutex_lock);
+
 	free(buffer);
 
-	pthread_mutex_unlock(&mutex_lock);
 	return dst;
 }
