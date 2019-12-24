@@ -1,38 +1,7 @@
-# BRANCH MASTER tp-2019-2c-Los-Trapitos 
+# Trabajo practico LINUSE - Para la materia de Sistemas Operativos de la Universidad Tecnologica Nacional Facultad Regional Buenos Aires (UTN FRBA) 
 
-## Integrantes
-- Ignacio Reyes -
-Legajo: 1645341
+Un proyecto que consta con tres modulos centralizados a modo de representacion de algunos de los servicios que provee el sistema operativo, estos son:
 
-- Gonzalo Ventura -
-Legajo: 1644853
-
-- Leandro Micolucci -
- Legajo: 1644762
-
-- Farid Ahmed -
-Legajo: 1559461
-
-- Jazmin Lopez -
-Legajo: 1562617
-
-
-## Como levantarlo:
-
-git clone https://github.com/sisoputnfrba/tp-2019-2c-Los-Trapitos.git
-
-cd tp-2019-2c-Los-Trapitos/
-
-mv deployGeneral.sh ~/
-
-cd ../..
-
-./deployGeneral.sh
-
-cd workspace/tp-2019-2c-Los-Trapitos/configs
-
-nano *archivo_config*
-
-*modificar archivo_config*
-
-ctrl+o && enter && ctrl+x
+- Modulo de Filesystem
+- Modulo de Memoria
+- Modulo de Planificacion de procesos
